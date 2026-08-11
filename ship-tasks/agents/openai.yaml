@@ -1,0 +1,6 @@
+interface:
+  display_name: "Ship Tasks"
+  short_description: "Довести известный task scope до результата"
+  default_prompt: "Используй $ship-tasks, чтобы довести известный task scope текущего проекта до проверенного terminal outcome и остановиться, если критичный контекст не определён."
+policy:
+  allow_implicit_invocation: false
