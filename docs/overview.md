@@ -11,9 +11,9 @@
 `In Review`, rework/completion remnants или unresolved in-scope defects.
 
 Конкретные Project/Release refs, repository commands, branches, environments и
-внешние эффекты определяются текущим project context. Если connector, exact
-scope или authority нельзя установить достоверно, skill обязан остановиться с
-`TASK CONTEXT ALARM` до первой мутации.
+внешние эффекты определяются текущим project context. Global конфликт
+connector/exact scope/Goal/shared authority останавливает run с
+`TASK CONTEXT ALARM`; изолированный вопрос по одной Task откладывает только её.
 
 ## Текущий статус
 
@@ -29,6 +29,13 @@ scope или authority нельзя установить достоверно, s
 - Delivery report публикуется только как native Task comment, когда current
   connector действительно предоставляет comment write. Пока capability нет,
   report step получает `not-available` и скипается; `description` не меняется.
+- Пока существует runnable work, skill не прерывает run task-local вопросами:
+  безопасный default выбирается автоматически, сложная Task попадает в decision
+  queue, а остальные продолжаются. При доступных comments defer обязательно
+  получает `BLOCKED` handoff.
+- Dev/test/QA/UAT/staging/preview/sandbox releases автоматически разрешены в
+  границах exact Task и проверенного non-production target. Production release
+  выполняется только по явному user approval; без него Task откладывается.
 - User-level копия должна совпадать с repository source после явной
   синхронизации.
 
@@ -57,6 +64,8 @@ review batch. Failed batch возвращает затронутые Tasks в `I
 По умолчанию acceptance остаётся явным решением пользователя; project context
 может определить другую проверяемую authority. Пока хотя бы одна Task остаётся
 `In Review`, Goal и общий execution plan не могут считаться завершёнными.
+Acceptance-ready Task без standing authority не прерывает runnable queue: она
+остаётся `In Review`, попадает в decision queue, а skill продолжает другие Tasks.
 
 Когда native comments доступны, пользователь получает report прямо в Task:
 outcome-first объяснение feature, exact evidence и полезную diagram для
@@ -74,6 +83,8 @@ surface.
 - Skill не берёт Tasks из `Backlog` и не меняет их.
 - Явно разрешённые новые Tasks создаются в `To Do`, а не в `Backlog`.
 - Skill не получает внешние полномочия из одного факта invocation.
+- Исключение ограничено ADR-0004: invocation заранее разрешает обычный in-scope
+  non-production release workflow, но не production release.
 - Skill не работает без подключённого Task Manager connector.
 - Наличие connector не заменяет authoritative Project/Release scope и write
   authority конкретного проекта.
@@ -82,5 +93,7 @@ surface.
   Task fields как fallback для comments.
 - Skill не завершает Goal, пока повторная полная инвентаризация выбранной
   границы находит хотя бы одну Task, подходящую под рабочие критерии.
+- Skill не считает deferred Task завершённой и не задаёт серию вопросов, пока
+  остаётся другая runnable работа.
 - Skill не называет plan, worker report, commit, test или deploy достаточным
   доказательством completion другого слоя.

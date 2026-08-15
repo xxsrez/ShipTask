@@ -1,0 +1,172 @@
+# Autonomous continuation и release authority
+
+Использовать этот reference для long-running multi-Task scope, task-local
+questions, missing acceptance/authority и любых release/deploy effects.
+
+## Содержание
+
+- Run invariant
+- Decision ladder
+- Deferred Task
+- Comment handoff
+- Non-production release
+- Production boundary
+- Deferred-only handoff
+- Resume
+
+## Run invariant
+
+Не останавливать весь run из-за одного изолированного вопроса. Пока существует
+dependency-ready Task, которую можно безопасно продолжать в exact scope,
+выбирать safe default либо defer-нуть blocked Task и двигаться дальше.
+
+Не задавать пользователю вопрос посреди runnable queue. Один consolidated
+decision request допустим, когда безопасная runnable работа исчерпана.
+
+Global `TASK CONTEXT ALARM` сохранять только для конфликта connector, exact
+scope, Goal, ownership, integration/shared state или authority, из-за которого
+небезопасна любая оставшаяся mutation.
+
+## Decision ladder
+
+### 1. Выбрать самому
+
+Принять reasonable default без вопроса, если одновременно:
+
+- решение обратимо либо легко корректируется;
+- оно локально affected Task и не меняет agreed product outcome;
+- acceptance допускает несколько эквивалентных реализаций;
+- blast radius, расходы и external effects ограничены;
+- решение не касается production, secrets, privacy, destructive durable data,
+  legal/financial commitment или внешнего получателя.
+
+Зафиксировать выбранный вариант и rationale в evidence/review report. Не
+превращать каждую мелкую реализационную развилку в decision queue entry.
+
+### 2. Defer-нуть Task
+
+Использовать `deferred`, если Task требует:
+
+- material product/architecture choice с разными observable outcomes;
+- human acceptance без standing acceptance authority;
+- production approval;
+- out-of-scope change или новую Task authority;
+- destructive/secret/privacy/cost/external-recipient authority;
+- решения ambiguous requirement после bounded research;
+- external state change, access или dependency, локальных этой Task.
+
+Не угадывать и не расширять scope. Изолировать Task, освободить lane и
+продолжить другие Tasks.
+
+### 3. Остановить run
+
+Использовать global alarm, только если конфликт нельзя изолировать: exact scope
+или Goal не разрешены, connector/ownership не позволяют безопасный write,
+shared integration state повреждён/неоднозначен либо все remaining mutations
+зависят от одной общей отсутствующей authority.
+
+## Deferred Task
+
+Сохранять truthful non-terminal status:
+
+- `To Do` — execution не начинался;
+- `In Progress` — существует partial implementation/rework;
+- `In Review` — exact candidate machine-verified, но ждёт acceptance или
+  production approval.
+
+Не переводить в `Done`, `Canceled`, `Duplicate` и не изобретать provider status
+`Blocked`. Не создавать replacement/follow-up Task без отдельной authority.
+
+В current-run decision queue записать:
+
+```text
+Task: <canonical ref and identifier>
+Reason: <stable reason code>
+Current status/result: <truthful state and exact identity>
+Last safe checkpoint: <what is safely complete>
+Evidence: <checks/releases/findings already proven>
+Recommended default: <one concrete recommendation or not-applicable>
+Decision/authority needed: <one exact user/external decision>
+Resume step: <first safe next action after unblock>
+```
+
+Reason codes включают `acceptance-required`, `production-approval-required`,
+`ambiguous-product-decision`, `out-of-scope-authority`, `external-access`,
+`unsafe-recovery` и `shared-dependency`.
+
+Не переизбирать deferred Task в том же run без нового evidence, authority или
+external state change. Deferred Task продолжает удерживать Goal active.
+
+## Comment handoff
+
+Если native Task comments доступны, для каждого defer обязательно опубликовать
+`BLOCKED` delivery-report comment до освобождения lane. Включить все поля
+decision queue, user impact/remaining risk и report key для exact Task/result.
+
+Если comments недоступны или write outcome unknown, не использовать
+`description`/другой field как fallback. Сохранить disposition и тот же handoff
+в consolidated interaction output, затем продолжить runnable work.
+
+## Non-production release
+
+Считать `$ship-tasks` standing authority для обычного in-scope release workflow
+только после доказанной классификации exact target как local, development,
+test, QA, UAT, staging, preview или sandbox.
+
+Без дополнительного confirmation выполнять необходимые:
+
+- build/package и publish candidate;
+- deploy/redeploy exact validated result;
+- task-required non-production schema/data migration при bounded recovery;
+- environment smoke и acceptance-relevant runtime checks;
+- bounded logs/metrics diagnosis;
+- repair, rollback или restore затронутого in-scope non-production surface.
+
+Не останавливаться с вопросом «деплоить ли на UAT/dev». Если обычный
+non-production release безопасно нужен для acceptance/evidence, выполнить его и
+проверить exact target. Временную in-scope поломку диагностировать и
+исправить/восстановить до перехода к другой независимой external mutation.
+
+Standing authority не разрешает permanent deletion, destructive shared/durable
+data reset без recovery, secrets exposure/rotation, unrelated cleanup,
+неограниченные расходы или действие вопреки explicit read-only request.
+
+## Production boundary
+
+Production release требует explicit user approval, однозначно относящегося к
+production target и текущему scope. Не считать approval:
+
+- Task/Release title или acceptance text;
+- Goal objective;
+- успешные checks, UAT deploy или acceptance;
+- прошлый production approval для другого result/target;
+- наличие production pipeline либо deploy tool;
+- сам invocation `$ship-tasks`.
+
+Без approval выполнить безопасную preparation и non-production release/smoke,
+оставить Task в truthful status, defer-нуть с
+`production-approval-required`, обязательно написать `BLOCKED` comment при
+доступных comments и продолжить другие Tasks. Не спрашивать approval посреди
+runnable queue.
+
+Если environment не доказан как non-production, считать target production-like
+и применять тот же defer. Не выполнять exploratory production mutation.
+
+## Deferred-only handoff
+
+Когда runnable queue исчерпана:
+
+1. Перечитать deferred Tasks и доступные comments/external state.
+2. Удалить из queue entries, которые получили новое доказанное решение.
+3. Сгруппировать оставшиеся по reason/dependency.
+4. Показать один consolidated decision request с recommended defaults.
+5. Оставить plan и Goal незавершёнными. Не вызывать Goal completion.
+6. Применять Goal `blocked` только после строгого model-tool threshold, а не
+   после первого defer или одного turn без progress.
+
+## Resume
+
+После нового user decision/authority или external state change перечитать Task,
+comment thread, current `version`, source/integration identity, checks и release
+target. Продолжить с `Resume step`, только если старый checkpoint всё ещё valid;
+иначе пересчитать Task disposition и evidence с нуля.

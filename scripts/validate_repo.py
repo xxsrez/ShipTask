@@ -13,6 +13,7 @@ SKILL_DIR = ROOT / "ship-tasks"
 SKILL_FILE = SKILL_DIR / "SKILL.md"
 OPENAI_FILE = SKILL_DIR / "agents" / "openai.yaml"
 REPORT_REFERENCE = SKILL_DIR / "references" / "delivery-report.md"
+AUTONOMY_REFERENCE = SKILL_DIR / "references" / "autonomy-and-release.md"
 DOCS_INDEX = ROOT / "docs" / "README.md"
 SPEC_FILE = ROOT / "docs" / "specs" / "ship-tasks.md"
 DECISION_FILE = ROOT / "docs" / "decisions" / "0001-task-manager-only.md"
@@ -21,6 +22,9 @@ REPORT_DECISION_FILE = (
 )
 COMMENT_REPORT_DECISION_FILE = (
     ROOT / "docs" / "decisions" / "0003-delivery-reports-as-task-comments.md"
+)
+AUTONOMY_DECISION_FILE = (
+    ROOT / "docs" / "decisions" / "0004-autonomous-continuation-and-release-authority.md"
 )
 
 REQUIRED_FILES = (
@@ -31,17 +35,18 @@ REQUIRED_FILES = (
     SKILL_FILE,
     OPENAI_FILE,
     REPORT_REFERENCE,
+    AUTONOMY_REFERENCE,
     DOCS_INDEX,
     SPEC_FILE,
     DECISION_FILE,
     REPORT_DECISION_FILE,
     COMMENT_REPORT_DECISION_FILE,
+    AUTONOMY_DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
     "ExampleNotes": re.compile(r"mind\s*diary", re.IGNORECASE),
     "Sites": re.compile(r"\bsites\b", re.IGNORECASE),
-    "UAT": re.compile(r"\buat\b", re.IGNORECASE),
     "legacy skill name": re.compile(
         r"ship-(?:lin" r"ear|work)-release", re.IGNORECASE
     ),
@@ -125,6 +130,11 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "native comment-create",
         "`not-available`",
         "Никогда не писать",
+        "autonomy and release reference",
+        "Не задавать пользователю вопрос",
+        "`deferred`",
+        "verified non-production target",
+        "Никогда не выполнять production release",
     )
     required_spec_fragments = (
         "### 5.3 Terminal invariant и acceptance authority",
@@ -135,6 +145,10 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "### 9.1 Delivery report как Task comment",
         "не блокирует `Done`",
         "Никогда не записывать report в `description`",
+        "### 5.4 Autonomous continuation и task-local defer",
+        "### 5.5 Environment и release authority",
+        "`production-approval-required`",
+        "одну consolidated decision queue",
     )
 
     for path, fragments in (
@@ -164,6 +178,20 @@ def validate_workflow_contract(errors: list[str]) -> None:
     ):
         if fragment not in report_text:
             fail(errors, f"delivery-report reference is missing {fragment!r}")
+
+    autonomy_text = AUTONOMY_REFERENCE.read_text(encoding="utf-8")
+    for fragment in (
+        "Decision ladder",
+        "Не задавать пользователю вопрос посреди runnable queue",
+        "Deferred Task",
+        "обязательно опубликовать",
+        "Non-production release",
+        "Production release требует explicit user approval",
+        "production-approval-required",
+        "Deferred-only handoff",
+    ):
+        if fragment not in autonomy_text:
+            fail(errors, f"autonomy reference is missing {fragment!r}")
 
     for path in (SKILL_FILE, SPEC_FILE, REPORT_REFERENCE):
         text = path.read_text(encoding="utf-8")

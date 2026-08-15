@@ -44,6 +44,11 @@ Task Manager connector и не вторым task source. Его можно сф�
 после разрешения exact Task Manager scope; Goal не заменяет canonical refs,
 current Task detail, connector access или Task write authority.
 
+Task Manager `Release` является planning entity и сам по себе не определяет
+deployment environment и не разрешает production effect. Exact runtime target,
+его non-production/production class и release commands берутся из проверенного
+project context по ADR-0004.
+
 ## Read-only discovery
 
 Использовать progressive disclosure connector:
@@ -182,10 +187,12 @@ capability отсутствует или неработоспособна, ск�
    `published`, `not-available` или `write-outcome-unknown`. При доступном
    comment read/list сверить report state и exact identity; отсутствие comments
    capability не блокирует terminal reconciliation.
-5. Отделить imported historical context от evidence текущего запуска.
-6. Указать capability gaps и project-defined coordination records отдельно от
+5. Отдельно показать deferred Tasks и их decision/authority queue; они сохраняют
+   truthful non-terminal status и удерживают Goal активным.
+6. Отделить imported historical context от evidence текущего запуска.
+7. Указать capability gaps и project-defined coordination records отдельно от
    Task Manager state.
-7. Повторно получить complete inventory выбранного Project/Release scope и не
+8. Повторно получить complete inventory выбранного Project/Release scope и не
    завершать Goal, пока хотя бы одна Task всё ещё подходит под рабочие критерии
    ShipTask.
 

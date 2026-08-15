@@ -7,8 +7,10 @@ outcome под обязательным workflow Goal: выполняет scope,
 периодическую проверку review batches, при доступной native comments capability
 публикует человекочитаемый delivery report в Task comment, затем согласует
 фактические Task statuses. Пока comments недоступны, report step скипается без
-изменения Task description. Goal остаётся активным, пока в выбранной границе
-есть Tasks, подходящие под рабочие критерии ShipTask.
+изменения Task description. Task-local вопросы откладывают только конкретную
+Task, не прерывая остальные; non-production releases выполняются автоматически,
+а production требует явного разрешения пользователя. Goal остаётся активным,
+пока в выбранной границе есть Tasks, подходящие под рабочие критерии ShipTask.
 
 ## Структура
 

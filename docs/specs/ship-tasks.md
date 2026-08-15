@@ -22,6 +22,7 @@ intake-зоной вне рабочего scope ShipTask: skill не берёт 
 - repository/workspace, integration policy и разрешённые writes;
 - per-Task targeted gate, периодический review-batch gate и их trigger policy;
 - обязательные external effects и способ их независимо проверить;
+- exact release targets, их verified environment class и recovery/smoke policy;
 - disposition native Task comment capability для optional in-Task delivery
   report: `available` либо `not-available`;
 - acceptance authority и evidence её решения;
@@ -35,9 +36,10 @@ ownership и external writes необходимо сформировать об�
 Поле Task `version` является optimistic-concurrency данными Task Manager, а не
 версией skill или workflow.
 
-Если connector, exact scope, acceptance, authority или integration policy
-неоднозначны, остановиться до code, Git, Task Manager, ownership и external
-writes с `TASK CONTEXT ALARM`.
+Если connector, exact scope, Goal, ownership, integration/shared state или
+authority неоднозначны так, что любая оставшаяся мутация небезопасна,
+остановиться с global `TASK CONTEXT ALARM`. Изолированную неопределённость одной
+Task обрабатывать как `deferred` по разделу 5.4 и продолжать остальные.
 
 ## 2. Единственный task source
 
@@ -217,21 +219,24 @@ Goal должен содержать:
   выбранного Project/Release scope до проверенного terminal outcome;
 - `Done when`: повторная complete inventory не находит `To Do`, `In Progress`,
   `In Review`, changes-requested/rework, completion remnants или unresolved
-  in-scope defects, report-comment disposition честно классифицирован для
-  изменённых Tasks и требования раздела 11 выполнены;
+  in-scope defects, нет deferred decision/authority queue, report-comment
+  disposition честно классифицирован для изменённых Tasks и требования раздела
+  11 выполнены;
 - `Verify with`: current Task details/statuses, source/integration identity,
   per-Task targeted gates, exact review-batch gate, authorized acceptance и
   independently verified external effects;
 - `Constraints`: точная граница scope, исключённый `Backlog`, разрешённые writes
   и запрет расширять scope либо authority из самого Goal;
-- `Blocked when`: конкретная внешняя зависимость или решение, без ослабления
+- `Blocked when`: после исчерпания runnable work остаётся конкретная
+  decision/authority queue либо общая внешняя зависимость, без ослабления
   текущего tool threshold для статуса `blocked`.
 
 Goal остаётся активным, пока хотя бы одна Task в выбранной границе подходит под
 рабочие критерии ShipTask. `Backlog` и terminal statuses сами по себе не держат
-Goal активным, но могут оставаться dependency boundary. `conflict` или
-временное отсутствие ready frontier не являются completion и не разрешают
-закрыть Goal, если подходящие Tasks либо completion remnants ещё существуют.
+Goal активным, но могут оставаться dependency boundary. `global-conflict`,
+`deferred` или временное отсутствие ready frontier не являются completion и не
+разрешают закрыть Goal, если подходящие Tasks либо completion remnants ещё
+существуют.
 Статус `blocked` допустим только после текущего строгого blocker threshold; он
 оставляет Goal незавершённым, а после resume workflow продолжается с тем же
 Goal и scope.
@@ -251,16 +256,18 @@ Goal и scope.
 | `work-remains` | Есть `To Do` Tasks, прошедшие или способные пройти preflight. |
 | `completion-remains` | Есть `In Review` либо implementation/rework уже завершены, но result не интегрирован, не принят, не отражён в Task Manager или не доведён до обязательного effect. |
 | `resume` | Есть `In Progress` с незавершённым implementation/rework, найден coherent checkpoint и доказана authority продолжения. |
+| `deferred` | Конкретная Task безопасно изолирована, но требует material decision, отсутствующей authority либо внешнего state change; в текущем run её не переизбирать без нового evidence. |
 | `no-work` | После исключения `Backlog` и terminal statuses нет рабочего candidate; это не утверждение, что Backlog пуст. |
-| `conflict` | Scope, owner, Task state или evidence противоречат друг другу. |
+| `global-conflict` | Scope, Goal, owner, shared state или evidence противоречат друг другу так, что любая оставшаяся мутация небезопасна. |
 
 Для смешанного scope выбирать disposition по precedence:
-`conflict → completion-remains → resume → work-remains → no-work`. Это задаёт
-первый безопасный stage, а не исключает остальные Tasks: после review/completion
-пересчитать disposition, затем продолжить resume и только потом dispatch новой
-`To Do`, если dependencies и review capacity не требуют иного порядка.
+`global-conflict → actionable completion-remains → resume → work-remains →
+deferred-only → no-work`. Это задаёт первый безопасный stage, а не исключает
+остальные Tasks. Acceptance/decision-waiting `In Review` сначала перевести в
+`deferred`, затем продолжить actionable review, resume и новую `To Do` работу.
 Changes-requested rework текущей review chain имеет приоритет среди
-dependency-ready `In Progress`; при blocker пересчитать disposition.
+dependency-ready `In Progress`; при task-local blocker defer-нуть lane,
+освободить capacity и пересчитать disposition.
 
 Для `no-work` сообщить отдельно исключённые Backlog и terminal counts, выполнить
 reconciliation применимого рабочего scope, завершить обязательный Goal только
@@ -272,8 +279,8 @@ reconciliation применимого рабочего scope, завершить
 Любая `In Review` Task означает `completion-remains`. Пока в exact scope есть
 хотя бы одна такая Task, запрещено отмечать весь execution plan завершённым,
 объявлять terminal completion или завершать Goal. Допустимый handoff в этом
-состоянии — batch/review packet, запрос acceptance либо точное описание
-оставшегося blocker.
+состоянии — batch/review packet, verified acceptance либо `deferred` с точным
+описанием оставшегося decision/authority blocker.
 
 По умолчанию acceptance является явным решением пользователя по предъявленному
 exact result. Project context может заранее определить другую acceptance
@@ -282,6 +289,75 @@ authority или автоматический acceptance contract, но толь
 current project context, не запрашивать повторно. Сам invocation `$ship-tasks`,
 успешные checks, deployment или внешний runtime check не являются acceptance,
 если project context прямо не определил обратное.
+
+Если acceptance требует нового решения пользователя, не запрашивать его, пока
+остаётся другая runnable Task. Оставить candidate в `In Review`, добавить его в
+decision queue, при доступных comments обязательно опубликовать `BLOCKED`
+handoff и продолжить scope. Когда runnable queue исчерпана, предъявить все такие
+решения одним consolidated request.
+
+### 5.4 Autonomous continuation и task-local defer
+
+Следовать [runtime reference](../../ship-tasks/references/autonomy-and-release.md)
+и [ADR-0004](../decisions/0004-autonomous-continuation-and-release-authority.md).
+Во время long-running scope не прерывать runnable queue task-local вопросами.
+
+Decision ladder:
+
+1. Выбрать и выполнить разумный default, если он обратим, локален, остаётся
+   внутри exact scope/acceptance, имеет ограниченный blast radius и не касается
+   production, secrets, privacy, существенных расходов либо необратимого
+   external effect. Зафиксировать rationale в evidence/report.
+2. Если решение materially меняет продуктовый outcome, требует отсутствующей
+   authority или остаётся неоднозначным после bounded research, defer-нуть
+   только affected Task. Не угадывать, не отменять её и не создавать новую.
+3. Остановить весь run с `TASK CONTEXT ALARM` только при global/shared conflict,
+   который делает небезопасной любую оставшуюся mutation.
+
+Deferred Task сохраняет truthful status: `To Do`, если execution не начинался;
+`In Progress`, если существует partial/rework result; `In Review`, если exact
+candidate machine-verified, но ждёт acceptance или production approval. Не
+переводить её в `Done`/`Canceled` и не изобретать portable `Blocked` status.
+
+В current run вести decision queue с canonical Task ref, reason, last safe
+checkpoint, уже выполненными actions/evidence, recommended default, точным
+decision/authority и resume step. Не переизбирать Task без нового evidence,
+authority или external state change. При доступной native comments capability
+обязательно опубликовать тот же `BLOCKED` handoff в Task; при отсутствии
+comments скипнуть write без изменения `description`.
+
+Когда runnable Tasks остаются, продолжать их без вопроса пользователю. Когда
+остались только deferred Tasks, предъявить одну consolidated decision queue.
+Goal и plan остаются незавершёнными; Goal `blocked` разрешён только после
+текущего строгого tool threshold, а не из-за первого defer.
+
+### 5.5 Environment и release authority
+
+Классифицировать exact release target по project instructions, config и current
+provider state. Название Task Manager `Release`, URL или прежний deploy сами по
+себе не доказывают environment class.
+
+Invocation `$ship-tasks` является standing authority для обычного in-scope
+non-production release workflow в local/development/test/QA/UAT/staging/preview/
+sandbox environment: build/package, deploy/redeploy, required non-production
+migration, smoke, bounded diagnosis и repair/rollback. Не запрашивать отдельное
+подтверждение для этих шагов. Если non-production release временно нарушил
+in-scope surface, диагностировать и восстановить/исправить его в том же scope.
+
+Production release выполнять только после явного user approval для production
+target. Не выводить approval из Task/Release title, acceptance, Goal, checks,
+project automation, прошлого approval или самого invocation. Без approval
+выполнить безопасную preparation, release и verification на non-production,
+затем оставить Task в truthful non-terminal status, defer-нуть её с reason
+`production-approval-required`, при доступных comments обязательно записать
+`BLOCKED` report и продолжить остальные Tasks. Не задавать production-вопрос
+пока есть runnable work.
+
+Если target нельзя надёжно классифицировать как non-production, считать его
+production-like и defer-нуть Task. Standing non-production authority не
+разрешает unrelated cleanup, permanent deletion, destructive durable-data
+reset, secrets exposure/rotation, неограниченные расходы или нарушение explicit
+read-only boundary. Deployment не заменяет acceptance и independent smoke.
 
 ## 6. Execution topology
 
@@ -377,7 +453,8 @@ rework. Не маскировать конфликт незапланирова�
 Для каждой рабочей Task:
 
 1. Зафиксировать canonical Task ref, current detail/version, status, base
-   identity, acceptance и разрешённые writes.
+   identity, acceptance, exact release target/environment class и разрешённые
+   writes.
 2. По status выбрать stage: `To Do` провести через preflight и перевести в
    `In Progress`; `In Progress` продолжить из проверенного checkpoint;
    `In Review` не реализовывать заново до finding, а сразу проверять exact
@@ -389,7 +466,8 @@ rework. Не маскировать конфликт незапланирова�
 5. Перед review прочитать все связанные duplicate Tasks и включить их
    отличающиеся problem statements, acceptance и failure scenarios в checklist.
    Если duplicate описывает материально отдельную проблему, зафиксировать
-   finding и запросить scope decision вместо silent closure.
+   finding, defer-нуть affected Task для scope decision и продолжить
+   независимые Tasks вместо interrupting question или silent closure.
 6. Интегрировать targeted-verified result, сформировать candidate evidence и
    обновить Task в `In Review`, если она ещё не в этом status. Это provisional
    review-ready state, а не terminal completion.
@@ -397,12 +475,15 @@ rework. Не маскировать конфликт незапланирова�
    review без mutation authority, когда его требует risk class или project
    policy, и выполнить review-batch gate на exact integrated result.
 8. Выполнить общие обязательные external effects в batch cadence и независимо
-   проверить exact target; не повторять один дорогой effect для каждого member.
+   проверить exact target. Non-production release выполнить без confirmation по
+   разделу 5.5; production без explicit approval defer-нуть. Не повторять один
+   дорогой effect для каждого member.
 9. Сформировать batch/review packet. Если current connector предоставляет
    native Task comment write, опубликовать task-specific acceptance-ready
    report там, когда это полезный review surface. Если capability отсутствует
    или ещё неработоспособна, классифицировать шаг как `not-available` и
-   продолжить без Task field fallback.
+   продолжить без Task field fallback. Если Task ждёт acceptance/decision,
+   defer-нуть её и продолжить runnable queue без вопроса пользователю.
 10. При changes requested либо failed batch gate вернуть Tasks, чьё evidence
     стало недействительным, из `In Review` в `In Progress`. При доступной native
     comments capability опубликовать понятный rework/incident comment; иначе
@@ -411,6 +492,11 @@ rework. Не маскировать конфликт незапланирова�
     authorized acceptance опубликовать final report comment, если capability
     доступна, независимо обновить Task в `Done` и перечитать. Аналогично
     обработать подтверждённый `Canceled` outcome.
+
+При любом task-local blocker сохранить last safe checkpoint, truthful status и
+decision queue entry; при доступных comments обязательно опубликовать `BLOCKED`
+report. Освободить lane и продолжить другие dependency-ready Tasks. Не
+переизбирать deferred Task без нового evidence/authority/state change.
 
 Разделять Task Manager state, source result, checks, authorized acceptance и
 external effects. Успех одного слоя не доказывает остальные.
@@ -446,8 +532,9 @@ Failed batch gate сначала локализовать по member, dependenc
 
 Если defect обнаружен уже после `Done`, не переписывать terminal history
 молча: reopen terminal Task только когда это разрешает project policy, иначе
-запросить scope decision и создавать отдельную defect Task лишь при явной
-authority. Нормальный workflow обязан провести batch gate до `Done`.
+defer-нуть affected route для consolidated scope decision и создавать отдельную
+defect Task лишь при явной authority. Нормальный workflow обязан провести batch
+gate до `Done`.
 
 ### 9.1 Delivery report как Task comment
 
@@ -479,6 +566,9 @@ Goal completion. Если advertised write завершился ошибкой �
   рабочей Task;
 - опубликовать `REWORK REQUIRED`/`BLOCKED` report при material failure,
   changes-requested или blocker, который важно объяснить пользователю;
+- при каждом task-local defer обязательно опубликовать `BLOCKED` handoff с
+  reason, last safe checkpoint, completed evidence, recommended default,
+  required decision/authority и resume step;
 - при необходимости опубликовать `ACCEPTANCE READY` report как review surface,
   но не комментировать обычные внутренние red/green iterations;
 - перед write при доступной comment list/read capability проверить, нет ли уже
@@ -519,16 +609,18 @@ trigger, root cause с confidence, recovery/rework, prevention и remaining risk
 
 - Автоматически исправлять только defect, который acceptance или project policy
   включает в exact scope.
-- Для нового out-of-scope defect остановиться до code и scope-changing Task
-  Manager writes; при доступных comments можно опубликовать `BLOCKED`/`decision
-  required` report текущей in-scope Task. Запросить scope decision.
+- Для нового out-of-scope defect не выполнять code или scope-changing Task
+  Manager writes. Если finding блокирует текущую Task, defer-нуть только её,
+  при доступных comments обязательно опубликовать `BLOCKED`/`decision required`
+  report и продолжить независимые Tasks. Включить решение в consolidated queue.
 - Не использовать failure как разрешение на cleanup, unrelated fixes,
   destructive recovery или silent task creation.
 - При resume перечитать Tasks и сверить их с workspace, Git, checks и external
   states. Старый report comment является checkpoint, но не proof.
 - При competing owner, unexplained drift или dirty state остановить затронутую
-  lane. Не выполнять automatic reset, clean, stash, force-push, takeover или
-  удаление чужой worktree/branch.
+  lane, defer-нуть affected Task и продолжить изолированные lanes, если shared
+  state остаётся безопасным. Не выполнять automatic reset, clean, stash,
+  force-push, takeover или удаление чужой worktree/branch.
 
 ## 11. Completion
 
@@ -537,6 +629,7 @@ Completion требует:
 - zero unfinished рабочих Tasks (`To Do`, `In Progress`, `In Review`) и
   unresolved in-scope defects; Backlog явно исключён и не блокирует этот gate;
 - zero unaccepted review-ready candidates;
+- zero deferred Tasks и unresolved decision/authority entries;
 - final review batch прошёл gate на exact final integrated result;
 - все duplicate-derived scenarios покрыты evidence либо вынесены как явные
   findings/scope decisions;
@@ -556,15 +649,18 @@ Completion требует:
 
 Перед `update_goal(status="complete")` повторить complete inventory выбранной
 границы и проверить все пункты completion. Если хотя бы одна Task подходит под
-рабочие критерии либо отсутствует обязательный evidence layer, не завершать
-Goal: продолжить workflow или зафиксировать blocker по текущему tool contract.
+рабочие критерии, остаётся deferred/decision queue либо отсутствует обязательный
+evidence layer, не завершать Goal: продолжить runnable workflow или, когда
+runnable work исчерпан, предъявить consolidated queue. Goal `blocked` применять
+только по текущему строгому tool threshold.
 Goal completion является последним lifecycle write после Task и evidence
 reconciliation, а не заменой этой проверки.
 
 Финальный interaction report отдельно показывает Goal identity/status, Task
 Manager projection, source/integration identity, checks, acceptance, external
 effects, gaps и disposition Task comment reports. Он не выдаёт скипнутые или
-unknown writes за опубликованные comments.
+unknown writes за опубликованные comments и отдельно показывает deferred Tasks,
+их last safe checkpoints и exact decisions/authority needed.
 
 ## 12. Non-goals
 
@@ -578,3 +674,7 @@ unknown writes за опубликованные comments.
   review capacity.
 - Не считать Task status, plan, worker report, commit, check или deployment
   достаточным evidence другого слоя.
+- Не выполнять production release без explicit user approval и не применять
+  production-style confirmation к ordinary verified non-production release.
+- Не использовать standing non-production authority для destructive,
+  secret-related, unrelated или explicitly read-only actions.

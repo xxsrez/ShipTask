@@ -68,13 +68,27 @@ Codex task получает только:
   unknown write outcome не приводит к blind retry;
 - non-trivial success/incident получает полезную diagram, trivial change —
   compact before/after; Mermaid не используется без proven comment renderer;
-- mixed scope однозначно выбирает review/completion перед resume и новой
-  работой, затем пересчитывает disposition;
+- mixed scope выбирает actionable review/completion перед resume и новой
+  работой, но decision-waiting review defer-ит и не блокирует runnable queue;
 - changes-requested rework сохраняет текущую lane до повторного review или
   blocker;
 - review canonical Task читает все входящие `duplicate_of` и превращает иной
   failure scenario в finding, а не в отдельную execution lane;
-- missing authority вызывает `TASK CONTEXT ALARM` до mutation;
+- global/shared missing authority вызывает `TASK CONTEXT ALARM`; task-local
+  missing decision/authority defer-ит только affected Task и не останавливает
+  runnable queue;
+- обратимый локальный implementation choice выбирается без вопроса, а material
+  ambiguity получает decision queue entry и truthful non-terminal status;
+- при доступных comments каждый defer обязательно создаёт `BLOCKED` handoff;
+  без comments write скипается без fallback в description;
+- UAT/dev/test/QA/staging/preview/sandbox release выполняется без confirmation,
+  включая smoke и bounded repair/rollback exact non-production target;
+- production без explicit user approval не мутируется: Task получает
+  `production-approval-required`, defer-ится, а другие Tasks продолжаются;
+- explicit production approval для exact target разрешает production workflow,
+  но не отменяет verification/acceptance gates;
+- когда остаются только deferred Tasks, skill выдаёт одну consolidated decision
+  queue и удерживает Goal/plan незавершёнными;
 - `completion-remains` не превращается в `no-work`;
 - `In Review` после успешных checks/external effect, но без authorized
   acceptance, оставляет plan и Goal активными и запрещает completion claim;

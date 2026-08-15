@@ -18,6 +18,9 @@
 - [0003: Delivery reports только как Task comments](decisions/0003-delivery-reports-as-task-comments.md)
   — capability-based comments-only contract без изменения description и без
   блокировки workflow, пока comments недоступны.
+- [0004: Autonomous continuation и release authority](decisions/0004-autonomous-continuation-and-release-authority.md)
+  — task-local defer вместо остановки run, automatic non-production releases и
+  explicit-only production boundary.
 
 ## Reference
 

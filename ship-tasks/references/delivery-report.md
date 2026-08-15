@@ -8,6 +8,7 @@ acceptance, checks, source identity или external-effect verification.
 
 - Capability gate
 - Write и reconciliation
+- Deferred/BLOCKED handoff
 - Общий формат
 - Success report
 - Material failure report
@@ -45,6 +46,8 @@ comment write, использовать его без ожидания отде�
   Task.
 - Публиковать `REWORK REQUIRED`/`BLOCKED` report после material failure,
   changes-requested или blocker, который важно объяснить пользователю.
+- Для каждого task-local defer обязательно публиковать `BLOCKED` report, если
+  comments доступны; это durable handoff перед продолжением других Tasks.
 - Публиковать `ACCEPTANCE READY` только когда comment является полезным review
   surface; не писать comment на каждую внутреннюю red/green iteration.
 - Не backfill-ить старые terminal Tasks и не писать отдельный report в
@@ -65,6 +68,42 @@ Report key: shiptask/<canonical-task-ref>/<STATE>/<exact-result-identity>
 ```
 
 Не включать secrets, signed URLs или private raw logs в key либо body.
+
+## Deferred/BLOCKED handoff
+
+Deferred report не обязан быть incident postmortem. Его задача — позволить
+пользователю принять одно точное решение, а следующему run безопасно продолжить.
+
+```text
+SHIPTASK DELIVERY REPORT
+State: BLOCKED
+Task: <identifier> — <title>
+Result: <exact checkpoint identity or not-started>
+Report key: shiptask/<task-ref>/BLOCKED/<checkpoint-identity>
+
+Why this Task was deferred
+<Reason code и почему safe default здесь недостаточен.>
+
+Last safe checkpoint
+<Что завершено, проверено и не будет повторяться без причины.>
+
+Impact
+<Что остаётся недоступным/непринятым; production impact только если доказан.>
+
+Recommended default
+<Один конкретный вариант и tradeoff либо not-applicable.>
+
+Decision or authority needed
+<Одно точное решение, acceptance, access или production approval.>
+
+Resume step
+<Первое безопасное действие после unblock.>
+```
+
+Для `production-approval-required` указать exact production target и candidate
+identity, но не формулировать Task/Goal/успешный UAT как уже выданное approval.
+Не задавать вопрос в comment, если ещё остаётся runnable work: comment является
+handoff, а consolidated decision request формируется после исчерпания queue.
 
 ## Общий формат
 
