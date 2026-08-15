@@ -35,6 +35,11 @@ project profile. Установленный plugin, успешный OAuth и в
 остановиться с `TASK CONTEXT ALARM`. Imported provenance является read-only
 external context и не образует отдельный writable task source.
 
+Обязательный Codex Goal является orchestration state ShipTask, а не частью
+Task Manager connector и не вторым task source. Его можно сформировать только
+после разрешения exact Task Manager scope; Goal не заменяет canonical refs,
+current Task detail, connector access или Task write authority.
+
 ## Read-only discovery
 
 Использовать progressive disclosure connector:
@@ -139,6 +144,11 @@ MCP connector умеет читать Projects/Releases/Tasks и создава�
   Administration и backup/restore;
 - idempotency key для `create_task`.
 
+Goal tools также не являются capability Task Manager connector. При запуске
+skill необходимо отдельно проверить model-visible Goal state и возможность
+создать либо продолжить совместимый Goal. Если обязательный Goal нельзя
+сформировать или удерживать, остановиться до mutations с `TASK CONTEXT ALARM`.
+
 Поэтому текущий Task Manager уже может быть authoritative источником scope,
 acceptance, dependencies и status projection, но не заменяет durable
 coordination runtime. Не использовать `description` как скрытый append-only
@@ -157,6 +167,9 @@ run state и review packets должны иметь project-defined durable chan
 4. Отделить imported historical context от evidence текущего запуска.
 5. Указать capability gaps и project-defined coordination records отдельно от
    Task Manager state.
+6. Повторно получить complete inventory выбранного Project/Release scope и не
+   завершать Goal, пока хотя бы одна Task всё ещё подходит под рабочие критерии
+   ShipTask.
 
 Task Manager state доказывает только собственную projection. Он не доказывает
 commit, merge, deployment, UAT, human acceptance или внешний эффект без

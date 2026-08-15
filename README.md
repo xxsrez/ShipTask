@@ -2,8 +2,10 @@
 
 ShipTask — репозиторий Codex skill `$ship-tasks`, который через Task Manager
 доводит заранее выбранные Tasks, Project или Release до проверенного terminal
-outcome: выполняет scope, проверяет dependencies, интегрирует результат,
-проводит verification и согласует фактические Task statuses.
+outcome под обязательным workflow Goal: выполняет scope, проверяет dependencies,
+интегрирует результат, проводит verification и согласует фактические Task
+statuses. Goal остаётся активным, пока в выбранной границе есть Tasks,
+подходящие под рабочие критерии ShipTask.
 
 ## Структура
 

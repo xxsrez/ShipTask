@@ -1,6 +1,6 @@
 ---
 name: ship-tasks
-description: "Доводить уже созданный и выбранный scope Tasks, Project или Release из Task Manager до проверенного terminal outcome: разрешать canonical refs через Task Manager connector, читать полный Task detail и dependencies, выполнять ready Tasks, безопасно интегрировать результаты, проводить проверки и human review, обновлять Task statuses с optimistic concurrency и сверять обязательные внешние эффекты. Использовать только при явном вызове $ship-tasks или явной просьбе исполнить ShipTask workflow. Работать только с Task Manager; если connector, exact scope, acceptance, authority или обязательная capability недоступны либо неоднозначны, остановиться до мутаций с TASK CONTEXT ALARM."
+description: "Доводить уже созданный и выбранный scope Tasks, Project или Release из Task Manager до проверенного terminal outcome: разрешать canonical refs через Task Manager connector, создавать обязательный workflow Goal и удерживать его активным, пока в выбранной границе есть подходящие рабочие Tasks, выполнять ready Tasks, безопасно интегрировать результаты, проводить проверки и human review, обновлять Task statuses с optimistic concurrency и сверять обязательные внешние эффекты. Использовать только при явном вызове $ship-tasks или явной просьбе исполнить ShipTask workflow. Работать только с Task Manager; если connector, exact scope, Goal lifecycle, acceptance, authority или обязательная capability недоступны либо неоднозначны, остановиться до мутаций с TASK CONTEXT ALARM."
 ---
 
 # Ship Tasks
@@ -44,6 +44,48 @@ OAuth Connect; не просить personal token. При недостаточн
 writes. Выдать `TASK CONTEXT ALARM`: известный scope, конфликтующие факты,
 проверенные sources, последний безопасный checkpoint и точное решение или
 доступ, который нужен.
+
+## Сформировать обязательный Goal
+
+Считать явный invocation `$ship-tasks` разрешением создать один workflow Goal
+для уже разрешённого scope. После exact canonical refs и complete read-only
+inventory, но до code, Git, Task Manager, ownership и external writes:
+
+1. Вызвать `get_goal`.
+   Если `get_goal` или `create_goal` недоступны, выдать `TASK CONTEXT ALARM` и
+   остановиться до code, Git, Task Manager, ownership и external writes.
+2. Если незавершённого Goal нет, вызвать `create_goal`. Не задавать token budget
+   без отдельного explicit numeric budget пользователя.
+3. Продолжить существующий Goal только если его objective и done criteria
+   однозначно совпадают с exact scope и terminal outcome текущего запуска.
+   Иначе выдать `TASK CONTEXT ALARM`; не завершать, не блокировать и не заменять
+   несовместимый Goal ради нового запуска.
+4. Проверить, что Goal активен до execution. Если совместимый Goal не активен и
+   model tools не могут его возобновить, запросить resume через доступный client
+   control и остановить execution до подтверждения.
+
+В Goal записать:
+
+- objective — довести exact Tasks либо все подходящие Tasks выбранного
+  Project/Release scope до проверенного terminal outcome;
+- done criteria — после повторной complete inventory нет `To Do`,
+  `In Progress`, `In Review`, changes-requested/rework, completion remnants и
+  unresolved in-scope defects, а все completion gates skill выполнены;
+- verification — current Task projection, source/integration identity,
+  required checks, human acceptance и обязательные external effects;
+- constraints — exact scope, исключённый `Backlog`, allowed writes и запрет
+  расширять scope либо authority из Goal;
+- blocker — конкретную внешнюю зависимость или решение с сохранением текущего
+  tool threshold для `blocked`.
+
+Удерживать Goal активным, пока хотя бы одна Task в выбранной границе подходит
+под рабочие критерии. `conflict` или пустой ready frontier не являются
+completion, если остаются такие Tasks или completion remnants. Для Project,
+Release или all-accessible scope перед terminal claim повторить `list_tasks` до
+`hasMore=false`; новая подходящая Task в той же границе продолжает Goal. Для
+явно перечисленных Task refs не расширять границу без отдельного разрешения.
+Переводить Goal в `blocked` только после текущего строгого blocker threshold;
+после resume продолжать тот же Goal и scope.
 
 ## Выполнить read-only preflight
 
@@ -95,7 +137,8 @@ Changes-requested rework текущей review chain выполнять рань
 dependency-ready `In Progress`; сохранять lane до повторного review или blocker.
 
 Для `no-work` отдельно сообщить исключённые Backlog и terminal counts, выполнить
-reconciliation рабочего scope и остановиться. Не создавать пустой commit, не
+reconciliation рабочего scope, завершить обязательный Goal только после
+прохождения completion gate и остановиться. Не создавать пустой commit, не
 повторять дорогой gate и не производить effect только ради отчёта.
 
 ## Выбрать execution topology
@@ -243,8 +286,18 @@ packet в текущем interaction и использовать Task Manager д
 - обязательные external effects независимо проверены;
 - все рабочие и изменённые Tasks перечитаны и current statuses соответствуют
   фактам; исключённые Backlog и terminal counts показаны отдельно;
-- Goal/run/journal state reconciled, когда применим.
+- обязательный Goal относится к exact scope и оставался активным, пока
+  существовали подходящие Tasks, rework/completion remnants или unresolved
+  in-scope defects;
+- run/journal state reconciled, когда применим.
 
-В финальном отчёте отдельно указать Task Manager projection,
-source/integration identity, checks, human acceptance, external effects и gaps.
+Перед `update_goal(status="complete")` повторить complete inventory выбранной
+границы. Если найдена хотя бы одна подходящая Task или отсутствует обязательный
+evidence layer, не завершать Goal: продолжить workflow либо зафиксировать
+blocker по текущему tool contract. Завершать Goal последним lifecycle write
+после Task и evidence reconciliation.
+
+В финальном отчёте отдельно указать Goal identity/status, Task Manager
+projection, source/integration identity, checks, human acceptance, external
+effects и gaps.
 Не объявлять completion при отсутствующем evidence любого обязательного слоя.

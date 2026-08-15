@@ -5,7 +5,8 @@
 ## Specification
 
 - [Ship Tasks](specs/ship-tasks.md) — канонический Task Manager-only workflow
-  от уже созданных Tasks до human acceptance и terminal evidence.
+  от уже созданных Tasks через обязательный Goal lifecycle до human acceptance
+  и terminal evidence.
 
 ## Decisions
 

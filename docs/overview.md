@@ -5,8 +5,10 @@
 `$ship-tasks` — явно вызываемый Task Manager-only workflow для доставки уже
 созданного и выбранного task scope. Skill разрешает Project, Release и Tasks
 через connector, читает полный Task detail, проверяет dependencies и authority,
-координирует execution, integration, verification, human acceptance и
-terminal status projection.
+создаёт обязательный workflow Goal и координирует execution, integration,
+verification, human acceptance и terminal status projection. Goal остаётся
+активным, пока в выбранной границе есть `To Do`, `In Progress`, `In Review`,
+rework/completion remnants или unresolved in-scope defects.
 
 Конкретные Project/Release refs, repository commands, branches, environments и
 внешние эффекты определяются текущим project context. Если connector, exact
@@ -19,6 +21,9 @@ scope или authority нельзя установить достоверно, s
 - `ship-tasks/SKILL.md` — компактный исполнимый contract на её основе.
 - [Task Manager adapter](reference/task-manager-adapter.md) — точный OAuth/MCP
   tool flow, identity, status и write semantics.
+- Каждый запуск после разрешения exact scope и до первой non-Goal mutation
+  создаёт Goal либо продолжает уже активный совместимый Goal. Несовместимый
+  незавершённый Goal блокирует запуск с `TASK CONTEXT ALARM`.
 - Cross-session scheduler, connector comments, durable claims и append-only
   task reports не изображаются существующими capabilities.
 - User-level копия должна совпадать с repository source после явной
@@ -45,6 +50,8 @@ To Do → In Progress → In Review → Done or Canceled
 ## Границы
 
 - Skill не создаёт scope из неопределённого пожелания.
+- Goal фиксирует и удерживает уже выбранный Task Manager scope, но не заменяет
+  его и не расширяет authority.
 - Skill не берёт Tasks из `Backlog` и не меняет их.
 - Явно разрешённые новые Tasks создаются в `To Do`, а не в `Backlog`.
 - Skill не получает внешние полномочия из одного факта invocation.
@@ -52,5 +59,7 @@ To Do → In Progress → In Review → Done or Canceled
 - Наличие connector не заменяет authoritative Project/Release scope и write
   authority конкретного проекта.
 - Skill не превращает failed check в разрешение на unrelated cleanup.
+- Skill не завершает Goal, пока повторная полная инвентаризация выбранной
+  границы находит хотя бы одну Task, подходящую под рабочие критерии.
 - Skill не называет plan, worker report, commit, test или deploy достаточным
   доказательством completion другого слоя.

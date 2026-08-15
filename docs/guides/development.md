@@ -44,6 +44,9 @@ Codex task получает только:
 Проверьте как минимум:
 
 - coherent scope проходит preflight;
+- после разрешения exact scope и до первой non-Goal mutation создаётся Goal с
+  observable done criteria; совместимый активный Goal продолжается,
+  несовместимый вызывает `TASK CONTEXT ALARM` и не перезаписывается;
 - `Backlog` исключается без Task writes, а явно разрешённый create использует
   current status ref `To Do`;
 - `To Do`, `In Progress` и `In Review` маршрутизируются соответственно в новую
@@ -56,6 +59,12 @@ Codex task получает только:
   failure scenario в finding, а не в отдельную execution lane;
 - missing authority вызывает `TASK CONTEXT ALARM` до mutation;
 - `completion-remains` не превращается в `no-work`;
+- Goal остаётся активным при любой подходящей `To Do`, `In Progress`,
+  `In Review`, rework/completion remnant или unresolved in-scope defect;
+- перед `update_goal(complete)` повторная complete inventory выбранной границы
+  подтверждает отсутствие подходящих Tasks и прохождение всех completion gates;
+- `no-work` сначала reconciles Task/evidence state и обязательный Goal, затем
+  завершает Goal и останавливает workflow;
 - out-of-scope defect не исправляется автоматически;
 - parallel request честно ограничивается dependency/review capacity;
 - изменения после `changes-requested` возвращаются как delta review.

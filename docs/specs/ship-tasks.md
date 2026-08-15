@@ -25,6 +25,11 @@ intake-зоной вне рабочего scope ShipTask: skill не берёт 
 - human acceptance authority;
 - execution mode, capacity и review WIP limit.
 
+После read-only разрешения exact scope, но до code, Git, Task Manager,
+ownership и external writes необходимо сформировать обязательный workflow Goal
+по правилам раздела 5. Невозможность создать или продолжить такой Goal является
+`TASK CONTEXT ALARM`, а не разрешением выполнять scope без Goal.
+
 Поле Task `version` является optimistic-concurrency данными Task Manager, а не
 версией skill или workflow.
 
@@ -37,6 +42,10 @@ writes с `TASK CONTEXT ALARM`.
 Task Manager является единственным authoritative task source. Не использовать
 fallback provider, repository TODO list, plan, Goal, chat transcript или memory
 как замену Task Manager scope.
+
+Обязательный Goal фиксирует выполнение уже разрешённого Task Manager scope и
+его критерии выхода, но не создаёт новый scope, не расширяет authority и не
+подменяет current connector evidence.
 
 Project context может уточнять Project/Release refs, repository commands,
 branches, environments и completion policy, но не заменяет current Task detail.
@@ -168,7 +177,59 @@ acceptance, integration и обязательных effects. `Canceled` испо
 при подтверждённом canceled outcome. Один status никогда не доказывает другой
 evidence layer.
 
-## 5. Preflight disposition
+## 5. Goal lifecycle и preflight disposition
+
+### 5.1 Обязательный Goal
+
+Явный вызов `$ship-tasks` или явная просьба исполнить ShipTask workflow
+разрешает создание одного workflow Goal для выбранного scope. После разрешения
+exact canonical refs и complete read-only inventory, но до первой non-Goal
+mutation:
+
+1. Проверить доступность `get_goal` и `create_goal`. При отсутствии обязательной
+   Goal capability остановиться с `TASK CONTEXT ALARM` до любых non-Goal
+   mutations. Вызвать `get_goal` и проверить current model-visible Goal state.
+2. Если незавершённого Goal нет, вызвать `create_goal` без token budget, если
+   пользователь отдельно не указал положительный numeric budget.
+3. Если уже существует незавершённый Goal, продолжить его только когда его
+   objective и done criteria однозначно относятся к тому же exact scope и
+   terminal outcome. Иначе остановиться с `TASK CONTEXT ALARM`; не завершать,
+   не блокировать и не заменять чужой или несовместимый Goal ради запуска.
+4. После создания или reuse проверить, что Goal активен до execution. Если
+   совместимый Goal существует, но не активен и его нельзя возобновить текущим
+   tool contract, запросить resume через доступный client control и остановить
+   execution до подтверждения.
+
+Goal должен содержать:
+
+- `Objective`: довести exact выбранные Tasks либо текущие подходящие Tasks
+  выбранного Project/Release scope до проверенного terminal outcome;
+- `Done when`: повторная complete inventory не находит `To Do`, `In Progress`,
+  `In Review`, changes-requested/rework, completion remnants или unresolved
+  in-scope defects, а все требования раздела 11 выполнены;
+- `Verify with`: current Task details/statuses, source/integration identity,
+  required checks, human acceptance и independently verified external effects;
+- `Constraints`: точная граница scope, исключённый `Backlog`, разрешённые writes
+  и запрет расширять scope либо authority из самого Goal;
+- `Blocked when`: конкретная внешняя зависимость или решение, без ослабления
+  текущего tool threshold для статуса `blocked`.
+
+Goal остаётся активным, пока хотя бы одна Task в выбранной границе подходит под
+рабочие критерии ShipTask. `Backlog` и terminal statuses сами по себе не держат
+Goal активным, но могут оставаться dependency boundary. `conflict` или
+временное отсутствие ready frontier не являются completion и не разрешают
+закрыть Goal, если подходящие Tasks либо completion remnants ещё существуют.
+Статус `blocked` допустим только после текущего строгого blocker threshold; он
+оставляет Goal незавершённым, а после resume workflow продолжается с тем же
+Goal и scope.
+
+Для явно перечисленных Task refs граница фиксирована этими refs и отдельно
+разрешёнными in-scope defects. Для Project, Release или all-accessible scope
+перед terminal claim повторить `list_tasks` по всем страницам до
+`hasMore=false`: новая или изменившая status Task внутри той же границы должна
+удерживать Goal активным, если она теперь подходит под рабочие критерии.
+
+### 5.2 Preflight disposition
 
 До execution выбрать ровно одну disposition:
 
@@ -189,9 +250,9 @@ Changes-requested rework текущей review chain имеет приорите
 dependency-ready `In Progress`; при blocker пересчитать disposition.
 
 Для `no-work` сообщить отдельно исключённые Backlog и terminal counts, выполнить
-reconciliation применимого рабочего scope и остановиться. Не создавать пустой
-commit, не повторять дорогой gate и не производить effect только ради свежего
-отчёта.
+reconciliation применимого рабочего scope, завершить обязательный Goal только
+после прохождения completion gate и остановиться. Не создавать пустой commit,
+не повторять дорогой gate и не производить effect только ради свежего отчёта.
 
 ## 6. Execution topology
 
@@ -328,10 +389,21 @@ Completion требует:
 - обязательные external effects независимо проверены;
 - все рабочие и изменённые Tasks перечитаны и их current statuses соответствуют
   фактам; исключённые Backlog и terminal counts отражены отдельно;
-- run/Goal/journal state reconciled, когда он применим.
+- обязательный Goal относится к exact scope и оставался активным, пока
+  существовали подходящие Tasks, rework/completion remnants или unresolved
+  in-scope defects;
+- run/journal state reconciled, когда он применим.
 
-Финальный отчёт отдельно показывает Task Manager projection, source/integration
-identity, checks, human acceptance, external effects и gaps.
+Перед `update_goal(status="complete")` повторить complete inventory выбранной
+границы и проверить все пункты completion. Если хотя бы одна Task подходит под
+рабочие критерии либо отсутствует обязательный evidence layer, не завершать
+Goal: продолжить workflow или зафиксировать blocker по текущему tool contract.
+Goal completion является последним lifecycle write после Task и evidence
+reconciliation, а не заменой этой проверки.
+
+Финальный отчёт отдельно показывает Goal identity/status, Task Manager
+projection, source/integration identity, checks, human acceptance, external
+effects и gaps.
 
 ## 12. Non-goals
 
