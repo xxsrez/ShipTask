@@ -1,6 +1,14 @@
 interface:
   display_name: "Ship Tasks"
-  short_description: "Довести известный task scope до результата"
-  default_prompt: "Используй $ship-tasks, чтобы довести известный task scope текущего проекта до проверенного terminal outcome и остановиться, если критичный контекст не определён."
+  short_description: "Доставить Task Manager scope до результата"
+  default_prompt: "Используй $ship-tasks, чтобы выполнить выбранный Task Manager scope, провести проверки и довести Tasks до подтверждённого terminal outcome."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "task-manager"
+      description: "Task Manager Projects, Releases и Tasks"
+      transport: "streamable_http"
+
 policy:
   allow_implicit_invocation: false

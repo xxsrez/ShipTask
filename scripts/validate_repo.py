@@ -13,6 +13,8 @@ SKILL_DIR = ROOT / "ship-tasks"
 SKILL_FILE = SKILL_DIR / "SKILL.md"
 OPENAI_FILE = SKILL_DIR / "agents" / "openai.yaml"
 DOCS_INDEX = ROOT / "docs" / "README.md"
+SPEC_FILE = ROOT / "docs" / "specs" / "ship-tasks.md"
+DECISION_FILE = ROOT / "docs" / "decisions" / "0001-task-manager-only.md"
 
 REQUIRED_FILES = (
     ROOT / "README.md",
@@ -22,18 +24,23 @@ REQUIRED_FILES = (
     SKILL_FILE,
     OPENAI_FILE,
     DOCS_INDEX,
+    SPEC_FILE,
+    DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
     "ExampleNotes": re.compile(r"mind\s*diary", re.IGNORECASE),
-    "Linear": re.compile(r"\blinear\b", re.IGNORECASE),
     "Sites": re.compile(r"\bsites\b", re.IGNORECASE),
     "UAT": re.compile(r"\buat\b", re.IGNORECASE),
     "legacy skill name": re.compile(
-        r"ship-(?:linear|work)-release", re.IGNORECASE
+        r"ship-(?:lin" r"ear|work)-release", re.IGNORECASE
     ),
-    "release-specific wording": re.compile(r"\brelease\b", re.IGNORECASE),
 }
+
+RETIRED_PROVIDER_RE = re.compile("lin" + "ear", re.IGNORECASE)
+SKILL_GENERATION_RE = re.compile(
+    r"(?:ship[- ]?tasks|shiptask)\s*-?\s*v\d+", re.IGNORECASE
+)
 
 LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 
@@ -75,6 +82,8 @@ def validate_skill(errors: list[str]) -> None:
 
     if "[TODO" in text or "TODO:" in text:
         fail(errors, "SKILL.md contains a template TODO")
+    if "Task Manager" not in text:
+        fail(errors, "SKILL.md must use Task Manager as its only task source")
     for label, pattern in FORBIDDEN_SKILL_PATTERNS.items():
         match = pattern.search(text)
         if match:
@@ -84,13 +93,37 @@ def validate_skill(errors: list[str]) -> None:
     metadata = OPENAI_FILE.read_text(encoding="utf-8")
     required_fragments = (
         'display_name: "Ship Tasks"',
-        'short_description: "Довести известный task scope до результата"',
+        'short_description: "Доставить Task Manager scope до результата"',
         "$ship-tasks",
+        'value: "task-manager"',
         "allow_implicit_invocation: false",
     )
     for fragment in required_fragments:
         if fragment not in metadata:
             fail(errors, f"agents/openai.yaml is missing {fragment!r}")
+
+
+def repository_text_files() -> list[Path]:
+    paths = [ROOT / "README.md", ROOT / "AGENTS.md", SKILL_FILE, OPENAI_FILE]
+    paths.extend(sorted((ROOT / "docs").rglob("*.md")))
+    paths.extend(sorted((ROOT / "scripts").rglob("*.py")))
+    return paths
+
+
+def validate_single_task_manager_contract(errors: list[str]) -> None:
+    for path in repository_text_files():
+        text = path.read_text(encoding="utf-8")
+        for label, pattern in (
+            ("retired task provider", RETIRED_PROVIDER_RE),
+            ("numbered ShipTask generation", SKILL_GENERATION_RE),
+        ):
+            match = pattern.search(text)
+            if match:
+                line = text.count("\n", 0, match.start()) + 1
+                fail(
+                    errors,
+                    f"{path.relative_to(ROOT)} contains {label} at line {line}",
+                )
 
 
 def markdown_files() -> list[Path]:
@@ -144,6 +177,7 @@ def main() -> int:
 
     if not errors:
         validate_skill(errors)
+        validate_single_task_manager_contract(errors)
         validate_links(errors)
         validate_artifacts(errors)
 

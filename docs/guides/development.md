@@ -4,8 +4,10 @@
 
 1. Прочитайте root `AGENTS.md`, текущий `ship-tasks/SKILL.md` и затронутую
    specification.
-2. Определите, меняется runtime contract или только proposal/reference.
-3. Не используйте ExampleNotes документы как authority для другого проекта.
+2. Для Task Manager mapping сверяйте текущий connector contract и
+   [adapter reference](../reference/task-manager-adapter.md).
+3. Сначала меняйте единственную
+   [specification](../specs/ship-tasks.md), затем runtime skill.
 
 ## Изменение skill
 
@@ -14,7 +16,8 @@
 - Пишите body в imperative/infinitive form и не дублируйте подробные reference
   документы.
 - Сохраняйте `policy.allow_implicit_invocation: false`.
-- Не добавляйте project-specific terms, commands или provider assumptions.
+- Не добавляйте fallback provider. Task Manager tool names и semantics,
+  необходимые для безопасного выполнения, являются частью runtime contract.
 
 ## Проверка
 
@@ -51,8 +54,7 @@ Codex task получает только:
 
 ## Установленная копия
 
-Каталог `ship-tasks/` в этом репозитории является source of truth. Копия в
-`~/.codex/skills/ship-tasks` существует отдельно. Не меняйте её, не создавайте
-symlink и не удаляйте без явной команды пользователя. После отдельного
-решения о packaging этот раздел следует заменить проверенным install/update
-workflow.
+Каталог `ship-tasks/` в этом репозитории является source of truth. Копию в
+`~/.codex/skills/ship-tasks` обновляйте только по явной команде пользователя.
+После синхронизации сравните `SKILL.md` и `agents/openai.yaml` byte-for-byte и
+провалите handoff при расхождении.

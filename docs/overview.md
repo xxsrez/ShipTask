@@ -2,38 +2,27 @@
 
 ## Назначение
 
-`$ship-tasks` — явно вызываемый универсальный workflow для доставки уже
-определённого task scope. Skill отвечает за способ выполнения: read-only
-preflight, authority, dependencies, изоляцию параллельных lanes, интеграцию,
-verification, внешние эффекты и честное terminal evidence.
+`$ship-tasks` — явно вызываемый Task Manager-only workflow для доставки уже
+созданного и выбранного task scope. Skill разрешает Project, Release и Tasks
+через connector, читает полный Task detail, проверяет dependencies и authority,
+координирует execution, integration, verification, human acceptance и
+terminal status projection.
 
-Конкретные задачи, команды, ветки, task manager, environments и права
-определяются текущим project context. Если критичный факт нельзя установить
-достоверно, skill обязан остановиться с `TASK CONTEXT ALARM` до первой
-мутации.
+Конкретные Project/Release refs, repository commands, branches, environments и
+внешние эффекты определяются текущим project context. Если connector, exact
+scope или authority нельзя установить достоверно, skill обязан остановиться с
+`TASK CONTEXT ALARM` до первой мутации.
 
 ## Текущий статус
 
-- `ship-tasks/SKILL.md` — текущий исполнимый baseline v1.
-- [Ship Tasks v2](specs/ship-tasks-v2.md) — proposal, а не реализованный
-  runtime contract.
-- Cross-session scheduler, durable review queue и provider adapters пока не
-  реализованы.
-- User-level установленная копия существует отдельно и не синхронизируется с
-  репозиторием автоматически.
-
-## Происхождение
-
-Репозиторий создан после сессии Codex
-`00000000-0000-4000-8000-3bd4623c02c1`. В ней repo-local
-`ship-linear-release` сначала был обобщён и переименован в `ship-tasks`, а
-затем сопоставлен с идеями управления человеческой review-нагрузкой.
-
-Документация предыдущего поколения была изучена в ExampleNotes. Универсальные
-инварианты перенесены в этот проект, а Linear, Sites/UAT, ветка `main`,
-ExampleNotes commands и запрет production оставлены за пределами runtime skill.
-Точная карта источников находится в
-[reference-документе](reference/minddiary-predecessor.md).
+- [Ship Tasks](specs/ship-tasks.md) — единственная каноническая specification.
+- `ship-tasks/SKILL.md` — компактный исполнимый contract на её основе.
+- [Task Manager adapter](reference/task-manager-adapter.md) — точный OAuth/MCP
+  tool flow, identity, status и write semantics.
+- Cross-session scheduler, connector comments, durable claims и append-only
+  task reports не изображаются существующими capabilities.
+- User-level копия должна совпадать с repository source после явной
+  синхронизации.
 
 ## Целевой продуктовый поток
 
@@ -48,15 +37,16 @@ user planning
 → terminal evidence
 ```
 
-Главная цель v2 — не заменить человеческую приёмку, а уменьшить число
+Цель review flow — не заменить человеческую приёмку, а уменьшить число
 обращений к пользователю и стоимость каждого переключения контекста.
 
 ## Границы
 
 - Skill не создаёт scope из неопределённого пожелания.
 - Skill не получает внешние полномочия из одного факта invocation.
-- Skill не навязывает Git, tracker, workers или deployment проекту, где они
-  неприменимы.
+- Skill не работает без подключённого Task Manager connector.
+- Наличие connector не заменяет authoritative Project/Release scope и write
+  authority конкретного проекта.
 - Skill не превращает failed check в разрешение на unrelated cleanup.
 - Skill не называет plan, worker report, commit, test или deploy достаточным
   доказательством completion другого слоя.

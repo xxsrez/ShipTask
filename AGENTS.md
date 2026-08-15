@@ -4,7 +4,7 @@
 
 ## Назначение
 
-- Репозиторий является source of truth для универсального Codex skill
+- Репозиторий является source of truth для Task Manager-only Codex skill
   `$ship-tasks`.
 - Исполнимый skill находится в `ship-tasks/`.
 - Документация проекта находится в `docs/`; `docs/README.md` — её
@@ -14,15 +14,16 @@
 
 ## Границы
 
-- Не добавляйте в исполнимый skill конкретный task manager, repository path,
-  branch, deployment provider, environment, URL, команду проекта или
-  production policy.
-- Такие сведения принадлежат project context или отдельному adapter/profile,
-  а не универсальному skill.
-- Не считайте proposal уже реализованным поведением. Текущий baseline и
-  предлагаемая v2-модель должны оставаться явно разделены.
-- Не синхронизируйте автоматически установленную user-level копию skill без
-  явного запроса пользователя.
+- `$ship-tasks` работает только через Task Manager connector. Не добавляйте
+  fallback providers, generic task-source abstraction или альтернативный
+  tracker workflow.
+- Project и Release refs, repository path, branch, deployment provider,
+  environment, URL, команды проекта и production policy брать из текущего
+  project context, а не зашивать в skill.
+- Каноническая specification описывает единственный текущий workflow. Не
+  создавайте параллельные поколения или альтернативные specifications.
+- Синхронизируйте установленную user-level копию только по явному запросу
+  пользователя и проверяйте её точное совпадение с repository source.
 
 ## Изменения
 
