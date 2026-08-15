@@ -12,9 +12,13 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILL_DIR = ROOT / "ship-tasks"
 SKILL_FILE = SKILL_DIR / "SKILL.md"
 OPENAI_FILE = SKILL_DIR / "agents" / "openai.yaml"
+REPORT_REFERENCE = SKILL_DIR / "references" / "delivery-report.md"
 DOCS_INDEX = ROOT / "docs" / "README.md"
 SPEC_FILE = ROOT / "docs" / "specs" / "ship-tasks.md"
 DECISION_FILE = ROOT / "docs" / "decisions" / "0001-task-manager-only.md"
+REPORT_DECISION_FILE = (
+    ROOT / "docs" / "decisions" / "0002-managed-delivery-report-in-task.md"
+)
 
 REQUIRED_FILES = (
     ROOT / "README.md",
@@ -23,9 +27,11 @@ REQUIRED_FILES = (
     ROOT / ".gitattributes",
     SKILL_FILE,
     OPENAI_FILE,
+    REPORT_REFERENCE,
     DOCS_INDEX,
     SPEC_FILE,
     DECISION_FILE,
+    REPORT_DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
@@ -111,6 +117,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "review-batch gate",
         "passing exact batch gate",
         "final review batch прошёл gate",
+        "delivery-report reference",
+        "SHIPTASK DELIVERY REPORT: START",
     )
     required_spec_fragments = (
         "### 5.3 Terminal invariant и acceptance authority",
@@ -118,6 +126,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Не запускать полный дорогой project gate для каждой Task",
         "Failed batch gate сначала локализовать",
         "final review batch прошёл gate",
+        "### 9.1 In-Task delivery report",
+        "прочитанный обратно delivery-report block",
     )
 
     for path, fragments in (
@@ -132,9 +142,21 @@ def validate_workflow_contract(errors: list[str]) -> None:
                     f"{path.relative_to(ROOT)} is missing workflow contract {fragment!r}",
                 )
 
+    report_text = REPORT_REFERENCE.read_text(encoding="utf-8")
+    for fragment in (
+        "===== SHIPTASK DELIVERY REPORT: START =====",
+        "===== SHIPTASK DELIVERY REPORT: END =====",
+        "ACCEPTANCE READY",
+        "REWORK REQUIRED",
+        "Confidence: CONFIRMED | PROBABLE | UNKNOWN",
+    ):
+        if fragment not in report_text:
+            fail(errors, f"delivery-report reference is missing {fragment!r}")
+
 
 def repository_text_files() -> list[Path]:
-    paths = [ROOT / "README.md", ROOT / "AGENTS.md", SKILL_FILE, OPENAI_FILE]
+    paths = [ROOT / "README.md", ROOT / "AGENTS.md", OPENAI_FILE]
+    paths.extend(sorted(SKILL_DIR.rglob("*.md")))
     paths.extend(sorted((ROOT / "docs").rglob("*.md")))
     paths.extend(sorted((ROOT / "scripts").rglob("*.py")))
     return paths
@@ -157,7 +179,8 @@ def validate_single_task_manager_contract(errors: list[str]) -> None:
 
 
 def markdown_files() -> list[Path]:
-    roots = [ROOT / "README.md", ROOT / "AGENTS.md", SKILL_FILE]
+    roots = [ROOT / "README.md", ROOT / "AGENTS.md"]
+    roots.extend(sorted(SKILL_DIR.rglob("*.md")))
     roots.extend(sorted((ROOT / "docs").rglob("*.md")))
     return roots
 

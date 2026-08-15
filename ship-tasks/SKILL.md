@@ -1,6 +1,6 @@
 ---
 name: ship-tasks
-description: "Доводить уже созданный и выбранный scope Tasks, Project или Release из Task Manager до проверенного terminal outcome: разрешать canonical refs через Task Manager connector, создавать обязательный workflow Goal и удерживать его активным, пока в выбранной границе есть подходящие рабочие Tasks, выполнять ready Tasks, применять лёгкий per-Task gate и периодический тщательный review-batch gate, безопасно интегрировать результаты, проводить acceptance, обновлять Task statuses с optimistic concurrency и сверять обязательные внешние эффекты. Использовать только при явном вызове $ship-tasks или явной просьбе исполнить ShipTask workflow. Работать только с Task Manager; если connector, exact scope, Goal lifecycle, acceptance, authority или обязательная capability недоступны либо неоднозначны, остановиться до мутаций с TASK CONTEXT ALARM."
+description: "Доводить уже созданный и выбранный scope Tasks, Project или Release из Task Manager до проверенного terminal outcome: разрешать canonical refs через Task Manager connector, создавать обязательный workflow Goal и удерживать его активным, выполнять ready Tasks, применять лёгкий per-Task gate и периодический тщательный review-batch gate, безопасно интегрировать результаты, записывать в каждую выполненную Task человекочитаемый delivery report с полезными diagrams/incident analysis, проводить acceptance, обновлять Task statuses с optimistic concurrency и сверять обязательные внешние эффекты. Использовать только при явном вызове $ship-tasks или явной просьбе исполнить ShipTask workflow. Работать только с Task Manager; если connector, exact scope, Goal lifecycle, report write, acceptance, authority или обязательная capability недоступны либо неоднозначны, остановиться до мутаций с TASK CONTEXT ALARM."
 ---
 
 # Ship Tasks
@@ -31,6 +31,7 @@ description: "Доводить уже созданный и выбранный s
 8. Прочитать project instructions и определить repository/workspace,
    integration policy, allowed writes, per-Task targeted gate, review-batch
    gate/trigger, external effects, acceptance authority и evidence её решения.
+   Проверить `description` write: он обязателен для in-Task delivery report.
 
 Использовать только canonical refs из connector. Поле Task `version` считать
 optimistic-concurrency данными, обязательными для безопасного update.
@@ -70,7 +71,8 @@ inventory, но до code, Git, Task Manager, ownership и external writes:
   Project/Release scope до проверенного terminal outcome;
 - done criteria — после повторной complete inventory нет `To Do`,
   `In Progress`, `In Review`, changes-requested/rework, completion remnants и
-  unresolved in-scope defects, а все completion gates skill выполнены;
+  unresolved in-scope defects, delivery reports актуальны, а все completion
+  gates skill выполнены;
 - verification — current Task projection, source/integration identity,
   per-Task targeted gates, exact review-batch gate, authorized acceptance и
   обязательные external effects;
@@ -215,6 +217,9 @@ checkpoint пользователя и при final flush. High-risk/coupled Tas
 - При `version_conflict` перечитать Task. Повторить update только если intent
   всё ещё применим; не перетирать unrelated newer edits.
 - После write перечитать Task и проверить status, fields и новую `version`.
+- Invocation `$ship-tasks` разрешает создать/заменить только один managed
+  delivery-report block в `description` рабочей in-scope Task. Не менять
+  исходное описание, acceptance или текст вне block.
 - Не повторять `create_task` вслепую после неизвестного outcome; сначала искать
   возможный duplicate.
 - Использовать `create_task` только при явном разрешении создать отдельную
@@ -227,8 +232,9 @@ checkpoint пользователя и при final flush. High-risk/coupled Tas
 evidence; это provisional batch-candidate, а не completion.
 После changes requested возвращать Task в `In Progress`, выполнять rework и
 повторные checks, сохраняя за ней текущую lane до повторного review или blocker.
-Переводить в `Done` только после passing exact batch gate, authorized
-acceptance, integration и обязательных effects.
+Переводить в `Done` только после passing exact batch gate, записанного и
+прочитанного обратно current delivery report, authorized acceptance, integration
+и обязательных effects.
 `Canceled` использовать только для подтверждённого canceled outcome.
 `Duplicate` не считать success основной Task.
 
@@ -258,13 +264,15 @@ acceptance, integration и обязательных effects.
    review без mutation authority и выполнить batch gate.
 8. Выполнить общие обязательные external effects в batch cadence и независимо
    проверить exact target; не повторять дорогой effect для каждого member.
-9. Сформировать batch/review packet. Считать acceptance-ready только members с
-   passing targeted gate, batch gate и полным evidence.
+9. Сформировать batch/review packet и записать task-specific delivery report.
+   Считать acceptance-ready только members с passing targeted gate, batch gate,
+   полным evidence и успешным report read-back.
 10. При changes requested или failed batch gate вернуть Tasks с
-    недействительным evidence в `In Progress`, сохранить lanes, выполнить
-    rework и targeted retest, затем проверить новый exact batch. После
-    authorized acceptance перевести Task в `Done` и перечитать. При
-    подтверждённом canceled outcome использовать `Canceled` по project policy.
+    недействительным evidence в `In Progress`, записав понятный failure/rework
+    report в том же optimistic update, когда возможно. Сохранить lanes,
+    выполнить rework и targeted retest, затем проверить новый exact batch.
+    После authorized acceptance финализировать report, перевести Task в `Done`
+    одним write и перечитать. Перед `Canceled` записать terminal report.
 
 Merge conflict, semantic conflict или aggregate regression возвращает Task в
 rework. Не маскировать конфликт незапланированной правкой integration owner.
@@ -292,17 +300,48 @@ Failed batch gate локализовать по member/dependency/shared result.
 evidence связанного batch недействительным и reopen все его members. После
 rework повторить targeted gates затронутых Tasks и gate нового exact batch.
 
-Task Manager connector не предоставляет append-only comments или отдельный
-task-report tool. Не перезаписывать Task description журналом. Выдавать review
-packet в текущем interaction и использовать Task Manager для status projection,
-если project context не определил другой durable report channel.
+## Записать delivery report в Task
+
+Перед первым report write прочитать
+[delivery-report reference](references/delivery-report.md) полностью. Current
+Task Manager хранит plain text: использовать outcome-first headings, короткие
+bullets и text diagrams, не выдавать Mermaid source за rendered diagram.
+
+Поддерживать ровно один block между точными sentinels
+`===== SHIPTASK DELIVERY REPORT: START =====` и
+`===== SHIPTASK DELIVERY REPORT: END =====`. Перед update вызвать `get_task`,
+сохранить весь текст вне block byte-for-byte и передать current `version`.
+Append block, если его нет; replace exact block, если он один. При malformed или
+multiple blocks, block для другого Task ref или field overflow выдать
+`TASK CONTEXT ALARM`; не обрезать исходный description. После write перечитать
+exact report и status.
+
+После passing batch gate записать `ACCEPTANCE READY` report. После material
+failure записать `REWORK REQUIRED`/`BLOCKED` analysis до или вместе с reopen;
+после rework заменить block delta-report. После acceptance финализировать
+`COMPLETED` report вместе с `Done`, когда возможно. Не создавать append-only
+journal, не backfill-ить старые terminal Tasks и не писать отдельный report в
+`Duplicate` без explicit authority.
+
+Success report объясняет user outcome, main flow, implementation decisions,
+exact evidence и limitations. Material failure объясняет symptom/impact,
+detection, trigger/cause с confidence, recovery, prevention и remaining risk.
+Для non-trivial feature/cross-component change/incident включить одну-две
+полезные plain-text diagrams; для trivial change использовать compact
+before/after. Писать blameless, отделять evidence от inference, не вставлять raw
+logs/secrets и не создавать follow-up Tasks без отдельной authority.
+
+Report остаётся task-specific: указать shared batch identity/result, но не
+копировать полный batch log каждому member. Missing или неподтверждённый report
+сохраняет `completion-remains` и запрещает `Done`/Goal completion.
 
 ## Ограничивать defects и recovery
 
 - Автоматически исправлять только defect, который acceptance или project policy
   включает в exact scope.
-- Для out-of-scope defect остановиться до code и Task Manager writes и запросить
-  scope decision.
+- Для out-of-scope defect остановиться до code и scope-changing Task Manager
+  writes; разрешён только managed `BLOCKED`/`decision required` report текущей
+  in-scope Task. Запросить scope decision.
 - Не использовать failure как разрешение на cleanup, unrelated fixes,
   destructive recovery или silent task creation.
 - Если defect найден после `Done`, reopen terminal Task только по project
@@ -327,6 +366,8 @@ packet в текущем interaction и использовать Task Manager д
 - accepted results присутствуют в exact integration state;
 - final checks относятся к exact result;
 - обязательные external effects независимо проверены;
+- каждая выполненная/materially failed рабочая Task содержит один актуальный,
+  прочитанный обратно delivery-report block для exact result/state;
 - все рабочие и изменённые Tasks перечитаны и current statuses соответствуют
   фактам; исключённые Backlog и terminal counts показаны отдельно;
 - обязательный Goal относится к exact scope и оставался активным, пока
@@ -342,5 +383,6 @@ blocker по текущему tool contract. Завершать Goal после�
 
 В финальном отчёте отдельно указать Goal identity/status, Task Manager
 projection, source/integration identity, targeted и batch checks, acceptance,
-external effects и gaps.
+external effects, gaps и outcome in-Task report writes. Interaction report не
+заменяет reports внутри Tasks.
 Не объявлять completion при отсутствующем evidence любого обязательного слоя.

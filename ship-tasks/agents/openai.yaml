@@ -1,7 +1,7 @@
 interface:
   display_name: "Ship Tasks"
   short_description: "Доставить Task Manager scope до результата"
-  default_prompt: "Используй $ship-tasks, чтобы создать обязательный Goal, выполнить выбранный Task Manager scope, провести targeted gate для каждой Task и периодический тщательный gate для review batch, затем довести Tasks и Goal до подтверждённого terminal outcome."
+  default_prompt: "Используй $ship-tasks, чтобы создать обязательный Goal, выполнить выбранный Task Manager scope, проверить Tasks и review batches, записать в Tasks понятные delivery reports и довести Tasks и Goal до подтверждённого terminal outcome."
 
 dependencies:
   tools:

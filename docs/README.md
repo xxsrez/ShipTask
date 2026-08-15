@@ -13,6 +13,9 @@
 
 - [0001: Task Manager-only skill](decisions/0001-task-manager-only.md) —
   единственный authoritative task source и граница project context.
+- [0002: Managed delivery report внутри Task](decisions/0002-managed-delivery-report-in-task.md)
+  — один сохраняющий исходное описание report block для success, failure и
+  terminal handoff.
 
 ## Reference
 

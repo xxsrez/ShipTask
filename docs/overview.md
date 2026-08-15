@@ -26,6 +26,9 @@ scope или authority нельзя установить достоверно, s
   незавершённый Goal блокирует запуск с `TASK CONTEXT ALARM`.
 - Cross-session scheduler, connector comments, durable claims и append-only
   task reports не изображаются существующими capabilities.
+- Для каждой выполненной Task skill поддерживает один видимый managed delivery
+  report в `description`, сохраняя исходный текст и заменяя только собственный
+  block при rework/acceptance.
 - User-level копия должна совпадать с repository source после явной
   синхронизации.
 
@@ -55,6 +58,12 @@ review batch. Failed batch возвращает затронутые Tasks в `I
 может определить другую проверяемую authority. Пока хотя бы одна Task остаётся
 `In Review`, Goal и общий execution plan не могут считаться завершёнными.
 
+Перед acceptance пользователь получает report прямо в Task: outcome-first
+объяснение feature, exact evidence и полезную text diagram для non-trivial
+flow. Material failure получает отдельный impact/cause/recovery analysis с
+уровнем уверенности и remaining risk. Report не заменяет evidence, но делает
+его понятным decision surface.
+
 ## Границы
 
 - Skill не создаёт scope из неопределённого пожелания.
@@ -67,6 +76,8 @@ review batch. Failed batch возвращает затронутые Tasks в `I
 - Наличие connector не заменяет authoritative Project/Release scope и write
   authority конкретного проекта.
 - Skill не превращает failed check в разрешение на unrelated cleanup.
+- Skill не затирает исходный Task description и не использует delivery report
+  как append-only execution log.
 - Skill не завершает Goal, пока повторная полная инвентаризация выбранной
   границы находит хотя бы одну Task, подходящую под рабочие критерии.
 - Skill не называет plan, worker report, commit, test или deploy достаточным

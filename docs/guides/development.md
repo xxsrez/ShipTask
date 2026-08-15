@@ -58,6 +58,14 @@ Codex task получает только:
   gate лишь для удобства, но допускают risk-driven и final singleton;
 - failed batch gate возвращает Tasks с недействительным evidence в
   `In Progress`; при неясной attribution reopen получает связанный batch;
+- passing batch gate создаёт один `ACCEPTANCE READY` delivery-report block в
+  Task description, сохраняя исходный текст byte-for-byte;
+- material failure создаёт user-oriented impact/cause/recovery report до или
+  вместе с reopen, а rework заменяет тот же block delta-report;
+- malformed/multiple report markers, field overflow или failed read-back
+  блокируют `Done`; report не дублируется и не превращается в journal;
+- non-trivial success/incident получает полезную plain-text diagram, trivial
+  change — compact before/after; Mermaid не используется без proven renderer;
 - mixed scope однозначно выбирает review/completion перед resume и новой
   работой, затем пересчитывает disposition;
 - changes-requested rework сохраняет текущую lane до повторного review или
@@ -68,6 +76,8 @@ Codex task получает только:
 - `completion-remains` не превращается в `no-work`;
 - `In Review` после успешных checks/external effect, но без authorized
   acceptance, оставляет plan и Goal активными и запрещает completion claim;
+- authorized acceptance финализирует `COMPLETED` report вместе с `Done`, а
+  missing/stale in-Task report удерживает Goal активным;
 - Goal остаётся активным при любой подходящей `To Do`, `In Progress`,
   `In Review`, rework/completion remnant или unresolved in-scope defect;
 - перед `update_goal(complete)` повторная complete inventory выбранной границы

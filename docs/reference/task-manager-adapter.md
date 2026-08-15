@@ -20,6 +20,11 @@
   capabilities, status catalog и доступность task-oriented tools; read-only
   выборка подтвердила compact `list_tasks`, полный `get_task`, relations,
   provenance, `availableStatuses` и `version`.
+- current local Task Manager source
+  `ba9761cdfb1b260fa49b96378e734ebe2a912af3` 2026-08-16: `update_task`
+  принимает `description` до 100 000 characters вместе со status и current
+  `version`; UI показывает description как plain text/textarea, не как rendered
+  Markdown/Mermaid.
 
 Это датированное подтверждение, а не гарантия будущей схемы. При фактическом
 запуске authoritative остаются текущие tool descriptions и ответы connector.
@@ -129,6 +134,9 @@ batch gate и authorized task acceptance. Failed gate или changes requested
   `To Do`. Не создавать ShipTask Tasks в `Backlog`; при отсутствии `To Do`
   остановиться до write.
 - После write перечитать Task и проверить новый status/version/projection.
+- Для ShipTask delivery report разрешено менять только exact managed block в
+  `description`, сохраняя весь user-authored текст вне sentinels. Report и
+  status можно передать одним optimistic update, затем необходимо read-back.
 
 ShipTask обычно начинает с уже созданных задач. `create_task` нужен только для
 отдельно разрешённого defect/task route; invocation skill не даёт такого
@@ -154,9 +162,11 @@ skill необходимо отдельно проверить model-visible Goa
 Поэтому текущий Task Manager уже может быть authoritative источником scope,
 acceptance, dependencies и status projection, но не заменяет durable
 coordination runtime. Не использовать `description` как скрытый append-only
-журнал и не перезаписывать её отчётом без отдельного project contract. Claims,
-run state и review packets должны иметь project-defined durable channel. Если
-такой channel обязателен, но отсутствует, остановиться до execution.
+журнал. Current ShipTask contract разрешает один visible replace-in-place
+delivery-report block: он сохраняет исходный description, не изображает
+comments/history и не хранит coordination state. Claims и run state должны
+иметь project-defined durable channel. Если такой channel обязателен, но
+отсутствует, остановиться до execution.
 
 ## Completion reconciliation
 
@@ -167,13 +177,15 @@ run state и review packets должны иметь project-defined durable chan
 3. Проверить, что Task Manager projection совпадает с exact Git/workspace
    result, per-Task targeted gates, exact review-batch gate, authorized
    acceptance и обязательными external effects.
-4. Отделить imported historical context от evidence текущего запуска.
-5. Указать capability gaps и project-defined coordination records отдельно от
+4. Проверить один актуальный ShipTask delivery-report block в каждой изменённой
+   рабочей Task; report state и exact identity должны совпадать с фактами.
+5. Отделить imported historical context от evidence текущего запуска.
+6. Указать capability gaps и project-defined coordination records отдельно от
    Task Manager state.
-6. Повторно получить complete inventory выбранного Project/Release scope и не
+7. Повторно получить complete inventory выбранного Project/Release scope и не
    завершать Goal, пока хотя бы одна Task всё ещё подходит под рабочие критерии
    ShipTask.
 
 Task Manager state доказывает только собственную projection. Он не доказывает
-commit, merge, deployment, UAT, human acceptance или внешний эффект без
+commit, merge, deployment, UAT, authorized acceptance или внешний эффект без
 независимого evidence.
