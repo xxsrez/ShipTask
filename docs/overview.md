@@ -27,15 +27,17 @@ scope или authority нельзя установить достоверно, s
 ## Целевой продуктовый поток
 
 ```text
-user planning
-→ dependency-ready execution
-→ deterministic verification
-→ independent agent review
-→ bounded review-ready queue
-→ human acceptance
-→ integration/external effects
-→ terminal evidence
+Backlog                           excluded intake
+To Do → In Progress → In Review → Done or Canceled
+                           ↑
+                  duplicate scenarios
 ```
+
+`To Do` является входом новой работы, `In Progress` — продолжающейся работой,
+`In Review` — проверяемым candidate. Terminal statuses не создают работу.
+`Duplicate` не получает отдельную execution lane, но все связанные duplicates
+обязательно читаются при review основной Task: иной ракурс проблемы должен быть
+покрыт evidence либо стать явным finding.
 
 Цель review flow — не заменить человеческую приёмку, а уменьшить число
 обращений к пользователю и стоимость каждого переключения контекста.
@@ -43,6 +45,8 @@ user planning
 ## Границы
 
 - Skill не создаёт scope из неопределённого пожелания.
+- Skill не берёт Tasks из `Backlog` и не меняет их.
+- Явно разрешённые новые Tasks создаются в `To Do`, а не в `Backlog`.
 - Skill не получает внешние полномочия из одного факта invocation.
 - Skill не работает без подключённого Task Manager connector.
 - Наличие connector не заменяет authoritative Project/Release scope и write

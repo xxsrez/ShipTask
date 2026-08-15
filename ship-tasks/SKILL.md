@@ -47,11 +47,24 @@ writes. Выдать `TASK CONTEXT ALARM`: известный scope, конфл�
 
 ## Выполнить read-only preflight
 
-1. Перечитать in-scope Task details и связанные boundary Tasks.
-2. Отделить `backlog`, `unstarted`, `started`, `completed` и `canceled` Tasks;
-   один status не считать доказательством acceptance или результата.
-3. Построить dependency-ready frontier по relations и current statuses. Не
-   угадывать смысл неоднозначной relation.
+1. Получить complete compact inventory. Перечитать полный detail только для
+   рабочих candidates и связанных boundary Tasks, необходимых для dependencies,
+   review или reconciliation.
+2. Классифицировать Tasks по current status:
+   - `Backlog` исключить из рабочего scope; не выполнять, не проверять как
+     candidate и не изменять;
+   - `To Do` считать входом новой работы после preflight;
+   - `In Progress` продолжать как уже начатую работу только из coherent
+     checkpoint;
+   - `In Review` проверять как предъявленный candidate;
+   - `Done`, `Finished`, `Canceled` и другие terminal аналоги не выполнять;
+   - `Duplicate` не выполнять отдельно, но читать при review связанной Task.
+   Использовать current canonical status refs и category как fallback для
+   terminal display names. Один status не считать доказательством acceptance
+   или результата.
+3. Построить dependency-ready frontier по relations и current statuses. Task в
+   `Backlog` может блокировать dependency, но не становится от этого рабочим
+   candidate. Не угадывать смысл неоднозначной relation.
 4. Проверить workspace, Git, branches, worktrees, uncommitted changes и
    provenance существующей работы. Сохранить пользовательские и чужие edits.
 5. Проверить active run, writer ownership, claims/coordination records и уже
@@ -63,15 +76,27 @@ writes. Выдать `TASK CONTEXT ALARM`: известный scope, конфл�
 
 Выбрать ровно одну disposition:
 
-- `work-remains` — есть ready или потенциально ready Tasks;
-- `completion-remains` — result существует, но не интегрирован, не принят, не
-  отражён в Task Manager или не доведён до обязательного effect;
-- `resume` — найден coherent checkpoint и доказана authority продолжения;
-- `no-work` — весь scope terminal и reconciled;
+- `work-remains` — есть `To Do`, прошедшие или способные пройти preflight;
+- `completion-remains` — есть `In Review` либо implementation/rework уже
+  завершены, но result не интегрирован, не принят, не отражён в Task Manager
+  или не доведён до effect;
+- `resume` — есть `In Progress` с незавершённым implementation/rework, найден
+  coherent checkpoint и доказана authority продолжения;
+- `no-work` — после исключения `Backlog` и terminal statuses нет рабочего
+  candidate; это не утверждение, что Backlog пуст;
 - `conflict` — scope, owner, Task state или evidence противоречат друг другу.
 
-Для `no-work` выполнить reconciliation и остановиться. Не создавать пустой
-commit, не повторять дорогой gate и не производить effect только ради отчёта.
+Для смешанного scope применять precedence:
+`conflict → completion-remains → resume → work-remains → no-work`. Это выбирает
+первый stage, а не исключает остальные Tasks. После review/completion
+пересчитать disposition, затем продолжить resume и только потом новую `To Do`,
+если dependencies и review capacity не требуют иного порядка.
+Changes-requested rework текущей review chain выполнять раньше другой
+dependency-ready `In Progress`; сохранять lane до повторного review или blocker.
+
+Для `no-work` отдельно сообщить исключённые Backlog и terminal counts, выполнить
+reconciliation рабочего scope и остановиться. Не создавать пустой commit, не
+повторять дорогой gate и не производить effect только ради отчёта.
 
 ## Выбрать execution topology
 
@@ -120,32 +145,50 @@ ready/blocked/review counts и причины свободной capacity.
 - Не повторять `create_task` вслепую после неизвестного outcome; сначала искать
   возможный duplicate.
 - Использовать `create_task` только при явном разрешении создать отдельную
-  defect Task. Invocation `$ship-tasks` само по себе этого не разрешает.
+  defect Task. Invocation `$ship-tasks` само по себе этого не разрешает. Новую
+  Task создавать сразу с current canonical status ref `To Do`, никогда не в
+  `Backlog`; при отсутствии `To Do` остановиться до create.
 
-Переводить Task в started status только после успешного preflight. Переводить
-в review status только для exact candidate с passing required checks и review
-packet. Переводить в completed status только после acceptance, integration и
-обязательных effects. Canceled/duplicate outcome не считать success без явной
-project policy.
+Переводить `To Do` в `In Progress` только после успешного preflight. Переводить
+в `In Review` только exact candidate с passing required checks и review packet.
+После changes requested возвращать Task в `In Progress`, выполнять rework и
+повторные checks, сохраняя за ней текущую lane до повторного review или blocker.
+Переводить в `Done` только после acceptance, integration и обязательных effects.
+`Canceled` использовать только для подтверждённого canceled outcome.
+`Duplicate` не считать success основной Task.
 
 ## Выполнять и проверять Tasks
 
-Для каждой ready Task:
+Для каждой рабочей Task:
 
-1. Зафиксировать canonical ref, current detail/version, base identity,
+1. Зафиксировать canonical ref, current detail/version, status, base identity,
    acceptance и разрешённые writes.
-2. При необходимости обновить Task в started status и перечитать projection.
-3. Реализовать минимальный целостный result без unrelated cleanup.
-4. Выполнить targeted checks и проверить changed scope.
-5. Провести independent review без mutation authority, если его требует risk
+2. По status выбрать stage: `To Do` провести через preflight и перевести в
+   `In Progress`; `In Progress` продолжить из checkpoint; `In Review` не
+   реализовывать заново до finding, а сразу проверять exact candidate.
+3. Для `To Do` и `In Progress` реализовать или завершить минимальный целостный
+   result без unrelated cleanup. Для `In Review` использовать уже предъявленный
+   result.
+4. Выполнить или повторить targeted checks и проверить changed scope.
+5. Перед review разрешить duplicate cluster по relations `duplicate_of`:
+   outgoing ведёт от duplicate к canonical Task, incoming canonical Task — ко
+   всем её duplicates. Вызвать `get_task` для canonical Task и каждого её
+   duplicate. Включить отличающиеся problem statements, acceptance и failure
+   scenarios в checklist; при материальном provenance прочитать external
+   context. Если duplicate описывает отдельную проблему, зафиксировать finding
+   и запросить scope decision вместо silent closure.
+6. Провести independent review без mutation authority, если его требует risk
    или project policy.
-6. Интегрировать result. После каждого risk-relevant merge повторить affected
+7. Интегрировать result. После каждого risk-relevant merge повторить affected
    checks; после fan-in выполнить aggregate gate на exact integrated result.
-7. Выполнить только обязательные external effects и независимо проверить exact
+8. Выполнить только обязательные external effects и независимо проверить exact
    target.
-8. Сформировать review packet и обновить Task в review status, если нужна human
-   acceptance.
-9. После explicit acceptance обновить Task в completed status и перечитать её.
+9. Сформировать review packet и обновить Task в `In Review`, если она ещё не в
+   этом status и нужна human acceptance.
+10. При changes requested вернуть Task в `In Progress` и сохранить за ней
+    текущую lane до повторного review или blocker. После explicit acceptance
+    обновить её в `Done` и перечитать. При подтверждённом canceled outcome
+    завершить через `Canceled` по project policy.
 
 Merge conflict, semantic conflict или aggregate regression возвращает Task в
 rework. Не маскировать конфликт незапланированной правкой integration owner.
@@ -157,6 +200,7 @@ rework. Не маскировать конфликт незапланирова�
 - Task identifiers и цель batch;
 - summary и exact result identity;
 - `acceptance criterion → evidence/result`;
+- `duplicate scenario → covered evidence/finding` для каждого duplicate;
 - targeted, integration и aggregate checks;
 - dependency/integration picture;
 - risks, limitations и gaps;
@@ -189,12 +233,16 @@ packet в текущем interaction и использовать Task Manager д
 
 До completion проверить:
 
-- zero unfinished in-scope Tasks и unresolved in-scope defects;
+- zero unfinished рабочих Tasks (`To Do`, `In Progress`, `In Review`) и
+  unresolved in-scope defects; `Backlog` явно исключён и не блокирует gate;
 - zero unaccepted review-ready candidates;
+- duplicate-derived scenarios покрыты evidence либо вынесены как явные
+  findings/scope decisions;
 - accepted results присутствуют в exact integration state;
 - final checks относятся к exact result;
 - обязательные external effects независимо проверены;
-- все in-scope Tasks перечитаны и current statuses соответствуют фактам;
+- все рабочие и изменённые Tasks перечитаны и current statuses соответствуют
+  фактам; исключённые Backlog и terminal counts показаны отдельно;
 - Goal/run/journal state reconciled, когда применим.
 
 В финальном отчёте отдельно указать Task Manager projection,

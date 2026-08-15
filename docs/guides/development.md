@@ -44,6 +44,16 @@ Codex task получает только:
 Проверьте как минимум:
 
 - coherent scope проходит preflight;
+- `Backlog` исключается без Task writes, а явно разрешённый create использует
+  current status ref `To Do`;
+- `To Do`, `In Progress` и `In Review` маршрутизируются соответственно в новую
+  работу, resume и review;
+- mixed scope однозначно выбирает review/completion перед resume и новой
+  работой, затем пересчитывает disposition;
+- changes-requested rework сохраняет текущую lane до повторного review или
+  blocker;
+- review canonical Task читает все входящие `duplicate_of` и превращает иной
+  failure scenario в finding, а не в отдельную execution lane;
 - missing authority вызывает `TASK CONTEXT ALARM` до mutation;
 - `completion-remains` не превращается в `no-work`;
 - out-of-scope defect не исправляется автоматически;

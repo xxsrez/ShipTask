@@ -76,21 +76,32 @@ subtasks, access, provenance, current `version` и `availableStatuses` нахо�
 ## Lifecycle projection
 
 Connector возвращает provider status и одну из системных категорий:
-`backlog`, `unstarted`, `started`, `completed`, `canceled`. Категория помогает
-ориентации, но не доказывает ShipTask state сама по себе.
+`backlog`, `unstarted`, `started`, `completed`, `canceled`. Category помогает
+распознать terminal аналоги, но рабочий stage определяется current status name
+и canonical ref.
 
-| Task Manager projection | ShipTask interpretation |
-|---|---|
-| `backlog` | Не ready, пока scope/acceptance/dependencies не подготовлены. |
-| `unstarted` | `planned` либо `ready` после проверки acceptance и dependency frontier. |
-| `started` | `running`, `rework` или `review-ready` только по конкретному status и evidence. |
-| `completed` | Terminal projection task source; completion всего scope ещё требует integration, checks, acceptance и effects. |
-| `canceled` | Canceled/duplicate outcome; не считать successful completion без project policy. |
+| Status | Category | ShipTask policy |
+|---|---|---|
+| `Backlog` | `backlog` | Исключить из рабочего scope; не выполнять и не изменять. |
+| `To Do` | `unstarted` | Брать как новую работу после preflight. |
+| `In Progress` | `started` | Продолжать уже начатую работу из coherent checkpoint. |
+| `In Review` | `started` | Проверять exact candidate и связанные duplicates. |
+| `Done`, `Finished` и другие terminal аналоги | `completed` | Не выполнять; учитывать только при reconciliation. |
+| `Canceled` и terminal аналоги | `canceled` | Не выполнять и не считать successful completion. |
+| `Duplicate` | `canceled` | Не выделять отдельную execution lane; читать как review context основной Task. |
 
-Текущий workspace имеет отдельные `In Progress` и `In Review` statuses внутри
-категории `started`. Переход в `In Review` допустим только после формирования
-проверенного candidate/review packet. Переход в `Done` допустим только после
-выполнения task acceptance; один status не является доказательством результата.
+Relation `duplicate_of` направлена от duplicate к canonical Task. При review
+разрешить canonical Task по исходящей relation, если она есть, затем получить
+полный `TaskDetail` всех её входящих `duplicate_of`. При материальном imported
+context вызвать `get_task_external_context`. Отличающийся problem statement или
+failure scenario становится review finding; status `Duplicate` сам по себе не
+доказывает, что сценарий покрыт основной Task.
+
+Переход `To Do → In Progress` допустим только после preflight, переход в
+`In Review` — только после формирования проверенного candidate/review packet,
+переход в `Done` — только после выполнения task acceptance. Changes requested
+возвращает Task в `In Progress` до повторной проверки. Один status не является
+доказательством результата.
 
 ## Writes и concurrency
 
@@ -107,6 +118,9 @@ Connector возвращает provider status и одну из системны
   перетирать unrelated newer edits.
 - Не повторять `create_task` вслепую после неизвестного network outcome:
   сначала искать возможный созданный duplicate.
+- Явно разрешённую новую Task создавать с current canonical status ref для
+  `To Do`. Не создавать ShipTask Tasks в `Backlog`; при отсутствии `To Do`
+  остановиться до write.
 - После write перечитать Task и проверить новый status/version/projection.
 
 ShipTask обычно начинает с уже созданных задач. `create_task` нужен только для
