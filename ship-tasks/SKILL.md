@@ -179,6 +179,14 @@ successful checks или внешний runtime result сами по себе н
   change и продолжить остальные Tasks. Когда runnable work исчерпан, показать
   одну consolidated decision queue. Goal и plan оставить незавершёнными;
   `blocked` применять только после строгого tool threshold.
+- В уже разрешённом exact scope перед task-local `request_user_input`,
+  финальным вопросом с ожиданием ответа или иным blocking pause повторить
+  complete inventory и доказать `runnable_count = 0`. При наличии actionable
+  `To Do`, `In Progress`, `In Review` или in-scope recovery user input запрещён:
+  сохранить decision и выбрать следующую Task. Review precedence и готовый
+  review packet этот gate не отменяют.
+- Out-of-scope finding без blocking edge к in-scope Task записать в final
+  findings; не создавать follow-up, не расширять Goal и не спрашивать решение.
 - Считать invocation standing authority для обычного in-scope release в exact
   verified non-production target: local/dev/test/QA/UAT/staging/preview/sandbox.
   Выполнять build/deploy/redeploy, required bounded migration, smoke и
@@ -401,6 +409,8 @@ reconciliate независимо, пока connector не гарантируе�
 - Для out-of-scope defect не выполнять code или scope-changing writes. Если он
   блокирует Task, defer-нуть только её, обязательно опубликовать `BLOCKED` при
   available comments и продолжить независимые Tasks; решение добавить в queue.
+- Если out-of-scope finding не блокирует in-scope Task, только включить его в
+  final findings: не вызывать user input и не удерживать completion/Goal.
 - Не использовать failure как разрешение на cleanup, unrelated fixes,
   destructive recovery или silent task creation.
 - Если defect найден после `Done`, reopen terminal Task только по project

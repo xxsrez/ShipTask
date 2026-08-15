@@ -23,6 +23,21 @@ dependency-ready Task, которую можно безопасно продол
 Не задавать пользователю вопрос посреди runnable queue. Один consolidated
 decision request допустим, когда безопасная runnable работа исчерпана.
 
+В уже разрешённом exact scope перед task-local `request_user_input`, финальным
+вопросом с ожиданием ответа или иным blocking pause обязательно заново получить
+complete Task inventory и вычислить:
+
+```text
+runnable_count = actionable To Do + actionable In Progress
+               + actionable In Review + actionable in-scope recovery
+```
+
+Не включать уже deferred Tasks. При `runnable_count > 0` blocking input
+запрещён: сохранить decision, освободить lane и выбрать следующую runnable Task.
+Не использовать cached disposition или review precedence как замену fresh gate.
+Review packet, `ACCEPTANCE READY` report и published comment являются handoff,
+а не разрешением приостановить оставшиеся implementation/resume lanes.
+
 Global `TASK CONTEXT ALARM` сохранять только для конфликта connector, exact
 scope, Goal, ownership, integration/shared state или authority, из-за которого
 небезопасна любая оставшаяся mutation.
@@ -97,6 +112,10 @@ Reason codes включают `acceptance-required`, `production-approval-requir
 Не переизбирать deferred Task в том же run без нового evidence, authority или
 external state change. Deferred Task продолжает удерживать Goal active.
 
+Новый out-of-scope finding без blocking edge к in-scope Task не является
+deferred Task: записать его в final findings, не расширять Goal/scope, не
+создавать follow-up и не запрашивать решение в текущем run.
+
 ## Comment handoff
 
 Если native Task comments доступны, для каждого defer обязательно опубликовать
@@ -156,12 +175,13 @@ runnable queue.
 
 Когда runnable queue исчерпана:
 
-1. Перечитать deferred Tasks и доступные comments/external state.
-2. Удалить из queue entries, которые получили новое доказанное решение.
-3. Сгруппировать оставшиеся по reason/dependency.
-4. Показать один consolidated decision request с recommended defaults.
-5. Оставить plan и Goal незавершёнными. Не вызывать Goal completion.
-6. Применять Goal `blocked` только после строгого model-tool threshold, а не
+1. Повторить complete inventory и доказать `runnable_count = 0`.
+2. Перечитать deferred Tasks и доступные comments/external state.
+3. Удалить из queue entries, которые получили новое доказанное решение.
+4. Сгруппировать оставшиеся по reason/dependency.
+5. Показать один consolidated decision request с recommended defaults.
+6. Оставить plan и Goal незавершёнными. Не вызывать Goal completion.
+7. Применять Goal `blocked` только после строгого model-tool threshold, а не
    после первого defer или одного turn без progress.
 
 ## Resume

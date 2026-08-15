@@ -89,6 +89,8 @@ Codex task получает только:
   но не отменяет verification/acceptance gates;
 - когда остаются только deferred Tasks, skill выдаёт одну consolidated decision
   queue и удерживает Goal/plan незавершёнными;
+- перед любым blocking user-input skill повторяет complete inventory и требует
+  `runnable_count = 0`; cached review precedence не является доказательством;
 - `completion-remains` не превращается в `no-work`;
 - `In Review` после успешных checks/external effect, но без authorized
   acceptance, оставляет plan и Goal активными и запрещает completion claim;
@@ -102,8 +104,17 @@ Codex task получает только:
 - `no-work` сначала reconciles Task/evidence state и обязательный Goal, затем
   завершает Goal и останавливает workflow;
 - out-of-scope defect не исправляется автоматически;
+- non-blocking out-of-scope finding попадает только в final findings, не
+  расширяет Goal, не создаёт Task и не останавливает текущий scope;
 - parallel request честно ограничивается dependency/review capacity;
 - изменения после `changes-requested` возвращаются как delta review.
+
+Обязательный regression scenario для autonomy: scope содержит одновременно
+шесть acceptance-waiting `In Review`, шесть dependency-ready `To Do`, comments
+недоступны и review находит два non-blocking out-of-scope findings. Ожидается
+zero `request_user_input`: review Tasks становятся deferred, findings остаются
+final-only, а execution немедленно переходит к `To Do`. Blocking consolidated
+input допустим только после fresh inventory с `runnable_count = 0`.
 
 Не передавайте тестовому агенту ожидаемый ответ или скрытую diagnosis.
 

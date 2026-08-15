@@ -296,6 +296,10 @@ decision queue, при доступных comments обязательно опу
 handoff и продолжить scope. Когда runnable queue исчерпана, предъявить все такие
 решения одним consolidated request.
 
+Review/completion precedence применяется только между actionable operations.
+Готовый review packet без acceptance не разрешает останавливать `To Do`, resume
+или другие безопасные lanes: это `deferred`, а не blocking review stage.
+
 ### 5.4 Autonomous continuation и task-local defer
 
 Следовать [runtime reference](../../ship-tasks/references/autonomy-and-release.md)
@@ -330,6 +334,14 @@ comments скипнуть write без изменения `description`.
 остались только deferred Tasks, предъявить одну consolidated decision queue.
 Goal и plan остаются незавершёнными; Goal `blocked` разрешён только после
 текущего строгого tool threshold, а не из-за первого defer.
+
+В уже разрешённом exact scope непосредственно перед task-local
+`request_user_input`, финальным вопросом с ожиданием ответа или эквивалентным
+blocking pause повторить complete inventory и пересчитать `runnable_count` без
+уже deferred Tasks. При `runnable_count > 0` blocking input запрещён:
+сохранить/обновить queue, освободить lane и выбрать следующую dependency-ready
+Task. Использовать cached disposition, review precedence или готовность batch
+packet вместо этой проверки нельзя.
 
 ### 5.5 Environment и release authority
 
@@ -613,6 +625,10 @@ trigger, root cause с confidence, recovery/rework, prevention и remaining risk
   Manager writes. Если finding блокирует текущую Task, defer-нуть только её,
   при доступных comments обязательно опубликовать `BLOCKED`/`decision required`
   report и продолжить независимые Tasks. Включить решение в consolidated queue.
+- Если новый out-of-scope finding не блокирует ни одну in-scope Task, записать
+  его как non-blocking final finding и продолжить. Не создавать Task, не
+  расширять Goal, не вызывать user input и не удерживать completion текущего
+  scope; пользователь может отдельно авторизовать follow-up позднее.
 - Не использовать failure как разрешение на cleanup, unrelated fixes,
   destructive recovery или silent task creation.
 - При resume перечитать Tasks и сверить их с workspace, Git, checks и external

@@ -133,6 +133,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "autonomy and release reference",
         "Не задавать пользователю вопрос",
         "`deferred`",
+        "`runnable_count = 0`",
+        "Review precedence",
         "verified non-production target",
         "Никогда не выполнять production release",
     )
@@ -149,6 +151,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "### 5.5 Environment и release authority",
         "`production-approval-required`",
         "одну consolidated decision queue",
+        "blocking input запрещён",
+        "non-blocking final finding",
     )
 
     for path, fragments in (
@@ -183,6 +187,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
     for fragment in (
         "Decision ladder",
         "Не задавать пользователю вопрос посреди runnable queue",
+        "runnable_count = actionable To Do",
+        "blocking input",
         "Deferred Task",
         "обязательно опубликовать",
         "Non-production release",

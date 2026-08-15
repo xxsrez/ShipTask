@@ -33,6 +33,16 @@ ShipTask рассчитан на долгий автономный run по не
 - Не переизбирать deferred Task в том же run без нового evidence, authority или
   внешнего state change. Когда runnable work исчерпан, показать один
   consolidated decision queue вместо серии interrupting questions.
+- В уже разрешённом exact scope перед любым task-local blocking user-input
+  (`request_user_input`, финальный вопрос с ожиданием ответа или эквивалентный
+  pause) заново получить complete inventory и вычислить `runnable_count`. При
+  `runnable_count > 0` такой вызов запрещён:
+  сохранить decision, освободить lane и выбрать следующую runnable Task.
+  Приоритет review/completion влияет на порядок actionable work, но не даёт
+  права остановить `To Do`/resume lanes ради acceptance.
+- Новый out-of-scope finding, который не блокирует ни одну in-scope Task, только
+  записать в final findings; не создавать Task, не расширять Goal, не спрашивать
+  scope decision и не удерживать completion текущего scope.
 - Не считать одну deferred Task глобальным `TASK CONTEXT ALARM`. Global alarm
   сохраняется только для конфликта exact scope, Goal, connector, ownership,
   integration/shared state или authority, который делает небезопасной любую
@@ -65,6 +75,8 @@ ShipTask рассчитан на долгий автономный run по не
 Положительные:
 
 - одна сложная Task не останавливает долгий multi-task run;
+- blocking input невозможно вызвать по cached stage: перед ним требуется fresh
+  inventory и доказанный `runnable_count = 0`;
 - обычные dev/UAT releases не получают production-style confirmation friction;
 - production остаётся жёсткой, явно авторизуемой границей;
 - пользователь получает одну компактную decision queue и durable Task comments
