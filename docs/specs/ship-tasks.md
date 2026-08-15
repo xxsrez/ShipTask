@@ -20,10 +20,10 @@ intake-зоной вне рабочего scope ShipTask: skill не берёт 
   lifecycle, access и current concurrency field `version`;
 - Project/Release membership и boundary dependencies;
 - repository/workspace, integration policy и разрешённые writes;
-- targeted, integration и aggregate checks;
+- per-Task targeted gate, периодический review-batch gate и их trigger policy;
 - обязательные external effects и способ их независимо проверить;
-- human acceptance authority;
-- execution mode, capacity и review WIP limit.
+- acceptance authority и evidence её решения;
+- execution mode, capacity, review WIP limit и batch target.
 
 После read-only разрешения exact scope, но до code, Git, Task Manager,
 ownership и external writes необходимо сформировать обязательный workflow Goal
@@ -125,7 +125,7 @@ Task Manager status category помогает интерпретации, но �
 | `Backlog` | `backlog` | Исключённый intake. Не брать в работу, не проверять как candidate и не изменять. |
 | `To Do` | `unstarted` | Единственная точка входа для новой работы; после preflight это `ready`. |
 | `In Progress` | `started` | Работа уже идёт; продолжать только из coherent checkpoint и с подтверждённой authority. |
-| `In Review` | `started` | Result уже предъявлен; проверять candidate, evidence и все связанные duplicates. |
+| `In Review` | `started` | Targeted-verified candidate уже предъявлен; он может ждать batch gate и acceptance. Проверять exact candidate, evidence и все связанные duplicates. |
 | `Done`, `Finished` и аналоги | `completed` | Terminal projection; не создаёт работу, но может участвовать в reconciliation. |
 | `Canceled` и аналоги | `canceled` | Terminal outcome; не выполнять и не считать successful completion. |
 | `Duplicate` | `canceled` | Отдельной работы не требует; читать как review context связанной основной Task. |
@@ -149,20 +149,21 @@ Duplicate                       (terminal review context, no own execution)
 planned
 → ready
 → running
-→ machine-verified
-→ review-ready
-→ human-accepted
+→ task-verified
+→ In Review / batch-candidate
+→ batch-verified / acceptance-ready
+→ authorized-accepted
 → terminal
 ```
 
 Возврат на доработку:
 
 ```text
-review-ready
+In Review / batch-candidate
 → changes-requested
 → rework
-→ machine-verified
-→ review-ready
+→ task-verified
+→ In Review / batch-candidate
 ```
 
 При changes requested вернуть Task из `In Review` в `In Progress`, выполнить
@@ -172,10 +173,10 @@ review или blocker; не переключаться на другую `In Pro
 смены status.
 Переводить `To Do` в `In Progress` только после успешного preflight и получения
 write authority. Переводить в `In Review` только exact candidate с passing
-required checks и review packet. Переводить в `Done` только после task
-acceptance, integration и обязательных effects. `Canceled` использовать только
-при подтверждённом canceled outcome. Один status никогда не доказывает другой
-evidence layer.
+targeted gate и candidate evidence. Переводить в `Done` только после passing
+review-batch gate, task acceptance, integration и обязательных effects.
+`Canceled` использовать только при подтверждённом canceled outcome. Один status
+никогда не доказывает другой evidence layer.
 
 ## 5. Goal lifecycle и preflight disposition
 
@@ -208,7 +209,8 @@ Goal должен содержать:
   `In Review`, changes-requested/rework, completion remnants или unresolved
   in-scope defects, а все требования раздела 11 выполнены;
 - `Verify with`: current Task details/statuses, source/integration identity,
-  required checks, human acceptance и independently verified external effects;
+  per-Task targeted gates, exact review-batch gate, authorized acceptance и
+  independently verified external effects;
 - `Constraints`: точная граница scope, исключённый `Backlog`, разрешённые writes
   и запрет расширять scope либо authority из самого Goal;
 - `Blocked when`: конкретная внешняя зависимость или решение, без ослабления
@@ -254,6 +256,22 @@ reconciliation применимого рабочего scope, завершить
 после прохождения completion gate и остановиться. Не создавать пустой commit,
 не повторять дорогой gate и не производить effect только ради свежего отчёта.
 
+### 5.3 Terminal invariant и acceptance authority
+
+Любая `In Review` Task означает `completion-remains`. Пока в exact scope есть
+хотя бы одна такая Task, запрещено отмечать весь execution plan завершённым,
+объявлять terminal completion или завершать Goal. Допустимый handoff в этом
+состоянии — batch/review packet, запрос acceptance либо точное описание
+оставшегося blocker.
+
+По умолчанию acceptance является явным решением пользователя по предъявленному
+exact result. Project context может заранее определить другую acceptance
+authority или автоматический acceptance contract, но только с однозначными
+критериями и проверяемым evidence. Standing authority, уже явно записанную в
+current project context, не запрашивать повторно. Сам invocation `$ship-tasks`,
+успешные checks, deployment или внешний runtime check не являются acceptance,
+если project context прямо не определил обратное.
+
 ## 6. Execution topology
 
 Default mode — adaptive execution с ceiling до четырёх writable task lanes.
@@ -284,6 +302,44 @@ rework или заполненном review WIP.
 Отдельно сообщать execution mode, ceiling, active target, sustained lanes,
 ready/blocked/review counts и причины свободной capacity.
 
+### 6.1 Двухуровневая verification
+
+Использовать два уровня проверки:
+
+1. **Per-Task targeted gate** — обязательная быстрая проверка каждой Task до
+   включения в review batch: acceptance-specific tests, changed-scope checks,
+   воспроизведение исправляемого defect и дешёвые static/build checks, когда они
+   материальны. Не запускать полный дорогой project gate для каждой Task, если
+   риск и project policy допускают batching.
+2. **Review-batch gate** — периодическая тщательная проверка exact
+   интегрированного batch: project-defined aggregate/full suite, integration и
+   risk-relevant browser/e2e, migration, security, performance, runtime либо
+   external checks. Выполнять каждый дорогой check один раз для точной batch
+   identity, а не повторять его для каждого member.
+
+На preflight определить `batch_target`, review WIP limit, дорогие checks и
+trigger policy. Размер не фиксировать глобально: учитывать dependency fan-in,
+конфликтность, риск, длительность gate и review capacity. Если доступно
+несколько безопасных кандидатов, не запускать дорогой gate на singleton только
+для удобства.
+
+Запускать review-batch gate, когда выполнено хотя бы одно условие:
+
+- достигнут batch target или заполнен review WIP;
+- закончилась execution wave либо больше нет готовых Tasks для наполнения
+  batch;
+- high-risk/coupled change требует раннего gate, включая обоснованный batch из
+  одной Task;
+- предстоит общий external effect, acceptance или перевод members в `Done`;
+- пользователь запросил checkpoint;
+- выполняется final flush перед completion.
+
+Batch identity включает member Task refs, exact source/integration identity и
+набор проверок. Любое изменение integrated result после passing batch gate
+аннулирует относящееся к нему evidence и требует нового gate перед acceptance.
+При заполненном review WIP сначала завершить batch/rework, а не продолжать
+dispatch новых Tasks.
+
 ## 7. Isolation и integration
 
 Для каждой concurrent writable Task использовать отдельную task branch и
@@ -299,8 +355,8 @@ surface.
   state и environments либо изолированы, либо делают Tasks конфликтующими;
 - reviewer/support role не получает mutation authority;
 - один integration owner выполняет fan-in в dependency order;
-- после merge повторяются affected checks, после полного fan-in — aggregate
-  gate на exact integrated result.
+- после merge повторяются affected targeted checks; aggregate/full checks
+  выполняются review-batch gate на exact integrated result.
 
 Merge conflict, semantic conflict или aggregate regression возвращает Task в
 rework. Не маскировать конфликт незапланированной правкой integration owner.
@@ -318,36 +374,41 @@ rework. Не маскировать конфликт незапланирова�
 3. Для `To Do` и `In Progress` реализовать или завершить минимальный целостный
    result без unrelated cleanup. Для `In Review` использовать уже предъявленный
    result.
-4. Выполнить или повторить targeted checks и проверить changed scope.
+4. Выполнить или повторить per-Task targeted gate и проверить changed scope.
 5. Перед review прочитать все связанные duplicate Tasks и включить их
    отличающиеся problem statements, acceptance и failure scenarios в checklist.
    Если duplicate описывает материально отдельную проблему, зафиксировать
    finding и запросить scope decision вместо silent closure.
-6. Провести independent agent review без mutation authority, если он требуется
-   risk class или project policy.
-7. Интегрировать result и выполнить integration/aggregate checks.
-8. Выполнить только обязательные external effects и независимо проверить exact
-   target.
-9. Сформировать review packet и обновить Task в `In Review`, если она ещё не в
-   этом status и требуется human acceptance.
-10. При changes requested вернуть Task в `In Progress` и сохранить за ней
-    текущую lane до повторного review или blocker. После explicit acceptance
-    обновить её в `Done` и перечитать. При подтверждённом canceled outcome
-    завершить через `Canceled` по project policy.
+6. Интегрировать targeted-verified result, сформировать candidate evidence и
+   обновить Task в `In Review`, если она ещё не в этом status. Это provisional
+   review-ready state, а не terminal completion.
+7. Наполнить review batch до trigger из раздела 6.1. Провести independent agent
+   review без mutation authority, когда его требует risk class или project
+   policy, и выполнить review-batch gate на exact integrated result.
+8. Выполнить общие обязательные external effects в batch cadence и независимо
+   проверить exact target; не повторять один дорогой effect для каждого member.
+9. Сформировать batch/review packet. Только members с passing targeted gate,
+   passing batch gate и полным evidence становятся acceptance-ready.
+10. При changes requested либо failed batch gate вернуть Tasks, чьё evidence
+    стало недействительным, из `In Review` в `In Progress`, сохранить за ними
+    текущие lanes, выполнить rework и targeted retest, затем собрать и проверить
+    новый exact batch. После authorized acceptance обновить Task в `Done` и
+    перечитать. При подтверждённом canceled outcome завершить через `Canceled`
+    по project policy.
 
 Разделять Task Manager state, source result, checks, human acceptance и external
 effects. Успех одного слоя не доказывает остальные.
 
 ## 9. Review и reports
 
-Review packet должен содержать:
+Batch/review packet должен содержать:
 
-- Task identifiers и цель batch;
+- batch identity, member Task identifiers и цель batch;
 - summary изменений и exact result identity;
-- `acceptance criterion → evidence/result`;
+- per-member `acceptance criterion → targeted evidence/result`;
 - `duplicate scenario → covered evidence/finding` для каждого связанного
   duplicate;
-- targeted, integration и aggregate checks;
+- targeted checks каждого member и общие batch-gate checks;
 - dependency/integration picture;
 - risks, limitations и unresolved gaps;
 - короткий human verification path;
@@ -355,6 +416,22 @@ Review packet должен содержать:
 
 После changes requested показывать delta: исправленные findings, новый result
 identity, повторённые checks и оставшиеся gaps.
+
+Failed batch gate сначала локализовать по member, dependency и shared result:
+
+- доказанно затронутые Tasks вернуть в `In Progress` и исправить в текущем
+  scope;
+- доказанно незатронутые Tasks можно оставить в `In Review`, только если их
+  result identity и evidence не изменились;
+- при неясной attribution считать evidence всего связанного batch
+  недействительным и вернуть его members в `In Progress`;
+- после rework повторить targeted gates затронутых Tasks и новый batch gate на
+  exact integrated result.
+
+Если defect обнаружен уже после `Done`, не переписывать terminal history
+молча: reopen terminal Task только когда это разрешает project policy, иначе
+запросить scope decision и создавать отдельную defect Task лишь при явной
+authority. Нормальный workflow обязан провести batch gate до `Done`.
 
 Connector не предоставляет append-only comments или отдельный task-report
 tool. Не перезаписывать Task description журналом выполнения. До появления
@@ -382,6 +459,7 @@ Completion требует:
 - zero unfinished рабочих Tasks (`To Do`, `In Progress`, `In Review`) и
   unresolved in-scope defects; Backlog явно исключён и не блокирует этот gate;
 - zero unaccepted review-ready candidates;
+- final review batch прошёл gate на exact final integrated result;
 - все duplicate-derived scenarios покрыты evidence либо вынесены как явные
   findings/scope decisions;
 - accepted results присутствуют в exact integration state;

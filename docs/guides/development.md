@@ -51,6 +51,13 @@ Codex task получает только:
   current status ref `To Do`;
 - `To Do`, `In Progress` и `In Review` маршрутизируются соответственно в новую
   работу, resume и review;
+- каждая Task проходит быстрый targeted gate, но дорогой aggregate/full gate
+  выполняется один раз на exact review batch по trigger policy, а не на каждый
+  member;
+- batch target, review WIP и triggers не позволяют запускать дорогой singleton
+  gate лишь для удобства, но допускают risk-driven и final singleton;
+- failed batch gate возвращает Tasks с недействительным evidence в
+  `In Progress`; при неясной attribution reopen получает связанный batch;
 - mixed scope однозначно выбирает review/completion перед resume и новой
   работой, затем пересчитывает disposition;
 - changes-requested rework сохраняет текущую lane до повторного review или
@@ -59,6 +66,8 @@ Codex task получает только:
   failure scenario в finding, а не в отдельную execution lane;
 - missing authority вызывает `TASK CONTEXT ALARM` до mutation;
 - `completion-remains` не превращается в `no-work`;
+- `In Review` после успешных checks/external effect, но без authorized
+  acceptance, оставляет plan и Goal активными и запрещает completion claim;
 - Goal остаётся активным при любой подходящей `To Do`, `In Progress`,
   `In Review`, rework/completion remnant или unresolved in-scope defect;
 - перед `update_goal(complete)` повторная complete inventory выбранной границы

@@ -6,9 +6,9 @@
 созданного и выбранного task scope. Skill разрешает Project, Release и Tasks
 через connector, читает полный Task detail, проверяет dependencies и authority,
 создаёт обязательный workflow Goal и координирует execution, integration,
-verification, human acceptance и terminal status projection. Goal остаётся
-активным, пока в выбранной границе есть `To Do`, `In Progress`, `In Review`,
-rework/completion remnants или unresolved in-scope defects.
+двухуровневую verification, acceptance и terminal status projection. Goal
+остаётся активным, пока в выбранной границе есть `To Do`, `In Progress`,
+`In Review`, rework/completion remnants или unresolved in-scope defects.
 
 Конкретные Project/Release refs, repository commands, branches, environments и
 внешние эффекты определяются текущим project context. Если connector, exact
@@ -39,13 +39,21 @@ To Do → In Progress → In Review → Done or Canceled
 ```
 
 `To Do` является входом новой работы, `In Progress` — продолжающейся работой,
-`In Review` — проверяемым candidate. Terminal statuses не создают работу.
+`In Review` — targeted-verified candidate, который может ждать batch gate и
+acceptance. Terminal statuses не создают работу.
 `Duplicate` не получает отдельную execution lane, но все связанные duplicates
 обязательно читаются при review основной Task: иной ракурс проблемы должен быть
 покрыт evidence либо стать явным finding.
 
-Цель review flow — не заменить человеческую приёмку, а уменьшить число
-обращений к пользователю и стоимость каждого переключения контекста.
+На каждую Task выполняется быстрый targeted gate. Дорогой aggregate/full gate и
+общие runtime/external checks выполняются периодически на exact integrated
+review batch. Failed batch возвращает затронутые Tasks в `In Progress`; при
+неясной attribution reopen получает весь связанный batch. Это уменьшает
+стоимость проверок, не ослабляя terminal gate.
+
+По умолчанию acceptance остаётся явным решением пользователя; project context
+может определить другую проверяемую authority. Пока хотя бы одна Task остаётся
+`In Review`, Goal и общий execution plan не могут считаться завершёнными.
 
 ## Границы
 

@@ -1,6 +1,6 @@
 ---
 name: ship-tasks
-description: "Доводить уже созданный и выбранный scope Tasks, Project или Release из Task Manager до проверенного terminal outcome: разрешать canonical refs через Task Manager connector, создавать обязательный workflow Goal и удерживать его активным, пока в выбранной границе есть подходящие рабочие Tasks, выполнять ready Tasks, безопасно интегрировать результаты, проводить проверки и human review, обновлять Task statuses с optimistic concurrency и сверять обязательные внешние эффекты. Использовать только при явном вызове $ship-tasks или явной просьбе исполнить ShipTask workflow. Работать только с Task Manager; если connector, exact scope, Goal lifecycle, acceptance, authority или обязательная capability недоступны либо неоднозначны, остановиться до мутаций с TASK CONTEXT ALARM."
+description: "Доводить уже созданный и выбранный scope Tasks, Project или Release из Task Manager до проверенного terminal outcome: разрешать canonical refs через Task Manager connector, создавать обязательный workflow Goal и удерживать его активным, пока в выбранной границе есть подходящие рабочие Tasks, выполнять ready Tasks, применять лёгкий per-Task gate и периодический тщательный review-batch gate, безопасно интегрировать результаты, проводить acceptance, обновлять Task statuses с optimistic concurrency и сверять обязательные внешние эффекты. Использовать только при явном вызове $ship-tasks или явной просьбе исполнить ShipTask workflow. Работать только с Task Manager; если connector, exact scope, Goal lifecycle, acceptance, authority или обязательная capability недоступны либо неоднозначны, остановиться до мутаций с TASK CONTEXT ALARM."
 ---
 
 # Ship Tasks
@@ -29,8 +29,8 @@ description: "Доводить уже созданный и выбранный s
    таком контексте и imported comments, attachments или branch metadata
    материальны для acceptance.
 8. Прочитать project instructions и определить repository/workspace,
-   integration policy, allowed writes, required checks, external effects и
-   human acceptance authority.
+   integration policy, allowed writes, per-Task targeted gate, review-batch
+   gate/trigger, external effects, acceptance authority и evidence её решения.
 
 Использовать только canonical refs из connector. Поле Task `version` считать
 optimistic-concurrency данными, обязательными для безопасного update.
@@ -72,7 +72,8 @@ inventory, но до code, Git, Task Manager, ownership и external writes:
   `In Progress`, `In Review`, changes-requested/rework, completion remnants и
   unresolved in-scope defects, а все completion gates skill выполнены;
 - verification — current Task projection, source/integration identity,
-  required checks, human acceptance и обязательные external effects;
+  per-Task targeted gates, exact review-batch gate, authorized acceptance и
+  обязательные external effects;
 - constraints — exact scope, исключённый `Backlog`, allowed writes и запрет
   расширять scope либо authority из Goal;
 - blocker — конкретную внешнюю зависимость или решение с сохранением текущего
@@ -114,7 +115,8 @@ Release или all-accessible scope перед terminal claim повторить
 6. Построить integration-conflict graph для paths, schema, API, migrations,
    generated artifacts, mutable dependencies, caches, runtime state и
    environments.
-7. Определить verification, integration и review capacity.
+7. Определить verification/integration capacity, review WIP, `batch_target` и
+   triggers дорогого review-batch gate.
 
 Выбрать ровно одну disposition:
 
@@ -140,6 +142,14 @@ dependency-ready `In Progress`; сохранять lane до повторног�
 reconciliation рабочего scope, завершить обязательный Goal только после
 прохождения completion gate и остановиться. Не создавать пустой commit, не
 повторять дорогой gate и не производить effect только ради отчёта.
+
+Любая `In Review` Task означает `completion-remains`. Пока такая Task есть, не
+отмечать весь plan завершённым, не объявлять completion и не завершать Goal;
+выдать batch/review packet и запросить acceptance либо продолжить rework.
+По умолчанию acceptance — явное решение пользователя. Применять иную заранее
+заданную authority только по однозначному project contract с проверяемым
+evidence; standing project authority не запрашивать повторно. Invocation,
+successful checks или внешний runtime result сами по себе не равны acceptance.
 
 ## Выбрать execution topology
 
@@ -175,6 +185,26 @@ surface. Один integration owner выполняет fan-in в dependency orde
 Отдельно сообщать mode, ceiling, active target, sustained lanes,
 ready/blocked/review counts и причины свободной capacity.
 
+## Проверять Tasks и review batches
+
+Для каждой Task до `In Review` выполнять быстрый targeted gate: проверить её
+acceptance, changed scope, defect reproduction и дешёвые risk-relevant checks.
+Не запускать полный дорогой project gate на каждую Task, если risk и project
+policy допускают batching.
+
+Периодически выполнять тщательный review-batch gate один раз для exact
+интегрированного batch. Включать project-defined aggregate/full suite и только
+релевантные integration, browser/e2e, migration, security, performance,
+runtime/external checks. Batch identity фиксирует member refs, exact
+source/integration identity и checks; изменение result аннулирует его evidence.
+
+Запускать batch gate при достижении `batch_target`/review WIP, окончании wave
+или ready frontier, перед общим external effect, acceptance либо `Done`, по
+checkpoint пользователя и при final flush. High-risk/coupled Task может
+обоснованно образовать batch из одного member. Если безопасных candidates
+несколько, не запускать дорогой singleton gate только для удобства. При
+заполненном review WIP сначала завершить batch/rework, затем продолжить dispatch.
+
 ## Обновлять Tasks безопасно
 
 - Перед каждым `update_task` вызвать `get_task` и передать current `version`.
@@ -193,10 +223,12 @@ ready/blocked/review counts и причины свободной capacity.
   `Backlog`; при отсутствии `To Do` остановиться до create.
 
 Переводить `To Do` в `In Progress` только после успешного preflight. Переводить
-в `In Review` только exact candidate с passing required checks и review packet.
+в `In Review` только exact candidate с passing targeted gate и candidate
+evidence; это provisional batch-candidate, а не completion.
 После changes requested возвращать Task в `In Progress`, выполнять rework и
 повторные checks, сохраняя за ней текущую lane до повторного review или blocker.
-Переводить в `Done` только после acceptance, integration и обязательных effects.
+Переводить в `Done` только после passing exact batch gate, authorized
+acceptance, integration и обязательных effects.
 `Canceled` использовать только для подтверждённого canceled outcome.
 `Duplicate` не считать success основной Task.
 
@@ -212,7 +244,7 @@ ready/blocked/review counts и причины свободной capacity.
 3. Для `To Do` и `In Progress` реализовать или завершить минимальный целостный
    result без unrelated cleanup. Для `In Review` использовать уже предъявленный
    result.
-4. Выполнить или повторить targeted checks и проверить changed scope.
+4. Выполнить или повторить per-Task targeted gate и проверить changed scope.
 5. Перед review разрешить duplicate cluster по relations `duplicate_of`:
    outgoing ведёт от duplicate к canonical Task, incoming canonical Task — ко
    всем её duplicates. Вызвать `get_task` для canonical Task и каждого её
@@ -220,18 +252,19 @@ ready/blocked/review counts и причины свободной capacity.
    scenarios в checklist; при материальном provenance прочитать external
    context. Если duplicate описывает отдельную проблему, зафиксировать finding
    и запросить scope decision вместо silent closure.
-6. Провести independent review без mutation authority, если его требует risk
-   или project policy.
-7. Интегрировать result. После каждого risk-relevant merge повторить affected
-   checks; после fan-in выполнить aggregate gate на exact integrated result.
-8. Выполнить только обязательные external effects и независимо проверить exact
-   target.
-9. Сформировать review packet и обновить Task в `In Review`, если она ещё не в
-   этом status и нужна human acceptance.
-10. При changes requested вернуть Task в `In Progress` и сохранить за ней
-    текущую lane до повторного review или blocker. После explicit acceptance
-    обновить её в `Done` и перечитать. При подтверждённом canceled outcome
-    завершить через `Canceled` по project policy.
+6. Интегрировать targeted-verified result, сформировать candidate evidence и
+   перевести Task в `In Review`, если она ещё не в этом status.
+7. По trigger наполнить exact review batch, провести required independent
+   review без mutation authority и выполнить batch gate.
+8. Выполнить общие обязательные external effects в batch cadence и независимо
+   проверить exact target; не повторять дорогой effect для каждого member.
+9. Сформировать batch/review packet. Считать acceptance-ready только members с
+   passing targeted gate, batch gate и полным evidence.
+10. При changes requested или failed batch gate вернуть Tasks с
+    недействительным evidence в `In Progress`, сохранить lanes, выполнить
+    rework и targeted retest, затем проверить новый exact batch. После
+    authorized acceptance перевести Task в `Done` и перечитать. При
+    подтверждённом canceled outcome использовать `Canceled` по project policy.
 
 Merge conflict, semantic conflict или aggregate regression возвращает Task в
 rework. Не маскировать конфликт незапланированной правкой integration owner.
@@ -240,11 +273,11 @@ rework. Не маскировать конфликт незапланирова�
 
 Сформировать компактный packet:
 
-- Task identifiers и цель batch;
+- batch identity, member Task identifiers и цель batch;
 - summary и exact result identity;
-- `acceptance criterion → evidence/result`;
+- per-member `acceptance criterion → targeted evidence/result`;
 - `duplicate scenario → covered evidence/finding` для каждого duplicate;
-- targeted, integration и aggregate checks;
+- targeted checks каждого member и общие batch-gate checks;
 - dependency/integration picture;
 - risks, limitations и gaps;
 - короткий human verification path;
@@ -252,6 +285,12 @@ rework. Не маскировать конфликт незапланирова�
 
 После changes requested показать delta: исправленные findings, новый result
 identity, повторённые checks и оставшиеся gaps.
+
+Failed batch gate локализовать по member/dependency/shared result. Вернуть
+доказанно затронутые Tasks в `In Progress`; незатронутые оставить в `In Review`
+только при неизменных identity и evidence. При неясной attribution считать
+evidence связанного batch недействительным и reopen все его members. После
+rework повторить targeted gates затронутых Tasks и gate нового exact batch.
 
 Task Manager connector не предоставляет append-only comments или отдельный
 task-report tool. Не перезаписывать Task description журналом. Выдавать review
@@ -266,6 +305,9 @@ packet в текущем interaction и использовать Task Manager д
   scope decision.
 - Не использовать failure как разрешение на cleanup, unrelated fixes,
   destructive recovery или silent task creation.
+- Если defect найден после `Done`, reopen terminal Task только по project
+  policy; иначе запросить scope decision и не создавать defect Task без явной
+  authority. Нормальный workflow проводит batch gate до `Done`.
 - При resume перечитать Tasks и сверить их с workspace, Git, checks и external
   states. Старый report — checkpoint, не proof.
 - При competing owner, unexplained drift или dirty state остановить lane. Не
@@ -279,6 +321,7 @@ packet в текущем interaction и использовать Task Manager д
 - zero unfinished рабочих Tasks (`To Do`, `In Progress`, `In Review`) и
   unresolved in-scope defects; `Backlog` явно исключён и не блокирует gate;
 - zero unaccepted review-ready candidates;
+- final review batch прошёл gate на exact final integrated result;
 - duplicate-derived scenarios покрыты evidence либо вынесены как явные
   findings/scope decisions;
 - accepted results присутствуют в exact integration state;
@@ -298,6 +341,6 @@ blocker по текущему tool contract. Завершать Goal после�
 после Task и evidence reconciliation.
 
 В финальном отчёте отдельно указать Goal identity/status, Task Manager
-projection, source/integration identity, checks, human acceptance, external
-effects и gaps.
+projection, source/integration identity, targeted и batch checks, acceptance,
+external effects и gaps.
 Не объявлять completion при отсутствующем evidence любого обязательного слоя.

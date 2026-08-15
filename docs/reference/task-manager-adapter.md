@@ -90,7 +90,7 @@ Connector возвращает provider status и одну из системны
 | `Backlog` | `backlog` | Исключить из рабочего scope; не выполнять и не изменять. |
 | `To Do` | `unstarted` | Брать как новую работу после preflight. |
 | `In Progress` | `started` | Продолжать уже начатую работу из coherent checkpoint. |
-| `In Review` | `started` | Проверять exact candidate и связанные duplicates. |
+| `In Review` | `started` | Проверять exact batch-candidate, batch evidence и связанные duplicates. |
 | `Done`, `Finished` и другие terminal аналоги | `completed` | Не выполнять; учитывать только при reconciliation. |
 | `Canceled` и terminal аналоги | `canceled` | Не выполнять и не считать successful completion. |
 | `Duplicate` | `canceled` | Не выделять отдельную execution lane; читать как review context основной Task. |
@@ -103,10 +103,12 @@ failure scenario становится review finding; status `Duplicate` сам 
 доказывает, что сценарий покрыт основной Task.
 
 Переход `To Do → In Progress` допустим только после preflight, переход в
-`In Review` — только после формирования проверенного candidate/review packet,
-переход в `Done` — только после выполнения task acceptance. Changes requested
-возвращает Task в `In Progress` до повторной проверки. Один status не является
-доказательством результата.
+`In Review` — только после per-Task targeted gate и формирования candidate
+evidence. `In Review` может ждать review-batch gate и acceptance; это всегда
+`completion-remains`. Переход в `Done` допустим только после passing exact
+batch gate и authorized task acceptance. Failed gate или changes requested
+возвращает Tasks с недействительным evidence в `In Progress` до повторной
+проверки. Один status не является доказательством результата.
 
 ## Writes и concurrency
 
@@ -163,7 +165,8 @@ run state и review packets должны иметь project-defined durable chan
 1. Перечитать все in-scope Tasks по canonical refs.
 2. Сверить status, `version`, relations и незавершённые boundary dependencies.
 3. Проверить, что Task Manager projection совпадает с exact Git/workspace
-   result, checks, human acceptance и обязательными external effects.
+   result, per-Task targeted gates, exact review-batch gate, authorized
+   acceptance и обязательными external effects.
 4. Отделить imported historical context от evidence текущего запуска.
 5. Указать capability gaps и project-defined coordination records отдельно от
    Task Manager state.

@@ -103,6 +103,36 @@ def validate_skill(errors: list[str]) -> None:
             fail(errors, f"agents/openai.yaml is missing {fragment!r}")
 
 
+def validate_workflow_contract(errors: list[str]) -> None:
+    required_skill_fragments = (
+        "Вызвать `get_goal`",
+        "Любая `In Review` Task означает `completion-remains`",
+        "per-Task targeted gate",
+        "review-batch gate",
+        "passing exact batch gate",
+        "final review batch прошёл gate",
+    )
+    required_spec_fragments = (
+        "### 5.3 Terminal invariant и acceptance authority",
+        "### 6.1 Двухуровневая verification",
+        "Не запускать полный дорогой project gate для каждой Task",
+        "Failed batch gate сначала локализовать",
+        "final review batch прошёл gate",
+    )
+
+    for path, fragments in (
+        (SKILL_FILE, required_skill_fragments),
+        (SPEC_FILE, required_spec_fragments),
+    ):
+        text = path.read_text(encoding="utf-8")
+        for fragment in fragments:
+            if fragment not in text:
+                fail(
+                    errors,
+                    f"{path.relative_to(ROOT)} is missing workflow contract {fragment!r}",
+                )
+
+
 def repository_text_files() -> list[Path]:
     paths = [ROOT / "README.md", ROOT / "AGENTS.md", SKILL_FILE, OPENAI_FILE]
     paths.extend(sorted((ROOT / "docs").rglob("*.md")))
@@ -177,6 +207,7 @@ def main() -> int:
 
     if not errors:
         validate_skill(errors)
+        validate_workflow_contract(errors)
         validate_single_task_manager_contract(errors)
         validate_links(errors)
         validate_artifacts(errors)
