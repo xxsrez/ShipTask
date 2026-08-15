@@ -24,11 +24,11 @@ scope или authority нельзя установить достоверно, s
 - Каждый запуск после разрешения exact scope и до первой non-Goal mutation
   создаёт Goal либо продолжает уже активный совместимый Goal. Несовместимый
   незавершённый Goal блокирует запуск с `TASK CONTEXT ALARM`.
-- Cross-session scheduler, connector comments, durable claims и append-only
-  task reports не изображаются существующими capabilities.
-- Для каждой выполненной Task skill поддерживает один видимый managed delivery
-  report в `description`, сохраняя исходный текст и заменяя только собственный
-  block при rework/acceptance.
+- Cross-session scheduler, durable claims и отсутствующие connector capabilities
+  не изображаются существующими.
+- Delivery report публикуется только как native Task comment, когда current
+  connector действительно предоставляет comment write. Пока capability нет,
+  report step получает `not-available` и скипается; `description` не меняется.
 - User-level копия должна совпадать с repository source после явной
   синхронизации.
 
@@ -58,11 +58,13 @@ review batch. Failed batch возвращает затронутые Tasks в `I
 может определить другую проверяемую authority. Пока хотя бы одна Task остаётся
 `In Review`, Goal и общий execution plan не могут считаться завершёнными.
 
-Перед acceptance пользователь получает report прямо в Task: outcome-first
-объяснение feature, exact evidence и полезную text diagram для non-trivial
-flow. Material failure получает отдельный impact/cause/recovery analysis с
-уровнем уверенности и remaining risk. Report не заменяет evidence, но делает
-его понятным decision surface.
+Когда native comments доступны, пользователь получает report прямо в Task:
+outcome-first объяснение feature, exact evidence и полезную diagram для
+non-trivial flow. Material failure получает отдельный impact/cause/recovery
+analysis с уровнем уверенности и remaining risk. Пока comments недоступны,
+тот же report остаётся в review/interaction output, но не сохраняется через
+другие Task fields. Report не заменяет evidence, но делает его понятным decision
+surface.
 
 ## Границы
 
@@ -76,8 +78,8 @@ flow. Material failure получает отдельный impact/cause/recovery
 - Наличие connector не заменяет authoritative Project/Release scope и write
   authority конкретного проекта.
 - Skill не превращает failed check в разрешение на unrelated cleanup.
-- Skill не затирает исходный Task description и не использует delivery report
-  как append-only execution log.
+- Skill не меняет Task description ради delivery report и не использует другие
+  Task fields как fallback для comments.
 - Skill не завершает Goal, пока повторная полная инвентаризация выбранной
   границы находит хотя бы одну Task, подходящую под рабочие критерии.
 - Skill не называет plan, worker report, commit, test или deploy достаточным

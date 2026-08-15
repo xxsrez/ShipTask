@@ -4,10 +4,11 @@ ShipTask — репозиторий Codex skill `$ship-tasks`, который ч
 доводит заранее выбранные Tasks, Project или Release до проверенного terminal
 outcome под обязательным workflow Goal: выполняет scope, проверяет dependencies,
 интегрирует результат, проводит лёгкую проверку каждой Task и тщательную
-периодическую проверку review batches, записывает человекочитаемый delivery
-report прямо в Task, затем согласует фактические Task statuses. Goal остаётся
-активным, пока в выбранной границе есть Tasks,
-подходящие под рабочие критерии ShipTask.
+периодическую проверку review batches, при доступной native comments capability
+публикует человекочитаемый delivery report в Task comment, затем согласует
+фактические Task statuses. Пока comments недоступны, report step скипается без
+изменения Task description. Goal остаётся активным, пока в выбранной границе
+есть Tasks, подходящие под рабочие критерии ShipTask.
 
 ## Структура
 

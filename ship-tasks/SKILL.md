@@ -1,6 +1,6 @@
 ---
 name: ship-tasks
-description: "Доводить уже созданный и выбранный scope Tasks, Project или Release из Task Manager до проверенного terminal outcome: разрешать canonical refs через Task Manager connector, создавать обязательный workflow Goal и удерживать его активным, выполнять ready Tasks, применять лёгкий per-Task gate и периодический тщательный review-batch gate, безопасно интегрировать результаты, записывать в каждую выполненную Task человекочитаемый delivery report с полезными diagrams/incident analysis, проводить acceptance, обновлять Task statuses с optimistic concurrency и сверять обязательные внешние эффекты. Использовать только при явном вызове $ship-tasks или явной просьбе исполнить ShipTask workflow. Работать только с Task Manager; если connector, exact scope, Goal lifecycle, report write, acceptance, authority или обязательная capability недоступны либо неоднозначны, остановиться до мутаций с TASK CONTEXT ALARM."
+description: "Доводить уже выбранные Tasks, Project или Release из Task Manager до проверенного terminal outcome: разрешать canonical refs, создавать обязательный workflow Goal и удерживать его активным, выполнять ready Tasks, применять лёгкий per-Task gate и периодический тщательный review-batch gate, интегрировать результаты, при доступной native comments capability публиковать человекочитаемые delivery reports с diagrams/incident analysis, проводить acceptance, обновлять Task statuses с optimistic concurrency и сверять обязательные внешние эффекты. Использовать только при явном вызове $ship-tasks или просьбе исполнить ShipTask workflow. Работать только с Task Manager; если comments ещё недоступны, скипать report step без изменения description и блокировки completion; если connector, exact scope, Goal lifecycle, acceptance, authority или другая обязательная capability недоступны либо неоднозначны, остановиться до мутаций с TASK CONTEXT ALARM."
 ---
 
 # Ship Tasks
@@ -31,7 +31,9 @@ description: "Доводить уже созданный и выбранный s
 8. Прочитать project instructions и определить repository/workspace,
    integration policy, allowed writes, per-Task targeted gate, review-batch
    gate/trigger, external effects, acceptance authority и evidence её решения.
-   Проверить `description` write: он обязателен для in-Task delivery report.
+   По current tool contract классифицировать native Task comment write как
+   `available` или `not-available`; imported comments не считать write
+   capability. Не требовать `description` write для delivery report.
 
 Использовать только canonical refs из connector. Поле Task `version` считать
 optimistic-concurrency данными, обязательными для безопасного update.
@@ -71,8 +73,8 @@ inventory, но до code, Git, Task Manager, ownership и external writes:
   Project/Release scope до проверенного terminal outcome;
 - done criteria — после повторной complete inventory нет `To Do`,
   `In Progress`, `In Review`, changes-requested/rework, completion remnants и
-  unresolved in-scope defects, delivery reports актуальны, а все completion
-  gates skill выполнены;
+  unresolved in-scope defects, report-comment disposition честно отражён, а все
+  completion gates skill выполнены;
 - verification — current Task projection, source/integration identity,
   per-Task targeted gates, exact review-batch gate, authorized acceptance и
   обязательные external effects;
@@ -217,9 +219,12 @@ checkpoint пользователя и при final flush. High-risk/coupled Tas
 - При `version_conflict` перечитать Task. Повторить update только если intent
   всё ещё применим; не перетирать unrelated newer edits.
 - После write перечитать Task и проверить status, fields и новую `version`.
-- Invocation `$ship-tasks` разрешает создать/заменить только один managed
-  delivery-report block в `description` рабочей in-scope Task. Не менять
-  исходное описание, acceptance или текст вне block.
+- Invocation `$ship-tasks` не разрешает менять `description` ради report.
+  Публиковать delivery report только через доступный native Task comment write;
+  не использовать другие Task fields как fallback.
+- Invocation разрешает task-specific delivery-report comment только в рабочей
+  in-scope Task по этому contract; не писать произвольные comments или reports
+  в unrelated/duplicate/старые terminal Tasks.
 - Не повторять `create_task` вслепую после неизвестного outcome; сначала искать
   возможный duplicate.
 - Использовать `create_task` только при явном разрешении создать отдельную
@@ -232,9 +237,9 @@ checkpoint пользователя и при final flush. High-risk/coupled Tas
 evidence; это provisional batch-candidate, а не completion.
 После changes requested возвращать Task в `In Progress`, выполнять rework и
 повторные checks, сохраняя за ней текущую lane до повторного review или blocker.
-Переводить в `Done` только после passing exact batch gate, записанного и
-прочитанного обратно current delivery report, authorized acceptance, integration
-и обязательных effects.
+Переводить в `Done` только после passing exact batch gate, authorized
+acceptance, integration и обязательных effects. Отсутствующий, unsupported или
+failed comment write сам по себе не блокирует `Done`.
 `Canceled` использовать только для подтверждённого canceled outcome.
 `Duplicate` не считать success основной Task.
 
@@ -264,15 +269,17 @@ evidence; это provisional batch-candidate, а не completion.
    review без mutation authority и выполнить batch gate.
 8. Выполнить общие обязательные external effects в batch cadence и независимо
    проверить exact target; не повторять дорогой effect для каждого member.
-9. Сформировать batch/review packet и записать task-specific delivery report.
-   Считать acceptance-ready только members с passing targeted gate, batch gate,
-   полным evidence и успешным report read-back.
+9. Сформировать batch/review packet. При `available` native comment write
+   опубликовать task-specific acceptance-ready report, когда это полезный review
+   surface. При `not-available` скипнуть report step без Task field fallback.
+   Acceptance-ready определяют gates и evidence, а не доступность comments.
 10. При changes requested или failed batch gate вернуть Tasks с
-    недействительным evidence в `In Progress`, записав понятный failure/rework
-    report в том же optimistic update, когда возможно. Сохранить lanes,
-    выполнить rework и targeted retest, затем проверить новый exact batch.
-    После authorized acceptance финализировать report, перевести Task в `Done`
-    одним write и перечитать. Перед `Canceled` записать terminal report.
+    недействительным evidence в `In Progress`. При доступных comments
+    опубликовать понятный failure/rework report; иначе скипнуть только этот
+    side effect. Сохранить lanes, выполнить rework и targeted retest, затем
+    проверить новый exact batch. После authorized acceptance опубликовать
+    final comment, если capability доступна, независимо перевести Task в `Done`
+    и перечитать. Аналогично обработать terminal `Canceled` outcome.
 
 Merge conflict, semantic conflict или aggregate regression возвращает Task в
 rework. Не маскировать конфликт незапланированной правкой integration owner.
@@ -300,55 +307,64 @@ Failed batch gate локализовать по member/dependency/shared result.
 evidence связанного batch недействительным и reopen все его members. После
 rework повторить targeted gates затронутых Tasks и gate нового exact batch.
 
-## Записать delivery report в Task
+## Опубликовать delivery report как Task comment
 
-Перед первым report write прочитать
-[delivery-report reference](references/delivery-report.md) полностью. Current
-Task Manager хранит plain text: использовать outcome-first headings, короткие
-bullets и text diagrams, не выдавать Mermaid source за rendered diagram.
+Перед первым report decision прочитать
+[delivery-report reference](references/delivery-report.md) полностью. По
+current Task Manager tool contract классифицировать native comment-create для
+canonical Task ref:
 
-Поддерживать ровно один block между точными sentinels
-`===== SHIPTASK DELIVERY REPORT: START =====` и
-`===== SHIPTASK DELIVERY REPORT: END =====`. Перед update вызвать `get_task`,
-сохранить весь текст вне block byte-for-byte и передать current `version`.
-Append block, если его нет; replace exact block, если он один. При malformed или
-multiple blocks, block для другого Task ref или field overflow выдать
-`TASK CONTEXT ALARM`; не обрезать исходный description. После write перечитать
-exact report и status.
+- `available` — operation явно существует и current authority позволяет write;
+- `not-available` — operation отсутствует, unsupported, недоступна по authority
+  или сообщает, что feature ещё не доступна.
 
-После passing batch gate записать `ACCEPTANCE READY` report. После material
-failure записать `REWORK REQUIRED`/`BLOCKED` analysis до или вместе с reopen;
-после rework заменить block delta-report. После acceptance финализировать
-`COMPLETED` report вместе с `Done`, когда возможно. Не создавать append-only
-journal, не backfill-ить старые terminal Tasks и не писать отдельный report в
-`Duplicate` без explicit authority.
+Imported comments и `get_task_external_context` являются read-only provenance.
+Не выводить capability из roadmap, версии или старой сессии. Никогда не писать
+report в `description`, acceptance, status text или другой Task field.
+
+При `not-available` скипнуть report write и продолжить workflow. Это не
+`TASK CONTEXT ALARM`, не `completion-remains` и не blocker для `Done`/Goal.
+Advertised write с ошибкой или unknown outcome также не блокирует terminal
+workflow: показать `not-available` либо `write-outcome-unknown` и не повторять
+write вслепую.
+
+При `available` публиковать `COMPLETED` comment при terminal completion и
+`REWORK REQUIRED`/`BLOCKED` при material failure/rework/blocker. Публиковать
+`ACCEPTANCE READY` только когда это полезный review surface; не комментировать
+каждую внутреннюю red/green iteration. При наличии comment list/read проверить
+duplicate для того же `Task + state + exact result` и выполнить read-back.
+Не backfill-ить старые terminal Tasks и не писать report в `Duplicate` без
+explicit authority.
 
 Success report объясняет user outcome, main flow, implementation decisions,
 exact evidence и limitations. Material failure объясняет symptom/impact,
 detection, trigger/cause с confidence, recovery, prevention и remaining risk.
 Для non-trivial feature/cross-component change/incident включить одну-две
-полезные plain-text diagrams; для trivial change использовать compact
-before/after. Писать blameless, отделять evidence от inference, не вставлять raw
-logs/secrets и не создавать follow-up Tasks без отдельной authority.
+полезные diagrams; для trivial change использовать compact before/after.
+Выбирать plain text/Markdown по proven comment renderer и не выдавать Mermaid
+за rendered diagram без proven support. Писать blameless, отделять evidence от
+inference, не вставлять raw logs/secrets и не создавать follow-up Tasks без
+отдельной authority.
 
 Report остаётся task-specific: указать shared batch identity/result, но не
-копировать полный batch log каждому member. Missing или неподтверждённый report
-сохраняет `completion-remains` и запрещает `Done`/Goal completion.
+копировать полный batch log каждому member. Comment write и status update
+reconciliate независимо, пока connector не гарантирует atomicity.
 
 ## Ограничивать defects и recovery
 
 - Автоматически исправлять только defect, который acceptance или project policy
   включает в exact scope.
 - Для out-of-scope defect остановиться до code и scope-changing Task Manager
-  writes; разрешён только managed `BLOCKED`/`decision required` report текущей
-  in-scope Task. Запросить scope decision.
+  writes; при доступных comments опубликовать `BLOCKED`/`decision required`
+  report текущей in-scope Task, иначе оставить его только в interaction output.
+  Запросить scope decision.
 - Не использовать failure как разрешение на cleanup, unrelated fixes,
   destructive recovery или silent task creation.
 - Если defect найден после `Done`, reopen terminal Task только по project
   policy; иначе запросить scope decision и не создавать defect Task без явной
   authority. Нормальный workflow проводит batch gate до `Done`.
 - При resume перечитать Tasks и сверить их с workspace, Git, checks и external
-  states. Старый report — checkpoint, не proof.
+  states. Старый report comment — checkpoint, не proof.
 - При competing owner, unexplained drift или dirty state остановить lane. Не
   выполнять automatic reset, clean, stash, force-push, takeover или удаление
   чужой worktree/branch.
@@ -366,8 +382,10 @@ Report остаётся task-specific: указать shared batch identity/resu
 - accepted results присутствуют в exact integration state;
 - final checks относятся к exact result;
 - обязательные external effects независимо проверены;
-- каждая выполненная/materially failed рабочая Task содержит один актуальный,
-  прочитанный обратно delivery-report block для exact result/state;
+- для каждой выполненной/materially failed рабочей Task report-comment
+  disposition отражён как `published`, `not-available` или
+  `write-outcome-unknown`; отсутствие comments capability не является gap
+  основного result evidence;
 - все рабочие и изменённые Tasks перечитаны и current statuses соответствуют
   фактам; исключённые Backlog и terminal counts показаны отдельно;
 - обязательный Goal относится к exact scope и оставался активным, пока
@@ -383,6 +401,6 @@ blocker по текущему tool contract. Завершать Goal после�
 
 В финальном отчёте отдельно указать Goal identity/status, Task Manager
 projection, source/integration identity, targeted и batch checks, acceptance,
-external effects, gaps и outcome in-Task report writes. Interaction report не
-заменяет reports внутри Tasks.
+external effects, gaps и disposition Task comment reports. Не выдавать skipped
+или unknown writes за опубликованные comments.
 Не объявлять completion при отсутствующем evidence любого обязательного слоя.

@@ -19,6 +19,9 @@ DECISION_FILE = ROOT / "docs" / "decisions" / "0001-task-manager-only.md"
 REPORT_DECISION_FILE = (
     ROOT / "docs" / "decisions" / "0002-managed-delivery-report-in-task.md"
 )
+COMMENT_REPORT_DECISION_FILE = (
+    ROOT / "docs" / "decisions" / "0003-delivery-reports-as-task-comments.md"
+)
 
 REQUIRED_FILES = (
     ROOT / "README.md",
@@ -32,6 +35,7 @@ REQUIRED_FILES = (
     SPEC_FILE,
     DECISION_FILE,
     REPORT_DECISION_FILE,
+    COMMENT_REPORT_DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
@@ -118,7 +122,9 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "passing exact batch gate",
         "final review batch прошёл gate",
         "delivery-report reference",
-        "SHIPTASK DELIVERY REPORT: START",
+        "native comment-create",
+        "`not-available`",
+        "Никогда не писать",
     )
     required_spec_fragments = (
         "### 5.3 Terminal invariant и acceptance authority",
@@ -126,8 +132,9 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Не запускать полный дорогой project gate для каждой Task",
         "Failed batch gate сначала локализовать",
         "final review batch прошёл gate",
-        "### 9.1 In-Task delivery report",
-        "прочитанный обратно delivery-report block",
+        "### 9.1 Delivery report как Task comment",
+        "не блокирует `Done`",
+        "Никогда не записывать report в `description`",
     )
 
     for path, fragments in (
@@ -144,14 +151,32 @@ def validate_workflow_contract(errors: list[str]) -> None:
 
     report_text = REPORT_REFERENCE.read_text(encoding="utf-8")
     for fragment in (
-        "===== SHIPTASK DELIVERY REPORT: START =====",
-        "===== SHIPTASK DELIVERY REPORT: END =====",
+        "Delivery report как Task comment",
+        "native comment-create operation",
+        "Не менять `description`",
+        "Report key: shiptask/",
+        "`not-available`",
+        "`write-outcome-unknown`",
+        "COMPLETED",
         "ACCEPTANCE READY",
         "REWORK REQUIRED",
         "Confidence: CONFIRMED | PROBABLE | UNKNOWN",
     ):
         if fragment not in report_text:
             fail(errors, f"delivery-report reference is missing {fragment!r}")
+
+    for path in (SKILL_FILE, SPEC_FILE, REPORT_REFERENCE):
+        text = path.read_text(encoding="utf-8")
+        for forbidden in (
+            "SHIPTASK DELIVERY REPORT: START",
+            "SHIPTASK DELIVERY REPORT: END",
+            "managed delivery-report block",
+        ):
+            if forbidden in text:
+                fail(
+                    errors,
+                    f"{path.relative_to(ROOT)} contains retired description-report contract {forbidden!r}",
+                )
 
 
 def repository_text_files() -> list[Path]:

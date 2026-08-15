@@ -1,6 +1,7 @@
 # 0002. Managed delivery report внутри Task
 
-Статус: accepted, 2026-08-16.
+Статус: superseded by
+[ADR-0003](0003-delivery-reports-as-task-comments.md), 2026-08-16.
 
 ## Контекст
 
@@ -22,6 +23,11 @@ surface: outcome, exact identity, acceptance evidence, impact map, risks и
 
 ## Решение
 
+Это решение описывает прежний runtime contract и сохранено как история.
+Текущий contract определён ADR-0003: delivery report не записывается в
+`description` и публикуется только через native Task comments, когда эта
+capability доступна.
+
 - Хранить в `description` каждой выполненной in-scope Task ровно один видимый
   managed delivery-report block с точными start/end sentinels.
 - Сохранять исходный user-authored description без изменений; append для первого
@@ -41,8 +47,8 @@ surface: outcome, exact identity, acceptance evidence, impact map, risks и
 - Писать blameless, отделять evidence от inference, не вставлять raw logs и не
   создавать follow-up Tasks без отдельной authority.
 
-Точный runtime format находится в
-[`ship-tasks/references/delivery-report.md`](../../ship-tasks/references/delivery-report.md).
+Этот historical contract больше не является runtime format. Текущий reference
+по ссылке из ADR-0003 описывает comments-only поведение.
 
 ## Рассмотренные варианты
 

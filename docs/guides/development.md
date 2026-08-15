@@ -58,14 +58,16 @@ Codex task получает только:
   gate лишь для удобства, но допускают risk-driven и final singleton;
 - failed batch gate возвращает Tasks с недействительным evidence в
   `In Progress`; при неясной attribution reopen получает связанный batch;
-- passing batch gate создаёт один `ACCEPTANCE READY` delivery-report block в
-  Task description, сохраняя исходный текст byte-for-byte;
-- material failure создаёт user-oriented impact/cause/recovery report до или
-  вместе с reopen, а rework заменяет тот же block delta-report;
-- malformed/multiple report markers, field overflow или failed read-back
-  блокируют `Done`; report не дублируется и не превращается в journal;
-- non-trivial success/incident получает полезную plain-text diagram, trivial
-  change — compact before/after; Mermaid не используется без proven renderer;
+- без native Task comment write report step получает `not-available`, не меняет
+  description/другие Task fields и не блокирует acceptance, `Done` или Goal;
+- при появлении native comment write skill определяет capability из current tool
+  contract и публикует `COMPLETED` report без отдельного version switch;
+- material failure создаёт user-oriented impact/cause/recovery comment только
+  при доступной capability; обычная red/green iteration не создаёт noise;
+- duplicate/read-back проверяются доступными comment list/read operations, а
+  unknown write outcome не приводит к blind retry;
+- non-trivial success/incident получает полезную diagram, trivial change —
+  compact before/after; Mermaid не используется без proven comment renderer;
 - mixed scope однозначно выбирает review/completion перед resume и новой
   работой, затем пересчитывает disposition;
 - changes-requested rework сохраняет текущую lane до повторного review или
@@ -76,8 +78,9 @@ Codex task получает только:
 - `completion-remains` не превращается в `no-work`;
 - `In Review` после успешных checks/external effect, но без authorized
   acceptance, оставляет plan и Goal активными и запрещает completion claim;
-- authorized acceptance финализирует `COMPLETED` report вместе с `Done`, а
-  missing/stale in-Task report удерживает Goal активным;
+- authorized acceptance допускает `Done` независимо от недоступного comment
+  report; финальный output честно различает `published`, `not-available` и
+  `write-outcome-unknown`;
 - Goal остаётся активным при любой подходящей `To Do`, `In Progress`,
   `In Review`, rework/completion remnant или unresolved in-scope defect;
 - перед `update_goal(complete)` повторная complete inventory выбранной границы
@@ -94,5 +97,6 @@ Codex task получает только:
 
 Каталог `ship-tasks/` в этом репозитории является source of truth. Копию в
 `~/.codex/skills/ship-tasks` обновляйте только по явной команде пользователя.
-После синхронизации сравните `SKILL.md` и `agents/openai.yaml` byte-for-byte и
-провалите handoff при расхождении.
+После синхронизации сравните каталоги целиком через
+`diff -qr ship-tasks ~/.codex/skills/ship-tasks`, проверьте установленную копию
+через `quick_validate.py` и провалите handoff при любом расхождении.

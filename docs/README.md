@@ -14,8 +14,10 @@
 - [0001: Task Manager-only skill](decisions/0001-task-manager-only.md) —
   единственный authoritative task source и граница project context.
 - [0002: Managed delivery report внутри Task](decisions/0002-managed-delivery-report-in-task.md)
-  — один сохраняющий исходное описание report block для success, failure и
-  terminal handoff.
+  — историческое решение о report block в description, заменённое ADR-0003.
+- [0003: Delivery reports только как Task comments](decisions/0003-delivery-reports-as-task-comments.md)
+  — capability-based comments-only contract без изменения description и без
+  блокировки workflow, пока comments недоступны.
 
 ## Reference
 

@@ -1,184 +1,147 @@
-# Delivery report внутри Task
+# Delivery report как Task comment
 
-Использовать этот reference перед первым report write в запуске `$ship-tasks`.
-Report является актуальным acceptance/completion artifact конкретной Task, а не
-append-only журналом выполнения.
+Использовать этот reference только после выбора exact Task и формирования
+task-specific evidence. Report объясняет результат пользователю; он не заменяет
+acceptance, checks, source identity или external-effect verification.
 
 ## Содержание
 
-- [Storage contract](#storage-contract)
-- [Когда обновлять](#когда-обновлять)
-- [Базовый шаблон](#базовый-шаблон)
-- [Success profile](#success-profile)
-- [Failure profile](#failure-profile)
-- [Диаграммы](#диаграммы)
-- [Качество и безопасность](#качество-и-безопасность)
+- Capability gate
+- Write и reconciliation
+- Общий формат
+- Success report
+- Material failure report
+- Task-specific boundary
 
-## Storage contract
+## Capability gate
 
-Current Task Manager показывает `description` как plain text. Использовать
-короткие headings, bullets и моноширинные text diagrams; не использовать
-Markdown table или Mermaid, пока current project context не подтвердит их
-фактический render.
+На каждом запуске проверить current Task Manager tool contract.
 
-Использовать ровно один block с точными sentinel lines:
+`available` означает одновременно:
+
+- connector явно предоставляет native comment-create operation для canonical
+  Task ref;
+- current authority позволяет вызвать этот write;
+- operation создаёт Task Manager comment, а не imported/external annotation.
+
+`not-available` означает, что operation отсутствует, unsupported, недоступна по
+authority или сообщает, что feature ещё не работает. Imported comments из
+`get_task_external_context` — только read-only provenance.
+
+При `not-available`:
+
+1. Не вызывать `update_task` ради report.
+2. Не менять `description`, acceptance, status text или другой Task field.
+3. Сохранить report в review/interaction output.
+4. Показать disposition `not-available` и продолжить основной workflow.
+
+Этот skip не является `TASK CONTEXT ALARM`, `completion-remains` или blocker для
+`Done`/Goal. Как только current connector фактически предоставляет native
+comment write, использовать его без ожидания отдельного ShipTask version gate.
+
+## Write и reconciliation
+
+- Публиковать `COMPLETED` report при terminal completion изменённой рабочей
+  Task.
+- Публиковать `REWORK REQUIRED`/`BLOCKED` report после material failure,
+  changes-requested или blocker, который важно объяснить пользователю.
+- Публиковать `ACCEPTANCE READY` только когда comment является полезным review
+  surface; не писать comment на каждую внутреннюю red/green iteration.
+- Не backfill-ить старые terminal Tasks и не писать отдельный report в
+  `Duplicate` без explicit authority.
+- При доступном comment list/read до write искать тот же report key, после
+  write перечитывать созданный comment. Не считать один success response
+  read-back, если connector предоставляет отдельное чтение.
+- При unknown write outcome не повторять create вслепую. Сначала искать report
+  через comment list/read; если это невозможно, показать
+  `write-outcome-unknown` и продолжить без duplicate risk.
+- Comment write и status update считать отдельными side effects, пока current
+  connector явно не гарантирует atomicity.
+
+Для дедупликации использовать стабильный видимый ключ:
 
 ```text
-===== SHIPTASK DELIVERY REPORT: START =====
-<report body>
-===== SHIPTASK DELIVERY REPORT: END =====
+Report key: shiptask/<canonical-task-ref>/<STATE>/<exact-result-identity>
 ```
 
-Перед write:
+Не включать secrets, signed URLs или private raw logs в key либо body.
 
-1. Вызвать `get_task` и взять current `description` и `version`.
-2. Сохранить весь текст вне sentinels без изменений.
-3. Если block отсутствует, добавить два line breaks и новый block в конец.
-4. Если block один, заменить только его целиком.
-5. При нескольких blocks, одном marker без пары, marker внутри report body или
-   объявленном другом Task ref выдать `TASK CONTEXT ALARM` до write.
-6. Проверить current field limit; не обрезать исходное описание или evidence.
-7. Передать current `version`; совместить report и status в одном
-   `update_task`, когда stage позволяет.
-8. Перечитать Task и проверить exact block, status и новую `version`.
+## Общий формат
 
-Не добавлять новые blocks для retries, rework или acceptance. Заменять один
-managed block актуальным состоянием. Пользовательские заметки принадлежат тексту
-вне sentinels и всегда сохраняются.
-
-## Когда обновлять
-
-- `ACCEPTANCE READY`: after passing targeted and exact batch gates, до запроса
-  acceptance.
-- `REWORK REQUIRED`: material failure инвалидировал candidate; записать до или
-  в одном write с `In Review → In Progress`.
-- `BLOCKED`: execution уже начался, safe progress остановлен, а blocker
-  действительно требует handoff; это не ослабляет Goal blocker threshold.
-- `COMPLETED`: после authorized acceptance; финализировать в одном write с
-  `Done`, когда возможно.
-- `CANCELED`: перед terminal cancel с подтверждённой причиной.
-
-Обычные red/green iterations, transient local mistakes и каждый повтор теста не
-создают incident report. Material failure — это user-visible impact, failed
-batch/external effect, rollback/revert, invalidated candidate, повторяющийся
-rework или blocker после начала execution.
-
-## Базовый шаблон
-
-Писать на языке пользователя. Удалять неприменимые sections, но сохранять
-outcome, identity, evidence и next decision.
+Начинать с outcome, а не с process diary. Масштабировать detail по task type и
+risk. Plain text является безопасным baseline. Использовать Markdown только
+если current comment renderer доказан; Mermaid — только при подтверждённом
+rendering, иначе text diagram.
 
 ```text
-===== SHIPTASK DELIVERY REPORT: START =====
 SHIPTASK DELIVERY REPORT
-State: ACCEPTANCE READY | REWORK REQUIRED | BLOCKED | COMPLETED | CANCELED
-Task: <identifier and title>
-Exact result: <commit/build/artifact/runtime identity>
-Review batch: <batch identity or not-applicable>
-Acceptance: PENDING | <authority and verified decision evidence>
+State: COMPLETED | ACCEPTANCE READY | REWORK REQUIRED | BLOCKED | CANCELED
+Task: <identifier> — <title>
+Result: <commit/build/deploy/artifact identity or not-applicable>
+Report key: shiptask/<task-ref>/<state>/<result-identity>
 
-OUTCOME
-<2-5 строк: что теперь получает пользователь или что мешает результату>
+Outcome
+<Что теперь получил пользователь или какое решение требуется.>
 
-HOW IT WORKS
-<объяснение основного поведения простыми словами>
+How it works / What happened
+<Короткое объяснение main flow либо failure narrative.>
 
-<одна полезная text diagram либо compact before/after>
+Diagram
+<Одна полезная flow/boundary/causal diagram либо compact before/after.>
 
-IMPLEMENTATION AND DECISIONS
-- <material changed boundary/component and why>
-- <important tradeoff or compatibility decision>
-
-EVIDENCE
-- <acceptance criterion>: PROVED | FAILED | NOT PROVED — <evidence>
-- Targeted gate: <result and identity>
-- Batch gate: <result and identity>
+Evidence
+- <acceptance criterion> -> <exact check/result>
+- Batch: <identity and aggregate gate>
 - External effect: <verified result or not-applicable>
 
-LIMITATIONS AND RISKS
-- <known limitation, residual risk or none known within verified scope>
-
-USER DECISION / NEXT ACTION
-<accept exact result, review specific gap, rework, unblock or no action>
-===== SHIPTASK DELIVERY REPORT: END =====
+Limits and next action
+<Ограничения, remaining risk, acceptance или следующий шаг.>
 ```
 
-## Success profile
+## Success report
 
-Сначала ответить на вопросы пользователя:
+Объяснить:
 
-1. Что изменилось в его сценарии и как этим пользоваться?
-2. Как запрос проходит через систему?
-3. Какие boundaries/components изменились и почему выбран этот вариант?
-4. Что проверено именно на exact result?
-5. Какие ограничения или manual steps остались?
+- user outcome и наблюдаемое новое поведение;
+- основной runtime/data flow простыми словами;
+- ключевые implementation decisions и tradeoffs;
+- exact targeted/batch/external evidence;
+- limitations, remaining risk и нужное user action.
 
-Для UI показать короткий user journey/before-after. Для service/data change —
-request/data sequence. Для architecture — только затронутый context/container
-boundary. Для policy/config — effective before/after и decision path. Для
-external effect — target, action, receipt, observed state и reversibility.
-Для performance/data change показывать measured before/after с units, workload
-и measurement method, а не неподтверждённое «стало быстрее».
+Для trivial change вместо diagram использовать compact before/after. Для
+non-trivial feature или cross-component change включить одну-две схемы, только
+если они ускоряют понимание.
 
-Не перечислять все изменённые файлы, если это не помогает понять систему.
-Ссылаться на canonical diff/check/deployment evidence, когда оно доступно
-читателю; не вставлять полный output.
+## Material failure report
 
-## Failure profile
+Material failure — это user-visible impact, failed batch/external effect,
+rollback/revert, invalidated candidate, repeated rework или настоящий blocker
+после execution. Обычный красный тест, найденный и исправленный внутри
+implementation loop, сам по себе не требует incident comment.
 
-При material failure заменить либо расширить центральные sections:
+Добавить к общему формату:
 
 ```text
-WHAT HAPPENED
-<симптом и текущее состояние>
+Impact
+<Что доказанно затронуто; если production impact не было, так и написать.>
 
-USER IMPACT
-<кто/что затронуто, duration/blast radius только если доказаны>
+Detection and causal chain
+<Как обнаружили и какая подтверждённая цепочка привела к failure.>
 
-DETECTION AND CAUSAL CHAIN
-[Trigger] -> [Failure] -> [Observed impact] -> [Detection]
-
-CAUSE
+Cause
 Confidence: CONFIRMED | PROBABLE | UNKNOWN
-<evidence отдельно от inference; без персонального обвинения>
+<Root cause либо честная граница знания.>
 
-RECOVERY / REWORK
-<что исправлено, откатано или ещё требуется>
-
-PREVENTION AND REMAINING RISK
-<конкретный проверяемый barrier; новый Task только с authority>
+Recovery and prevention
+<Что исправлено/reopened, какие checks повторены, что предотвращает повтор.>
 ```
 
-Если root cause неизвестен, так и написать; не повышать confidence из-за
-правдоподобного объяснения. Разделять mitigation и permanent fix. Action item
-должен иметь observable end state; не писать расплывчатое «улучшить тесты».
+Писать blameless. Не превращать temporal sequence в доказанную causal chain,
+не скрывать uncertainty и не создавать follow-up Task без отдельной authority.
 
-## Диаграммы
+## Task-specific boundary
 
-Использовать одну-две схемы только когда они сокращают объяснение:
-
-- runtime/sequence flow: `[User] -> [UI] -> [API] -> [Store]`;
-- changed boundary: `[Existing] -> [New component] -> [Consumer]`;
-- lifecycle: `[To Do] -> [In Progress] -> [In Review] -> [Done]`;
-- causal chain: `[Trigger] -> [Defect] -> [Impact] -> [Detection] -> [Fix]`;
-- before/after для локального behavior.
-- measured comparison для performance/data, только при сопоставимом evidence.
-
-Держать строку примерно до 80 characters, подписывать неочевидные arrows и
-показывать только участвующие nodes. Для cross-component feature предпочитать
-один context/container-level view; code-level diagram нужен только когда без
-него нельзя понять поведение. Не вставлять diagram ради декоративности.
-
-## Качество и безопасность
-
-- Начинать с outcome, не с процесса агента.
-- Писать для пользователя проекта, объяснять неизвестные terms.
-- Отделять observed evidence, qualified inference и unknown.
-- Не считать report доказательством checks, acceptance или external effect.
-- Не включать secrets, tokens, signed URLs, private data, raw stack traces,
-  exploit details или недоступные пользователю local paths.
-- Не выдумывать metrics, impact, root cause, links, screenshots или results.
-- Не копировать полный batch report во все Tasks; оставить только
-  task-specific meaning и shared batch identity/result.
-- Сохранять concise report для trivial success; при material failure дать
-  достаточную глубину для понимания impact, причины, recovery и prevention.
+В каждый comment включать только evidence конкретной Task и краткую shared batch
+identity. Не копировать полный batch log всем members. При rework публиковать
+delta относительно прошлого user-visible state: исправленные findings, новая
+result identity, повторённые checks и remaining gaps.

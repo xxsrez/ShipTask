@@ -1,6 +1,6 @@
 # Task Manager adapter
 
-Статус: текущий integration profile, 2026-08-15.
+Статус: текущий integration profile, 2026-08-16.
 
 Документ описывает точный OAuth/MCP contract, через который `$ship-tasks`
 работает с Task Manager. Он не задаёт Project, Release, status или permission
@@ -21,10 +21,9 @@
   выборка подтвердила compact `list_tasks`, полный `get_task`, relations,
   provenance, `availableStatuses` и `version`.
 - current local Task Manager source
-  `ba9761cdfb1b260fa49b96378e734ebe2a912af3` 2026-08-16: `update_task`
-  принимает `description` до 100 000 characters вместе со status и current
-  `version`; UI показывает description как plain text/textarea, не как rendered
-  Markdown/Mermaid.
+  `06f19e807bf24829ca47106791eca662f4b36dcf` 2026-08-16: MCP регистрирует
+  `get_task_external_context` для read-only imported comments, но не регистрирует
+  native Task comment create/list tools.
 
 Это датированное подтверждение, а не гарантия будущей схемы. При фактическом
 запуске authoritative остаются текущие tool descriptions и ответы connector.
@@ -134,9 +133,9 @@ batch gate и authorized task acceptance. Failed gate или changes requested
   `To Do`. Не создавать ShipTask Tasks в `Backlog`; при отсутствии `To Do`
   остановиться до write.
 - После write перечитать Task и проверить новый status/version/projection.
-- Для ShipTask delivery report разрешено менять только exact managed block в
-  `description`, сохраняя весь user-authored текст вне sentinels. Report и
-  status можно передать одним optimistic update, затем необходимо read-back.
+- Не менять `description` или другой Task field ради ShipTask delivery report.
+  Report публиковать только через отдельную native Task comment capability,
+  когда она фактически присутствует в current connector contract.
 
 ShipTask обычно начинает с уже созданных задач. `create_task` нужен только для
 отдельно разрешённого defect/task route; invocation skill не даёт такого
@@ -145,9 +144,10 @@ ShipTask обычно начинает с уже созданных задач. 
 ## Текущие capability gaps
 
 MCP connector умеет читать Projects/Releases/Tasks и создавать/изменять Task,
-но не предоставляет tools для:
+но на проверенном current source не предоставляет tools для:
 
-- append-only comments или отдельного task report;
+- native Task comment create/list или отдельного task report; imported comments
+  доступны только как read-only external context;
 - claims, leases, heartbeats и fencing;
 - изменения assignee, labels, parent/subtasks или relations;
 - Project/Release mutation, workflow configuration, sharing, ownership,
@@ -161,10 +161,11 @@ skill необходимо отдельно проверить model-visible Goa
 
 Поэтому текущий Task Manager уже может быть authoritative источником scope,
 acceptance, dependencies и status projection, но не заменяет durable
-coordination runtime. Не использовать `description` как скрытый append-only
-журнал. Current ShipTask contract разрешает один visible replace-in-place
-delivery-report block: он сохраняет исходный description, не изображает
-comments/history и не хранит coordination state. Claims и run state должны
+coordination runtime. Не использовать `description` ни как журнал, ни как
+fallback report storage. На каждом запуске проверять текущий tool contract: при
+появлении native Task comment write публиковать delivery reports туда; пока
+capability отсутствует или неработоспособна, скипать report step как
+`not-available` без блокировки Task/Goal completion. Claims и run state должны
 иметь project-defined durable channel. Если такой channel обязателен, но
 отсутствует, остановиться до execution.
 
@@ -177,8 +178,10 @@ comments/history и не хранит coordination state. Claims и run state д
 3. Проверить, что Task Manager projection совпадает с exact Git/workspace
    result, per-Task targeted gates, exact review-batch gate, authorized
    acceptance и обязательными external effects.
-4. Проверить один актуальный ShipTask delivery-report block в каждой изменённой
-   рабочей Task; report state и exact identity должны совпадать с фактами.
+4. Для каждой изменённой рабочей Task зафиксировать report-comment disposition:
+   `published`, `not-available` или `write-outcome-unknown`. При доступном
+   comment read/list сверить report state и exact identity; отсутствие comments
+   capability не блокирует terminal reconciliation.
 5. Отделить imported historical context от evidence текущего запуска.
 6. Указать capability gaps и project-defined coordination records отдельно от
    Task Manager state.
