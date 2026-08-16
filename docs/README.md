@@ -16,14 +16,17 @@
 - [0002: Managed delivery report внутри Task](decisions/0002-managed-delivery-report-in-task.md)
   — историческое решение о report block в description, заменённое ADR-0003.
 - [0003: Delivery reports только как Task comments](decisions/0003-delivery-reports-as-task-comments.md)
-  — capability-based comments-only contract без изменения description и без
-  блокировки workflow, пока comments недоступны.
+  — исторический comments-only contract без изменения description; его
+  capability-optional часть заменена ADR-0006.
 - [0004: Autonomous continuation и release authority](decisions/0004-autonomous-continuation-and-release-authority.md)
   — task-local defer вместо остановки run, automatic non-production releases и
   explicit-only production boundary.
 - [0005: Automatic terminal acceptance](decisions/0005-automatic-terminal-acceptance.md)
   — terminal-ready Tasks автоматически переходят в Done; feedback возвращается
   через reopen или новую Task, без blocking human-acceptance round-trip.
+- [0006: Delivery comment как обязательный terminal effect](decisions/0006-delivery-comment-as-terminal-effect.md)
+  — после появления native comment tools завершение Task требует
+  опубликованного и перечитанного `COMPLETED` report до перехода в Done.
 
 ## Reference
 

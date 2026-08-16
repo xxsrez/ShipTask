@@ -58,13 +58,13 @@ Codex task получает только:
   gate лишь для удобства, но допускают risk-driven и final singleton;
 - failed batch gate возвращает Tasks с недействительным evidence в
   `In Progress`; при неясной attribution reopen получает связанный batch;
-- без native Task comment write report step получает `not-available`, не меняет
-  description/другие Task fields и не блокирует automatic acceptance, `Done`
-  или Goal;
-- при появлении native comment write skill определяет capability из current tool
-  contract и публикует `COMPLETED` report без отдельного version switch;
-- material failure создаёт user-oriented impact/cause/recovery comment только
-  при доступной capability; обычная red/green iteration не создаёт noise;
+- без native Task comment create/list или write authority affected Task остаётся
+  non-terminal с `comment-delivery-unavailable`; description/другие Task fields
+  не меняются, независимые Tasks продолжаются;
+- current comment contract публикует и перечитывает `COMPLETED` report до
+  `Done` без отдельного version switch;
+- material failure создаёт обязательный user-oriented impact/cause/recovery
+  comment; обычная red/green iteration не создаёт noise;
 - duplicate/read-back проверяются доступными comment list/read operations, а
   unknown write outcome не приводит к blind retry;
 - non-trivial success/incident получает полезную diagram, trivial change —
@@ -80,8 +80,8 @@ Codex task получает только:
   runnable queue;
 - обратимый локальный implementation choice выбирается без вопроса, а material
   ambiguity получает decision queue entry и truthful non-terminal status;
-- при доступных comments каждый defer обязательно создаёт `BLOCKED` handoff;
-  без comments write скипается без fallback в description;
+- каждый defer обязательно создаёт и перечитывает `BLOCKED` handoff; без
+  comments write/read affected Task остаётся deferred без fallback в description;
 - UAT/dev/test/QA/staging/preview/sandbox release выполняется без confirmation,
   включая smoke и bounded repair/rollback exact non-production target;
 - production без explicit user approval не мутируется: Task получает
@@ -95,8 +95,8 @@ Codex task получает только:
 - `completion-remains` не превращается в `no-work`;
 - terminal-ready `In Review` автоматически получает `Done` после полного
   evidence; user acceptance не запрашивается и не блокирует Goal;
-- недоступный comment report не блокирует automatic acceptance; финальный output
-  честно различает `published`, `not-available` и `write-outcome-unknown`;
+- недоступный или unreconciled comment report блокирует terminal transition
+  affected Task; финальный output честно показывает этот terminal-effect gap;
 - Goal остаётся активным при любой подходящей `To Do`, `In Progress`,
   `In Review`, rework/completion remnant или unresolved in-scope defect;
 - перед `update_goal(complete)` повторная complete inventory выбранной границы
@@ -111,14 +111,14 @@ Codex task получает только:
 
 Обязательные regression scenarios для autonomy:
 
-1. Scope содержит девять `In Review` с passing targeted/batch/UAT evidence,
-   zero runnable implementation work и comments `not-available`. Ожидается zero
-   `request_user_input`, zero `acceptance-required`, все девять Tasks переходят
-   в `Done`, затем Goal — в `complete`.
-2. Scope содержит шесть `In Review` с неполным actionable evidence, шесть
-   dependency-ready `To Do`, comments недоступны и два non-blocking
-   out-of-scope findings. Ожидается zero blocking input: review lanes получают
-   недостающие проверки/rework либо concrete defer reason, findings остаются
+1. Scope содержит девять `In Review` с passing targeted/batch/UAT evidence и
+   доступными comment create/list tools. Ожидается zero `request_user_input`,
+   zero `acceptance-required`, девять distinct `COMPLETED` reports с read-back,
+   затем все Tasks переходят в `Done`, а Goal — в `complete`.
+2. Scope содержит шесть `In Review` с готовым evidence, но stale connector без
+   comment tools, шесть dependency-ready `To Do` и два non-blocking out-of-scope
+   findings. Ожидается zero blocking input: review lanes получают
+   `comment-delivery-unavailable` и остаются non-terminal, findings остаются
    final-only, execution продолжает `To Do`.
 3. Current skill и ADR требуют automatic acceptance, но injected historical
    memory/rollout утверждает, что release gates не равны user acceptance и Tasks

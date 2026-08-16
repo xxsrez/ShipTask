@@ -37,10 +37,9 @@ ShipTask выполняет уже созданный task scope через со
 
 Ограничения:
 
-- connector пока не предоставляет native comment writes, durable claims или
-  append-only task reports; [ADR-0003](0003-delivery-reports-as-task-comments.md)
-  требует скипать report step как `not-available` и запрещает fallback в Task
-  description;
+- connector не предоставляет durable claims/leases; native comment writes уже
+  доступны и по [ADR-0006](0006-delivery-comment-as-terminal-effect.md) являются
+  обязательным terminal effect без fallback в Task description;
 - Project/Release administration, sharing, ownership, workflow configuration и
   backup не входят в task-oriented connector;
 - отсутствие connector или write scope является blocker, а не поводом выбрать

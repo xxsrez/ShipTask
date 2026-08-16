@@ -26,13 +26,14 @@ connector/exact scope/Goal/shared authority останавливает run с
   незавершённый Goal блокирует запуск с `TASK CONTEXT ALARM`.
 - Cross-session scheduler, durable claims и отсутствующие connector capabilities
   не изображаются существующими.
-- Delivery report публикуется только как native Task comment, когда current
-  connector действительно предоставляет comment write. Пока capability нет,
-  report step получает `not-available` и скипается; `description` не меняется.
+- Delivery report публикуется только как native Task comment и является
+  обязательным terminal effect. Без comment write/read-back Task остаётся
+  non-terminal с явным blocker; `description` не меняется.
 - Пока существует runnable work, skill не прерывает run task-local вопросами:
   безопасный default выбирается автоматически, сложная Task попадает в decision
-  queue, а остальные продолжаются. При доступных comments defer обязательно
-  получает `BLOCKED` handoff.
+  queue, а остальные продолжаются. Каждый defer обязательно получает
+  опубликованный и перечитанный `BLOCKED` handoff; иначе comment delivery
+  остаётся частью blocker.
 - Dev/test/QA/UAT/staging/preview/sandbox releases автоматически разрешены в
   границах exact Task и проверенного non-production target. Production release
   выполняется только по явному user approval; без него Task откладывается.
@@ -74,13 +75,12 @@ evidence и не могут вернуть ручной gate. `Acceptance criter
 проверяемые completion criteria; feedback после `Done` приходит через
 user-initiated reopen или новую Task.
 
-Когда native comments доступны, пользователь получает report прямо в Task:
-outcome-first объяснение feature, exact evidence и полезную diagram для
-non-trivial flow. Material failure получает отдельный impact/cause/recovery
-analysis с уровнем уверенности и remaining risk. Пока comments недоступны,
-тот же report остаётся в review/interaction output, но не сохраняется через
-другие Task fields. Report не заменяет evidence, но делает его понятным decision
-surface.
+Пользователь получает report прямо в Task: outcome-first объяснение feature,
+exact evidence и полезную diagram для non-trivial flow. Material failure
+получает отдельный impact/cause/recovery analysis с уровнем уверенности и
+remaining risk. Если report нельзя опубликовать и перечитать, workflow не
+маскирует gap другим Task field и не завершает Task. Report не заменяет
+evidence, но является обязательной durable review surface.
 
 ## Границы
 

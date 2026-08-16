@@ -23,8 +23,8 @@ intake-зоной вне рабочего scope ShipTask: skill не берёт 
 - per-Task targeted gate, периодический review-batch gate и их trigger policy;
 - обязательные external effects и способ их независимо проверить;
 - exact release targets, их verified environment class и recovery/smoke policy;
-- disposition native Task comment capability для optional in-Task delivery
-  report: `available` либо `not-available`;
+- native Task comment create/list capability и authority, необходимые для
+  обязательного terminal delivery report и read-back;
 - hard automatic-terminal policy этого workflow и evidence, достаточный для
   terminal transition;
 - отдельно — действительно внешние approval gates, которые нельзя заменить
@@ -190,9 +190,9 @@ targeted gate и candidate evidence. Переводить в `Done` только
 review-batch gate, выполнения Task acceptance criteria, integration и
 обязательных effects. При полном evidence workflow автоматически принимает
 result и переводит Task в `Done`; отдельное подтверждение пользователя не
-требуется. Report comment публиковать при доступной native comments capability,
-но его отсутствие или failed/unsupported comment write само по себе не блокирует
-`Done`.
+требуется. До `Done` обязательно опубликовать и перечитать native `COMPLETED`
+report. Отсутствующий, failed или unreconciled comment write оставляет Task в
+`completion-remains`/`deferred` и блокирует её terminal transition.
 `Canceled` использовать только при подтверждённом canceled outcome. Один status
 никогда не доказывает другой evidence layer.
 
@@ -225,8 +225,8 @@ Goal должен содержать:
   выбранного Project/Release scope до проверенного terminal outcome;
 - `Done when`: повторная complete inventory не находит `To Do`, `In Progress`,
   `In Review`, changes-requested/rework, completion remnants или unresolved
-  in-scope defects, нет deferred decision/authority queue, report-comment
-  disposition честно классифицирован для изменённых Tasks и требования раздела
+  in-scope defects, нет deferred decision/authority queue, обязательные Task
+  comments опубликованы и перечитаны для изменённых Tasks и требования раздела
   11 выполнены;
 - `Verify with`: current Task details/statuses, source/integration identity,
   per-Task targeted gates, exact review-batch gate, automatic acceptance record
@@ -310,8 +310,9 @@ specification и текущий invocation определяют поведени
 
 Не запрашивать ручную приёмку, не создавать reason `acceptance-required`, не
 оставлять terminal-ready Task в `In Review` и не блокировать Goal ожиданием
-фразы «принимаю». При passing evidence автоматически записать completion report
-при доступных comments, обновить Task в `Done`, перечитать её и продолжить scope.
+фразы «принимаю». При passing evidence автоматически записать и перечитать
+обязательный completion report, обновить Task в `Done`, перечитать её и
+продолжить scope.
 
 Если старый run уже оставил Task/Goal в ожидании ручной приёмки, при resume
 удалить retired blocker из текущего reasoning, заново проверить exact evidence
@@ -358,9 +359,9 @@ decision. Не переводить её в `Done`/`Canceled` и не изобр
 В current run вести decision queue с canonical Task ref, reason, last safe
 checkpoint, уже выполненными actions/evidence, recommended default, точным
 decision/authority и resume step. Не переизбирать Task без нового evidence,
-authority или external state change. При доступной native comments capability
-обязательно опубликовать тот же `BLOCKED` handoff в Task; при отсутствии
-comments скипнуть write без изменения `description`.
+authority или external state change. Обязательно опубликовать и перечитать тот
+же `BLOCKED` handoff в Task; при отсутствии comment write/read включить этот
+terminal effect в blocker без изменения `description`.
 
 Когда runnable Tasks остаются, продолжать их без вопроса пользователю. Когда
 остались только deferred Tasks, предъявить одну consolidated decision queue.
@@ -393,8 +394,8 @@ target. Не выводить approval из Task/Release title, acceptance, Goal
 project automation, прошлого approval или самого invocation. Без approval
 выполнить безопасную preparation, release и verification на non-production,
 затем оставить Task в truthful non-terminal status, defer-нуть её с reason
-`production-approval-required`, при доступных comments обязательно записать
-`BLOCKED` report и продолжить остальные Tasks. Не задавать production-вопрос
+`production-approval-required`, обязательно записать и перечитать `BLOCKED`
+report и продолжить остальные Tasks. Не задавать production-вопрос
 пока есть runnable work.
 
 Если target нельзя надёжно классифицировать как non-production, считать его
@@ -525,22 +526,24 @@ rework. Не маскировать конфликт незапланирова�
    разделу 5.5; production без explicit approval defer-нуть. Не повторять один
    дорогой effect для каждого member.
 9. Сформировать batch/review packet как evidence artifact, а не user gate. Не
-   публиковать `ACCEPTANCE READY` и не запрашивать ручную приёмку. Если comments
-   недоступны, классифицировать report step как `not-available` и продолжить без
-   Task field fallback.
+   публиковать `ACCEPTANCE READY` и не запрашивать ручную приёмку. До terminal
+   transition опубликовать и перечитать обязательный `COMPLETED` report без Task
+   field fallback.
 10. При changes requested либо failed batch gate вернуть Tasks, чьё evidence
     стало недействительным, из `In Review` в `In Progress`. При доступной native
-    comments capability опубликовать понятный rework/incident comment; иначе
-    скипнуть только report step. Сохранить текущие lanes, выполнить rework и
+    comments capability опубликовать понятный rework/incident comment. Если
+    comment write недоступен, defer-нуть affected Task с явным blocker.
+    Сохранить текущие lanes, выполнить rework и
     targeted retest, затем собрать и проверить новый exact batch. После полного
-    passing terminal evidence автоматически принять result, опубликовать final
-    report comment, если capability доступна, независимо обновить Task в `Done`
+    passing terminal evidence автоматически принять result, обязательно
+    опубликовать и перечитать final report comment, затем обновить Task в `Done`
     и перечитать. Аналогично
     обработать подтверждённый `Canceled` outcome.
 
 При любом task-local blocker сохранить last safe checkpoint, truthful status и
-decision queue entry; при доступных comments обязательно опубликовать `BLOCKED`
-report. Освободить lane и продолжить другие dependency-ready Tasks. Не
+decision queue entry; обязательно опубликовать и перечитать `BLOCKED` report.
+Если comment write/read недоступен, включить его в blocker. Освободить lane и
+продолжить другие dependency-ready Tasks. Не
 переизбирать deferred Task без нового evidence/authority/state change.
 
 Разделять Task Manager state, source result, checks, automatic acceptance
@@ -584,29 +587,27 @@ gate до `Done`.
 
 ### 9.1 Delivery report как Task comment
 
-Следовать [runtime format](../../ship-tasks/references/delivery-report.md) и
-[ADR-0003](../decisions/0003-delivery-reports-as-task-comments.md). На каждом
-запуске проверить current Task Manager tool contract:
-
-1. `available` — connector явно предоставляет native comment-create operation
-   для canonical Task ref и текущая authority позволяет её вызвать;
-2. `not-available` — operation отсутствует, не поддерживается фактическим
-   connector, не разрешена текущей authority либо сообщает, что feature ещё не
-   доступна.
+Следовать [runtime format](../../ship-tasks/references/delivery-report.md),
+[ADR-0003](../decisions/0003-delivery-reports-as-task-comments.md) и
+[ADR-0006](../decisions/0006-delivery-comment-as-terminal-effect.md). На каждом
+запуске проверить, что current Task Manager tool contract предоставляет native
+comment create и list/read для canonical Task ref, а текущая authority разрешает
+write.
 
 Imported comments из `get_task_external_context` являются read-only provenance
 и не доказывают native comment write. Не выводить capability из roadmap, версии
 или прошлой сессии. Никогда не записывать report в `description`, acceptance,
 status text или другой Task field как fallback.
 
-При `not-available` скипнуть report write, сохранить report в review/interaction
-output и продолжить основной workflow. Этот gap сам по себе не вызывает
-`TASK CONTEXT ALARM`, не создаёт `completion-remains` и не блокирует `Done` или
-Goal completion. Если advertised write завершился ошибкой либо outcome
-неизвестен, не повторять его вслепую; показать `not-available` или
-`write-outcome-unknown` с причиной и также не блокировать terminal workflow.
+Если create отсутствует/unsupported/unauthorized либо write outcome невозможно
+reconciliate через read-back, не повторять write вслепую и не использовать Task
+fields как fallback. Сохранить truthful non-terminal status, классифицировать
+Task как `completion-remains` или `deferred`, добавить
+`comment-delivery-unavailable`/`write-outcome-unknown` в decision queue и
+продолжить независимые Tasks. Этот gap блокирует `Done` affected Task и Goal
+completion, пока Task остаётся в рабочем scope.
 
-Когда capability `available`:
+При доступной capability:
 
 - опубликовать `COMPLETED` report при terminal completion каждой изменённой
   рабочей Task;
@@ -657,8 +658,9 @@ trigger, root cause с confidence, recovery/rework, prevention и remaining risk
   включает в exact scope.
 - Для нового out-of-scope defect не выполнять code или scope-changing Task
   Manager writes. Если finding блокирует текущую Task, defer-нуть только её,
-  при доступных comments обязательно опубликовать `BLOCKED`/`decision required`
-  report и продолжить независимые Tasks. Включить решение в consolidated queue.
+  обязательно опубликовать и перечитать `BLOCKED`/`decision required` report;
+  при невозможности включить comment delivery в blocker и продолжить
+  независимые Tasks. Включить решение в consolidated queue.
 - Если новый out-of-scope finding не блокирует ни одну in-scope Task, записать
   его как non-blocking final finding и продолжить. Не создавать Task, не
   расширять Goal, не вызывать user input и не удерживать completion текущего
@@ -688,10 +690,9 @@ Completion требует:
 - automatically accepted results присутствуют в exact integration state;
 - final project checks относятся к exact result;
 - обязательные external effects независимо проверены;
-- для каждой изменённой или materially failed рабочей Task report-comment
-  disposition отражён как `published`, `not-available` или
-  `write-outcome-unknown`; отсутствие comment capability не является evidence
-  gap основного результата;
+- для каждой изменённой или materially failed рабочей Task обязательный
+  report-comment опубликован и перечитан; `not-available` или
+  `write-outcome-unknown` остаются незавершённым terminal effect;
 - все рабочие и изменённые Tasks перечитаны и их current statuses соответствуют
   фактам; исключённые Backlog и terminal counts отражены отдельно;
 - обязательный Goal относится к exact scope и оставался активным, пока
@@ -720,9 +721,9 @@ decisions/authority needed.
 - Не превращать идею или specification в новый task scope без отдельной
   planning-команды.
 - Не использовать другой task provider или generic fallback.
-- Не изображать comments, durable claims, background scheduler, Project/Release
+- Не изображать durable claims, background scheduler, Project/Release
   administration или bulk mutation существующими connector capabilities и не
-  использовать `description` как fallback для отсутствующих comments.
+  использовать `description` как fallback при проблеме с comments.
 - Не максимизировать agent count без dependency, isolation, integration и
   review capacity.
 - Не считать Task status, plan, worker report, commit, check или deployment

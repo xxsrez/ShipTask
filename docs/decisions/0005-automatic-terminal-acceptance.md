@@ -1,6 +1,7 @@
 # 0005. Automatic terminal acceptance
 
 Статус: accepted, 2026-08-16. Заменяет human-acceptance часть ADR-0004.
+Порядок обязательного delivery comment перед `Done` уточнён ADR-0006.
 
 ## Контекст
 
@@ -27,8 +28,8 @@ automatic acceptance недостаточно: нужен явный retirement 
   `acceptance-required`, не удерживать Task в `In Review` и не переводить Goal в
   `blocked` только ради ручной приёмки.
 - Считать `In Review` actionable completion stage. После passing evidence
-  опубликовать `COMPLETED` report при доступных comments, независимо перевести
-  Task в `Done`, выполнить read-back и продолжить scope.
+  опубликовать и перечитать обязательный `COMPLETED` report, затем перевести
+  Task в `Done`, выполнить Task read-back и продолжить scope.
 - При failed/insufficient evidence автоматически выполнить разрешённый
   rework/retest. Defer использовать только для конкретного material decision,
   отсутствующей внешней authority или state change, а не как surrogate ручной

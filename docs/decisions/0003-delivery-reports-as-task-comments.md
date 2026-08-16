@@ -1,7 +1,8 @@
 # 0003. Delivery reports только как Task comments
 
 Статус: accepted, 2026-08-16. Заменяет
-[ADR-0002](0002-managed-delivery-report-in-task.md).
+[ADR-0002](0002-managed-delivery-report-in-task.md). Capability-optional часть
+этого решения заменена [ADR-0006](0006-delivery-comment-as-terminal-effect.md).
 
 ## Контекст
 

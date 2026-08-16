@@ -90,11 +90,12 @@ shared integration state повреждён/неоднозначен либо в
 evidence set доказывает acceptance criteria, targeted и applicable batch gates,
 integration identity, required effects и отсутствие unresolved in-scope finding.
 
-При таком результате не вызывать user input и не оставлять Task в `In Review`:
-опубликовать `COMPLETED` при доступных comments, перевести Task в `Done`,
-перечитать status/version и продолжить scope. После `Done` user reopen или новая
-Task запускают обычный последующий rework cycle; прошлый report остаётся только
-historical checkpoint.
+При таком результате не вызывать user input и не оставлять Task в `In Review`
+ради human acceptance: опубликовать и перечитать обязательный `COMPLETED`, затем
+перевести Task в `Done`, перечитать status/version и продолжить scope. Если
+comment write/read недоступен, Task остаётся non-terminal с отдельным
+terminal-effect blocker. После `Done` user reopen или новая Task запускают
+обычный последующий rework cycle; прошлый report остаётся historical checkpoint.
 
 Automatic acceptance не заменяет production approval, destructive/secret/
 privacy authority или обязательный approval внешнего approver.
@@ -155,13 +156,14 @@ deferred Task: записать его в final findings, не расширят�
 
 ## Comment handoff
 
-Если native Task comments доступны, для каждого defer обязательно опубликовать
-`BLOCKED` delivery-report comment до освобождения lane. Включить все поля
-decision queue, user impact/remaining risk и report key для exact Task/result.
+Для каждого defer обязательно опубликовать и перечитать `BLOCKED`
+delivery-report comment до освобождения lane. Включить все поля decision queue,
+user impact/remaining risk и report key для exact Task/result.
 
 Если comments недоступны или write outcome unknown, не использовать
-`description`/другой field как fallback. Сохранить disposition и тот же handoff
-в consolidated interaction output, затем продолжить runnable work.
+`description`/другой field как fallback. Добавить comment delivery в blocker,
+сохранить тот же handoff в consolidated interaction output, оставить affected
+Task non-terminal и продолжить независимую runnable work.
 
 ## Non-production release
 

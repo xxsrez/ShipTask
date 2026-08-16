@@ -10,20 +10,17 @@
 
 Профиль сверён с:
 
-- Task Manager `cf02223fe782304e83b4b7711c9f5dfd943d4b53`:
+- Task Manager `374e33df755c49b351e943cc68ec4fe82369ef62`:
   `docs/specs/agent-api.md`, ADR-0006, ADR-0008 и
   `lib/task-manager-mcp.ts`;
-- Task Manager Marketplace
-  `3e18568af206a80d8d9497c13d923d709925d9b5`:
+- Task Manager Marketplace plugin 0.4.0,
+  `9a5adc2def98bef89951330bc5d1e8123db888e1`:
   `plugins/task-manager/skills/task-manager/SKILL.md`;
-- живым connector 2026-08-15: `get_workspace` подтвердил read и task-write
-  capabilities, status catalog и доступность task-oriented tools; read-only
-  выборка подтвердила compact `list_tasks`, полный `get_task`, relations,
-  provenance, `availableStatuses` и `version`.
-- current local Task Manager source
-  `06f19e807bf24829ca47106791eca662f4b36dcf` 2026-08-16: MCP регистрирует
-  `get_task_external_context` для read-only imported comments, но не регистрирует
-  native Task comment create/list tools.
+- live connector 2026-08-16: anonymous `tools/list` подтвердил task-oriented
+  surface, включая `list_task_comments`, `get_task_thread`,
+  `add_task_comment`, reply/edit/delete, reactions и thread resolution; current
+  authenticated session может потребовать plugin refresh/new Codex Task, чтобы
+  загрузить этот расширенный tool snapshot.
 
 Это датированное подтверждение, а не гарантия будущей схемы. При фактическом
 запуске authoritative остаются текущие tool descriptions и ответы connector.
@@ -69,6 +66,8 @@ project context по ADR-0004.
 7. Читать `get_task_external_context` только когда `provenance` сообщает о
    таком контексте и imported comments, attachments или branch metadata
    материальны для acceptance либо boundary dependencies.
+8. Читать native discussion через `list_task_comments`/`get_task_thread` перед
+   report deduplication и после write; не смешивать её с imported context.
 
 `TaskSummary` подходит для inventory и выбора. Описание, lifecycle, relations,
 subtasks, access, provenance, current `version` и `availableStatuses` находятся
@@ -141,8 +140,8 @@ criteria, exact batch gate, integration и required effects: ShipTask прини
   остановиться до write.
 - После write перечитать Task и проверить новый status/version/projection.
 - Не менять `description` или другой Task field ради ShipTask delivery report.
-  Report публиковать только через отдельную native Task comment capability,
-  когда она фактически присутствует в current connector contract.
+  Report публиковать через `add_task_comment` со стабильным idempotency key,
+  проверкой duplicate и read-back до terminal Task transition.
 
 ShipTask обычно начинает с уже созданных задач. `create_task` нужен только для
 отдельно разрешённого defect/task route; invocation skill не даёт такого
@@ -150,11 +149,10 @@ ShipTask обычно начинает с уже созданных задач. 
 
 ## Текущие capability gaps
 
-MCP connector умеет читать Projects/Releases/Tasks и создавать/изменять Task,
-но на проверенном current source не предоставляет tools для:
+MCP connector умеет читать Projects/Releases/Tasks/native comments,
+создавать/изменять Tasks и выполнять native comment operations, но не
+предоставляет tools для:
 
-- native Task comment create/list или отдельного task report; imported comments
-  доступны только как read-only external context;
 - claims, leases, heartbeats и fencing;
 - изменения assignee, labels, parent/subtasks или relations;
 - Project/Release mutation, workflow configuration, sharing, ownership,
@@ -166,15 +164,13 @@ skill необходимо отдельно проверить model-visible Goa
 создать либо продолжить совместимый Goal. Если обязательный Goal нельзя
 сформировать или удерживать, остановиться до mutations с `TASK CONTEXT ALARM`.
 
-Поэтому текущий Task Manager уже может быть authoritative источником scope,
-acceptance, dependencies и status projection, но не заменяет durable
-coordination runtime. Не использовать `description` ни как журнал, ни как
-fallback report storage. На каждом запуске проверять текущий tool contract: при
-появлении native Task comment write публиковать delivery reports туда; пока
-capability отсутствует или неработоспособна, скипать report step как
-`not-available` без блокировки Task/Goal completion. Claims и run state должны
-иметь project-defined durable channel. Если такой channel обязателен, но
-отсутствует, остановиться до execution.
+Поэтому текущий Task Manager является authoritative источником scope,
+acceptance, dependencies, status projection и durable task-specific delivery
+reports, но не заменяет coordination runtime. Не использовать `description` ни
+как журнал, ни как fallback report storage. Stale session без comment tools
+оставляет affected Task non-terminal до plugin/tool refresh; claims и run state
+по-прежнему требуют project-defined durable channel. Если такой channel
+обязателен, но отсутствует, остановиться до execution.
 
 ## Completion reconciliation
 
@@ -185,10 +181,9 @@ capability отсутствует или неработоспособна, ск�
 3. Проверить, что Task Manager projection совпадает с exact Git/workspace
    result, per-Task targeted gates, exact review-batch gate, automatic
    acceptance decision и обязательными external effects.
-4. Для каждой изменённой рабочей Task зафиксировать report-comment disposition:
-   `published`, `not-available` или `write-outcome-unknown`. При доступном
-   comment read/list сверить report state и exact identity; отсутствие comments
-   capability не блокирует terminal reconciliation.
+4. Для каждой изменённой рабочей Task проверить published/read-back report с
+   exact state/result identity. `not-available` или `write-outcome-unknown`
+   остаются terminal-effect gap и не разрешают `Done` affected Task.
 5. Отдельно показать deferred Tasks и их decision/authority queue; они сохраняют
    truthful non-terminal status и удерживают Goal активным.
 6. Отделить imported historical context от evidence текущего запуска.

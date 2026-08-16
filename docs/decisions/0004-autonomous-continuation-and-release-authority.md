@@ -26,11 +26,11 @@ production release. Terminal acceptance теперь определяется AD
   authority либо неоднозначен и рискован, переводить только эту Task в runtime
   disposition `deferred`, сохранять truthful non-terminal status и продолжать
   независимые Tasks. Не создавать отдельную Task и не закрывать исходную.
-- При доступной native comments capability обязательно публиковать в deferred
-  Task `BLOCKED` report: причина, last safe checkpoint, уже выполненное,
-  рекомендуемый default, точное решение/authority и resume step. Если comments
-  недоступны, скипать write без fallback в `description` и включать те же данные
-  в consolidated decision queue.
+- Обязательно публиковать в deferred Task `BLOCKED` report: причина, last safe
+  checkpoint, уже выполненное, рекомендуемый default, точное решение/authority
+  и resume step. Если comment write/read недоступен, включать его доставку в
+  blocker без fallback в `description` и сохранять те же данные в consolidated
+  decision queue.
 - Не переизбирать deferred Task в том же run без нового evidence, authority или
   внешнего state change. Когда runnable work исчерпан, показать один
   consolidated decision queue вместо серии interrupting questions.
@@ -80,13 +80,13 @@ production release. Terminal acceptance теперь определяется AD
   inventory и доказанный `runnable_count = 0`;
 - обычные dev/UAT releases не получают production-style confirmation friction;
 - production остаётся жёсткой, явно авторизуемой границей;
-- пользователь получает одну компактную decision queue и durable Task comments
-  там, где connector это поддерживает.
+- пользователь получает одну компактную decision queue и обязательные durable
+  Task comments.
 
 Ограничения:
 
-- без comments deferred state живёт только в current run/interaction output и
-  должен быть восстановлен из Task/external state при resume;
+- stale connector без comments оставляет affected Task deferred и требует
+  refresh/reconnect; interaction output сохраняет handoff до resume;
 - Task Manager status catalog пока не имеет обязательного portable `Blocked`
   status, поэтому defer не маскируется ложным terminal/status transition;
 - automatic terminal acceptance регулируется ADR-0005 и не расширяет

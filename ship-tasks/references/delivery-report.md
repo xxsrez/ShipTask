@@ -34,12 +34,14 @@ authority или сообщает, что feature ещё не работает. 
 
 1. Не вызывать `update_task` ради report.
 2. Не менять `description`, acceptance, status text или другой Task field.
-3. Сохранить report в review/interaction output.
-4. Показать disposition `not-available` и продолжить основной workflow.
+3. Сохранить report и blocker в review/interaction output.
+4. Оставить Task truthful non-terminal, классифицировать её как
+   `completion-remains`/`deferred` и продолжить независимый workflow.
 
-Этот skip не является `TASK CONTEXT ALARM`, `completion-remains` или blocker для
-`Done`/Goal. Как только current connector фактически предоставляет native
-comment write, использовать его без ожидания отдельного ShipTask version gate.
+Этот gap не является global `TASK CONTEXT ALARM`, но блокирует `Done` affected
+Task и Goal completion, пока Task остаётся в scope. Как только current connector
+предоставляет native comment write/read, продолжить с report step без отдельного
+ShipTask version gate.
 
 ## Write и reconciliation
 
@@ -47,8 +49,8 @@ comment write, использовать его без ожидания отде�
   Task.
 - Публиковать `REWORK REQUIRED`/`BLOCKED` report после material failure,
   changes-requested или blocker, который важно объяснить пользователю.
-- Для каждого task-local defer обязательно публиковать `BLOCKED` report, если
-  comments доступны; это durable handoff перед продолжением других Tasks.
+- Для каждого task-local defer обязательно публиковать `BLOCKED` report; если
+  comments недоступны, сам comment delivery становится частью blocker.
 - Не публиковать `ACCEPTANCE READY`: terminal-ready evidence автоматически
   приводит к `COMPLETED`; не писать comment на каждую внутреннюю red/green
   iteration.
@@ -59,7 +61,8 @@ comment write, использовать его без ожидания отде�
   read-back, если connector предоставляет отдельное чтение.
 - При unknown write outcome не повторять create вслепую. Сначала искать report
   через comment list/read; если это невозможно, показать
-  `write-outcome-unknown` и продолжить без duplicate risk.
+  `write-outcome-unknown`, оставить Task non-terminal и продолжить только
+  независимую работу без duplicate risk.
 - Comment write и status update считать отдельными side effects, пока current
   connector явно не гарантирует atomicity.
 
