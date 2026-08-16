@@ -37,8 +37,8 @@ comments отсутствует. Эта capability планируется отд
   `completion-remains` и не препятствие для `Done` или Goal completion.
 - Когда comments доступны, писать user-facing report при terminal completion и
   при material failure/rework/blocker, который важно объяснить пользователю.
-  Acceptance-ready comment допустим, когда он служит реальным review surface.
-  Не комментировать каждую внутреннюю red/green итерацию.
+  Не писать `ACCEPTANCE READY`: passing terminal evidence автоматически ведёт
+  к `COMPLETED`. Не комментировать каждую внутреннюю red/green итерацию.
 - Перед созданием комментария использовать read/list capability, если она есть,
   чтобы не дублировать тот же `Task + state + exact result`. После write
   проверить созданный comment, когда connector даёт read-back. При unknown

@@ -6,7 +6,7 @@
 
 - [Ship Tasks](specs/ship-tasks.md) — канонический Task Manager-only workflow
   от уже созданных Tasks через обязательный Goal lifecycle, per-Task targeted
-  gates и периодические review-batch gates до authorized acceptance и terminal
+  gates и периодические review-batch gates до automatic acceptance и terminal
   evidence.
 
 ## Decisions
@@ -21,6 +21,9 @@
 - [0004: Autonomous continuation и release authority](decisions/0004-autonomous-continuation-and-release-authority.md)
   — task-local defer вместо остановки run, automatic non-production releases и
   explicit-only production boundary.
+- [0005: Automatic terminal acceptance](decisions/0005-automatic-terminal-acceptance.md)
+  — terminal-ready Tasks автоматически переходят в Done; feedback возвращается
+  через reopen или новую Task, без blocking human-acceptance round-trip.
 
 ## Reference
 

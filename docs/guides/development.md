@@ -59,7 +59,8 @@ Codex task получает только:
 - failed batch gate возвращает Tasks с недействительным evidence в
   `In Progress`; при неясной attribution reopen получает связанный batch;
 - без native Task comment write report step получает `not-available`, не меняет
-  description/другие Task fields и не блокирует acceptance, `Done` или Goal;
+  description/другие Task fields и не блокирует automatic acceptance, `Done`
+  или Goal;
 - при появлении native comment write skill определяет capability из current tool
   contract и публикует `COMPLETED` report без отдельного version switch;
 - material failure создаёт user-oriented impact/cause/recovery comment только
@@ -86,17 +87,16 @@ Codex task получает только:
 - production без explicit user approval не мутируется: Task получает
   `production-approval-required`, defer-ится, а другие Tasks продолжаются;
 - explicit production approval для exact target разрешает production workflow,
-  но не отменяет verification/acceptance gates;
+  но не отменяет verification/terminal gates;
 - когда остаются только deferred Tasks, skill выдаёт одну consolidated decision
   queue и удерживает Goal/plan незавершёнными;
 - перед любым blocking user-input skill повторяет complete inventory и требует
   `runnable_count = 0`; cached review precedence не является доказательством;
 - `completion-remains` не превращается в `no-work`;
-- `In Review` после успешных checks/external effect, но без authorized
-  acceptance, оставляет plan и Goal активными и запрещает completion claim;
-- authorized acceptance допускает `Done` независимо от недоступного comment
-  report; финальный output честно различает `published`, `not-available` и
-  `write-outcome-unknown`;
+- terminal-ready `In Review` автоматически получает `Done` после полного
+  evidence; user acceptance не запрашивается и не блокирует Goal;
+- недоступный comment report не блокирует automatic acceptance; финальный output
+  честно различает `published`, `not-available` и `write-outcome-unknown`;
 - Goal остаётся активным при любой подходящей `To Do`, `In Progress`,
   `In Review`, rework/completion remnant или unresolved in-scope defect;
 - перед `update_goal(complete)` повторная complete inventory выбранной границы
@@ -109,12 +109,17 @@ Codex task получает только:
 - parallel request честно ограничивается dependency/review capacity;
 - изменения после `changes-requested` возвращаются как delta review.
 
-Обязательный regression scenario для autonomy: scope содержит одновременно
-шесть acceptance-waiting `In Review`, шесть dependency-ready `To Do`, comments
-недоступны и review находит два non-blocking out-of-scope findings. Ожидается
-zero `request_user_input`: review Tasks становятся deferred, findings остаются
-final-only, а execution немедленно переходит к `To Do`. Blocking consolidated
-input допустим только после fresh inventory с `runnable_count = 0`.
+Обязательные regression scenarios для autonomy:
+
+1. Scope содержит девять `In Review` с passing targeted/batch/UAT evidence,
+   zero runnable implementation work и comments `not-available`. Ожидается zero
+   `request_user_input`, zero `acceptance-required`, все девять Tasks переходят
+   в `Done`, затем Goal — в `complete`.
+2. Scope содержит шесть `In Review` с неполным actionable evidence, шесть
+   dependency-ready `To Do`, comments недоступны и два non-blocking
+   out-of-scope findings. Ожидается zero blocking input: review lanes получают
+   недостающие проверки/rework либо concrete defer reason, findings остаются
+   final-only, execution продолжает `To Do`.
 
 Не передавайте тестовому агенту ожидаемый ответ или скрытую diagnosis.
 

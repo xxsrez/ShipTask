@@ -1,7 +1,7 @@
 interface:
   display_name: "Ship Tasks"
   short_description: "Доставить Task Manager scope до результата"
-  default_prompt: "Используй $ship-tasks, чтобы автономно выполнить выбранный Task Manager scope под обязательным Goal: выбирай безопасные defaults, defer-ь task-local blockers и продолжай остальные Tasks, автоматически выпускай в verified non-production environments, не релизь production без explicit user approval и при доступных comments публикуй delivery/BLOCKED reports без изменения description."
+  default_prompt: "Используй $ship-tasks, чтобы автономно выполнить выбранный Task Manager scope под обязательным Goal: выбирай безопасные defaults, defer-ь task-local blockers, автоматически принимай terminal-ready Tasks и выпускай в verified non-production environments, не релизь production без explicit user approval и при доступных comments публикуй delivery/BLOCKED reports без изменения description."
 
 dependencies:
   tools:

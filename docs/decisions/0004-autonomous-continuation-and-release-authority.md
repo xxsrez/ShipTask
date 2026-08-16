@@ -1,13 +1,14 @@
 # 0004. Autonomous continuation и release authority
 
-Статус: accepted, 2026-08-16.
+Статус: accepted, 2026-08-16. Human-acceptance часть заменена
+[ADR-0005](0005-automatic-terminal-acceptance.md).
 
 ## Контекст
 
 ShipTask рассчитан на долгий автономный run по нескольким Tasks. Вопрос по
 одной Task не должен останавливать независимую работу во всём scope. При этом
-автономность не должна превращаться в выдуманную acceptance authority,
-необратимое решение или неразрешённый production release.
+автономность не должна превращаться в необратимое решение или неразрешённый
+production release. Terminal acceptance теперь определяется ADR-0005.
 
 Пользователь отдельно установил release boundary: обычные in-scope releases в
 локальные, development, test, QA, UAT, staging, preview и sandbox environments
@@ -88,5 +89,5 @@ ShipTask рассчитан на долгий автономный run по не
   должен быть восстановлен из Task/external state при resume;
 - Task Manager status catalog пока не имеет обязательного portable `Blocked`
   status, поэтому defer не маскируется ложным terminal/status transition;
-- автономный default не заменяет human acceptance там, где она остаётся
-  terminal gate.
+- automatic terminal acceptance регулируется ADR-0005 и не расширяет
+  production/destructive/external authority.

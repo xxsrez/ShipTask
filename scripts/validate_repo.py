@@ -26,6 +26,9 @@ COMMENT_REPORT_DECISION_FILE = (
 AUTONOMY_DECISION_FILE = (
     ROOT / "docs" / "decisions" / "0004-autonomous-continuation-and-release-authority.md"
 )
+AUTO_ACCEPTANCE_DECISION_FILE = (
+    ROOT / "docs" / "decisions" / "0005-automatic-terminal-acceptance.md"
+)
 
 REQUIRED_FILES = (
     ROOT / "README.md",
@@ -42,6 +45,7 @@ REQUIRED_FILES = (
     REPORT_DECISION_FILE,
     COMMENT_REPORT_DECISION_FILE,
     AUTONOMY_DECISION_FILE,
+    AUTO_ACCEPTANCE_DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
@@ -124,7 +128,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Любая `In Review` Task означает `completion-remains`",
         "per-Task targeted gate",
         "review-batch gate",
-        "passing exact batch gate",
+        "passing acceptance criteria, exact batch gate",
         "final review batch прошёл gate",
         "delivery-report reference",
         "native comment-create",
@@ -135,11 +139,13 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "`deferred`",
         "`runnable_count = 0`",
         "Review precedence",
+        "автоматически принять exact result",
+        "Не запрашивать user acceptance",
         "verified non-production target",
         "Никогда не выполнять production release",
     )
     required_spec_fragments = (
-        "### 5.3 Terminal invariant и acceptance authority",
+        "### 5.3 Terminal invariant и automatic acceptance",
         "### 6.1 Двухуровневая verification",
         "Не запускать полный дорогой project gate для каждой Task",
         "Failed batch gate сначала локализовать",
@@ -153,6 +159,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "одну consolidated decision queue",
         "blocking input запрещён",
         "non-blocking final finding",
+        "не блокировать Goal ожиданием",
+        "Reopen исходной Task",
     )
 
     for path, fragments in (
@@ -176,7 +184,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "`not-available`",
         "`write-outcome-unknown`",
         "COMPLETED",
-        "ACCEPTANCE READY",
+        "Не публиковать `ACCEPTANCE READY`",
         "REWORK REQUIRED",
         "Confidence: CONFIRMED | PROBABLE | UNKNOWN",
     ):
@@ -189,6 +197,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Не задавать пользователю вопрос посреди runnable queue",
         "runnable_count = actionable To Do",
         "blocking input",
+        "Automatic acceptance",
+        "Reason `acceptance-required` запрещён",
         "Deferred Task",
         "обязательно опубликовать",
         "Non-production release",
@@ -210,6 +220,22 @@ def validate_workflow_contract(errors: list[str]) -> None:
                 fail(
                     errors,
                     f"{path.relative_to(ROOT)} contains retired description-report contract {forbidden!r}",
+                )
+
+    for path in (SKILL_FILE, SPEC_FILE, REPORT_REFERENCE, AUTONOMY_REFERENCE):
+        text = path.read_text(encoding="utf-8")
+        for forbidden in (
+            "По умолчанию acceptance — явное решение пользователя",
+            "По умолчанию acceptance является явным решением пользователя",
+            "После authorized acceptance",
+            "zero unaccepted review-ready candidates",
+            "Публиковать `ACCEPTANCE READY` только",
+            "acceptance-ready report",
+        ):
+            if forbidden in text:
+                fail(
+                    errors,
+                    f"{path.relative_to(ROOT)} contains retired human-acceptance contract {forbidden!r}",
                 )
 
 

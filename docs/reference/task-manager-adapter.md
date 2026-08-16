@@ -181,8 +181,8 @@ capability отсутствует или неработоспособна, ск�
 1. Перечитать все in-scope Tasks по canonical refs.
 2. Сверить status, `version`, relations и незавершённые boundary dependencies.
 3. Проверить, что Task Manager projection совпадает с exact Git/workspace
-   result, per-Task targeted gates, exact review-batch gate, authorized
-   acceptance и обязательными external effects.
+   result, per-Task targeted gates, exact review-batch gate, automatic
+   acceptance decision и обязательными external effects.
 4. Для каждой изменённой рабочей Task зафиксировать report-comment disposition:
    `published`, `not-available` или `write-outcome-unknown`. При доступном
    comment read/list сверить report state и exact identity; отсутствие comments
@@ -197,5 +197,5 @@ capability отсутствует или неработоспособна, ск�
    ShipTask.
 
 Task Manager state доказывает только собственную projection. Он не доказывает
-commit, merge, deployment, UAT, authorized acceptance или внешний эффект без
-независимого evidence.
+commit, merge, deployment, UAT, automatic acceptance decision или внешний
+эффект без независимого evidence.

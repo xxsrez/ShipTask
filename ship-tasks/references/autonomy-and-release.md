@@ -1,12 +1,14 @@
 # Autonomous continuation и release authority
 
 Использовать этот reference для long-running multi-Task scope, task-local
-questions, missing acceptance/authority и любых release/deploy effects.
+questions, missing authority и любых release/deploy effects. Automatic terminal
+acceptance задана ADR-0005 и канонической specification.
 
 ## Содержание
 
 - Run invariant
 - Decision ladder
+- Automatic acceptance
 - Deferred Task
 - Comment handoff
 - Non-production release
@@ -35,8 +37,8 @@ runnable_count = actionable To Do + actionable In Progress
 Не включать уже deferred Tasks. При `runnable_count > 0` blocking input
 запрещён: сохранить decision, освободить lane и выбрать следующую runnable Task.
 Не использовать cached disposition или review precedence как замену fresh gate.
-Review packet, `ACCEPTANCE READY` report и published comment являются handoff,
-а не разрешением приостановить оставшиеся implementation/resume lanes.
+Review packet и published comment являются evidence/handoff, а не разрешением
+приостановить оставшиеся implementation/resume lanes или ждать user acceptance.
 
 Global `TASK CONTEXT ALARM` сохранять только для конфликта connector, exact
 scope, Goal, ownership, integration/shared state или authority, из-за которого
@@ -63,8 +65,8 @@ scope, Goal, ownership, integration/shared state или authority, из-за к�
 Использовать `deferred`, если Task требует:
 
 - material product/architecture choice с разными observable outcomes;
-- human acceptance без standing acceptance authority;
 - production approval;
+- обязательный approval внешнего approver, прямо заданный Task/project policy;
 - out-of-scope change или новую Task authority;
 - destructive/secret/privacy/cost/external-recipient authority;
 - решения ambiguous requirement после bounded research;
@@ -80,14 +82,31 @@ scope, Goal, ownership, integration/shared state или authority, из-за к�
 shared integration state повреждён/неоднозначен либо все remaining mutations
 зависят от одной общей отсутствующей authority.
 
+## Automatic acceptance
+
+Не считать terminal acceptance пользовательским вопросом. Invocation
+`$ship-tasks` разрешает автоматически принять exact result, когда полный
+evidence set доказывает acceptance criteria, targeted и applicable batch gates,
+integration identity, required effects и отсутствие unresolved in-scope finding.
+
+При таком результате не вызывать user input и не оставлять Task в `In Review`:
+опубликовать `COMPLETED` при доступных comments, перевести Task в `Done`,
+перечитать status/version и продолжить scope. После `Done` user reopen или новая
+Task запускают обычный последующий rework cycle; прошлый report остаётся только
+historical checkpoint.
+
+Automatic acceptance не заменяет production approval, destructive/secret/
+privacy authority или обязательный approval внешнего approver.
+
 ## Deferred Task
 
 Сохранять truthful non-terminal status:
 
 - `To Do` — execution не начинался;
 - `In Progress` — существует partial implementation/rework;
-- `In Review` — exact candidate machine-verified, но ждёт acceptance или
-  production approval.
+- `In Review` — exact candidate machine-verified, но ждёт material decision,
+  production/external approval или недостающий terminal evidence. Обычный
+  terminal-ready result не defer-ить: автоматически перевести в `Done`.
 
 Не переводить в `Done`, `Canceled`, `Duplicate` и не изобретать provider status
 `Blocked`. Не создавать replacement/follow-up Task без отдельной authority.
@@ -105,9 +124,10 @@ Decision/authority needed: <one exact user/external decision>
 Resume step: <first safe next action after unblock>
 ```
 
-Reason codes включают `acceptance-required`, `production-approval-required`,
-`ambiguous-product-decision`, `out-of-scope-authority`, `external-access`,
-`unsafe-recovery` и `shared-dependency`.
+Reason codes включают `production-approval-required`,
+`external-approval-required`, `ambiguous-product-decision`,
+`out-of-scope-authority`, `external-access`, `unsafe-recovery` и
+`shared-dependency`. Reason `acceptance-required` запрещён.
 
 Не переизбирать deferred Task в том же run без нового evidence, authority или
 external state change. Deferred Task продолжает удерживать Goal active.
@@ -137,12 +157,12 @@ test, QA, UAT, staging, preview или sandbox.
 - build/package и publish candidate;
 - deploy/redeploy exact validated result;
 - task-required non-production schema/data migration при bounded recovery;
-- environment smoke и acceptance-relevant runtime checks;
+- environment smoke и terminal-relevant runtime checks;
 - bounded logs/metrics diagnosis;
 - repair, rollback или restore затронутого in-scope non-production surface.
 
 Не останавливаться с вопросом «деплоить ли на UAT/dev». Если обычный
-non-production release безопасно нужен для acceptance/evidence, выполнить его и
+non-production release безопасно нужен для terminal evidence, выполнить его и
 проверить exact target. Временную in-scope поломку диагностировать и
 исправить/восстановить до перехода к другой независимой external mutation.
 
@@ -157,7 +177,7 @@ production target и текущему scope. Не считать approval:
 
 - Task/Release title или acceptance text;
 - Goal objective;
-- успешные checks, UAT deploy или acceptance;
+- успешные checks, UAT deploy или automatic acceptance;
 - прошлый production approval для другого result/target;
 - наличие production pipeline либо deploy tool;
 - сам invocation `$ship-tasks`.

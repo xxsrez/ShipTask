@@ -2,7 +2,8 @@
 
 Использовать этот reference только после выбора exact Task и формирования
 task-specific evidence. Report объясняет результат пользователю; он не заменяет
-acceptance, checks, source identity или external-effect verification.
+checks, automatic acceptance decision, source identity или external-effect
+verification.
 
 ## Содержание
 
@@ -48,8 +49,9 @@ comment write, использовать его без ожидания отде�
   changes-requested или blocker, который важно объяснить пользователю.
 - Для каждого task-local defer обязательно публиковать `BLOCKED` report, если
   comments доступны; это durable handoff перед продолжением других Tasks.
-- Публиковать `ACCEPTANCE READY` только когда comment является полезным review
-  surface; не писать comment на каждую внутреннюю red/green iteration.
+- Не публиковать `ACCEPTANCE READY`: terminal-ready evidence автоматически
+  приводит к `COMPLETED`; не писать comment на каждую внутреннюю red/green
+  iteration.
 - Не backfill-ить старые terminal Tasks и не писать отдельный report в
   `Duplicate` без explicit authority.
 - При доступном comment list/read до write искать тот же report key, после
@@ -71,8 +73,8 @@ Report key: shiptask/<canonical-task-ref>/<STATE>/<exact-result-identity>
 
 ## Deferred/BLOCKED handoff
 
-Deferred report не обязан быть incident postmortem. Его задача — позволить
-пользователю принять одно точное решение, а следующему run безопасно продолжить.
+Deferred report не обязан быть incident postmortem. Его задача — показать один
+точный material blocker и позволить следующему run безопасно продолжить.
 
 ```text
 SHIPTASK DELIVERY REPORT
@@ -88,13 +90,13 @@ Last safe checkpoint
 <Что завершено, проверено и не будет повторяться без причины.>
 
 Impact
-<Что остаётся недоступным/непринятым; production impact только если доказан.>
+<Что остаётся недоступным/незавершённым; production impact только если доказан.>
 
 Recommended default
 <Один конкретный вариант и tradeoff либо not-applicable.>
 
 Decision or authority needed
-<Одно точное решение, acceptance, access или production approval.>
+<Одно точное material decision, access или production/external approval.>
 
 Resume step
 <Первое безопасное действие после unblock.>
@@ -114,7 +116,7 @@ rendering, иначе text diagram.
 
 ```text
 SHIPTASK DELIVERY REPORT
-State: COMPLETED | ACCEPTANCE READY | REWORK REQUIRED | BLOCKED | CANCELED
+State: COMPLETED | REWORK REQUIRED | BLOCKED | CANCELED
 Task: <identifier> — <title>
 Result: <commit/build/deploy/artifact identity or not-applicable>
 Report key: shiptask/<task-ref>/<state>/<result-identity>
@@ -134,7 +136,7 @@ Evidence
 - External effect: <verified result or not-applicable>
 
 Limits and next action
-<Ограничения, remaining risk, acceptance или следующий шаг.>
+<Ограничения, remaining risk и optional verification/reopen guidance.>
 ```
 
 ## Success report
@@ -145,7 +147,7 @@ Limits and next action
 - основной runtime/data flow простыми словами;
 - ключевые implementation decisions и tradeoffs;
 - exact targeted/batch/external evidence;
-- limitations, remaining risk и нужное user action.
+- limitations, remaining risk и optional user verification/reopen guidance.
 
 Для trivial change вместо diagram использовать compact before/after. Для
 non-trivial feature или cross-component change включить одну-две схемы, только

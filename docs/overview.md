@@ -6,8 +6,8 @@
 созданного и выбранного task scope. Skill разрешает Project, Release и Tasks
 через connector, читает полный Task detail, проверяет dependencies и authority,
 создаёт обязательный workflow Goal и координирует execution, integration,
-двухуровневую verification, acceptance и terminal status projection. Goal
-остаётся активным, пока в выбранной границе есть `To Do`, `In Progress`,
+двухуровневую verification, automatic acceptance и terminal status projection.
+Goal остаётся активным, пока в выбранной границе есть `To Do`, `In Progress`,
 `In Review`, rework/completion remnants или unresolved in-scope defects.
 
 Конкретные Project/Release refs, repository commands, branches, environments и
@@ -36,6 +36,9 @@ connector/exact scope/Goal/shared authority останавливает run с
 - Dev/test/QA/UAT/staging/preview/sandbox releases автоматически разрешены в
   границах exact Task и проверенного non-production target. Production release
   выполняется только по явному user approval; без него Task откладывается.
+- Terminal-ready result автоматически принимается и переводится в `Done` без
+  вопроса пользователю. Если позже обнаружен bug, пользователь reopen-ит Task
+  либо создаёт новую проблему для следующего ShipTask scope.
 - User-level копия должна совпадать с repository source после явной
   синхронизации.
 
@@ -49,8 +52,9 @@ To Do → In Progress → In Review → Done or Canceled
 ```
 
 `To Do` является входом новой работы, `In Progress` — продолжающейся работой,
-`In Review` — targeted-verified candidate, который может ждать batch gate и
-acceptance. Terminal statuses не создают работу.
+`In Review` — targeted-verified candidate, который ждёт batch gate, required
+effects или terminal reconciliation, но не ручную приёмку. Terminal statuses не
+создают работу.
 `Duplicate` не получает отдельную execution lane, но все связанные duplicates
 обязательно читаются при review основной Task: иной ракурс проблемы должен быть
 покрыт evidence либо стать явным finding.
@@ -61,11 +65,10 @@ review batch. Failed batch возвращает затронутые Tasks в `I
 неясной attribution reopen получает весь связанный batch. Это уменьшает
 стоимость проверок, не ослабляя terminal gate.
 
-По умолчанию acceptance остаётся явным решением пользователя; project context
-может определить другую проверяемую authority. Пока хотя бы одна Task остаётся
-`In Review`, Goal и общий execution plan не могут считаться завершёнными.
-Acceptance-ready Task без standing authority не прерывает runnable queue: она
-остаётся `In Review`, попадает в decision queue, а skill продолжает другие Tasks.
+Invocation `$ship-tasks` разрешает automatic acceptance после полного terminal
+evidence. Пока хотя бы одна Task остаётся `In Review`, Goal и общий execution
+plan не могут считаться завершёнными: skill обязан закончить gates, выполнить
+rework либо перевести terminal-ready Task в `Done`, а не ждать пользователя.
 
 Когда native comments доступны, пользователь получает report прямо в Task:
 outcome-first объяснение feature, exact evidence и полезную diagram для
@@ -85,6 +88,8 @@ surface.
 - Skill не получает внешние полномочия из одного факта invocation.
 - Исключение ограничено ADR-0004: invocation заранее разрешает обычный in-scope
   non-production release workflow, но не production release.
+- ADR-0005 отдельно разрешает automatic terminal acceptance после полного
+  evidence, но не production/destructive/external authority.
 - Skill не работает без подключённого Task Manager connector.
 - Наличие connector не заменяет authoritative Project/Release scope и write
   authority конкретного проекта.
