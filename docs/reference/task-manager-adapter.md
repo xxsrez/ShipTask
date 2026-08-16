@@ -113,11 +113,13 @@ failure scenario становится review finding; status `Duplicate` сам 
 
 Переход `To Do → In Progress` допустим только после preflight, переход в
 `In Review` — только после per-Task targeted gate и формирования candidate
-evidence. `In Review` может ждать review-batch gate и acceptance; это всегда
-`completion-remains`. Переход в `Done` допустим только после passing exact
-batch gate и authorized task acceptance. Failed gate или changes requested
-возвращает Tasks с недействительным evidence в `In Progress` до повторной
-проверки. Один status не является доказательством результата.
+evidence. `In Review` может ждать review-batch gate, required effects или
+terminal reconciliation, но не user acceptance; это всегда
+`completion-remains`. Переход в `Done` обязателен после passing Task completion
+criteria, exact batch gate, integration и required effects: ShipTask принимает
+такой result автоматически. Failed gate или changes requested возвращает Tasks
+с недействительным evidence в `In Progress` до повторной проверки. Один status
+не является доказательством результата.
 
 ## Writes и concurrency
 

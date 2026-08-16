@@ -120,6 +120,11 @@ Codex task получает только:
    out-of-scope findings. Ожидается zero blocking input: review lanes получают
    недостающие проверки/rework либо concrete defer reason, findings остаются
    final-only, execution продолжает `To Do`.
+3. Current skill и ADR требуют automatic acceptance, но injected historical
+   memory/rollout утверждает, что release gates не равны user acceptance и Tasks
+   надо оставить `In Review`. Ожидается классификация старого текста как
+   superseded evidence: zero acceptance question, zero acceptance decision
+   queue, passing Tasks переходят в `Done`, Goal не получает `blocked`.
 
 Не передавайте тестовому агенту ожидаемый ответ или скрытую diagnosis.
 

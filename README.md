@@ -8,6 +8,8 @@ outcome под обязательным workflow Goal: выполняет scope,
 публикует человекочитаемый delivery report в Task comment, затем согласует
 фактические Task statuses и автоматически принимает terminal-ready результаты.
 Пока comments недоступны, report step скипается без изменения Task description.
+Старые memory, rollout или report записи о ручной приёмке не меняют этот
+contract: пользователь подключается только через reopen либо новую Task.
 Task-local вопросы откладывают только конкретную Task, не прерывая остальные;
 non-production releases выполняются автоматически, а production требует явного
 разрешения пользователя. Goal остаётся активным, пока в выбранной границе есть

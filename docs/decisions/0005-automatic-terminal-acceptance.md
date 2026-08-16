@@ -11,6 +11,12 @@ Goal `blocked`. Такой gate не добавил evidence: пользоват
 готовый результат позже и при обнаруженном defect reopen-нуть Task либо создать
 новую проблему.
 
+После первоначального исправления новый run загрузил уже обновлённый skill, но
+также получил более старую memory-запись, требующую explicit acceptance. Он
+выбрал historical record, снова запросил фразу для трёх Tasks и после третьего
+goal-turn пометил Goal `blocked`. Значит, одного положительного правила
+automatic acceptance недостаточно: нужен явный retirement старого контекста.
+
 ## Решение
 
 - Считать invocation `$ship-tasks` standing authority для automatic acceptance
@@ -37,6 +43,15 @@ Goal `blocked`. Такой gate не добавил evidence: пользоват
   destructive durable-data action, secrets/privacy mutation, external-recipient
   action или обязательный approval внешнего approver. Эти границы сохраняют
   собственные reason codes и authority requirements.
+- Считать `acceptance criteria` объективными Task completion criteria, а не
+  запросом human sign-off. Project/Release/Task context не может настроить
+  manual product acceptance для `$ship-tasks`.
+- Считать любое прежнее требование human acceptance из memory, rollout summary,
+  старого report/Goal/plan или cached project context superseded historical
+  evidence. Оно не создаёт current authority, blocker или decision queue.
+- При resume старого Goal, заблокированного только ручной приёмкой, отбросить
+  retired blocker, повторно проверить exact evidence и автоматически завершить
+  passing Tasks. Не повторять blocker threshold для этой причины.
 
 ## Последствия
 
@@ -46,6 +61,7 @@ Goal `blocked`. Такой gate не добавил evidence: пользоват
 - Goal не зависает и не становится `blocked` после успешной доставки;
 - `In Review` перестаёт быть ручной очередью приёмки;
 - пользователь сохраняет простой feedback loop через reopen/new Task.
+- stale runtime context больше не может вернуть удалённый human gate.
 
 Ограничения:
 

@@ -16,6 +16,7 @@ REPORT_REFERENCE = SKILL_DIR / "references" / "delivery-report.md"
 AUTONOMY_REFERENCE = SKILL_DIR / "references" / "autonomy-and-release.md"
 DOCS_INDEX = ROOT / "docs" / "README.md"
 SPEC_FILE = ROOT / "docs" / "specs" / "ship-tasks.md"
+ADAPTER_FILE = ROOT / "docs" / "reference" / "task-manager-adapter.md"
 DECISION_FILE = ROOT / "docs" / "decisions" / "0001-task-manager-only.md"
 REPORT_DECISION_FILE = (
     ROOT / "docs" / "decisions" / "0002-managed-delivery-report-in-task.md"
@@ -41,6 +42,7 @@ REQUIRED_FILES = (
     AUTONOMY_REFERENCE,
     DOCS_INDEX,
     SPEC_FILE,
+    ADAPTER_FILE,
     DECISION_FILE,
     REPORT_DECISION_FILE,
     COMMENT_REPORT_DECISION_FILE,
@@ -139,8 +141,12 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "`deferred`",
         "`runnable_count = 0`",
         "Review precedence",
+        "## Никогда не требовать ручную приёмку",
         "автоматически принять exact result",
         "Не запрашивать user acceptance",
+        "superseded",
+        "historical evidence",
+        "Никогда не переводить Goal в `blocked` по этой причине",
         "verified non-production target",
         "Никогда не выполнять production release",
     )
@@ -160,6 +166,9 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "blocking input запрещён",
         "non-blocking final finding",
         "не блокировать Goal ожиданием",
+        "Automatic terminal policy не настраивается Project",
+        "superseded historical evidence",
+        "не переводить Goal в `blocked` по этой причине",
         "Reopen исходной Task",
     )
 
@@ -198,6 +207,10 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "runnable_count = actionable To Do",
         "blocking input",
         "Automatic acceptance",
+        "Stale acceptance context",
+        "superseded historical evidence",
+        "не может переопределить",
+        "current skill",
         "Reason `acceptance-required` запрещён",
         "Deferred Task",
         "обязательно опубликовать",
@@ -237,6 +250,33 @@ def validate_workflow_contract(errors: list[str]) -> None:
                     errors,
                     f"{path.relative_to(ROOT)} contains retired human-acceptance contract {forbidden!r}",
                 )
+
+    decision_text = AUTO_ACCEPTANCE_DECISION_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        "более старую memory-запись",
+        "cached project context superseded historical",
+        "не создаёт current authority, blocker или decision queue",
+        "заблокированного только ручной приёмкой",
+    ):
+        if fragment not in decision_text:
+            fail(errors, f"ADR-0005 is missing stale-context guard {fragment!r}")
+
+    adapter_text = ADAPTER_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        "но не user acceptance",
+        "passing Task completion",
+        "criteria, exact batch gate",
+        "ShipTask принимает",
+        "такой result автоматически",
+    ):
+        if fragment not in adapter_text:
+            fail(errors, f"Task Manager adapter is missing automatic acceptance {fragment!r}")
+    for forbidden in (
+        "может ждать review-batch gate и acceptance",
+        "authorized task acceptance",
+    ):
+        if forbidden in adapter_text:
+            fail(errors, f"Task Manager adapter contains retired acceptance {forbidden!r}")
 
 
 def repository_text_files() -> list[Path]:

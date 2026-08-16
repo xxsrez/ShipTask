@@ -69,6 +69,10 @@ Invocation `$ship-tasks` разрешает automatic acceptance после по
 evidence. Пока хотя бы одна Task остаётся `In Review`, Goal и общий execution
 plan не могут считаться завершёнными: skill обязан закончить gates, выполнить
 rework либо перевести terminal-ready Task в `Done`, а не ждать пользователя.
+Старые memory/rollout/report записи о human acceptance являются historical
+evidence и не могут вернуть ручной gate. `Acceptance criteria` в Task означают
+проверяемые completion criteria; feedback после `Done` приходит через
+user-initiated reopen или новую Task.
 
 Когда native comments доступны, пользователь получает report прямо в Task:
 outcome-first объяснение feature, exact evidence и полезную diagram для

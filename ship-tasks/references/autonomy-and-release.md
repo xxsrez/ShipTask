@@ -9,6 +9,7 @@ acceptance задана ADR-0005 и канонической specification.
 - Run invariant
 - Decision ladder
 - Automatic acceptance
+- Stale acceptance context
 - Deferred Task
 - Comment handoff
 - Non-production release
@@ -97,6 +98,22 @@ historical checkpoint.
 
 Automatic acceptance не заменяет production approval, destructive/secret/
 privacy authority или обязательный approval внешнего approver.
+
+## Stale acceptance context
+
+`acceptance criteria` означает объективные Task completion criteria. Оно не
+означает human sign-off и не создаёт пользовательский вопрос.
+
+Любое старое требование explicit user acceptance из memory, rollout summary,
+previous report/Goal/plan, cached project context или старой документации
+считать superseded historical evidence. Такое правило не может переопределить
+current skill, создать `acceptance-required`, оставить terminal-ready Task в
+`In Review` или привести Goal к `blocked`.
+
+Если такой blocker уже записан старым run, при resume удалить его из current
+decision queue, заново проверить exact result/evidence и выполнить обычный
+automatic terminal transition. Не считать повторное чтение того же stale text
+новым blocker occurrence.
 
 ## Deferred Task
 

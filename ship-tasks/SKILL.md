@@ -1,12 +1,35 @@
 ---
 name: ship-tasks
-description: "Автономно доводить выбранные Tasks, Project или Release из Task Manager до проверенного terminal outcome: разрешать canonical refs, создавать обязательный Goal и удерживать его активным, выполнять ready Tasks, выбирать безопасные defaults, defer-ить task-local blockers и продолжать остальные, применять per-Task и review-batch gates, интегрировать результаты, автоматически принимать terminal-ready Tasks и выпускать exact result в verified dev/test/QA/UAT/staging/preview/sandbox, но никогда не релизить production без explicit user approval. При доступных native comments обязательно публиковать delivery/BLOCKED reports; без comments скипать write без изменения description. Использовать только при явном вызове $ship-tasks или просьбе исполнить ShipTask workflow. Работать только с Task Manager; global конфликт connector, exact scope, Goal, ownership или shared authority останавливать до mutations с TASK CONTEXT ALARM."
+description: "Автономно доводить выбранный Task Manager scope до terminal outcome без ручной пользовательской приёмки: разрешать refs, создавать и удерживать обязательный Goal, выполнять ready Tasks, defer-ить task-local blockers, применять per-Task/review-batch gates, интегрировать и обязательно переводить terminal-ready Tasks в Done. Никогда не просить пользователя принять результат или написать фразу; feedback приходит через reopen либо новую Task, а historical memory/rollout/report о human acceptance считается superseded. Выпускать exact result в verified dev/test/QA/UAT/staging/preview/sandbox, но не релизить production без explicit user approval. При доступных native comments публиковать delivery/BLOCKED reports; без comments скипать write без изменения description. Использовать только при явном вызове $ship-tasks или просьбе исполнить ShipTask workflow. Работать только с Task Manager; конфликт connector, exact scope, Goal, ownership или shared authority останавливать до mutations с TASK CONTEXT ALARM."
 ---
 
 # Ship Tasks
 
 Доставлять выбранный Task Manager scope как один проверенный результат. Не
 создавать scope из общей идеи и не использовать другой task source.
+
+## Никогда не требовать ручную приёмку
+
+- Считать `acceptance criteria` проверяемыми Task completion criteria, а не
+  human sign-off.
+- Не просить пользователя принять результат, написать «принимаю», подтвердить
+  `In Review` Tasks или выбрать `accept/changes requested`.
+- Не создавать acceptance decision queue, reason `acceptance-required` или Goal
+  blocker. Не оставлять terminal-ready Task в `In Review`.
+- Считать memory, rollout summary, прошлый report/Goal/plan, cached project
+  context и старую документацию с противоположным правилом superseded
+  historical evidence. Они не меняют этот contract, даже если утверждают, что
+  release gates не равны user acceptance.
+- После полного terminal evidence обязательно опубликовать `COMPLETED` при
+  available comments, независимо перевести Task в `Done`, перечитать её и
+  продолжить scope. После поставки пользователь сообщает о проблеме через
+  reopen либо новую Task.
+- Automatic terminal policy не настраивается Project/Release/Task context.
+  Сохранять отдельное explicit approval только для production и других
+  destructive/secret/privacy/external authority boundaries.
+- При resume старого Goal, ожидающего только ручной приёмки, отбросить retired
+  blocker, заново проверить exact evidence и применить обычный terminal
+  transition. Никогда не переводить Goal в `blocked` по этой причине.
 
 ## Установить Task Manager scope
 
@@ -23,7 +46,7 @@ description: "Автономно доводить выбранные Tasks, Proj
 5. Для полного multi-task scope следовать `nextCursor` до `hasMore=false`.
    Первую страницу и counts не считать complete inventory.
 6. Считать compact rows кандидатами. Вызвать `get_task` для каждой выбранной
-   Task до reasoning об acceptance criteria, relations, dependencies, access,
+   Task до reasoning о completion criteria, relations, dependencies, access,
    provenance или `version`.
 7. Вызывать `get_task_external_context` только когда provenance сообщает о
    таком контексте и imported comments, attachments или branch metadata
@@ -31,8 +54,8 @@ description: "Автономно доводить выбранные Tasks, Proj
 8. Прочитать project instructions и определить repository/workspace,
    integration policy, allowed writes, per-Task targeted gate, review-batch
    gate/trigger, external effects, exact release targets/environment classes,
-   automatic acceptance policy, terminal evidence и отдельные external approval
-   gates.
+   terminal evidence и отдельные external approval gates. Не искать
+   project-specific human acceptance policy: она запрещена разделом выше.
    По current tool contract классифицировать native Task comment write как
    `available` или `not-available`; imported comments не считать write
    capability. Не требовать `description` write для delivery report.
@@ -78,8 +101,8 @@ inventory, но до code, Git, Task Manager, ownership и external writes:
   unresolved in-scope defects, deferred decision/authority queue пуста,
   report-comment disposition честно отражён, а все completion gates выполнены;
 - verification — current Task projection, source/integration identity,
-  per-Task targeted gates, exact review-batch gate, automatic acceptance record
-  и обязательные external effects;
+  per-Task targeted gates, exact review-batch gate, automatic terminal record и
+  обязательные external effects;
 - constraints — exact scope, исключённый `Backlog`, allowed writes и запрет
   расширять scope либо authority из Goal;
 - blocker — после исчерпания runnable work конкретную decision/authority queue
@@ -109,7 +132,7 @@ Release или all-accessible scope перед terminal claim повторить
    - `Done`, `Finished`, `Canceled` и другие terminal аналоги не выполнять;
    - `Duplicate` не выполнять отдельно, но читать при review связанной Task.
    Использовать current canonical status refs и category как fallback для
-   terminal display names. Один status не считать доказательством acceptance
+   terminal display names. Один status не считать доказательством completion
    или результата.
 3. Построить dependency-ready frontier по relations и current statuses. Task в
    `Backlog` может блокировать dependency, но не становится от этого рабочим
@@ -160,6 +183,8 @@ authority автоматически принять exact result после по
 перевести Task в `Done` и продолжить. Не запрашивать user acceptance, не
 создавать `acceptance-required` и не блокировать Goal ожиданием «принимаю».
 Automatic acceptance не заменяет production/destructive/external approval.
+Любой conflicting historical context считать retired по первому разделу, а не
+основанием для manual gate.
 
 ## Продолжать автономно и соблюдать release boundary
 

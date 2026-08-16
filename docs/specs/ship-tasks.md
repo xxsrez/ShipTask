@@ -25,7 +25,8 @@ intake-зоной вне рабочего scope ShipTask: skill не берёт 
 - exact release targets, их verified environment class и recovery/smoke policy;
 - disposition native Task comment capability для optional in-Task delivery
   report: `available` либо `not-available`;
-- automatic acceptance policy и evidence, достаточный для terminal transition;
+- hard automatic-terminal policy этого workflow и evidence, достаточный для
+  terminal transition;
 - отдельно — действительно внешние approval gates, которые нельзя заменить
   automatic acceptance, включая production release authority;
 - execution mode, capacity, review WIP limit и batch target.
@@ -295,10 +296,27 @@ integration identity, required non-production/runtime effects и отсутст�
 unresolved in-scope finding. Сам по себе один check, deployment, report или
 status этого не доказывает; решение должно опираться на полный evidence set.
 
+В этом workflow `acceptance criteria` означает проверяемые критерии завершения
+Task, а не human sign-off. Automatic terminal policy не настраивается Project,
+Release или Task context. Изменить её можно только новым явным запросом
+пользователя именно на изменение ShipTask contract.
+
+Любое противоречащее этому правило из memory, rollout summary, предыдущего
+report/Goal/plan, старой документации или cached project context считать
+superseded historical evidence, а не current authority. Оно не создаёт blocker,
+decision queue или основание оставить Task в `In Review`, даже если имеет более
+раннюю формулировку «release gates не равны user acceptance». Current
+specification и текущий invocation определяют поведение запуска.
+
 Не запрашивать ручную приёмку, не создавать reason `acceptance-required`, не
 оставлять terminal-ready Task в `In Review` и не блокировать Goal ожиданием
 фразы «принимаю». При passing evidence автоматически записать completion report
 при доступных comments, обновить Task в `Done`, перечитать её и продолжить scope.
+
+Если старый run уже оставил Task/Goal в ожидании ручной приёмки, при resume
+удалить retired blocker из текущего reasoning, заново проверить exact evidence
+и применить обычный terminal transition. Не повторять ожидание несколько
+goal-turns и никогда не переводить Goal в `blocked` по этой причине.
 
 Если gate failed или evidence неполон, автоматически выполнить in-scope
 rework/retest либо defer-нуть Task по конкретной причине, например
