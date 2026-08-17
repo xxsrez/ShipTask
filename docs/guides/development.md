@@ -15,7 +15,8 @@
 - Все trigger conditions перечисляйте в `description`.
 - Пишите body в imperative/infinitive form и не дублируйте подробные reference
   документы.
-- Сохраняйте `policy.allow_implicit_invocation: false`.
+- Сохраняйте `policy.allow_implicit_invocation: true` и проверяйте одновременно
+  positive delivery triggers и negative read/planning/backlog exclusions.
 - Не добавляйте fallback provider. Task Manager tool names и semantics,
   необходимые для безопасного выполнения, являются частью runtime contract.
 
@@ -43,12 +44,27 @@ Codex task получает только:
 
 Проверьте как минимум:
 
-- coherent scope проходит preflight;
-- после разрешения exact scope и до первой non-Goal mutation создаётся Goal с
-  observable done criteria; совместимый активный Goal продолжается,
+- natural-language exact Task delivery активирует `single`, а read/status,
+  planning и backlog capture не запускают delivery;
+- «создай одну Task и начинай делать» активирует `single create-and-deliver`:
+  exact Task создаётся в `To Do`, проходит read-back/preflight, переводится в
+  `In Progress` до implementation; один `create_task` не завершает flow;
+- bare `$ship-tasks` требует ровно один применимый memory `current_scope`, а
+  exact prompt selector имеет приоритет без silent memory update;
+- `single` не вызывает Goal tools, работает serial и при blocker не выбирает
+  другую Task;
+- `batch` после разрешения exact scope и до первой non-Goal mutation создаёт
+  Goal с observable done criteria; совместимый активный Goal продолжается,
   несовместимый вызывает `TASK CONTEXT ALARM` и не перезаписывается;
-- `Backlog` исключается без Task writes, а явно разрешённый create использует
-  current status ref `To Do`;
+- memory-maintenance оформляет logical schema только по explicit request,
+  перечитывает result и не сохраняет live Task state или secrets;
+- missing/stale/conflicting required memory до mutation вызывает
+  `TASK CONTEXT ALARM`; exact prompt selector позволяет безопасный run без
+  изменения default;
+- coherent scope проходит preflight;
+- pre-existing `Backlog` исключается без Task writes, а exact Task, только что
+  созданная текущим `create-and-deliver`, при вынужденном default `Backlog`
+  переводится только в current `To Do`, затем после preflight — в `In Progress`;
 - `To Do`, `In Progress` и `In Review` маршрутизируются соответственно в новую
   работу, resume и review;
 - каждая Task проходит быстрый targeted gate, но дорогой aggregate/full gate
@@ -97,12 +113,12 @@ Codex task получает только:
   evidence; user acceptance не запрашивается и не блокирует Goal;
 - недоступный или unreconciled comment report блокирует terminal transition
   affected Task; финальный output честно показывает этот terminal-effect gap;
-- Goal остаётся активным при любой подходящей `To Do`, `In Progress`,
+- Batch Goal остаётся активным при любой подходящей `To Do`, `In Progress`,
   `In Review`, rework/completion remnant или unresolved in-scope defect;
-- перед `update_goal(complete)` повторная complete inventory выбранной границы
+- в batch перед `update_goal(complete)` повторная complete inventory выбранной границы
   подтверждает отсутствие подходящих Tasks и прохождение всех completion gates;
-- `no-work` сначала reconciles Task/evidence state и обязательный Goal, затем
-  завершает Goal и останавливает workflow;
+- в batch `no-work` сначала reconciles Task/evidence state и обязательный Goal,
+  затем завершает Goal и останавливает workflow; single не вызывает Goal tools;
 - out-of-scope defect не исправляется автоматически;
 - non-blocking out-of-scope finding попадает только в final findings, не
   расширяет Goal, не создаёт Task и не останавливает текущий scope;

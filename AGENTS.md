@@ -34,7 +34,28 @@
 - Не создавайте пустые каталоги или placeholder-документы.
 - Не добавляйте runtime state, secrets, private content или signed URLs в Git.
 
-## Проверка
+## Definition of done для изменения skill
+
+Поведенческое или distribution-изменение `$ship-tasks` не завершено, пока
+одновременно не выполнены все четыре критерия:
+
+1. Exact repository scope закоммичен в этом репозитории.
+2. Этот commit запушен в `origin/main`, а local `HEAD` совпадает с
+   `origin/main`.
+3. Установленная user-level копия `~/.codex/skills/ship-tasks`
+   byte-identical каталогу `ship-tasks/` repository source и проходит
+   `quick_validate.py`.
+4. Marketplace package обновлён: byte-identical копия skill находится в
+   `Srez Marketplace/plugins/task-manager/skills/ship-tasks`, manifest version
+   или cachebuster обновлён, marketplace commit запушен в `origin/main`, plugin
+   переустановлен из `task-manager@srez-marketplace`, а installed cache
+   byte-identical marketplace source и отображается installed/enabled.
+
+Не объявляйте изменение завершённым при частичном выполнении этого списка.
+Проверку загрузки нового snapshot выполняйте в новой Codex-сессии; текущая
+сессия может сохранять старые skill/tool instructions.
+
+## Проверка перед commit
 
 Перед commit выполните:
 

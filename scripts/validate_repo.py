@@ -9,11 +9,13 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+AGENTS_FILE = ROOT / "AGENTS.md"
 SKILL_DIR = ROOT / "ship-tasks"
 SKILL_FILE = SKILL_DIR / "SKILL.md"
 OPENAI_FILE = SKILL_DIR / "agents" / "openai.yaml"
 REPORT_REFERENCE = SKILL_DIR / "references" / "delivery-report.md"
 AUTONOMY_REFERENCE = SKILL_DIR / "references" / "autonomy-and-release.md"
+MEMORY_REFERENCE = SKILL_DIR / "references" / "project-memory.md"
 DOCS_INDEX = ROOT / "docs" / "README.md"
 SPEC_FILE = ROOT / "docs" / "specs" / "ship-tasks.md"
 ADAPTER_FILE = ROOT / "docs" / "reference" / "task-manager-adapter.md"
@@ -30,16 +32,20 @@ AUTONOMY_DECISION_FILE = (
 AUTO_ACCEPTANCE_DECISION_FILE = (
     ROOT / "docs" / "decisions" / "0005-automatic-terminal-acceptance.md"
 )
+POLICY_MEMORY_DECISION_FILE = (
+    ROOT / "docs" / "decisions" / "0007-delivery-policy-and-project-memory.md"
+)
 
 REQUIRED_FILES = (
     ROOT / "README.md",
-    ROOT / "AGENTS.md",
+    AGENTS_FILE,
     ROOT / ".gitignore",
     ROOT / ".gitattributes",
     SKILL_FILE,
     OPENAI_FILE,
     REPORT_REFERENCE,
     AUTONOMY_REFERENCE,
+    MEMORY_REFERENCE,
     DOCS_INDEX,
     SPEC_FILE,
     ADAPTER_FILE,
@@ -48,6 +54,7 @@ REQUIRED_FILES = (
     COMMENT_REPORT_DECISION_FILE,
     AUTONOMY_DECISION_FILE,
     AUTO_ACCEPTANCE_DECISION_FILE,
+    POLICY_MEMORY_DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
@@ -101,6 +108,22 @@ def validate_skill(errors: list[str]) -> None:
     text = SKILL_FILE.read_text(encoding="utf-8")
     validate_frontmatter(errors, text)
 
+    frontmatter = text.split("---", 2)[1] if text.count("---") >= 2 else ""
+    for fragment in (
+        "$ship-tasks",
+        "по естественным просьбам выполнить, исправить или довести",
+        "текущий Project/Release/scope",
+        "создать одну Task и сразу начать",
+        "single create-and-deliver, а не backlog capture",
+        "project memory",
+        "Bare $ship-tasks запускает batch",
+        "exact Task — single без Goal",
+        "Не использовать для чтения",
+        "backlog capture",
+    ):
+        if fragment not in frontmatter:
+            fail(errors, f"SKILL.md description is missing trigger contract {fragment!r}")
+
     if "[TODO" in text or "TODO:" in text:
         fail(errors, "SKILL.md contains a template TODO")
     if "Task Manager" not in text:
@@ -114,10 +137,10 @@ def validate_skill(errors: list[str]) -> None:
     metadata = OPENAI_FILE.read_text(encoding="utf-8")
     required_fragments = (
         'display_name: "Ship Tasks"',
-        'short_description: "Доставить Task Manager scope до результата"',
+        'short_description: "Доставить Task Manager scope по project context"',
         "$ship-tasks",
         'value: "task-manager"',
-        "allow_implicit_invocation: false",
+        "allow_implicit_invocation: true",
     )
     for fragment in required_fragments:
         if fragment not in metadata:
@@ -125,32 +148,64 @@ def validate_skill(errors: list[str]) -> None:
 
 
 def validate_workflow_contract(errors: list[str]) -> None:
+    agents_text = AGENTS_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        "## Definition of done для изменения skill",
+        "Exact repository scope закоммичен",
+        "local `HEAD` совпадает с",
+        "byte-identical каталогу `ship-tasks/`",
+        "Srez Marketplace/plugins/task-manager/skills/ship-tasks",
+        "task-manager@srez-marketplace",
+        "installed cache",
+        "installed/enabled",
+    ):
+        if fragment not in agents_text:
+            fail(errors, f"AGENTS.md is missing delivery DoD contract {fragment!r}")
+
     required_skill_fragments = (
-        "Вызвать `get_goal`",
+        "Классифицировать intent до mutations",
+        "Bare `$ship-tasks`",
+        "`single` требует ровно одну canonical",
+        "`single create-and-deliver`",
+        "не завершать flow после одного `create_task`",
+        "exact Task, только что",
+        "перевести её в `In Progress`",
+        "`memory-maintenance`",
+        "project-memory reference",
+        "Exact selector в текущем prompt выше memory default",
+        "Task Manager adapter",
+        "Создать Goal только для batch",
+        "В `single`, `memory-maintenance` и `non-delivery` не вызывать Goal tools",
         "Любая `In Review` Task означает `completion-remains`",
         "per-Task targeted gate",
         "review-batch gate",
-        "passing acceptance criteria, exact batch gate",
-        "final review batch прошёл gate",
         "delivery-report reference",
-        "native comment-create",
-        "published/read-back `COMPLETED` comment",
+        "published/read-back `COMPLETED`",
         "Никогда не писать",
         "autonomy and release reference",
         "Не задавать пользователю вопрос",
         "`deferred`",
-        "`runnable_count = 0`",
-        "Review precedence",
+        "`runnable_count > 0`",
         "## Никогда не требовать ручную приёмку",
-        "автоматически принять exact result",
-        "Не запрашивать user acceptance",
-        "superseded",
-        "historical evidence",
+        "автоматически принять exact",
+        "superseded historical evidence",
         "Никогда не переводить Goal в `blocked` по этой причине",
         "verified non-production target",
         "Никогда не выполнять production release",
+        "Завершить по mode",
     )
     required_spec_fragments = (
+        "### 1.1 Слои ответственности",
+        "### 1.2 Классификация intent и execution mode",
+        "Bare `$ship-tasks`",
+        "`single` (`create-and-deliver`)",
+        "не является backlog",
+        "только что созданная самим workflow",
+        "только затем начинать",
+        "`memory-maintenance`",
+        "приоритет над memory default",
+        "Обязательный Goal только для batch",
+        "`single`, `memory-maintenance` и `non-delivery` не вызывают",
         "### 5.3 Terminal invariant и automatic acceptance",
         "### 6.1 Двухуровневая verification",
         "Не запускать полный дорогой project gate для каждой Task",
@@ -165,7 +220,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "одну consolidated decision queue",
         "blocking input запрещён",
         "non-blocking final finding",
-        "не блокировать Goal ожиданием",
+        "не блокировать batch Goal ожиданием",
         "Automatic terminal policy не настраивается Project",
         "superseded historical evidence",
         "не переводить Goal в `blocked` по этой причине",
@@ -223,6 +278,24 @@ def validate_workflow_contract(errors: list[str]) -> None:
         if fragment not in autonomy_text:
             fail(errors, f"autonomy reference is missing {fragment!r}")
 
+    memory_text = MEMORY_REFERENCE.read_text(encoding="utf-8")
+    for fragment in (
+        "Project memory contract",
+        "Граница ответственности",
+        "Поиск и приоритет источников",
+        "Логическая схема",
+        "Bootstrap и update",
+        "Проверка перед delivery",
+        "TASK CONTEXT ALARM",
+        "Ограничения переносимости",
+        "current_scope",
+        "Task status, `version`",
+        "только по явной просьбе",
+        "не обещает cross-surface visibility",
+    ):
+        if fragment not in memory_text:
+            fail(errors, f"project-memory reference is missing {fragment!r}")
+
     for path in (SKILL_FILE, SPEC_FILE, REPORT_REFERENCE):
         text = path.read_text(encoding="utf-8")
         for forbidden in (
@@ -264,20 +337,49 @@ def validate_workflow_contract(errors: list[str]) -> None:
 
     adapter_text = ADAPTER_FILE.read_text(encoding="utf-8")
     for fragment in (
-        "но не user acceptance",
-        "passing Task completion",
-        "criteria, exact batch gate",
-        "ShipTask принимает",
-        "такой result автоматически",
+        "только техническую границу",
+        "Adapter responsibility",
+        "не выбирает business scope",
+        "Minimal read contract",
+        "Identity and capability invariants",
+        "Write and concurrency invariants",
+        "current Task `version`",
+        "Не повторять `create_task`",
+        "Task Manager state доказывает только собственную projection",
     ):
         if fragment not in adapter_text:
-            fail(errors, f"Task Manager adapter is missing automatic acceptance {fragment!r}")
-    for forbidden in (
-        "может ждать review-batch gate и acceptance",
-        "authorized task acceptance",
+            fail(errors, f"Task Manager adapter is missing compatibility contract {fragment!r}")
+
+    decision_text = POLICY_MEMORY_DECISION_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        "Task Manager skill  -> технический adapter",
+        "ShipTask skill      -> intent routing и business delivery policy",
+        "Project Memories    -> current scope и project-specific profile",
+        "`single` — ровно одна",
+        "`create-and-deliver` intent",
+        "`batch` — Project, Release",
+        "пишет memory только по явной просьбе пользователя",
     ):
-        if forbidden in adapter_text:
-            fail(errors, f"Task Manager adapter contains retired acceptance {forbidden!r}")
+        if fragment not in decision_text:
+            fail(errors, f"ADR-0007 is missing architecture contract {fragment!r}")
+
+    retired_create_delivery_fragments = {
+        SKILL_FILE: (
+            "`single` требует ровно одну canonical существующую Task",
+        ),
+        SPEC_FILE: (
+            "Skill должен довести выбранный scope уже созданных Task Manager Tasks",
+            "Обычный запуск работает с уже созданным scope",
+        ),
+    }
+    for path, fragments in retired_create_delivery_fragments.items():
+        text = path.read_text(encoding="utf-8")
+        for fragment in fragments:
+            if fragment in text:
+                fail(
+                    errors,
+                    f"{path.relative_to(ROOT)} contains retired create-and-deliver contract {fragment!r}",
+                )
 
 
 def repository_text_files() -> list[Path]:

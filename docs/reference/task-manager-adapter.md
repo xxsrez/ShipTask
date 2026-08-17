@@ -1,198 +1,119 @@
 # Task Manager adapter
 
-Статус: текущий integration profile, 2026-08-16.
+Статус: compatibility contract, 2026-08-16.
 
-Документ описывает точный OAuth/MCP contract, через который `$ship-tasks`
-работает с Task Manager. Он не задаёт Project, Release, status или permission
-конкретного продуктового репозитория.
+Документ фиксирует только техническую границу между ShipTask и Task Manager
+skill/connector. Business delivery policy, lifecycle decisions, Goal,
+automatic acceptance, release authority и project memory определяются
+[ShipTask specification](../specs/ship-tasks.md), а не adapter.
 
 ## Проверенная база
 
-Профиль сверён с:
+Профиль сверялся с Task Manager repository/plugin и live connector
+2026-08-16. Это датированный snapshot. При фактическом запуске authoritative
+остаются current tool descriptions, capabilities и ответы connector.
 
-- Task Manager `374e33df755c49b351e943cc68ec4fe82369ef62`:
-  `docs/specs/agent-api.md`, ADR-0006, ADR-0008 и
-  `lib/task-manager-mcp.ts`;
-- Task Manager Marketplace plugin 0.4.0,
-  `9a5adc2def98bef89951330bc5d1e8123db888e1`:
-  `plugins/task-manager/skills/task-manager/SKILL.md`;
-- live connector 2026-08-16: anonymous `tools/list` подтвердил task-oriented
-  surface, включая `list_task_comments`, `get_task_thread`,
-  `add_task_comment`, reply/edit/delete, reactions и thread resolution; current
-  authenticated session может потребовать plugin refresh/new Codex Task, чтобы
-  загрузить этот расширенный tool snapshot.
+Marketplace Task Manager skill пока содержит часть старого delivery workflow.
+До отдельного cutover ShipTask является policy authority, а этот reference
+определяет минимальный совместимый adapter contract.
 
-Это датированное подтверждение, а не гарантия будущей схемы. При фактическом
-запуске authoritative остаются текущие tool descriptions и ответы connector.
+## Adapter responsibility
 
-## Scope authority
+Task Manager skill/connector владеет:
 
-Task Manager является единственным task-source adapter ShipTask. Exact Project,
-Release или Tasks выбираются явным invocation, repository instructions либо
-project profile. Установленный plugin, успешный OAuth и видимый Project сами по
-себе не разрешают выбрать scope или выполнять writes.
+- OAuth connection и capability discovery;
+- Project, Release, Task и status lookup;
+- canonical refs, pagination и full detail retrieval;
+- ACL checks и optimistic concurrency через current Task `version`;
+- Task create/update mechanics;
+- native Task comment create/list/read и reconciliation;
+- exact tool errors и retry-safe behavior.
 
-Если несколько Projects или Releases одинаково подходят под запрос,
-остановиться с `TASK CONTEXT ALARM`. Imported provenance является read-only
-external context и не образует отдельный writable task source.
+Adapter не выбирает business scope, не решает, нужен ли Goal, не определяет
+`Backlog`/`In Review` delivery semantics, не принимает result, не классифицирует
+environment и не разрешает release. Эти решения получает от ShipTask.
 
-Обязательный Codex Goal является orchestration state ShipTask, а не частью
-Task Manager connector и не вторым task source. Его можно сформировать только
-после разрешения exact Task Manager scope; Goal не заменяет canonical refs,
-current Task detail, connector access или Task write authority.
+## Minimal read contract
 
-Task Manager `Release` является planning entity и сам по себе не определяет
-deployment environment и не разрешает production effect. Exact runtime target,
-его non-production/production class и release commands берутся из проверенного
-project context по ADR-0004.
+ShipTask передаёт intent/selectors; adapter возвращает live canonical evidence:
 
-## Read-only discovery
+1. `get_workspace`: signed-in identity, read/write capabilities и status
+   catalog.
+2. `list_projects` и при необходимости `get_project`: exact Project ref,
+   access, releases и available statuses.
+3. `list_releases` и `get_release`: exact Release ref и подтверждённая Project
+   membership.
+4. `list_tasks`: filtered inventory; для полного Project/Release scope — все
+   страницы до `hasMore=false`.
+5. `get_task`: full detail каждого выбранного кандидата до dependency,
+   acceptance, relation или write reasoning.
+6. `get_task_external_context`: только когда provenance сообщает о материальном
+   imported context.
+7. Native comment list/thread reads: deduplication и read-back Task reports.
 
-Использовать progressive disclosure connector:
+List rows и counts не заменяют complete inventory или `TaskDetail`. Human
+identifier вроде `TM-123` является selector/display identity; immutable Task
+`ref` является write identity.
 
-1. Вызвать `get_workspace` и проверить `capabilities.read`, нужный write scope
-   и status catalog.
-2. Разрешить названный Project через `list_projects`, затем получить
-   `get_project`, если нужны releases, counts, access или допустимые statuses.
-3. Разрешить Release через `list_releases`; перед combined filter проверить
-   через `get_release`, что он принадлежит выбранному Project.
-4. Получить exact inventory через `list_tasks` только с подтверждёнными
-   `projectRef`, `releaseRef` и требуемыми filters. Оба ref можно опустить
-   только когда scope действительно охватывает все доступные задачи.
-5. Продолжать по `nextCursor`, пока `hasMore=false`, когда нужен полный scope.
-   Для выбора одного candidate не загружать лишние страницы.
-6. Считать list rows только кандидатами. До execution, dependency reasoning или
-   write загрузить `get_task` для каждой выбранной задачи.
-7. Читать `get_task_external_context` только когда `provenance` сообщает о
-   таком контексте и imported comments, attachments или branch metadata
-   материальны для acceptance либо boundary dependencies.
-8. Читать native discussion через `list_task_comments`/`get_task_thread` перед
-   report deduplication и после write; не смешивать её с imported context.
+## Identity and capability invariants
 
-`TaskSummary` подходит для inventory и выбора. Описание, lifecycle, relations,
-subtasks, access, provenance, current `version` и `availableStatuses` находятся
-в `TaskDetail`.
+- Использовать только canonical refs, возвращённые current connector. Не
+  строить Project/Release/status refs из display names и не доверять remembered
+  ref без current lookup.
+- Проверять Release membership до combined Project+Release filter.
+- Проверять connector write capability и `access.canEdit` отдельно.
+- Imported comments/attachments являются read-only provenance и не доказывают
+  native comment-write capability.
+- Goal tools не являются Task Manager tools.
+- Task Manager `Release` не является deployment environment и не доказывает
+  production/non-production class.
 
-## Identity и scope
+## Write and concurrency invariants
 
-- Использовать immutable Task `ref` как canonical identity, а `identifier`
-  наподобие `TM-123` — как человекочитаемую ссылку.
-- Использовать только canonical Project/Release/status refs из connector, не
-  строить refs из display names.
-- Проверять release membership до совмещённого Project+Release filter.
-- Не считать counts или первую страницу complete inventory.
-- Не выводить task acceptance только из title/status; читать detail и при
-  необходимости imported context.
-- Проверять `access.canEdit` и connector write capability отдельно: OAuth scope
-  не отменяет resource ACL.
-
-## Lifecycle projection
-
-Connector возвращает provider status и одну из системных категорий:
-`backlog`, `unstarted`, `started`, `completed`, `canceled`. Category помогает
-распознать terminal аналоги, но рабочий stage определяется current status name
-и canonical ref.
-
-| Status | Category | ShipTask policy |
-|---|---|---|
-| `Backlog` | `backlog` | Исключить из рабочего scope; не выполнять и не изменять. |
-| `To Do` | `unstarted` | Брать как новую работу после preflight. |
-| `In Progress` | `started` | Продолжать уже начатую работу из coherent checkpoint. |
-| `In Review` | `started` | Проверять exact batch-candidate, batch evidence и связанные duplicates. |
-| `Done`, `Finished` и другие terminal аналоги | `completed` | Не выполнять; учитывать только при reconciliation. |
-| `Canceled` и terminal аналоги | `canceled` | Не выполнять и не считать successful completion. |
-| `Duplicate` | `canceled` | Не выделять отдельную execution lane; читать как review context основной Task. |
-
-Relation `duplicate_of` направлена от duplicate к canonical Task. При review
-разрешить canonical Task по исходящей relation, если она есть, затем получить
-полный `TaskDetail` всех её входящих `duplicate_of`. При материальном imported
-context вызвать `get_task_external_context`. Отличающийся problem statement или
-failure scenario становится review finding; status `Duplicate` сам по себе не
-доказывает, что сценарий покрыт основной Task.
-
-Переход `To Do → In Progress` допустим только после preflight, переход в
-`In Review` — только после per-Task targeted gate и формирования candidate
-evidence. `In Review` может ждать review-batch gate, required effects или
-terminal reconciliation, но не user acceptance; это всегда
-`completion-remains`. Переход в `Done` обязателен после passing Task completion
-criteria, exact batch gate, integration и required effects: ShipTask принимает
-такой result автоматически. Failed gate или changes requested возвращает Tasks
-с недействительным evidence в `In Progress` до повторной проверки. Один status
-не является доказательством результата.
-
-## Writes и concurrency
-
-- Task writes выполнять только при явной authority текущего workflow и
-  `capabilities.writeTasks=true`.
-- Перед каждым `update_task` повторно вызвать `get_task` и передать его текущий
+- До каждого `update_task` заново вызвать `get_task` и передать current
   `version`.
-- Использовать status ref из `availableStatuses` выбранной Task либо из
-  подтверждённого Project/Release detail для создания.
-- Значение `null` у `projectRef`, `releaseRef` или `dueDate` очищает поле. Не
-  передавать `null`, если очистка не входит в запрос.
-- При `version_conflict` заново прочитать Task, сравнить новые факты с
-  намерением запуска и повторить update только если он всё ещё применим. Не
-  перетирать unrelated newer edits.
-- Не повторять `create_task` вслепую после неизвестного network outcome:
-  сначала искать возможный созданный duplicate.
-- Явно разрешённую новую Task создавать с current canonical status ref для
-  `To Do`. Не создавать ShipTask Tasks в `Backlog`; при отсутствии `To Do`
-  остановиться до write.
-- После write перечитать Task и проверить новый status/version/projection.
-- Не менять `description` или другой Task field ради ShipTask delivery report.
-  Report публиковать через `add_task_comment` со стабильным idempotency key,
-  проверкой duplicate и read-back до terminal Task transition.
+- Брать status ref из current `availableStatuses` либо проверенного
+  Project/Release detail.
+- Не передавать `null` для `projectRef`, `releaseRef` или `dueDate`, если очистка
+  не была явно разрешена.
+- При `version_conflict` перечитать Task и повторить update только если intent
+  всё ещё применим; не перетирать unrelated newer edits.
+- После каждого write перечитать Task и проверить фактические fields, status и
+  новую `version`.
+- Не повторять `create_task` или comment create вслепую после unknown network
+  outcome. Сначала искать возможный созданный object/report.
+- Не менять `description`, acceptance или status text ради delivery report.
+  Report создаётся только native Task comment operation и независимо
+  reconciles через list/read.
 
-ShipTask обычно начинает с уже созданных задач. `create_task` нужен только для
-отдельно разрешённого defect/task route; invocation skill не даёт такого
-разрешения автоматически.
+Эти invariants ShipTask сохраняет в runtime даже если отдельный Task Manager
+skill не был автоматически загружен. Конкретные tool names и payload schema
+берутся из current adapter skill/tool descriptions, а не копируются в business
+policy.
 
-## Текущие capability gaps
+## Capability gaps
 
-MCP connector умеет читать Projects/Releases/Tasks/native comments,
-создавать/изменять Tasks и выполнять native comment operations, но не
-предоставляет tools для:
+Current adapter может не предоставлять claims, leases, heartbeats, fencing,
+idempotency для Task create, relation/assignee/label mutation,
+Project/Release administration или durable orchestration state. ShipTask не
+изображает отсутствующие capabilities существующими.
 
-- claims, leases, heartbeats и fencing;
-- изменения assignee, labels, parent/subtasks или relations;
-- Project/Release mutation, workflow configuration, sharing, ownership,
-  Administration и backup/restore;
-- idempotency key для `create_task`.
+Если отсутствие capability делает любую следующую mutation небезопасной,
+ShipTask применяет `TASK CONTEXT ALARM`. Если gap изолирован одной Task, policy
+может оставить её truthful non-terminal и продолжить независимый batch scope.
 
-Goal tools также не являются capability Task Manager connector. При запуске
-skill необходимо отдельно проверить model-visible Goal state и возможность
-создать либо продолжить совместимый Goal. Если обязательный Goal нельзя
-сформировать или удерживать, остановиться до mutations с `TASK CONTEXT ALARM`.
+## Adapter handoff result
 
-Поэтому текущий Task Manager является authoritative источником scope,
-acceptance, dependencies, status projection и durable task-specific delivery
-reports, но не заменяет coordination runtime. Не использовать `description` ни
-как журнал, ни как fallback report storage. Stale session без comment tools
-оставляет affected Task non-terminal до plugin/tool refresh; claims и run state
-по-прежнему требуют project-defined durable channel. Если такой channel
-обязателен, но отсутствует, остановиться до execution.
+Для каждого read/write adapter должен позволить ShipTask зафиксировать:
 
-## Completion reconciliation
+- resolved canonical identity;
+- current detail/status/version/access;
+- pagination completeness для multi-task inventory;
+- write outcome и post-write read-back;
+- native comment/report identity либо честный `not-available` /
+  `write-outcome-unknown`;
+- exact connector error без выдуманного business interpretation.
 
-Перед terminal claim:
-
-1. Перечитать все in-scope Tasks по canonical refs.
-2. Сверить status, `version`, relations и незавершённые boundary dependencies.
-3. Проверить, что Task Manager projection совпадает с exact Git/workspace
-   result, per-Task targeted gates, exact review-batch gate, automatic
-   acceptance decision и обязательными external effects.
-4. Для каждой изменённой рабочей Task проверить published/read-back report с
-   exact state/result identity. `not-available` или `write-outcome-unknown`
-   остаются terminal-effect gap и не разрешают `Done` affected Task.
-5. Отдельно показать deferred Tasks и их decision/authority queue; они сохраняют
-   truthful non-terminal status и удерживают Goal активным.
-6. Отделить imported historical context от evidence текущего запуска.
-7. Указать capability gaps и project-defined coordination records отдельно от
-   Task Manager state.
-8. Повторно получить complete inventory выбранного Project/Release scope и не
-   завершать Goal, пока хотя бы одна Task всё ещё подходит под рабочие критерии
-   ShipTask.
-
-Task Manager state доказывает только собственную projection. Он не доказывает
-commit, merge, deployment, UAT, automatic acceptance decision или внешний
-эффект без независимого evidence.
+Task Manager state доказывает только собственную projection. Commit, build,
+deployment, smoke, automatic acceptance decision и другие external effects
+требуют независимого evidence по ShipTask policy.

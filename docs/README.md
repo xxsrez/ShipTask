@@ -5,9 +5,9 @@
 ## Specification
 
 - [Ship Tasks](specs/ship-tasks.md) — канонический Task Manager-only workflow
-  от уже созданных Tasks через обязательный Goal lifecycle, per-Task targeted
-  gates и периодические review-batch gates до automatic acceptance и terminal
-  evidence.
+  для explicit и natural-language delivery: single без Goal, batch с Goal,
+  project-memory context, per-Task targeted gates и review-batch gates до
+  automatic acceptance и terminal evidence.
 
 ## Decisions
 
@@ -27,12 +27,18 @@
 - [0006: Delivery comment как обязательный terminal effect](decisions/0006-delivery-comment-as-terminal-effect.md)
   — после появления native comment tools завершение Task требует
   опубликованного и перечитанного `COMPLETED` report до перехода в Done.
+- [0007: Delivery policy и project memory принадлежат ShipTask](decisions/0007-delivery-policy-and-project-memory.md)
+  — adapter / policy / context layers, implicit routing, single/batch modes и
+  граница Memories как selector/profile, а не live task state.
 
 ## Reference
 
 - [Task Manager adapter](reference/task-manager-adapter.md) — точный discovery,
   identity, lifecycle, concurrency и текущие capability gaps OAuth/MCP
   connector.
+- [Project memory contract](../ship-tasks/references/project-memory.md) —
+  runtime-схема current scope и project profile, precedence, bootstrap,
+  freshness, alarms и cross-surface ограничения.
 
 ## Guides
 
@@ -41,6 +47,12 @@
 
 ## Reports
 
+- [Предложение по развитию ShipTask skill](reports/2026-08-16-shiptask-skill-change-proposal.md)
+  — целевая граница business policy, explicit/implicit modes, project-memory
+  contract, runtime refactor, trigger matrix и согласованный cutover.
+- [Предложение по изменению Task Manager skill](reports/2026-08-16-task-manager-skill-change-proposal.md)
+  — handoff для adapter-only marketplace skill: что удалить, что сохранить,
+  какие metadata обновить и как проверить совместный routing с ShipTask.
 - [Как на практике разрабатывают с coding agents](reports/2026-08-11-agentic-development-in-practice.md)
   — срез по восьми выступлениям, engineering cases, HN/Reddit,
   surveys и field studies; consensus, разногласия и implications для ShipTask.

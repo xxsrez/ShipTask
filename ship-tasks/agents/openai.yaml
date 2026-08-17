@@ -1,7 +1,7 @@
 interface:
   display_name: "Ship Tasks"
-  short_description: "Доставить Task Manager scope до результата"
-  default_prompt: "Используй $ship-tasks, чтобы автономно выполнить выбранный Task Manager scope под обязательным Goal: никогда не проси ручную приёмку, считай historical acceptance context superseded, перед Done обязательно публикуй и перечитывай понятный native COMPLETED report, defer-ь task-local blockers с BLOCKED report, выпускай в verified non-production environments и не релизь production без explicit user approval."
+  short_description: "Доставить Task Manager scope по project context"
+  default_prompt: "Используй $ship-tasks для текущего project scope: классифицируй single или batch; составную команду создать одну Task и сразу выполнить её веди как single create-and-deliver до In Progress и результата, а не как backlog capture. Возьми bare scope из project memory, перечитай live Task Manager state, создай Goal только для batch, выполни verification и required non-production effects, опубликуй native report и автоматически доведи полный evidence до terminal status."
 
 dependencies:
   tools:
@@ -11,4 +11,4 @@ dependencies:
       transport: "streamable_http"
 
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

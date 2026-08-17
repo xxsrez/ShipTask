@@ -2,28 +2,50 @@
 
 ## Назначение
 
-`$ship-tasks` — явно вызываемый Task Manager-only workflow для доставки уже
-созданного и выбранного task scope. Skill разрешает Project, Release и Tasks
-через connector, читает полный Task detail, проверяет dependencies и authority,
-создаёт обязательный workflow Goal и координирует execution, integration,
-двухуровневую verification, automatic acceptance и terminal status projection.
-Goal остаётся активным, пока в выбранной границе есть `To Do`, `In Progress`,
-`In Review`, rework/completion remnants или unresolved in-scope defects.
+ShipTask — Task Manager-only business delivery policy для выбранного task scope.
+Она активируется явным `$ship-tasks` и подходящим natural-language запросом.
+Обычно scope уже существует; составная команда создать одну конкретную Task и
+сразу выполнить её создаёт exact `single` scope и продолжает delivery. Skill
+разрешает Project, Release и Tasks через connector, читает полный Task detail,
+проверяет dependencies и authority и координирует execution, integration,
+verification, automatic acceptance и terminal status projection.
 
-Конкретные Project/Release refs, repository commands, branches, environments и
-внешние эффекты определяются текущим project context. Global конфликт
-connector/exact scope/Goal/shared authority останавливает run с
+Есть четыре intent mode: `single` для одной exact Task без Goal, включая
+`create-and-deliver`, `batch` для
+нескольких Tasks/Project/Release с обязательным Goal, `memory-maintenance` для
+явного оформления project context и `non-delivery` для чтения/планирования.
+Bare `$ship-tasks` всегда запускает batch по `current_scope` из project memory.
+
+Конкретные Project/Release selectors, repository commands, branches,
+environments и внешние эффекты определяются project memory и проверяются по
+current live sources. Global конфликт connector/exact scope/applicable
+Goal/shared authority останавливает run с
 `TASK CONTEXT ALARM`; изолированный вопрос по одной Task откладывает только её.
+
+```text
+Task Manager skill  = technical adapter
+ShipTask skill      = business delivery policy
+Project Memories    = scope selectors + project-specific profile
+```
 
 ## Текущий статус
 
 - [Ship Tasks](specs/ship-tasks.md) — единственная каноническая specification.
+- [ADR-0007](decisions/0007-delivery-policy-and-project-memory.md) — принятое
+  разбиение adapter / delivery policy / project memory и implicit routing.
 - `ship-tasks/SKILL.md` — компактный исполнимый contract на её основе.
+- `ship-tasks/references/project-memory.md` — логическая схема, bootstrap,
+  freshness, precedence и alarm contract project memory.
 - [Task Manager adapter](reference/task-manager-adapter.md) — точный OAuth/MCP
   tool flow, identity, status и write semantics.
-- Каждый запуск после разрешения exact scope и до первой non-Goal mutation
-  создаёт Goal либо продолжает уже активный совместимый Goal. Несовместимый
-  незавершённый Goal блокирует запуск с `TASK CONTEXT ALARM`.
+- Каждый `batch` после разрешения exact scope и до первой non-Goal mutation
+  создаёт Goal либо продолжает уже активный совместимый Goal. `single` Goal не
+  создаёт. Несовместимый незавершённый Goal блокирует только новый batch с
+  `TASK CONTEXT ALARM`.
+- Prompt selector имеет приоритет над memory default, но не переписывает его.
+  Task status/detail/version всегда перечитываются из Task Manager.
+- Memory обновляется только по явной просьбе пользователя; delivery-run может
+  предложить обновление, но не выполняет его молча.
 - Cross-session scheduler, durable claims и отсутствующие connector capabilities
   не изображаются существующими.
 - Delivery report публикуется только как native Task comment и является
@@ -47,6 +69,7 @@ connector/exact scope/Goal/shared authority останавливает run с
 
 ```text
 Backlog                           excluded intake
+  └─ exact just-created Task → To Do   create-and-deliver only
 To Do → In Progress → In Review → Done or Canceled
                            ↑
                   duplicate scenarios
@@ -66,10 +89,11 @@ review batch. Failed batch возвращает затронутые Tasks в `I
 неясной attribution reopen получает весь связанный batch. Это уменьшает
 стоимость проверок, не ослабляя terminal gate.
 
-Invocation `$ship-tasks` разрешает automatic acceptance после полного terminal
-evidence. Пока хотя бы одна Task остаётся `In Review`, Goal и общий execution
-plan не могут считаться завершёнными: skill обязан закончить gates, выполнить
-rework либо перевести terminal-ready Task в `Done`, а не ждать пользователя.
+Любой классифицированный ShipTask delivery intent разрешает automatic acceptance
+после полного terminal evidence. Пока хотя бы одна Task остаётся `In Review`,
+применимый batch Goal и общий execution plan не могут считаться завершёнными:
+skill обязан закончить gates, выполнить rework либо перевести terminal-ready
+Task в `Done`, а не ждать пользователя.
 Старые memory/rollout/report записи о human acceptance являются historical
 evidence и не могут вернуть ручной gate. `Acceptance criteria` в Task означают
 проверяемые completion criteria; feedback после `Done` приходит через
@@ -85,10 +109,14 @@ evidence, но является обязательной durable review surface.
 ## Границы
 
 - Skill не создаёт scope из неопределённого пожелания.
-- Goal фиксирует и удерживает уже выбранный Task Manager scope, но не заменяет
-  его и не расширяет authority.
-- Skill не берёт Tasks из `Backlog` и не меняет их.
-- Явно разрешённые новые Tasks создаются в `To Do`, а не в `Backlog`.
+- Batch Goal фиксирует и удерживает уже выбранный Task Manager scope, но не
+  заменяет его и не расширяет authority. Single-task delivery Goal не создаёт.
+- Project memory помогает выбрать scope и project profile, но не заменяет live
+  Task Manager state и не меняется без явной просьбы.
+- Skill не берёт pre-existing Tasks из `Backlog` и не меняет их.
+- `Create-and-deliver` создаёт exact Task в `To Do`; если adapter вернул только
+  что созданную Task в `Backlog`, skill выводит только её в `To Do`, завершает
+  preflight и переводит в `In Progress` до implementation.
 - Skill не получает внешние полномочия из одного факта invocation.
 - Исключение ограничено ADR-0004: invocation заранее разрешает обычный in-scope
   non-production release workflow, но не production release.
@@ -100,7 +128,7 @@ evidence, но является обязательной durable review surface.
 - Skill не превращает failed check в разрешение на unrelated cleanup.
 - Skill не меняет Task description ради delivery report и не использует другие
   Task fields как fallback для comments.
-- Skill не завершает Goal, пока повторная полная инвентаризация выбранной
+- Skill не завершает batch Goal, пока повторная полная инвентаризация выбранной
   границы находит хотя бы одну Task, подходящую под рабочие критерии.
 - Skill не считает deferred Task завершённой и не задаёт серию вопросов, пока
   остаётся другая runnable работа.
