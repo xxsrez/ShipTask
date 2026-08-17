@@ -30,6 +30,9 @@
 - [0007: Delivery policy и project memory принадлежат ShipTask](decisions/0007-delivery-policy-and-project-memory.md)
   — adapter / policy / context layers, implicit routing, single/batch modes и
   граница Memories как selector/profile, а не live task state.
+- [0008: Plugin-only runtime distribution](decisions/0008-plugin-only-runtime-distribution.md)
+  — единственная runtime-установка ShipTask внутри
+  `task-manager@srez-marketplace`, без standalone user-level дубликата.
 
 ## Reference
 

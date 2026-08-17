@@ -43,6 +43,8 @@ ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```
 
-Установленная копия `~/.codex/skills/ship-tasks` обновляется только по явному
-запросу пользователя и после синхронизации должна точно совпадать с каталогом
-`ship-tasks/` этого репозитория.
+Единственная runtime-дистрибуция ShipTask — skill внутри plugin bundle
+`task-manager@srez-marketplace`. Standalone каталог
+`~/.codex/skills/ship-tasks` не устанавливается: он создаёт второй logical
+skill рядом с plugin-qualified `task-manager:ship-tasks`. Repository source
+публикуется через marketplace package и сверяется с installed plugin cache.

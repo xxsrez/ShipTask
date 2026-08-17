@@ -144,10 +144,23 @@ Codex task получает только:
 
 Не передавайте тестовому агенту ожидаемый ответ или скрытую diagnosis.
 
-## Установленная копия
+## Runtime-дистрибуция
 
-Каталог `ship-tasks/` в этом репозитории является source of truth. Копию в
-`~/.codex/skills/ship-tasks` обновляйте только по явной команде пользователя.
-После синхронизации сравните каталоги целиком через
-`diff -qr ship-tasks ~/.codex/skills/ship-tasks`, проверьте установленную копию
-через `quick_validate.py` и провалите handoff при любом расхождении.
+Каталог `ship-tasks/` в этом репозитории является source of truth, а
+единственной устанавливаемой runtime-копией служит skill внутри plugin bundle
+`task-manager@srez-marketplace`. Не создавайте standalone каталог
+`~/.codex/skills/ship-tasks`: одинаковый `name` не объединяет standalone и
+plugin-qualified skills, поэтому такая копия создаёт дубликат в catalog/picker.
+
+При изменении runtime payload:
+
+1. Сравните marketplace source с repository source через `diff -qr`.
+2. Обновите manifest version или cachebuster и запушьте marketplace commit.
+3. Переустановите plugin из `task-manager@srez-marketplace`.
+4. Проверьте `quick_validate.py` для marketplace skill, byte-identical installed
+   cache и состояние installed/enabled.
+5. В fresh App Server catalog подтвердите отсутствие standalone user skill и
+   наличие `task-manager:ship-tasks` внутри plugin.
+
+Marketplace snapshot и installed cache не являются дополнительными logical
+installations и управляются plugin lifecycle; не удаляйте их вручную.

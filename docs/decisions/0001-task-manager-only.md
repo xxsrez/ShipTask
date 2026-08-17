@@ -2,6 +2,10 @@
 
 Статус: accepted, 2026-08-15.
 
+Решение о standalone user-level копии ниже заменено
+[ADR-0008](0008-plugin-only-runtime-distribution.md); остальные положения
+остаются действующими.
+
 ## Контекст
 
 ShipTask выполняет уже созданный task scope через собственный Task Manager и

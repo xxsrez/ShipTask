@@ -22,8 +22,9 @@
   project context, а не зашивать в skill.
 - Каноническая specification описывает единственный текущий workflow. Не
   создавайте параллельные поколения или альтернативные specifications.
-- Синхронизируйте установленную user-level копию только по явному запросу
-  пользователя и проверяйте её точное совпадение с repository source.
+- Распространяйте runtime skill только внутри plugin bundle
+  `task-manager@srez-marketplace`. Не создавайте и не синхронизируйте
+  standalone user-level копию `~/.codex/skills/ship-tasks`.
 
 ## Изменения
 
@@ -37,19 +38,23 @@
 ## Definition of done для изменения skill
 
 Поведенческое или distribution-изменение `$ship-tasks` не завершено, пока
-одновременно не выполнены все четыре критерия:
+одновременно не выполнены все три критерия:
 
 1. Exact repository scope закоммичен в этом репозитории.
 2. Этот commit запушен в `origin/main`, а local `HEAD` совпадает с
    `origin/main`.
-3. Установленная user-level копия `~/.codex/skills/ship-tasks`
-   byte-identical каталогу `ship-tasks/` repository source и проходит
-   `quick_validate.py`.
-4. Marketplace package обновлён: byte-identical копия skill находится в
-   `Srez Marketplace/plugins/task-manager/skills/ship-tasks`, manifest version
-   или cachebuster обновлён, marketplace commit запушен в `origin/main`, plugin
-   переустановлен из `task-manager@srez-marketplace`, а installed cache
-   byte-identical marketplace source и отображается installed/enabled.
+3. Marketplace package является единственной runtime-дистрибуцией:
+   `Srez Marketplace/plugins/task-manager/skills/ship-tasks` byte-identical
+   repository source, а installed cache byte-identical marketplace source и
+   отображается installed/enabled. Если изменился runtime payload, manifest
+   version или cachebuster обновлён, соответствующий marketplace commit запушен
+   в `origin/main`, а plugin переустановлен из
+   `task-manager@srez-marketplace`.
+
+Standalone user-level каталог `~/.codex/skills/ship-tasks` должен
+отсутствовать, а fresh `skills/list` не должен возвращать отдельный user skill.
+Plugin-managed marketplace snapshot и installed cache являются внутренними
+копиями одной plugin installation и не удаляются вручную.
 
 Не объявляйте изменение завершённым при частичном выполнении этого списка.
 Проверку загрузки нового snapshot выполняйте в новой Codex-сессии; текущая

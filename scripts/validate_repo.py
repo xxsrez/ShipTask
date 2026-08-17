@@ -35,6 +35,9 @@ AUTO_ACCEPTANCE_DECISION_FILE = (
 POLICY_MEMORY_DECISION_FILE = (
     ROOT / "docs" / "decisions" / "0007-delivery-policy-and-project-memory.md"
 )
+PLUGIN_DISTRIBUTION_DECISION_FILE = (
+    ROOT / "docs" / "decisions" / "0008-plugin-only-runtime-distribution.md"
+)
 
 REQUIRED_FILES = (
     ROOT / "README.md",
@@ -55,6 +58,7 @@ REQUIRED_FILES = (
     AUTONOMY_DECISION_FILE,
     AUTO_ACCEPTANCE_DECISION_FILE,
     POLICY_MEMORY_DECISION_FILE,
+    PLUGIN_DISTRIBUTION_DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
@@ -153,11 +157,14 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "## Definition of done для изменения skill",
         "Exact repository scope закоммичен",
         "local `HEAD` совпадает с",
-        "byte-identical каталогу `ship-tasks/`",
+        "все три критерия",
         "Srez Marketplace/plugins/task-manager/skills/ship-tasks",
         "task-manager@srez-marketplace",
         "installed cache",
         "installed/enabled",
+        "Standalone user-level каталог `~/.codex/skills/ship-tasks` должен",
+        "fresh `skills/list` не должен возвращать отдельный user skill",
+        "не удаляются вручную",
     ):
         if fragment not in agents_text:
             fail(errors, f"AGENTS.md is missing delivery DoD contract {fragment!r}")
@@ -362,6 +369,20 @@ def validate_workflow_contract(errors: list[str]) -> None:
     ):
         if fragment not in decision_text:
             fail(errors, f"ADR-0007 is missing architecture contract {fragment!r}")
+
+    decision_text = PLUGIN_DISTRIBUTION_DECISION_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        "Единственная runtime installation",
+        "task-manager@srez-marketplace",
+        "~/.codex/skills/ship-tasks",
+        "не должен существовать",
+        "task-manager:ship-tasks",
+        "Marketplace snapshot и installed cache",
+        "не удаляются вручную",
+        "fresh Codex session",
+    ):
+        if fragment not in decision_text:
+            fail(errors, f"ADR-0008 is missing plugin-only distribution contract {fragment!r}")
 
     retired_create_delivery_fragments = {
         SKILL_FILE: (
