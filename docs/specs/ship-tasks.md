@@ -1,6 +1,6 @@
 # Ship Tasks
 
-Статус: current contract, 2026-08-17.
+Статус: current contract, 2026-08-18.
 
 Документ описывает единственную business delivery policy ShipTask для явного
 `$ship-tasks` и подходящих natural-language запросов. Исполнимый
@@ -9,12 +9,18 @@
 ## 1. Результат и граница
 
 Skill должен довести выбранный scope Task Manager Tasks до одного проверенного
-terminal outcome. Он применяется как при явном invocation, так и при
-однозначном delivery intent в свободной форме. Обычно scope уже существует и
-задаётся одной или несколькими Tasks, Project либо Release. Составная команда
-создать одну конкретную Task и сразу начать или выполнить её сама разрешает
-создать этот exact scope и продолжить в `single` mode; она не является backlog
-capture. Неопределённая идея сама по себе scope не создаёт.
+terminal outcome. Он применяется при явном `$ship-tasks` и неявно только когда
+текущий запрос одновременно содержит delivery intent и однозначный Task
+Manager delivery anchor: exact существующую Task, явно выбранный
+Project/Release/current scope либо explicit create-and-deliver ровно одной
+новой Task. Обычная просьба исправить продукт, код, repository или plugin без
+такого anchor не относится к ShipTask, даже если использует delivery verb.
+
+Обычно scope уже существует и задаётся одной или несколькими Tasks, Project
+либо Release. Составная команда явно создать ровно одну Task именно в Task
+Manager и сразу начать или выполнить её сама разрешает создать этот exact scope
+и продолжить в `single` mode; она не является backlog capture. Неопределённая
+идея и один delivery verb сами по себе scope не создают.
 
 Pre-existing `Backlog` остаётся intake-зоной вне рабочего scope ShipTask: skill
 не берёт такие Tasks в работу и не меняет их status или content. Узкое
@@ -46,9 +52,33 @@ ShipTask: routing + business delivery policy + memory contract
 - Task Manager остаётся единственным authority для текущих Task detail, status,
   `version`, relations, comments и access. Memory никогда их не заменяет.
 
-### 1.2 Классификация intent и execution mode
+### 1.2 Invocation gate и классификация execution mode
 
-Классифицировать запрос до scope-changing или delivery mutations:
+До чтения project memory, обращения к Task Manager adapter, создания Goal или
+других scope-changing/delivery mutations проверить invocation gate.
+
+Явный `$ship-tasks` всегда является достаточным invocation anchor. Для
+implicit invocation одновременно обязательны delivery intent и ровно один
+однозначный Task Manager delivery anchor, уже присутствующий в текущем запросе
+или выбранном Task Manager context:
+
+- exact существующая Task, названная canonical identifier/ref вроде `TM-123`
+  либо иначе однозначно выбранная как Task Manager Task;
+- явно выбранный Task Manager Project, Release или current scope, для которого
+  пользователь просит выполнить delivery;
+- explicit create-and-deliver: пользователь в одном запросе просит создать
+  ровно одну Task именно в Task Manager и сразу начать или выполнить её.
+
+Явная настройка ShipTask project memory остаётся отдельным
+`memory-maintenance` trigger. Project memory и adapter lookup можно использовать
+для разрешения уже прошедшего gate, но нельзя читать их, чтобы задним числом
+превратить обычную просьбу исправить код/продукт/plugin в Task Manager scope.
+Текущий repository, software project, code task или release target не являются
+Task Manager Project/Release/current scope без такого контекста.
+
+Если gate не пройден, ShipTask не активируется: выполнить обычный запрос его
+прямым workflow и не вызывать Task Manager/Goal tools от имени ShipTask. После
+успешного gate классифицировать запрос до mutations:
 
 | Intent | Mode | Scope source | Goal |
 |---|---|---|---|
@@ -56,21 +86,24 @@ ShipTask: routing + business delivery policy + memory contract
 | `$ship-tasks` с exact Task | `single` | prompt selector | нет |
 | `$ship-tasks` с несколькими Tasks, Project или Release | `batch` | prompt selector | обязательный |
 | «выполни/исправь/доведи TM-123» | `single` | ровно одна canonical Task | нет |
-| «создай одну Task и сразу начни/выполни её» | `single` (`create-and-deliver`) | exact новая Task в явно выбранном Project/Release | нет |
-| «доведи текущий release/project/scope» | `batch` | prompt, затем project memory | обязательный |
+| «создай ровно одну Task в Task Manager и сразу начни/выполни её» | `single` (`create-and-deliver`) | exact новая Task в явно выбранном Project/Release | нет |
+| «доведи выбранный Task Manager release/project/current scope» | `batch` | выбранный context, затем project memory | обязательный |
 | «настрой/обнови ShipTask memory» | `memory-maintenance` | текущий project context | нет |
 | list/read/status/audit/planning/backlog capture | `non-delivery` | exact user request | нет |
 
-Delivery verbs не отменяют явный read-only/local-only/no-deploy boundary.
+Один delivery verb недостаточен для implicit invocation и не отменяет явный
+read-only/local-only/no-deploy boundary.
 Фразы «просто добавь», «положи в backlog», «запланируй» создают или уточняют
 planning scope только когда это явно разрешено; они не запускают delivery,
 не меняют status существующей Task и не требуют delivery report.
 
-Явная комбинация create intent с execution intent — например, «создай задачу и
-начинай делать» — является `single` delivery. Не переклассифицировать её в
-planning/backlog capture после `create_task` и не завершать flow только потому,
-что default status созданной Task оказался `Backlog`. Команда лишь создать или
-описать Task без execution intent остаётся `non-delivery`.
+Явная комбинация Task Manager create intent с execution intent — например,
+«создай ровно одну Task в Task Manager и начинай делать» — является `single`
+delivery. Не переклассифицировать её в planning/backlog capture после
+`create_task` и не завершать flow только потому, что default status созданной
+Task оказался `Backlog`. Команда лишь создать или описать Task без execution
+intent остаётся `non-delivery`. Просьба создать и выполнить сущность, не
+названную Task Manager Task, не является ShipTask create-and-deliver.
 
 `single` требует ровно одну canonical Task до implementation. Для обычного
 single её разрешить из current Task Manager state. Для `create-and-deliver`
@@ -88,6 +121,27 @@ scope. Exact selector из текущего prompt имеет приоритет
 `memory-maintenance` читает project sources, помогает сформировать структуру и
 пишет memory только по явной просьбе пользователя. Обычный delivery-run не
 обновляет memory как побочный эффект.
+
+### 1.3 Проверяемая trigger matrix
+
+Эта matrix является regression contract для discovery description, runtime
+gate, repository validator и fresh-session behavioral smoke:
+
+| Prompt | ShipTask activation | Mode/result |
+|---|---|---|
+| `$ship-tasks` | да | `batch` по memory `current_scope` |
+| `Выполни TM-123` | да | `single` для exact существующей Task |
+| `Доведи выбранный Task Manager Project Alpha` | да | `batch` выбранного Project |
+| `Выпусти выбранный Task Manager Release 0.2` | да | `batch` выбранного Release |
+| `Доведи текущий Task Manager scope` | да | `batch` уже выбранного current scope |
+| `Создай ровно одну Task в Task Manager: исправить импорт, и сразу начни выполнять её` | да | `single create-and-deliver` |
+| `Почини X сейчас` | нет | обычная реализация без Task Manager scope |
+| `Исправь баг в plugin` | нет | обычная реализация без Task Manager scope |
+| `Реализуй это изменение в коде` | нет | обычная реализация без Task Manager scope |
+| `Покажи статус TM-123` | нет | read-only Task Manager adapter |
+| `Проведи аудит TM-123` | нет | read-only Task Manager adapter |
+| `Создай Task в Task Manager` | нет | planning/write через adapter, без delivery flow |
+| `Просто добавь это в backlog` | нет | backlog capture, без delivery flow |
 
 До первой мутации необходимо установить:
 

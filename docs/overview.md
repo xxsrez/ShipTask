@@ -3,12 +3,15 @@
 ## Назначение
 
 ShipTask — Task Manager-only business delivery policy для выбранного task scope.
-Она активируется явным `$ship-tasks` и подходящим natural-language запросом.
-Обычно scope уже существует; составная команда создать одну конкретную Task и
-сразу выполнить её создаёт exact `single` scope и продолжает delivery. Skill
-разрешает Project, Release и Tasks через connector, читает полный Task detail,
-проверяет dependencies и authority и координирует execution, integration,
-verification, automatic acceptance и terminal status projection.
+Она активируется явным `$ship-tasks` и natural-language delivery только при
+однозначном Task Manager anchor: exact Task либо уже выбранном
+Project/Release/current scope. Один delivery verb и обычная просьба исправить
+код/продукт/plugin без такого anchor недостаточны. Обычно scope уже существует;
+составная команда явно создать ровно одну Task в Task Manager и сразу выполнить
+её создаёт exact `single` scope и продолжает delivery. Skill разрешает Project,
+Release и Tasks через connector, читает полный Task detail, проверяет
+dependencies и authority и координирует execution, integration, verification,
+automatic acceptance и terminal status projection.
 
 Есть четыре intent mode: `single` для одной exact Task без Goal, включая
 `create-and-deliver`, `batch` для
@@ -68,8 +71,8 @@ Project Memories    = scope selectors + project-specific profile
 - Terminal-ready result автоматически принимается и переводится в `Done` без
   вопроса пользователю. Если позже обнаружен bug, пользователь reopen-ит Task
   либо создаёт новую проблему для следующего ShipTask scope.
-- User-level копия должна совпадать с repository source после явной
-  синхронизации.
+- Marketplace runtime и installed cache должны быть byte-identical repository
+  source; standalone user-level копия отсутствует.
 
 ## Целевой продуктовый поток
 
@@ -121,6 +124,9 @@ evidence, но является обязательной durable review surface.
 
 ## Границы
 
+- Один delivery verb не является implicit invocation. Project memory и Task
+  Manager lookup не используются, чтобы придумать anchor для обычной code/
+  product/plugin просьбы.
 - Skill не создаёт scope из неопределённого пожелания.
 - Batch Goal фиксирует и удерживает уже выбранный Task Manager scope, но не
   заменяет его и не расширяет authority. Single-task delivery Goal не создаёт.

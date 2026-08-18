@@ -16,7 +16,8 @@
 - Пишите body в imperative/infinitive form и не дублируйте подробные reference
   документы.
 - Сохраняйте `policy.allow_implicit_invocation: true` и проверяйте одновременно
-  positive delivery triggers и negative read/planning/backlog exclusions.
+  positive Task Manager delivery anchors и negative read/planning/backlog/code/
+  product/plugin exclusions. Один delivery verb не является trigger.
 - Не добавляйте fallback provider. Task Manager tool names и semantics,
   необходимые для безопасного выполнения, являются частью runtime contract.
 
@@ -44,11 +45,17 @@ Codex task получает только:
 
 Проверьте как минимум:
 
-- natural-language exact Task delivery активирует `single`, а read/status,
-  planning и backlog capture не запускают delivery;
-- «создай одну Task и начинай делать» активирует `single create-and-deliver`:
+- `$ship-tasks`, natural-language exact `TM-123` и явно выбранный Task Manager
+  Project/Release/current scope активируют ShipTask; один delivery verb без
+  Task Manager anchor этого не делает;
+- «почини X сейчас», «исправь баг в plugin» и «реализуй это изменение в коде»
+  используют обычный workflow без ShipTask, Task Manager lookup и Goal;
+- read/status/audit/planning/backlog capture не запускают ShipTask delivery;
+- «создай ровно одну Task в Task Manager и начинай делать» активирует `single create-and-deliver`:
   exact Task создаётся в `To Do`, проходит read-back/preflight, переводится в
   `In Progress` до implementation; один `create_task` не завершает flow;
+- «создай Task в Task Manager» без immediate execution остаётся adapter/planning
+  write и не запускает ShipTask;
 - bare `$ship-tasks` требует ровно один применимый memory `current_scope`, а
   exact prompt selector имеет приоритет без silent memory update;
 - `single` не вызывает Goal tools, работает serial и при blocker не выбирает

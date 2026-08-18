@@ -90,6 +90,58 @@ SKILL_GENERATION_RE = re.compile(
 
 LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 
+TRIGGER_MATRIX = (
+    ("$ship-tasks", "да", "`batch` по memory `current_scope`"),
+    ("Выполни TM-123", "да", "`single` для exact существующей Task"),
+    (
+        "Доведи выбранный Task Manager Project Alpha",
+        "да",
+        "`batch` выбранного Project",
+    ),
+    (
+        "Выпусти выбранный Task Manager Release 0.2",
+        "да",
+        "`batch` выбранного Release",
+    ),
+    (
+        "Доведи текущий Task Manager scope",
+        "да",
+        "`batch` уже выбранного current scope",
+    ),
+    (
+        "Создай ровно одну Task в Task Manager: исправить импорт, и сразу начни выполнять её",
+        "да",
+        "`single create-and-deliver`",
+    ),
+    (
+        "Почини X сейчас",
+        "нет",
+        "обычная реализация без Task Manager scope",
+    ),
+    (
+        "Исправь баг в plugin",
+        "нет",
+        "обычная реализация без Task Manager scope",
+    ),
+    (
+        "Реализуй это изменение в коде",
+        "нет",
+        "обычная реализация без Task Manager scope",
+    ),
+    ("Покажи статус TM-123", "нет", "read-only Task Manager adapter"),
+    ("Проведи аудит TM-123", "нет", "read-only Task Manager adapter"),
+    (
+        "Создай Task в Task Manager",
+        "нет",
+        "planning/write через adapter, без delivery flow",
+    ),
+    (
+        "Просто добавь это в backlog",
+        "нет",
+        "backlog capture, без delivery flow",
+    ),
+)
+
 
 def fail(errors: list[str], message: str) -> None:
     errors.append(message)
@@ -129,11 +181,14 @@ def validate_skill(errors: list[str]) -> None:
     frontmatter = text.split("---", 2)[1] if text.count("---") >= 2 else ""
     for fragment in (
         "$ship-tasks",
-        "по естественным просьбам выполнить, исправить или довести",
-        "текущий Project/Release/scope",
-        "создать одну Task и сразу начать",
-        "single create-and-deliver, а не backlog capture",
-        "project memory",
+        "однозначно выбранный Task Manager scope",
+        "implicit invocation — только",
+        "exact существующей Task (например TM-123)",
+        "выбранным Task Manager Project/Release/current scope",
+        "Одного delivery-глагола недостаточно",
+        "исправить продукт, код, repository или plugin",
+        "ровно одну Task именно в Task Manager",
+        "ShipTask project memory",
         "Bare $ship-tasks запускает batch",
         "exact Task — single без Goal",
         "Не использовать для чтения",
@@ -141,6 +196,13 @@ def validate_skill(errors: list[str]) -> None:
     ):
         if fragment not in frontmatter:
             fail(errors, f"SKILL.md description is missing trigger contract {fragment!r}")
+
+    for forbidden in (
+        "по естественным просьбам выполнить, исправить или довести",
+        "создать одну Task и сразу начать",
+    ):
+        if forbidden in frontmatter:
+            fail(errors, f"SKILL.md description contains broad trigger {forbidden!r}")
 
     if "[TODO" in text or "TODO:" in text:
         fail(errors, "SKILL.md contains a template TODO")
@@ -155,14 +217,49 @@ def validate_skill(errors: list[str]) -> None:
     metadata = OPENAI_FILE.read_text(encoding="utf-8")
     required_fragments = (
         'display_name: "Ship Tasks"',
-        'short_description: "Доставить Task Manager scope по project context"',
+        'short_description: "Доставить выбранный Task Manager scope"',
         "$ship-tasks",
+        "создать ровно одну Task в Task Manager",
         'value: "task-manager"',
         "allow_implicit_invocation: true",
     )
     for fragment in required_fragments:
         if fragment not in metadata:
             fail(errors, f"agents/openai.yaml is missing {fragment!r}")
+
+
+def validate_trigger_matrix(errors: list[str]) -> None:
+    spec_text = SPEC_FILE.read_text(encoding="utf-8")
+    marker = "### 1.3 Проверяемая trigger matrix"
+    if marker not in spec_text:
+        fail(errors, "canonical specification is missing the trigger matrix")
+        return
+
+    section = spec_text.split(marker, 1)[1].split("\n### ", 1)[0]
+    for prompt, activation, result in TRIGGER_MATRIX:
+        expected = f"| `{prompt}` | {activation} | {result} |"
+        if expected not in section:
+            fail(errors, f"trigger matrix is missing exact case {prompt!r}")
+
+    matrix_rows = [line for line in section.splitlines() if line.startswith("| `")]
+    if len(matrix_rows) != len(TRIGGER_MATRIX):
+        fail(
+            errors,
+            "trigger matrix must contain exactly the validated positive/negative cases",
+        )
+
+    skill_text = SKILL_FILE.read_text(encoding="utf-8")
+    for prompt in (
+        "$ship-tasks",
+        "Выполни TM-123",
+        "Доведи выбранный Task Manager Project/Release/current scope",
+        "Создай ровно одну Task в Task Manager и сразу начни выполнять её",
+        "Почини X сейчас",
+        "Исправь баг в plugin",
+        "Реализуй это изменение в коде",
+    ):
+        if prompt not in skill_text:
+            fail(errors, f"runtime gate is missing regression example {prompt!r}")
 
 
 def validate_workflow_contract(errors: list[str]) -> None:
@@ -185,11 +282,18 @@ def validate_workflow_contract(errors: list[str]) -> None:
             fail(errors, f"AGENTS.md is missing delivery DoD contract {fragment!r}")
 
     required_skill_fragments = (
+        "## Проверить invocation gate",
+        "ровно один однозначный Task Manager delivery anchor",
+        "Один delivery verb недостаточен",
+        "не активируют ShipTask",
+        "Не читать memory и не вызывать",
+        "Если gate не пройден, ShipTask не владеет запросом",
+        "Natural-language read/status/audit/explain/plan/backlog request не активирует",
         "Классифицировать intent до mutations",
         "Bare `$ship-tasks`",
         "`single` требует ровно одну canonical",
         "`single create-and-deliver`",
-        "не завершать flow после одного `create_task`",
+        "Не завершать flow после одного `create_task`",
         "exact Task, только что",
         "перевести её в `In Progress`",
         "`memory-maintenance`",
@@ -225,7 +329,11 @@ def validate_workflow_contract(errors: list[str]) -> None:
     )
     required_spec_fragments = (
         "### 1.1 Слои ответственности",
-        "### 1.2 Классификация intent и execution mode",
+        "### 1.2 Invocation gate и классификация execution mode",
+        "однозначный Task Manager delivery anchor",
+        "Один delivery verb недостаточен",
+        "нельзя читать их, чтобы задним числом",
+        "### 1.3 Проверяемая trigger matrix",
         "Bare `$ship-tasks`",
         "`single` (`create-and-deliver`)",
         "не является backlog",
@@ -413,6 +521,9 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Task Manager skill  -> технический adapter",
         "ShipTask skill      -> intent routing и business delivery policy",
         "Project Memories    -> current scope и project-specific profile",
+        "implicit invocation требует однозначного Task Manager",
+        "один delivery verb не активирует ShipTask",
+        "Project memory и adapter lookup разрешают уже выбранный scope",
         "`single` — ровно одна",
         "`create-and-deliver` intent",
         "`batch` — Project, Release",
@@ -607,6 +718,7 @@ def main() -> int:
 
     if not errors:
         validate_skill(errors)
+        validate_trigger_matrix(errors)
         validate_workflow_contract(errors)
         validate_single_task_manager_contract(errors)
         validate_links(errors)

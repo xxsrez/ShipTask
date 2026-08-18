@@ -2,12 +2,14 @@
 
 ShipTask — репозиторий Codex skill `$ship-tasks`, который через Task Manager
 доводит выбранные Tasks, Project или Release до проверенного terminal outcome
-при явном invocation и по natural-language delivery intent. Составная команда
-создать одну Task и сразу выполнить её также запускает `single`, а не backlog
-capture. Exact одна Task работает в `single` mode без Goal; несколько Tasks,
-Project, Release и bare `$ship-tasks` — в `batch` mode с обязательным Goal. Bare
-scope выбирается из project memory и затем всегда перепроверяется по live Task
-Manager state.
+при явном invocation и по natural-language delivery intent с однозначным Task
+Manager anchor. Один delivery verb или обычная просьба исправить код/продукт/
+plugin без такого anchor ShipTask не активирует. Составная команда явно создать
+ровно одну Task в Task Manager и сразу выполнить её запускает `single`, а не
+backlog capture. Exact одна Task работает в `single` mode без Goal; несколько
+Tasks, Project, Release и bare `$ship-tasks` — в `batch` mode с обязательным
+Goal. Bare scope выбирается из project memory и затем всегда перепроверяется по
+live Task Manager state.
 
 Skill выполняет scope, проверяет dependencies, интегрирует результат, проводит
 лёгкую проверку каждой Task и тщательную периодическую проверку review batches,

@@ -5,9 +5,10 @@
 ## Specification
 
 - [Ship Tasks](specs/ship-tasks.md) — канонический Task Manager-only workflow
-  для explicit и natural-language delivery: single без Goal, batch с Goal,
-  project-memory context, per-Task targeted gates и review-batch gates до
-  automatic acceptance и terminal evidence.
+  для explicit invocation и natural-language delivery с однозначным Task
+  Manager anchor: single без Goal, batch с Goal, project-memory context,
+  per-Task targeted gates и review-batch gates до automatic acceptance и
+  terminal evidence.
 
 ## Decisions
 
