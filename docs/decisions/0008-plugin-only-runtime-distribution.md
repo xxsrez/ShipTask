@@ -1,6 +1,10 @@
 # 0008: Plugin-only runtime distribution
 
-Статус: accepted. Дата: 2026-08-17.
+Статус: superseded ADR-0011. Дата: 2026-08-17.
+
+Решение о bundled ShipTask внутри Task Manager plugin отменено
+[ADR-0011](0011-separate-shiptask-plugin-distribution.md). Этот документ
+сохранён как историческое объяснение предыдущего distribution choice.
 
 ## Контекст
 

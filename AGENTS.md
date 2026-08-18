@@ -22,8 +22,10 @@
   project context, а не зашивать в skill.
 - Каноническая specification описывает единственный текущий workflow. Не
   создавайте параллельные поколения или альтернативные specifications.
-- Распространяйте runtime skill только внутри plugin bundle
-  `task-manager@srez-marketplace`. Не создавайте и не синхронизируйте
+- Распространяйте runtime skill только через отдельный plugin
+  `ship-tasks@srez-marketplace`. Task Manager connector устанавливается
+  отдельно как adapter-only `task-manager@srez-marketplace`; не помещайте
+  ShipTask внутрь его package. Не создавайте и не синхронизируйте
   standalone user-level копию `~/.codex/skills/ship-tasks`.
 
 ## Изменения
@@ -43,13 +45,15 @@
 1. Exact repository scope закоммичен в этом репозитории.
 2. Этот commit запушен в `origin/main`, а local `HEAD` совпадает с
    `origin/main`.
-3. Marketplace package является единственной runtime-дистрибуцией:
-   `Srez Marketplace/plugins/task-manager/skills/ship-tasks` byte-identical
+3. Отдельный Marketplace package является единственной runtime-дистрибуцией:
+   `Srez Marketplace/plugins/ship-tasks/skills/ship-tasks` byte-identical
    repository source, а installed cache byte-identical marketplace source и
    отображается installed/enabled. Если изменился runtime payload, manifest
    version или cachebuster обновлён, соответствующий marketplace commit запушен
    в `origin/main`, а plugin переустановлен из
-   `task-manager@srez-marketplace`.
+   `ship-tasks@srez-marketplace`. Отдельно установленный
+   `task-manager@srez-marketplace` остаётся adapter-only и не содержит
+   `skills/ship-tasks`.
 
 Standalone user-level каталог `~/.codex/skills/ship-tasks` должен
 отсутствовать, а fresh `skills/list` не должен возвращать отдельный user skill.

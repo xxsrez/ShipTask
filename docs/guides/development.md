@@ -170,8 +170,10 @@ Codex task получает только:
 ## Runtime-дистрибуция
 
 Каталог `ship-tasks/` в этом репозитории является source of truth, а
-единственной устанавливаемой runtime-копией служит skill внутри plugin bundle
-`task-manager@srez-marketplace`. Не создавайте standalone каталог
+единственной устанавливаемой runtime-копией служит skill внутри отдельного
+plugin `ship-tasks@srez-marketplace`. Task Manager connector устанавливается
+отдельно через adapter-only `task-manager@srez-marketplace`. Не создавайте
+standalone каталог
 `~/.codex/skills/ship-tasks`: одинаковый `name` не объединяет standalone и
 plugin-qualified skills, поэтому такая копия создаёт дубликат в catalog/picker.
 
@@ -179,11 +181,12 @@ plugin-qualified skills, поэтому такая копия создаёт д�
 
 1. Сравните marketplace source с repository source через `diff -qr`.
 2. Обновите manifest version или cachebuster и запушьте marketplace commit.
-3. Переустановите plugin из `task-manager@srez-marketplace`.
+3. Переустановите plugin из `ship-tasks@srez-marketplace`.
 4. Проверьте `quick_validate.py` для marketplace skill, byte-identical installed
    cache и состояние installed/enabled.
 5. В fresh App Server catalog подтвердите отсутствие standalone user skill и
-   наличие `task-manager:ship-tasks` внутри plugin.
+   наличие `ship-tasks:ship-tasks` только в отдельном plugin; отдельно
+   подтвердите, что `task-manager@srez-marketplace` не содержит ShipTask.
 
 Marketplace snapshot и installed cache не являются дополнительными logical
 installations и управляются plugin lifecycle; не удаляйте их вручную.

@@ -31,14 +31,16 @@
   — adapter / policy / context layers, implicit routing, single/batch modes и
   граница Memories как selector/profile, а не live task state.
 - [0008: Plugin-only runtime distribution](decisions/0008-plugin-only-runtime-distribution.md)
-  — единственная runtime-установка ShipTask внутри
-  `task-manager@srez-marketplace`, без standalone user-level дубликата.
+  — историческое решение о bundled distribution, заменённое ADR-0011.
 - [0009: Terminal-report capability как preflight barrier](decisions/0009-terminal-report-capability-preflight.md)
   — superseded incident hypothesis; сохранена как история отменённого
   comment-channel fail-fast решения.
 - [0010: Осмысленная финализация и глубокий компактный run report](decisions/0010-blocker-analysis-and-human-run-report.md)
   — перед любым terminal outcome агент проверяет целостный результат, устраняет
   доступные проблемы и только затем даёт человеку сжатое причинное объяснение.
+- [0011: Separate ShipTask plugin distribution](decisions/0011-separate-shiptask-plugin-distribution.md)
+  — ShipTask и Task Manager connector устанавливаются как два независимых
+  Marketplace plugin; Task Manager package остаётся adapter-only.
 
 ## Reference
 

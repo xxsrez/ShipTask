@@ -45,6 +45,9 @@ TERMINAL_CAPABILITY_DECISION_FILE = (
 BLOCKER_REPORT_DECISION_FILE = (
     ROOT / "docs" / "decisions" / "0010-blocker-analysis-and-human-run-report.md"
 )
+SEPARATE_PLUGIN_DECISION_FILE = (
+    ROOT / "docs" / "decisions" / "0011-separate-shiptask-plugin-distribution.md"
+)
 
 REQUIRED_FILES = (
     ROOT / "README.md",
@@ -69,6 +72,7 @@ REQUIRED_FILES = (
     PLUGIN_DISTRIBUTION_DECISION_FILE,
     TERMINAL_CAPABILITY_DECISION_FILE,
     BLOCKER_REPORT_DECISION_FILE,
+    SEPARATE_PLUGIN_DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
@@ -168,8 +172,9 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Exact repository scope закоммичен",
         "local `HEAD` совпадает с",
         "все три критерия",
-        "Srez Marketplace/plugins/task-manager/skills/ship-tasks",
-        "task-manager@srez-marketplace",
+        "Srez Marketplace/plugins/ship-tasks/skills/ship-tasks",
+        "ship-tasks@srez-marketplace",
+        "task-manager@srez-marketplace` остаётся adapter-only",
         "installed cache",
         "installed/enabled",
         "Standalone user-level каталог `~/.codex/skills/ship-tasks` должен",
@@ -418,17 +423,27 @@ def validate_workflow_contract(errors: list[str]) -> None:
 
     decision_text = PLUGIN_DISTRIBUTION_DECISION_FILE.read_text(encoding="utf-8")
     for fragment in (
-        "Единственная runtime installation",
+        "Статус: superseded ADR-0011",
+        "Решение о bundled ShipTask внутри Task Manager plugin отменено",
+    ):
+        if fragment not in decision_text:
+            fail(errors, f"ADR-0008 is missing superseded distribution marker {fragment!r}")
+
+    decision_text = SEPARATE_PLUGIN_DECISION_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        "Единственная runtime installation skill",
+        "ship-tasks@srez-marketplace",
         "task-manager@srez-marketplace",
+        "содержит только adapter skill `task-manager`",
+        "не содержит `.mcp.json`",
+        "plugins/ship-tasks/skills/ship-tasks",
         "~/.codex/skills/ship-tasks",
-        "не должен существовать",
+        "ship-tasks:ship-tasks",
         "task-manager:ship-tasks",
-        "Marketplace snapshot и installed cache",
-        "не удаляются вручную",
         "fresh Codex session",
     ):
         if fragment not in decision_text:
-            fail(errors, f"ADR-0008 is missing plugin-only distribution contract {fragment!r}")
+            fail(errors, f"ADR-0011 is missing separate-plugin contract {fragment!r}")
 
     decision_text = TERMINAL_CAPABILITY_DECISION_FILE.read_text(encoding="utf-8")
     for fragment in (

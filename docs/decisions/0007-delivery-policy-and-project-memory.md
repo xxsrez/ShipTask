@@ -3,8 +3,8 @@
 Статус: accepted. Дата: 2026-08-16.
 
 Формулировка о загрузке user-level skill в последствиях ниже заменена
-[ADR-0008](0008-plugin-only-runtime-distribution.md). Runtime ShipTask теперь
-распространяется только внутри Task Manager plugin bundle.
+[ADR-0011](0011-separate-shiptask-plugin-distribution.md). Runtime ShipTask
+распространяется отдельным plugin рядом с adapter-only Task Manager plugin.
 
 ## Контекст
 

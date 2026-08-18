@@ -47,8 +47,11 @@ ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```
 
-Единственная runtime-дистрибуция ShipTask — skill внутри plugin bundle
-`task-manager@srez-marketplace`. Standalone каталог
+Единственная runtime-дистрибуция ShipTask — отдельный plugin
+`ship-tasks@srez-marketplace`. Task Manager connector устанавливается отдельно
+как adapter-only `task-manager@srez-marketplace`; ShipTask в его package не
+входит. Standalone каталог
 `~/.codex/skills/ship-tasks` не устанавливается: он создаёт второй logical
-skill рядом с plugin-qualified `task-manager:ship-tasks`. Repository source
-публикуется через marketplace package и сверяется с installed plugin cache.
+skill рядом с plugin-qualified `ship-tasks:ship-tasks`. Repository source
+публикуется через отдельный marketplace package и сверяется с installed plugin
+cache.
