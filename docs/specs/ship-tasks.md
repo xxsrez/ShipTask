@@ -349,12 +349,13 @@ Goal активным, но могут оставаться dependency boundary.
 разрешают закрыть Goal, если подходящие Tasks либо completion remnants ещё
 существуют.
 Статус `blocked` допустим только после текущего строгого blocker threshold и
-после причинного анализа и user-visible `SHIPTASK RUN REPORT` по разделу 9.3.
-Агент обязан восстановить causal timeline, проверить root cause текущими
-sources/tools, найти и выполнить доступный safe in-scope recovery, затем
-перечитать affected state. Если имеющаяся operation/authority устраняет
-причину, `blocked` запрещён. Один reason code, raw error или status write без
-понятного объяснения, recovery evidence и exact resume step недопустимы.
+finalization pass с понятным пользователю объяснением по разделу 9.3. Blocker
+остаётся blocker до устранения; доступный safe in-scope recovery не отменяет
+его, но означает, что meaningful progress ещё возможен и terminal Goal
+`blocked` пока не обоснован. Агент обязан выполнить recovery, перечитать
+affected state и повторить finalization. Один reason code, raw error или status
+write без понятного объяснения, recovery evidence и exact resume condition
+недопустимы.
 Повторное чтение того же state не создаёт новый blocker occurrence. `blocked`
 оставляет Goal незавершённым, а после resume workflow продолжается с тем же
 Goal и scope.
@@ -790,12 +791,12 @@ member, но не копировать полный batch log. Comment write и 
 сложности и риску; не превращать простой change в формальный postmortem и не
 вставлять raw logs, огромные file lists или декоративные схемы.
 
-Для non-trivial feature, cross-component change либо material incident включать
-одну-две диаграммы, которые объясняют runtime/data flow, changed boundary,
-lifecycle или causal chain. Для локального тривиального изменения использовать
-compact before/after вместо бесполезной диаграммы. Формат выбирать по
-доказанному comment renderer contract: plain text работает как baseline;
-Mermaid не выдавать за rendered diagram без подтверждённой поддержки.
+Диаграмму использовать только когда она заметно быстрее объясняет runtime/data
+flow, changed boundary, lifecycle или causal chain, чем короткий текст. Не
+добавлять её по формальному признаку сложности. Для локального изменения обычно
+достаточно compact before/after. Формат выбирать по доказанному comment renderer
+contract: plain text работает как baseline; Mermaid не выдавать за rendered
+diagram без подтверждённой поддержки.
 
 При success report должен объяснять: что получил пользователь, как проходит
 основной flow, что и почему изменено, как это проверено и какие ограничения
@@ -805,32 +806,32 @@ trigger, root cause с confidence, recovery/rework, prevention и remaining risk
 без отдельной authority. Обычный red/green test внутри implementation не
 является material incident сам по себе.
 
-### 9.3 Причинный анализ и terminal interaction report
+### 9.3 Осмысленная финализация и terminal interaction report
 
-Перед blocking input, утверждением «продолжить невозможно» или Goal `blocked`
-следовать [run-report reference](../../ship-tasks/references/run-report.md) и
+Перед любым terminal outcome, blocking pause или финальным ответом следовать
+[run-report reference](../../ship-tasks/references/run-report.md) и
 [ADR-0010](../decisions/0010-blocker-analysis-and-human-run-report.md).
 
-Агент обязан назвать symptom и impact, восстановить causal timeline и first
-divergence, проверить вероятную root cause authoritative reads/tools, отделить
-evidence от inference и найти доступные safe in-scope recovery actions. Если
-имеющаяся operation и authority позволяют устранить причину, агент выполняет
-recovery, перечитывает affected state и продолжает workflow; `blocked` в этом
-случае запрещён. Сложность diagnosis или необходимость обычного tool call не
-являются внешним blocker.
+Finalization pass обязан сопоставить requested и actual outcome, перечитать
+current scope/Task/Goal/result/effect state, проверить существенное evidence и
+объяснить material gaps. Если safe in-scope recovery доступен при существующей
+authority, агент выполняет его, повторяет affected checks/read-back и начинает
+finalization заново. Terminal report нельзя строить по состоянию до recovery.
 
-Если self-recovery действительно исчерпан, до допустимого
-`update_goal(status="blocked")` показать человеку plain-language explanation:
-что произошло, почему, что проверено, что агент уже попробовал, почему дальше
-нужен человек/external state и какое одно действие возобновит run. Один reason
-code, raw error, список tool calls или отсутствующий Task effect не заменяют
-root-cause explanation.
+Blocker считается существующим до фактического устранения. Возможность recovery
+не переименовывает его в non-blocker; она означает, что terminal Goal `blocked`
+пока не обоснован, потому что агент ещё способен сделать meaningful progress.
+Если blocker сохраняется после self-recovery и выполнен строгий tool threshold,
+до `update_goal(status="blocked")` показать человеку plain-language explanation:
+что не достигнуто, почему, что уже сделано, почему агент не может продолжить сам
+и какое одно условие возобновит run.
 
 Каждый terminal exit ShipTask (`complete`, `blocked`, partial/deferred,
-`no-work`) заканчивается `SHIPTASK RUN REPORT`. Он сначала простыми словами
-показывает итог, causal explanation и self-recovery, затем current Task counts и
-statuses, result/effect identities, comments, Goal state, remaining work и exact
-evidence. Task comments не заменяют общий interaction report.
+`no-work`) заканчивается глубоким компактным `SHIPTASK RUN REPORT`. Report
+сначала передаёт итог, текущий статус и причинную модель простым языком, затем
+только необходимые evidence, ограничения и следующий шаг. Форму адаптировать к
+результату; не выгружать process diary, raw logs/tool calls или исчерпывающий
+inventory. Task comments не заменяют общий interaction report.
 
 ## 10. Defects и recovery
 
@@ -881,23 +882,21 @@ Completion требует:
 - run/journal state reconciled, когда он применим.
 
 Только в `batch` mode перед `update_goal(status="complete")` повторить complete
-inventory выбранной границы и проверить все пункты completion. Если хотя бы
-одна Task подходит под рабочие критерии, остаётся deferred/decision queue либо
-отсутствует обязательный evidence layer, не завершать Goal: продолжить runnable
-workflow или, когда runnable work исчерпан, предъявить consolidated queue. Goal
-`blocked` применять только по текущему строгому tool threshold, после
-причинного анализа, исчерпанного self-recovery и user-visible
-`SHIPTASK RUN REPORT` из раздела 9.3. Goal completion является последним
-lifecycle write после Task и evidence reconciliation, а не заменой этой
-проверки.
+inventory выбранной границы, выполнить finalization pass и проверить все пункты
+completion. Если хотя бы одна Task подходит под рабочие критерии, остаётся
+deferred/decision queue, доступный recovery либо отсутствует обязательный
+evidence layer, не завершать Goal: продолжить runnable workflow или, когда
+runnable work исчерпан, предъявить consolidated queue. Goal `blocked` применять
+только по текущему строгому tool threshold, когда blocker остаётся после
+self-recovery и понятное пользователю объяснение уже дано по разделу 9.3. Goal
+completion является последним lifecycle write после Task и evidence
+reconciliation, а не заменой этой проверки.
 
-Финальный interaction report отдельно показывает mode; для batch — Goal
-identity/status; затем Task Manager projection, source/integration identity,
-checks, automatic acceptance decisions, external effects, gaps и disposition
-Task comment reports. Он не
-выдаёт скипнутые или unknown writes за опубликованные comments и отдельно
-показывает deferred Tasks, их last safe checkpoints и exact
-decisions/authority needed.
+Финальный interaction report показывает фактический outcome и status; для batch
+— также Goal status. Остальные Task/result/effect/comment details включать только
+в объёме, который объясняет или доказывает вывод. Report не выдаёт скипнутые или
+unknown writes за опубликованные comments; для deferred Tasks компактно
+показывает impact, last safe checkpoint и exact decision/authority needed.
 
 ## 12. Non-goals
 

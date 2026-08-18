@@ -200,8 +200,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "active write target равен `1`",
         "Не начинать новую Task, если занятые lanes",
         "run-report reference",
-        "Провести causal analysis",
-        "`blocked` запрещён",
+        "finalization pass",
+        "Blocker остаётся blocker до устранения",
         "SHIPTASK RUN REPORT",
         "delivery-report reference",
         "published/read-back `COMPLETED`",
@@ -216,7 +216,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Никогда не переводить Goal в `blocked` по этой причине",
         "verified non-production target",
         "Никогда не выполнять production release",
-        "Завершить по mode",
+        "Осмыслить и завершить по mode",
     )
     required_spec_fragments = (
         "### 1.1 Слои ответственности",
@@ -235,9 +235,9 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "`active_write_target` и `batch_target` — разные величины",
         "status-reconciliation barrier",
         "начинать следующую `To Do` запрещено",
-        "### 9.3 Причинный анализ и terminal interaction report",
-        "имеющаяся operation и authority",
-        "причину, `blocked` запрещён",
+        "### 9.3 Осмысленная финализация и terminal interaction report",
+        "Finalization pass обязан",
+        "Blocker считается существующим до фактического устранения",
         "SHIPTASK RUN REPORT",
         "Не запускать полный дорогой project gate для каждой Task",
         "Failed batch gate сначала локализовать",
@@ -289,14 +289,17 @@ def validate_workflow_contract(errors: list[str]) -> None:
 
     run_report_text = RUN_REPORT_REFERENCE.read_text(encoding="utf-8")
     for fragment in (
-        "Причинный анализ и финальный ShipTask run report",
-        "Нельзя завершать run на первом симптоме",
-        "Если доступное действие устраняет blocker, `blocked` запрещён",
-        "Human-readable explanation",
+        "Осмысленная финализация и ShipTask run report",
+        "Не выбирать terminal outcome по последнему tool result",
+        "Blocker — фактическое условие",
+        "meaningful progress был возможен",
+        "Глубокий компактный отчёт",
         "SHIPTASK RUN REPORT",
-        "Что произошло и почему",
-        "Что агент проверил и сделал",
-        "после status write финальный ответ показывает фактический Goal state",
+        "Итог и статус",
+        "Почему так",
+        "Подтверждение",
+        "Осталось / следующий шаг",
+        "После status write финальный ответ должен отражать фактический Goal status",
     ):
         if fragment not in run_report_text:
             fail(errors, f"run-report reference is missing {fragment!r}")
@@ -319,10 +322,11 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Production release требует explicit user approval",
         "production-approval-required",
         "Deferred-only handoff",
-        "Blocker analysis and self-recovery",
+        "Finalization analysis and self-recovery",
         "Terminal run report",
         "SHIPTASK RUN REPORT",
-        "Если доступная operation устраняет причину, `blocked` запрещён",
+        "Blocker остаётся blocker до устранения",
+        "meaningful progress ещё возможен",
     ):
         if fragment not in autonomy_text:
             fail(errors, f"autonomy reference is missing {fragment!r}")
@@ -438,14 +442,28 @@ def validate_workflow_contract(errors: list[str]) -> None:
     decision_text = BLOCKER_REPORT_DECISION_FILE.read_text(encoding="utf-8")
     for fragment in (
         "comment lifecycle из",
-        "выполнить причинный анализ",
-        "выполнить recovery самостоятельно",
-        "`blocked` запрещён",
-        "SHIPTASK RUN REPORT",
-        "Один reason code, raw error",
+        "Перед любым terminal outcome выполнить finalization pass",
+        "Blocker остаётся blocker до фактического устранения",
+        "глубоким, но компактным",
+        "process diary",
     ):
         if fragment not in decision_text:
             fail(errors, f"ADR-0010 is missing blocker-analysis contract {fragment!r}")
+
+    for path in (
+        SKILL_FILE,
+        SPEC_FILE,
+        RUN_REPORT_REFERENCE,
+        AUTONOMY_REFERENCE,
+        BLOCKER_REPORT_DECISION_FILE,
+        ROOT / "docs" / "overview.md",
+    ):
+        text = path.read_text(encoding="utf-8")
+        if "`blocked` запрещён" in text:
+            fail(
+                errors,
+                f"{path.relative_to(ROOT)} conflates a blocker with terminal Goal blocked",
+            )
 
     retired_terminal_channel_fragments = {
         SKILL_FILE: (

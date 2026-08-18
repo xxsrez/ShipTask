@@ -51,10 +51,12 @@ Project Memories    = scope selectors + project-specific profile
 - Delivery report публикуется только как native Task comment и является
   обязательным terminal effect. Без comment write/read-back affected Task
   остаётся non-terminal с явным blocker; `description` не меняется.
-- Перед Goal `blocked` агент обязан установить root cause, выполнить доступный
-  safe in-scope recovery и перечитать affected state. Если он может устранить
-  причину сам, блокировка запрещена. Каждый terminal exit заканчивается
-  понятным `SHIPTASK RUN REPORT`, который Task comments не заменяют.
+- Перед любым terminal outcome агент выполняет finalization pass: сверяет
+  обещанный и фактический результат, объясняет material gaps, выполняет
+  доступный safe in-scope recovery и перечитывает affected state. Blocker
+  остаётся blocker до устранения; пока meaningful progress возможен, финальный
+  Goal status `blocked` ещё не обоснован. Каждый terminal exit заканчивается
+  глубоким компактным `SHIPTASK RUN REPORT`, который Task comments не заменяют.
 - Пока существует runnable work, skill не прерывает run task-local вопросами:
   безопасный default выбирается автоматически, сложная Task попадает в decision
   queue, а остальные продолжаются. Каждый defer обязательно получает

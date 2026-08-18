@@ -16,6 +16,10 @@ Task comment, затем согласует фактические Task statuses
 принимает terminal-ready результаты.
 Без доказанного comment write/read-back Task остаётся non-terminal; Task
 description никогда не используется как fallback.
+Перед любым terminal outcome skill выполняет finalization pass: сверяет
+обещанный и фактический результат, самостоятельно устраняет доступные in-scope
+проблемы и только затем выдаёт глубокий компактный отчёт понятным человеку
+языком.
 Старые memory, rollout или report записи о ручной приёмке не меняют этот
 contract: пользователь подключается только через reopen либо новую Task.
 Task-local вопросы откладывают только конкретную Task, не прерывая остальные;

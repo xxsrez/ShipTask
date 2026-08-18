@@ -36,9 +36,9 @@
 - [0009: Terminal-report capability как preflight barrier](decisions/0009-terminal-report-capability-preflight.md)
   — superseded incident hypothesis; сохранена как история отменённого
   comment-channel fail-fast решения.
-- [0010: Причинный анализ перед blocked и человекочитаемый run report](decisions/0010-blocker-analysis-and-human-run-report.md)
-  — агент сначала диагностирует и пытается устранить root cause, а каждый
-  terminal exit завершает понятным `SHIPTASK RUN REPORT`.
+- [0010: Осмысленная финализация и глубокий компактный run report](decisions/0010-blocker-analysis-and-human-run-report.md)
+  — перед любым terminal outcome агент проверяет целостный результат, устраняет
+  доступные проблемы и только затем даёт человеку сжатое причинное объяснение.
 
 ## Reference
 

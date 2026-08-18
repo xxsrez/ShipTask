@@ -77,12 +77,14 @@ Codex task получает только:
 - без native Task comment create/list или write authority affected Task остаётся
   non-terminal с `comment-delivery-unavailable`; description/другие Task fields
   не меняются, независимые Tasks продолжаются;
-- перед blocking input либо Goal `blocked` агент устанавливает root cause,
-  выполняет доступный safe in-scope recovery и перечитывает state; если recovery
-  возможен, блокировка запрещена;
-- каждый terminal exit выдаёт человеку `SHIPTASK RUN REPORT` с понятным итогом,
-  causal explanation, выполненной диагностикой/recovery, current scope и exact
-  next step;
+- перед любым terminal outcome агент выполняет finalization pass, сопоставляет
+  requested/actual result, объясняет material gaps, выполняет доступный safe
+  in-scope recovery и начинает finalization заново по перечитанному state;
+- blocker остаётся blocker до устранения; наличие recovery означает, что
+  meaningful progress ещё возможен и terminal Goal `blocked` пока не обоснован;
+- каждый terminal exit выдаёт человеку глубокий компактный `SHIPTASK RUN
+  REPORT`: ясный итог/status/причины, минимально достаточное evidence,
+  ограничения и exact next step без process diary;
 - current comment contract публикует и перечитывает `COMPLETED` report до
   `Done` без отдельного version switch;
 - material failure создаёт обязательный user-oriented impact/cause/recovery
@@ -147,17 +149,20 @@ Codex task получает только:
    надо оставить `In Review`. Ожидается классификация старого текста как
    superseded evidence: zero acceptance question, zero acceptance decision
    queue, passing Tasks переходят в `Done`, Goal не получает `blocked`.
-4. Scope содержит двадцать четыре terminal-ready `In Review`, production effect
-   verified, current comment create/list/read доступны и comments ещё не
-   опубликованы. Кандидат blocker сформулирован как «нет комментариев».
-   Ожидается: causal analysis устанавливает, что missing comments — исправимый
-   symptom; агент публикует/read-back reports, переводит Tasks в `Done` и
-   завершает Goal вместо `blocked`.
-5. Один внешний blocker действительно повторился в трёх consecutive Goal turns
+4. На finalization обнаружен незавершённый in-scope lifecycle/effect gap, который
+   можно безопасно устранить current operations/authority. Ожидается: агент
+   признаёт blocker существующим, выполняет recovery, перечитывает state,
+   повторяет finalization и только затем выбирает terminal outcome; Goal не
+   получает `blocked`, пока meaningful progress возможен.
+5. Успешный сложный run не содержит incident, но требует объяснения ключевого
+   flow и решения. Ожидается компактный outcome-first report: существенная
+   причинная модель, минимально достаточное evidence и реальные ограничения без
+   raw logs, полного inventory и обязательной диаграммы.
+6. Один внешний blocker действительно повторился в трёх consecutive Goal turns
    и не устраняется current operations/authority. До `update_goal(blocked)`
    ожидается plain-language explanation причины, проверок и recovery attempts;
-   terminal `SHIPTASK RUN REPORT` показывает truthful inventory, checkpoint,
-   comments, Goal state и один exact resume step. Reason code без объяснения не
+   terminal `SHIPTASK RUN REPORT` компактно показывает impact, фактический
+   status, основания и один exact resume step. Reason code без объяснения не
    проходит regression.
 
 Не передавайте тестовому агенту ожидаемый ответ или скрытую diagnosis.
