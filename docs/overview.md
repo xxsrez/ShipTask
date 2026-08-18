@@ -89,6 +89,13 @@ review batch. Failed batch возвращает затронутые Tasks в `I
 неясной attribution reopen получает весь связанный batch. Это уменьшает
 стоимость проверок, не ослабляя terminal gate.
 
+Число Tasks в `In Progress` не является размером будущего review batch.
+Последовательный run без реально запущенных isolated workers имеет одну active
+write lane: до старта следующей `To Do` предыдущая targeted-verified и
+интегрированная Task обязана перейти в `In Review` с read-back. Общий commit,
+UAT, full gate или обязательный completion comment выполняются batch cadence,
+но не разрешают накапливать завершённые candidates в `In Progress`.
+
 Любой классифицированный ShipTask delivery intent разрешает automatic acceptance
 после полного terminal evidence. Пока хотя бы одна Task остаётся `In Review`,
 применимый batch Goal и общий execution plan не могут считаться завершёнными:

@@ -536,6 +536,35 @@ active_write_target = min(
 )
 ```
 
+`active_write_target` и `batch_target` — разные величины. Первый ограничивает
+реально исполняемые или дорабатываемые Task, второй — число уже
+targeted-verified candidates, которое выгодно собрать перед общим gate/effect.
+Review batching никогда не превращает `In Progress` в waiting room: candidate,
+который уже прошёл targeted gate и интегрирован, должен находиться в
+`In Review`, пока ждёт общий commit identity, review-batch gate, UAT/runtime
+effect, completion comment или terminal reconciliation.
+
+Run ведёт явный набор `active_lane_tasks`:
+
+- каждый подтверждённый `To Do → In Progress` read-back добавляет Task и
+  занимает одну writable lane;
+- без фактически запущенных isolated concurrent workers
+  `active_write_target = 1`, независимо от размера scope и `batch_target`;
+- lane освобождается после подтверждённого `In Review`/terminal read-back либо
+  после truthful defer незавершённого partial/rework checkpoint по правилам
+  report/autonomy; targeted-verified candidate нельзя выдавать за partial defer;
+- unresolved или unknown status write не освобождает lane.
+
+Перед каждым новым `To Do → In Progress` действует обязательный
+status-reconciliation barrier. Для каждой Task, занятой текущим run, но больше
+не находящейся в implementation/rework, workflow обязан сначала выбрать и
+подтвердить ровно один исход: targeted-verified integrated candidate →
+`In Review` с read-back; незавершённый material blocker → truthful defer;
+terminal result → terminal read-back. Если после этого число занятых lanes не
+меньше `active_write_target`, начинать следующую `To Do` запрещено. В serial run
+это означает: предыдущая Task должна покинуть активную lane до status-start
+следующей.
+
 Неизвестный task class начинать не шире двух lanes. Увеличивать target после
 чистого fan-in и при свободном verification/integration/review buffer.
 Уменьшать при новых dependencies, semantic conflict, failed aggregate check,
@@ -631,7 +660,10 @@ rework. Не маскировать конфликт незапланирова�
    независимые Tasks вместо interrupting question или silent closure.
 6. Интегрировать targeted-verified result, сформировать candidate evidence и
    обновить Task в `In Review`, если она ещё не в этом status. Это provisional
-   review-ready state, а не terminal completion.
+   review-ready state, а не terminal completion. Status write и read-back
+   являются barrier перед освобождением lane и стартом replacement Task; общий
+   commit, review-batch gate или external effect не разрешают отложить этот
+   переход.
 7. Наполнить review batch до trigger из раздела 6.1. Провести independent agent
    review без mutation authority, когда его требует risk class или project
    policy, и выполнить review-batch gate на exact integrated result.
