@@ -2,9 +2,7 @@
 
 Статус: accepted, 2026-08-16. Заменяет capability-optional часть
 [ADR-0003](0003-delivery-reports-as-task-comments.md); запрет fallback в Task
-fields и формат отчёта из ADR-0003 сохраняются. Обработка unavailable channel
-до/после mutations уточнена
-[ADR-0009](0009-terminal-report-capability-preflight.md).
+fields и формат отчёта из ADR-0003 сохраняются.
 
 ## Контекст
 
@@ -32,12 +30,11 @@ Task пользователю было невозможно восстанови
   стабильный report key/idempotency key, искать эквивалентный report перед
   повтором и выполнять read-back после write. Никогда не менять `description`,
   acceptance, status text или другой Task field ради отчёта.
-- Если comment create/list/read отсутствует на preflight, остановить delivery до
-  Goal и mutations по ADR-0009. Если channel потерян или write нельзя
-  reconciliate через read-back уже после mutation, сохранить truthful
-  non-terminal statuses, прекратить новый dispatch и явно показать
-  `comment-delivery-unavailable`/`write-outcome-unknown` в scope-wide blocker
-  ledger.
+- Если comment-create отсутствует, authority недостаточна либо write нельзя
+  reconciliate через read-back, считать Task `completion-remains` или
+  `deferred`, а не terminal-ready. Сохранить truthful non-terminal status,
+  продолжить независимые Tasks и явно показать `comment-delivery-unavailable`
+  или `write-outcome-unknown` в decision queue.
 - Automatic acceptance остаётся автоматической, но последовательность теперь
   фиксирована: terminal evidence → published/read-back `COMPLETED` → `Done` →
   Task reread. Отдельная пользовательская приёмка по-прежнему не нужна.

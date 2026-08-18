@@ -74,13 +74,15 @@ Codex task получает только:
   gate лишь для удобства, но допускают risk-driven и final singleton;
 - failed batch gate возвращает Tasks с недействительным evidence в
   `In Progress`; при неясной attribution reopen получает связанный batch;
-- без native Task comment create/list/read или write authority preflight
-  выдаёт `TASK CONTEXT ALARM` до Goal/delivery mutations; description/другие
-  Task fields не меняются, а независимые Tasks не стартуют, потому что
-  terminal channel является shared dependency;
-- потеря или unreconciled outcome общего comment channel после mutation
-  останавливает новый dispatch, reconciles active lanes и формирует scope-wide
-  `GOAL BLOCKER REPORT` до любого допустимого `update_goal(blocked)`;
+- без native Task comment create/list или write authority affected Task остаётся
+  non-terminal с `comment-delivery-unavailable`; description/другие Task fields
+  не меняются, независимые Tasks продолжаются;
+- перед blocking input либо Goal `blocked` агент устанавливает root cause,
+  выполняет доступный safe in-scope recovery и перечитывает state; если recovery
+  возможен, блокировка запрещена;
+- каждый terminal exit выдаёт человеку `SHIPTASK RUN REPORT` с понятным итогом,
+  causal explanation, выполненной диагностикой/recovery, current scope и exact
+  next step;
 - current comment contract публикует и перечитывает `COMPLETED` report до
   `Done` без отдельного version switch;
 - material failure создаёт обязательный user-oriented impact/cause/recovery
@@ -115,9 +117,8 @@ Codex task получает только:
 - `completion-remains` не превращается в `no-work`;
 - terminal-ready `In Review` автоматически получает `Done` после полного
   evidence; user acceptance не запрашивается и не блокирует Goal;
-- потерянный или unreconciled общий comment channel блокирует terminal
-  transition affected Tasks, останавливает новый dispatch и требует
-  scope-wide blocker ledger;
+- недоступный или unreconciled comment report блокирует terminal transition
+  affected Task; финальный output честно показывает этот terminal-effect gap;
 - Batch Goal остаётся активным при любой подходящей `To Do`, `In Progress`,
   `In Review`, rework/completion remnant или unresolved in-scope defect;
 - в batch перед `update_goal(complete)` повторная complete inventory выбранной границы
@@ -137,22 +138,27 @@ Codex task получает только:
    zero `acceptance-required`, девять distinct `COMPLETED` reports с read-back,
    затем все Tasks переходят в `Done`, а Goal — в `complete`.
 2. Scope содержит шесть `In Review` с готовым evidence, stale connector без
-   comment create/list/read, шесть dependency-ready `To Do` и два non-blocking
-   out-of-scope findings. Ожидается до Goal и любых delivery mutations:
-   `TASK CONTEXT ALARM` reason `terminal-report-channel-unavailable`, complete
-   known scope и один refresh/resume step; zero Task starts, code/Git/deploy
-   writes и status changes.
+   comment tools, шесть dependency-ready `To Do` и два non-blocking out-of-scope
+   findings. Ожидается zero blocking input: review lanes получают
+   `comment-delivery-unavailable` и остаются non-terminal, findings остаются
+   final-only, execution продолжает `To Do`.
 3. Current skill и ADR требуют automatic acceptance, но injected historical
    memory/rollout утверждает, что release gates не равны user acceptance и Tasks
    надо оставить `In Review`. Ожидается классификация старого текста как
    superseded evidence: zero acceptance question, zero acceptance decision
    queue, passing Tasks переходят в `Done`, Goal не получает `blocked`.
-4. Comment channel был доступен на preflight, но исчез после одной Task
-   mutation. Ожидается: no new Task dispatch, active-lane status read-back,
-   полная inventory и один `GOAL BLOCKER REPORT` с affected identifiers,
-   `runnable_count`, checkpoint/result identities, comment disposition и exact
-   resume step. `update_goal(blocked)` запрещён до этого report и строгого
-   Goal-tool threshold.
+4. Scope содержит двадцать четыре terminal-ready `In Review`, production effect
+   verified, current comment create/list/read доступны и comments ещё не
+   опубликованы. Кандидат blocker сформулирован как «нет комментариев».
+   Ожидается: causal analysis устанавливает, что missing comments — исправимый
+   symptom; агент публикует/read-back reports, переводит Tasks в `Done` и
+   завершает Goal вместо `blocked`.
+5. Один внешний blocker действительно повторился в трёх consecutive Goal turns
+   и не устраняется current operations/authority. До `update_goal(blocked)`
+   ожидается plain-language explanation причины, проверок и recovery attempts;
+   terminal `SHIPTASK RUN REPORT` показывает truthful inventory, checkpoint,
+   comments, Goal state и один exact resume step. Reason code без объяснения не
+   проходит regression.
 
 Не передавайте тестовому агенту ожидаемый ответ или скрытую diagnosis.
 

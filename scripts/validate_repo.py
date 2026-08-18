@@ -14,6 +14,7 @@ SKILL_DIR = ROOT / "ship-tasks"
 SKILL_FILE = SKILL_DIR / "SKILL.md"
 OPENAI_FILE = SKILL_DIR / "agents" / "openai.yaml"
 REPORT_REFERENCE = SKILL_DIR / "references" / "delivery-report.md"
+RUN_REPORT_REFERENCE = SKILL_DIR / "references" / "run-report.md"
 AUTONOMY_REFERENCE = SKILL_DIR / "references" / "autonomy-and-release.md"
 MEMORY_REFERENCE = SKILL_DIR / "references" / "project-memory.md"
 DOCS_INDEX = ROOT / "docs" / "README.md"
@@ -41,6 +42,9 @@ PLUGIN_DISTRIBUTION_DECISION_FILE = (
 TERMINAL_CAPABILITY_DECISION_FILE = (
     ROOT / "docs" / "decisions" / "0009-terminal-report-capability-preflight.md"
 )
+BLOCKER_REPORT_DECISION_FILE = (
+    ROOT / "docs" / "decisions" / "0010-blocker-analysis-and-human-run-report.md"
+)
 
 REQUIRED_FILES = (
     ROOT / "README.md",
@@ -50,6 +54,7 @@ REQUIRED_FILES = (
     SKILL_FILE,
     OPENAI_FILE,
     REPORT_REFERENCE,
+    RUN_REPORT_REFERENCE,
     AUTONOMY_REFERENCE,
     MEMORY_REFERENCE,
     DOCS_INDEX,
@@ -63,6 +68,7 @@ REQUIRED_FILES = (
     POLICY_MEMORY_DECISION_FILE,
     PLUGIN_DISTRIBUTION_DECISION_FILE,
     TERMINAL_CAPABILITY_DECISION_FILE,
+    BLOCKER_REPORT_DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
@@ -193,10 +199,10 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "status-reconciliation",
         "active write target равен `1`",
         "Не начинать новую Task, если занятые lanes",
-        "terminal-report-channel-unavailable",
-        "не создавать Goal, не начинать Task",
-        "Production approval этого не исправляет",
-        "GOAL BLOCKER REPORT",
+        "run-report reference",
+        "Провести causal analysis",
+        "`blocked` запрещён",
+        "SHIPTASK RUN REPORT",
         "delivery-report reference",
         "published/read-back `COMPLETED`",
         "Никогда не писать",
@@ -229,10 +235,10 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "`active_write_target` и `batch_target` — разные величины",
         "status-reconciliation barrier",
         "начинать следующую `To Do` запрещено",
-        "### 3.4 Mandatory terminal-report capability gate",
-        "terminal-report-channel-unavailable",
-        "Production approval не заменяет connector capability",
-        "GOAL BLOCKER REPORT",
+        "### 9.3 Причинный анализ и terminal interaction report",
+        "имеющаяся operation и authority",
+        "причину, `blocked` запрещён",
+        "SHIPTASK RUN REPORT",
         "Не запускать полный дорогой project gate для каждой Task",
         "Failed batch gate сначала локализовать",
         "final review batch прошёл gate",
@@ -273,8 +279,6 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "`not-available`",
         "`write-outcome-unknown`",
         "блокирует `Done` affected",
-        "scope-wide blocker",
-        "не продолжать «независимые» Tasks",
         "COMPLETED",
         "Не публиковать `ACCEPTANCE READY`",
         "REWORK REQUIRED",
@@ -282,6 +286,20 @@ def validate_workflow_contract(errors: list[str]) -> None:
     ):
         if fragment not in report_text:
             fail(errors, f"delivery-report reference is missing {fragment!r}")
+
+    run_report_text = RUN_REPORT_REFERENCE.read_text(encoding="utf-8")
+    for fragment in (
+        "Причинный анализ и финальный ShipTask run report",
+        "Нельзя завершать run на первом симптоме",
+        "Если доступное действие устраняет blocker, `blocked` запрещён",
+        "Human-readable explanation",
+        "SHIPTASK RUN REPORT",
+        "Что произошло и почему",
+        "Что агент проверил и сделал",
+        "после status write финальный ответ показывает фактический Goal state",
+    ):
+        if fragment not in run_report_text:
+            fail(errors, f"run-report reference is missing {fragment!r}")
 
     autonomy_text = AUTONOMY_REFERENCE.read_text(encoding="utf-8")
     for fragment in (
@@ -301,10 +319,10 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Production release требует explicit user approval",
         "production-approval-required",
         "Deferred-only handoff",
-        "Shared terminal channel loss",
-        "Goal blocker report",
-        "GOAL BLOCKER REPORT",
-        "Production approval не заменяет эту capability",
+        "Blocker analysis and self-recovery",
+        "Terminal run report",
+        "SHIPTASK RUN REPORT",
+        "Если доступная operation устраняет причину, `blocked` запрещён",
     ):
         if fragment not in autonomy_text:
             fail(errors, f"autonomy reference is missing {fragment!r}")
@@ -410,31 +428,46 @@ def validate_workflow_contract(errors: list[str]) -> None:
 
     decision_text = TERMINAL_CAPABILITY_DECISION_FILE.read_text(encoding="utf-8")
     for fragment in (
-        "terminal-report-channel-unavailable",
-        "до batch Goal",
-        "не начинать Task",
-        "scope-wide blocker ledger",
-        "GOAL BLOCKER REPORT",
-        "Production authority не могла устранить проблему",
-        "exact `single` Task",
+        "Статус: superseded",
+        "отменено",
+        "не является текущим runtime contract",
     ):
         if fragment not in decision_text:
-            fail(errors, f"ADR-0009 is missing terminal capability guard {fragment!r}")
+            fail(errors, f"ADR-0009 is missing superseded marker {fragment!r}")
+
+    decision_text = BLOCKER_REPORT_DECISION_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        "comment lifecycle из",
+        "выполнить причинный анализ",
+        "выполнить recovery самостоятельно",
+        "`blocked` запрещён",
+        "SHIPTASK RUN REPORT",
+        "Один reason code, raw error",
+    ):
+        if fragment not in decision_text:
+            fail(errors, f"ADR-0010 is missing blocker-analysis contract {fragment!r}")
 
     retired_terminal_channel_fragments = {
+        SKILL_FILE: (
+            "terminal-report-channel-unavailable",
+            "Production approval этого не исправляет",
+            "scope-wide blocker ledger",
+        ),
         REPORT_REFERENCE: (
-            "Этот gap не является global `TASK CONTEXT ALARM`",
-            "и продолжить независимый workflow",
+            "Это scope-wide blocker",
+            "остановить новый dispatch",
         ),
         ROOT / "docs" / "guides" / "development.md": (
-            "execution продолжает `To Do`",
+            "terminal-report-channel-unavailable",
+            "zero Task starts, code/Git/deploy",
         ),
         SPEC_FILE: (
-            "Если comment write/read недоступен, включить его в blocker. Освободить lane",
-            "comment write недоступен, defer-нуть affected Task",
+            "### 3.4 Mandatory terminal-report capability gate",
+            "scope-wide blocker ledger",
         ),
         AUTONOMY_REFERENCE: (
-            "comment write/read недоступен, Task остаётся non-terminal с отдельным",
+            "## Shared terminal channel loss",
+            "Production approval не заменяет эту capability",
         ),
     }
     for path, fragments in retired_terminal_channel_fragments.items():

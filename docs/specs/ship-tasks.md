@@ -101,9 +101,8 @@ scope. Exact selector из текущего prompt имеет приоритет
 - per-Task targeted gate, периодический review-batch gate и их trigger policy;
 - обязательные external effects и способ их независимо проверить;
 - exact release targets, их verified environment class и recovery/smoke policy;
-- native Task comment create/list/read capability и authority, необходимые для
-  обязательного terminal delivery report и read-back; это scope-wide
-  preflight barrier, а не отложенный per-Task effect;
+- native Task comment create/list capability и authority, необходимые для
+  обязательного terminal delivery report и read-back;
 - hard automatic-terminal policy этого workflow и evidence, достаточный для
   terminal transition;
 - отдельно — действительно внешние approval gates, которые нельзя заменить
@@ -120,12 +119,11 @@ workflow Goal по правилам раздела 5. В `single`, `memory-maint
 Поле Task `version` является optimistic-concurrency данными Task Manager, а не
 версией skill или workflow.
 
-Если connector, terminal-report channel, exact scope, обязательный batch Goal,
-ownership, integration/shared state или authority неоднозначны так, что любая
-оставшаяся мутация небезопасна, остановиться с global `TASK CONTEXT ALARM`.
-Изолированную неопределённость одной Task обрабатывать как `deferred` по разделу
-5.4 и продолжать остальные. Отсутствие общего comment channel не является
-изолированной неопределённостью.
+Если connector, exact scope, обязательный batch Goal, ownership,
+integration/shared state или authority неоднозначны так, что любая оставшаяся
+мутация небезопасна, остановиться с global `TASK CONTEXT ALARM`. Изолированную
+неопределённость одной Task обрабатывать как `deferred` по разделу 5.4 и
+продолжать остальные.
 
 ## 2. Единственный task source
 
@@ -233,32 +231,6 @@ OAuth Connect. Не просить personal token. При недостаточн
   `Backlog`/`To Do` или подтвердить read-back, остановить affected single flow и
   не утверждать, что execution начался.
 
-### 3.4 Mandatory terminal-report capability gate
-
-После exact selector и complete read-only inventory, но до batch Goal и любой
-delivery mutation, доказать по current tool catalog и authority наличие native
-comment create и list/read для canonical Task. Для `create-and-deliver` эту
-проверку выполнить до create по current adapter contract и parent authority, а
-после create — повторить для exact Task при первом report decision.
-
-Если рабочему scope потребуются обязательные reports, а channel отсутствует,
-unsupported или unauthorized, выдать global `TASK CONTEXT ALARM` с reason
-`terminal-report-channel-unavailable`. Не создавать Goal, не переводить Tasks в
-`In Progress`, не менять code/Git и не выполнять deploy/external effects.
-Production approval не заменяет connector capability.
-
-Единственное bootstrap-исключение — exact `single` Task, acceptance которой
-непосредственно восстанавливает native comment create/list/read для ShipTask.
-Разрешено выполнить только её минимальный result и оставить truthful
-non-terminal checkpoint до fresh capability preflight. Не применять исключение
-к Project/Release batch, unrelated Tasks или обычному stale snapshot.
-
-Если channel потерян либо comment write/read-back стал unreconciled после уже
-совершённой delivery mutation, немедленно прекратить новый Task dispatch.
-Reconciliate active lanes в truthful statuses и сформировать scope-wide blocker
-ledger по разделу 5.1; не продолжать остальные Tasks как «независимые», потому
-что общий terminal channel является shared dependency всего run.
-
 ## 4. Lifecycle projection
 
 Task Manager status category помогает интерпретации, но не заменяет evidence:
@@ -335,9 +307,8 @@ report. Отсутствующий, failed или unreconciled comment write о�
 
 `batch` mode разрешает создание одного workflow Goal для выбранного scope.
 `single`, `memory-maintenance` и `non-delivery` не вызывают `get_goal`,
-`create_goal` или `update_goal`. После разрешения exact canonical refs,
-complete read-only inventory и successful terminal-report capability gate из
-раздела 3.4, но до первой non-Goal mutation:
+`create_goal` или `update_goal`. После разрешения exact canonical refs и
+complete read-only inventory batch, но до первой non-Goal mutation:
 
 1. Проверить доступность `get_goal` и `create_goal`. При отсутствии обязательной
    Goal capability остановиться с `TASK CONTEXT ALARM` до любых non-Goal
@@ -378,14 +349,15 @@ Goal активным, но могут оставаться dependency boundary.
 разрешают закрыть Goal, если подходящие Tasks либо completion remnants ещё
 существуют.
 Статус `blocked` допустим только после текущего строгого blocker threshold и
-после user-visible `GOAL BLOCKER REPORT`. Report обязан показать exact shared
-reason, affected Task identifiers/statuses, complete inventory и
-`runnable_count`, last safe checkpoint/result identities, missing
-effect/evidence, recovery checks, почему current session не может продолжить,
-comment disposition и один exact resume step. Goal tool не хранит отдельное
-reason field, поэтому один status write без этого ledger запрещён. Повторное
-чтение того же state не создаёт новый blocker occurrence. `blocked` оставляет
-Goal незавершённым, а после resume workflow продолжается с тем же Goal и scope.
+после причинного анализа и user-visible `SHIPTASK RUN REPORT` по разделу 9.3.
+Агент обязан восстановить causal timeline, проверить root cause текущими
+sources/tools, найти и выполнить доступный safe in-scope recovery, затем
+перечитать affected state. Если имеющаяся operation/authority устраняет
+причину, `blocked` запрещён. Один reason code, raw error или status write без
+понятного объяснения, recovery evidence и exact resume step недопустимы.
+Повторное чтение того же state не создаёт новый blocker occurrence. `blocked`
+оставляет Goal незавершённым, а после resume workflow продолжается с тем же
+Goal и scope.
 
 Для явно перечисленных batch Task refs граница фиксирована этими refs и отдельно
 разрешёнными in-scope defects. Для Project, Release или all-accessible scope
@@ -509,9 +481,8 @@ decision. Не переводить её в `Done`/`Canceled` и не изобр
 checkpoint, уже выполненными actions/evidence, recommended default, точным
 decision/authority и resume step. Не переизбирать Task без нового evidence,
 authority или external state change. Обязательно опубликовать и перечитать тот
-же `BLOCKED` handoff в Task. Это правило относится к task-local defer при
-доступном общем channel; shared loss comment create/list/read после старта
-обрабатывается scope-wide barrier из раздела 3.4 без fallback в `description`.
+же `BLOCKED` handoff в Task; при отсутствии comment write/read включить этот
+terminal effect в blocker без изменения `description`.
 
 Когда runnable Tasks остаются, продолжать их без вопроса пользователю. Когда
 остались только deferred Tasks, предъявить одну consolidated decision queue.
@@ -714,20 +685,19 @@ rework. Не маскировать конфликт незапланирова�
 10. При changes requested либо failed batch gate вернуть Tasks, чьё evidence
     стало недействительным, из `In Review` в `In Progress`. При доступной native
     comments capability опубликовать понятный rework/incident comment. Если
-    общий comment channel потерян или outcome невозможно reconciliate,
-    остановить новый dispatch и применить scope-wide recovery из раздела 3.4.
-    Только при доступном channel сохранить текущие lanes, выполнить rework и
+    comment write недоступен, defer-нуть affected Task с явным blocker.
+    Сохранить текущие lanes, выполнить rework и
     targeted retest, затем собрать и проверить новый exact batch. После полного
     passing terminal evidence автоматически принять result, обязательно
     опубликовать и перечитать final report comment, затем обновить Task в `Done`
-    и перечитать. Аналогично обработать подтверждённый `Canceled` outcome.
+    и перечитать. Аналогично
+    обработать подтверждённый `Canceled` outcome.
 
 При любом task-local blocker сохранить last safe checkpoint, truthful status и
 decision queue entry; обязательно опубликовать и перечитать `BLOCKED` report.
-Освободить lane и продолжить другие dependency-ready Tasks только при доступном
-общем comment channel. Если comment create/list/read недоступен или unreconciled,
-это shared loss из раздела 3.4: новый dispatch запрещён. Не переизбирать deferred
-Task без нового evidence/authority/state change.
+Если comment write/read недоступен, включить его в blocker. Освободить lane и
+продолжить другие dependency-ready Tasks. Не
+переизбирать deferred Task без нового evidence/authority/state change.
 
 Разделять Task Manager state, source result, checks, automatic acceptance
 decision и external effects. Успех одного слоя не доказывает остальные.
@@ -772,9 +742,7 @@ gate до `Done`.
 
 Следовать [runtime format](../../ship-tasks/references/delivery-report.md),
 [ADR-0003](../decisions/0003-delivery-reports-as-task-comments.md) и
-[ADR-0006](../decisions/0006-delivery-comment-as-terminal-effect.md), а
-preflight barrier —
-[ADR-0009](../decisions/0009-terminal-report-capability-preflight.md). На каждом
+[ADR-0006](../decisions/0006-delivery-comment-as-terminal-effect.md). На каждом
 запуске проверить, что current Task Manager tool contract предоставляет native
 comment create и list/read для canonical Task ref, а текущая authority разрешает
 write.
@@ -784,14 +752,13 @@ Imported comments из `get_task_external_context` являются read-only pr
 или прошлой сессии. Никогда не записывать report в `description`, acceptance,
 status text или другой Task field как fallback.
 
-Если create/list/read отсутствует, unsupported или unauthorized уже на
-preflight, остановить весь delivery до Goal/mutations по разделу 3.4. Если
-write outcome невозможно reconciliate через read-back уже после mutation, не
-повторять write вслепую и не использовать Task fields как fallback. Сохранить
-truthful non-terminal statuses, добавить
-`comment-delivery-unavailable`/`write-outcome-unknown` в scope-wide blocker
-ledger и прекратить новый dispatch. Этот gap блокирует `Done` affected Tasks и
-Goal completion, пока channel не восстановлен.
+Если create отсутствует/unsupported/unauthorized либо write outcome невозможно
+reconciliate через read-back, не повторять write вслепую и не использовать Task
+fields как fallback. Сохранить truthful non-terminal status, классифицировать
+Task как `completion-remains` или `deferred`, добавить
+`comment-delivery-unavailable`/`write-outcome-unknown` в decision queue и
+продолжить независимые Tasks. Этот gap блокирует `Done` affected Task и Goal
+completion, пока Task остаётся в рабочем scope.
 
 При доступной capability:
 
@@ -837,6 +804,33 @@ trigger, root cause с confidence, recovery/rework, prevention и remaining risk
 Писать blameless, отделять evidence от inference и не создавать follow-up Tasks
 без отдельной authority. Обычный red/green test внутри implementation не
 является material incident сам по себе.
+
+### 9.3 Причинный анализ и terminal interaction report
+
+Перед blocking input, утверждением «продолжить невозможно» или Goal `blocked`
+следовать [run-report reference](../../ship-tasks/references/run-report.md) и
+[ADR-0010](../decisions/0010-blocker-analysis-and-human-run-report.md).
+
+Агент обязан назвать symptom и impact, восстановить causal timeline и first
+divergence, проверить вероятную root cause authoritative reads/tools, отделить
+evidence от inference и найти доступные safe in-scope recovery actions. Если
+имеющаяся operation и authority позволяют устранить причину, агент выполняет
+recovery, перечитывает affected state и продолжает workflow; `blocked` в этом
+случае запрещён. Сложность diagnosis или необходимость обычного tool call не
+являются внешним blocker.
+
+Если self-recovery действительно исчерпан, до допустимого
+`update_goal(status="blocked")` показать человеку plain-language explanation:
+что произошло, почему, что проверено, что агент уже попробовал, почему дальше
+нужен человек/external state и какое одно действие возобновит run. Один reason
+code, raw error, список tool calls или отсутствующий Task effect не заменяют
+root-cause explanation.
+
+Каждый terminal exit ShipTask (`complete`, `blocked`, partial/deferred,
+`no-work`) заканчивается `SHIPTASK RUN REPORT`. Он сначала простыми словами
+показывает итог, causal explanation и self-recovery, затем current Task counts и
+statuses, result/effect identities, comments, Goal state, remaining work и exact
+evidence. Task comments не заменяют общий interaction report.
 
 ## 10. Defects и recovery
 
@@ -891,10 +885,11 @@ inventory выбранной границы и проверить все пун�
 одна Task подходит под рабочие критерии, остаётся deferred/decision queue либо
 отсутствует обязательный evidence layer, не завершать Goal: продолжить runnable
 workflow или, когда runnable work исчерпан, предъявить consolidated queue. Goal
-`blocked` применять только по текущему строгому tool threshold и только после
-полного `GOAL BLOCKER REPORT` из раздела 5.1. Goal completion является
-последним lifecycle write после Task и evidence reconciliation, а не заменой
-этой проверки.
+`blocked` применять только по текущему строгому tool threshold, после
+причинного анализа, исчерпанного self-recovery и user-visible
+`SHIPTASK RUN REPORT` из раздела 9.3. Goal completion является последним
+lifecycle write после Task и evidence reconciliation, а не заменой этой
+проверки.
 
 Финальный interaction report отдельно показывает mode; для batch — Goal
 identity/status; затем Task Manager projection, source/integration identity,

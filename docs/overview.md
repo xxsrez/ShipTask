@@ -49,11 +49,12 @@ Project Memories    = scope selectors + project-specific profile
 - Cross-session scheduler, durable claims и отсутствующие connector capabilities
   не изображаются существующими.
 - Delivery report публикуется только как native Task comment и является
-  обязательным terminal effect. Native create/list/read — scope-wide preflight
-  barrier: без него delivery не создаёт batch Goal и не начинает Tasks,
-  code/Git или deploy. Если channel потерян после mutation, новый dispatch
-  прекращается, statuses reconciliate и формируется `GOAL BLOCKER REPORT`;
-  `description` не меняется.
+  обязательным terminal effect. Без comment write/read-back affected Task
+  остаётся non-terminal с явным blocker; `description` не меняется.
+- Перед Goal `blocked` агент обязан установить root cause, выполнить доступный
+  safe in-scope recovery и перечитать affected state. Если он может устранить
+  причину сам, блокировка запрещена. Каждый terminal exit заканчивается
+  понятным `SHIPTASK RUN REPORT`, который Task comments не заменяют.
 - Пока существует runnable work, skill не прерывает run task-local вопросами:
   безопасный default выбирается автоматически, сложная Task попадает в decision
   queue, а остальные продолжаются. Каждый defer обязательно получает
@@ -133,10 +134,6 @@ evidence, но является обязательной durable review surface.
 - ADR-0005 отдельно разрешает automatic terminal acceptance после полного
   evidence, но не production/destructive/external authority.
 - Skill не работает без подключённого Task Manager connector.
-- Skill не начинает delivery, если current connector не предоставляет
-  обязательный native comment create/list/read channel. Production approval не
-  заменяет эту capability; exact single self-bootstrap Task является
-  единственным узким исключением.
 - Наличие connector не заменяет authoritative Project/Release scope и write
   authority конкретного проекта.
 - Skill не превращает failed check в разрешение на unrelated cleanup.

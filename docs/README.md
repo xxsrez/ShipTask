@@ -20,15 +20,13 @@
   capability-optional часть заменена ADR-0006.
 - [0004: Autonomous continuation и release authority](decisions/0004-autonomous-continuation-and-release-authority.md)
   — task-local defer вместо остановки run, automatic non-production releases и
-  explicit-only production boundary; shared report-channel loss регулируется
-  ADR-0009.
+  explicit-only production boundary; blocker analysis уточнён ADR-0010.
 - [0005: Automatic terminal acceptance](decisions/0005-automatic-terminal-acceptance.md)
   — terminal-ready Tasks автоматически переходят в Done; feedback возвращается
   через reopen или новую Task, без blocking human-acceptance round-trip.
 - [0006: Delivery comment как обязательный terminal effect](decisions/0006-delivery-comment-as-terminal-effect.md)
   — после появления native comment tools завершение Task требует
-  опубликованного и перечитанного `COMPLETED` report до перехода в Done;
-  unavailable-channel preflight регулируется ADR-0009.
+  опубликованного и перечитанного `COMPLETED` report до перехода в Done.
 - [0007: Delivery policy и project memory принадлежат ShipTask](decisions/0007-delivery-policy-and-project-memory.md)
   — adapter / policy / context layers, implicit routing, single/batch modes и
   граница Memories как selector/profile, а не live task state.
@@ -36,8 +34,11 @@
   — единственная runtime-установка ShipTask внутри
   `task-manager@srez-marketplace`, без standalone user-level дубликата.
 - [0009: Terminal-report capability как preflight barrier](decisions/0009-terminal-report-capability-preflight.md)
-  — missing native comment channel останавливает delivery до Goal/mutations;
-  post-start loss требует scope-wide blocker ledger и прекращения dispatch.
+  — superseded incident hypothesis; сохранена как история отменённого
+  comment-channel fail-fast решения.
+- [0010: Причинный анализ перед blocked и человекочитаемый run report](decisions/0010-blocker-analysis-and-human-run-report.md)
+  — агент сначала диагностирует и пытается устранить root cause, а каждый
+  terminal exit завершает понятным `SHIPTASK RUN REPORT`.
 
 ## Reference
 

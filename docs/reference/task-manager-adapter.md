@@ -101,9 +101,6 @@ Project/Release administration или durable orchestration state. ShipTask не
 Если отсутствие capability делает любую следующую mutation небезопасной,
 ShipTask применяет `TASK CONTEXT ALARM`. Если gap изолирован одной Task, policy
 может оставить её truthful non-terminal и продолжить независимый batch scope.
-Отсутствие обязательного native comment create/list/read не считается
-изолированным gap: это scope-wide preflight barrier до Goal и delivery
-mutations. Production authority не меняет adapter tool catalog.
 
 ## Adapter handoff result
 

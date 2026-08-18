@@ -1,8 +1,8 @@
 # 0009. Terminal-report capability как preflight barrier
 
-Статус: accepted, 2026-08-18. Уточняет обработку unavailable comments из
-[ADR-0004](0004-autonomous-continuation-and-release-authority.md) и
-[ADR-0006](0006-delivery-comment-as-terminal-effect.md).
+Статус: superseded, 2026-08-18. Fail-fast решение из этого ADR отменено
+[ADR-0010](0010-blocker-analysis-and-human-run-report.md). Документ сохранён как
+история ошибочной гипотезы и не является текущим runtime contract.
 
 ## Контекст
 

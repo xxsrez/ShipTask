@@ -1,9 +1,9 @@
 # 0004. Autonomous continuation и release authority
 
 Статус: accepted, 2026-08-16. Human-acceptance часть заменена
-[ADR-0005](0005-automatic-terminal-acceptance.md); shared terminal-report
-channel handling уточнён
-[ADR-0009](0009-terminal-report-capability-preflight.md).
+[ADR-0005](0005-automatic-terminal-acceptance.md). Blocker analysis и terminal
+interaction report уточнены
+[ADR-0010](0010-blocker-analysis-and-human-run-report.md).
 
 ## Контекст
 
@@ -30,9 +30,13 @@ production release. Terminal acceptance теперь определяется AD
   независимые Tasks. Не создавать отдельную Task и не закрывать исходную.
 - Обязательно публиковать в deferred Task `BLOCKED` report: причина, last safe
   checkpoint, уже выполненное, рекомендуемый default, точное решение/authority
-  и resume step. Это task-local правило применяется при доступном общем comment
-  channel; preflight/post-start loss channel обрабатывается scope-wide по
-  ADR-0009 без fallback в `description`.
+  и resume step. Если comment write/read недоступен, включать его доставку в
+  blocker без fallback в `description` и сохранять те же данные в consolidated
+  decision queue.
+- Перед blocking input или Goal `blocked` выполнить причинный анализ по
+  ADR-0010. Если доступное безопасное действие устраняет причину, выполнить его
+  и продолжить вместо блокировки. Каждый terminal exit заканчивается
+  человекочитаемым `SHIPTASK RUN REPORT`.
 - Не переизбирать deferred Task в том же run без нового evidence, authority или
   внешнего state change. Когда runnable work исчерпан, показать один
   consolidated decision queue вместо серии interrupting questions.
@@ -87,9 +91,8 @@ production release. Terminal acceptance теперь определяется AD
 
 Ограничения:
 
-- stale connector без comments останавливает delivery до Goal/mutations и
-  требует refresh/reconnect; post-start loss прекращает новый dispatch и
-  получает scope-wide blocker ledger по ADR-0009;
+- stale connector без comments оставляет affected Task deferred и требует
+  refresh/reconnect; interaction output сохраняет handoff до resume;
 - Task Manager status catalog пока не имеет обязательного portable `Blocked`
   status, поэтому defer не маскируется ложным terminal/status transition;
 - automatic terminal acceptance регулируется ADR-0005 и не расширяет
