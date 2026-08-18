@@ -38,6 +38,9 @@ POLICY_MEMORY_DECISION_FILE = (
 PLUGIN_DISTRIBUTION_DECISION_FILE = (
     ROOT / "docs" / "decisions" / "0008-plugin-only-runtime-distribution.md"
 )
+TERMINAL_CAPABILITY_DECISION_FILE = (
+    ROOT / "docs" / "decisions" / "0009-terminal-report-capability-preflight.md"
+)
 
 REQUIRED_FILES = (
     ROOT / "README.md",
@@ -59,6 +62,7 @@ REQUIRED_FILES = (
     AUTO_ACCEPTANCE_DECISION_FILE,
     POLICY_MEMORY_DECISION_FILE,
     PLUGIN_DISTRIBUTION_DECISION_FILE,
+    TERMINAL_CAPABILITY_DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
@@ -189,6 +193,10 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "status-reconciliation",
         "active write target равен `1`",
         "Не начинать новую Task, если занятые lanes",
+        "terminal-report-channel-unavailable",
+        "не создавать Goal, не начинать Task",
+        "Production approval этого не исправляет",
+        "GOAL BLOCKER REPORT",
         "delivery-report reference",
         "published/read-back `COMPLETED`",
         "Никогда не писать",
@@ -221,6 +229,10 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "`active_write_target` и `batch_target` — разные величины",
         "status-reconciliation barrier",
         "начинать следующую `To Do` запрещено",
+        "### 3.4 Mandatory terminal-report capability gate",
+        "terminal-report-channel-unavailable",
+        "Production approval не заменяет connector capability",
+        "GOAL BLOCKER REPORT",
         "Не запускать полный дорогой project gate для каждой Task",
         "Failed batch gate сначала локализовать",
         "final review batch прошёл gate",
@@ -261,6 +273,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "`not-available`",
         "`write-outcome-unknown`",
         "блокирует `Done` affected",
+        "scope-wide blocker",
+        "не продолжать «независимые» Tasks",
         "COMPLETED",
         "Не публиковать `ACCEPTANCE READY`",
         "REWORK REQUIRED",
@@ -287,6 +301,10 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Production release требует explicit user approval",
         "production-approval-required",
         "Deferred-only handoff",
+        "Shared terminal channel loss",
+        "Goal blocker report",
+        "GOAL BLOCKER REPORT",
+        "Production approval не заменяет эту capability",
     ):
         if fragment not in autonomy_text:
             fail(errors, f"autonomy reference is missing {fragment!r}")
@@ -389,6 +407,44 @@ def validate_workflow_contract(errors: list[str]) -> None:
     ):
         if fragment not in decision_text:
             fail(errors, f"ADR-0008 is missing plugin-only distribution contract {fragment!r}")
+
+    decision_text = TERMINAL_CAPABILITY_DECISION_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        "terminal-report-channel-unavailable",
+        "до batch Goal",
+        "не начинать Task",
+        "scope-wide blocker ledger",
+        "GOAL BLOCKER REPORT",
+        "Production authority не могла устранить проблему",
+        "exact `single` Task",
+    ):
+        if fragment not in decision_text:
+            fail(errors, f"ADR-0009 is missing terminal capability guard {fragment!r}")
+
+    retired_terminal_channel_fragments = {
+        REPORT_REFERENCE: (
+            "Этот gap не является global `TASK CONTEXT ALARM`",
+            "и продолжить независимый workflow",
+        ),
+        ROOT / "docs" / "guides" / "development.md": (
+            "execution продолжает `To Do`",
+        ),
+        SPEC_FILE: (
+            "Если comment write/read недоступен, включить его в blocker. Освободить lane",
+            "comment write недоступен, defer-нуть affected Task",
+        ),
+        AUTONOMY_REFERENCE: (
+            "comment write/read недоступен, Task остаётся non-terminal с отдельным",
+        ),
+    }
+    for path, fragments in retired_terminal_channel_fragments.items():
+        text = path.read_text(encoding="utf-8")
+        for fragment in fragments:
+            if fragment in text:
+                fail(
+                    errors,
+                    f"{path.relative_to(ROOT)} contains retired terminal-channel contract {fragment!r}",
+                )
 
     retired_create_delivery_fragments = {
         SKILL_FILE: (
