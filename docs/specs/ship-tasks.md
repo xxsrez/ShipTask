@@ -185,6 +185,45 @@ integration/shared state или authority неоднозначны так, чт�
 неопределённость одной Task обрабатывать как `deferred` по разделу 5.4 и
 продолжать остальные.
 
+### 1.4 Необязательное название текущего Codex thread
+
+ShipTask может один раз задать понятное название текущего Codex thread как UI metadata.
+Это не Task Manager write, не evidence, не часть Goal и не terminal effect.
+Название меняется только если одновременно выполнены все условия:
+
+1. текущая Codex surface предоставляет current-thread read (например,
+   `codex_app__read_thread`) и setter его title (например,
+   `codex_app__set_thread_title`);
+2. metadata явно подтверждает, что текущий запрос — первый пользовательский
+   ход нового thread и до него нет завершённых ходов; если это нельзя надёжно
+   установить, title не менять;
+3. текущий title пустой или является очевидным auto-generated placeholder,
+   прямо полученным из `$ship-tasks`/его catalog link. Любой другой непустой
+   title считать пользовательским и не перезаписывать;
+4. invocation gate пройден, а canonical scope и его live display names уже
+   разрешены.
+
+Сначала прочитать current-thread metadata, затем разрешить scope.
+После разрешения scope вызвать title setter не более одного раза. Если title
+уже начинается с `ShipTask ·`, он считается принадлежащим этому
+workflow и повторно не меняется. Если setter отсутствует или вернул ошибку,
+продолжить delivery без retry; это не делает Task `BLOCKED`.
+
+Использовать короткий, нормализованный label Task/Project/Release (без status,
+дат, branch и длинного acceptance text):
+
+| Scope | Title |
+|---|---|
+| `single` existing Task | `ShipTask · <Task ref> · <short Task title>` |
+| `single create-and-deliver` | тот же формат после create/read-back exact Task |
+| `batch` Project + Release | `ShipTask · <Project name> · <Release name>` |
+| `batch` без Release | `ShipTask · <Project name> · batch` |
+| bare `$ship-tasks` | тот же формат после разрешения memory `current_scope` |
+
+Приоритет у уже заданного пользователем title всегда выше этого default. Не
+пытаться переименовывать thread на последующих ходах или при повторном
+`$ship-tasks` в уже существующей сессии.
+
 ## 2. Единственный task source
 
 Task Manager является единственным authoritative live task source. Не

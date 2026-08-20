@@ -60,6 +60,11 @@ Codex task получает только:
   write и не запускает ShipTask;
 - bare `$ship-tasks` требует ровно один применимый memory `current_scope`, а
   exact prompt selector имеет приоритет без silent memory update;
+- в свежем thread с первым `$ship-tasks` и пустым/очевидно auto-generated title
+  после live scope resolution задаётся короткий `ShipTask · ...` title;
+- существующий непустой пользовательский title, любой последующий ход или
+  неизвестный first-turn signal не вызывают rename; отсутствие app title tool
+  не блокирует delivery;
 - `single` не вызывает Goal tools, работает serial и при blocker не выбирает
   другую Task;
 - `batch` после разрешения exact scope и до первой non-Goal mutation создаёт
