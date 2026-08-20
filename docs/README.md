@@ -2,6 +2,12 @@
 
 Начните с [обзора](overview.md), чтобы понять назначение и границы skill.
 
+## Strategic vision
+
+- [Strategic Explainer](strategic-explainer.md) — implementation-independent
+  продуктовая цель, место между technical evidence и решениями основного
+  агента, устойчивые требования и quality bar понятного User Brief.
+
 ## Specifications
 
 - [Ship Tasks](specs/ship-tasks.md) — канонический Task Manager-only workflow

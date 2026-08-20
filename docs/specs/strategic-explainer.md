@@ -2,6 +2,10 @@
 
 Статус: current contract, 2026-08-20.
 
+Продуктовая цель и implementation-independent инварианты зафиксированы в
+[стратегическом видении](../strategic-explainer.md). Эта specification задаёт
+нормативный input/output и behavioral contract.
+
 Документ описывает общий skill `$strategic-explainer`, который переводит
 локальную техническую ситуацию в ясное объяснение на уровне целей,
 пользовательского эффекта, ограничений и следующего понятного шага. Skill не

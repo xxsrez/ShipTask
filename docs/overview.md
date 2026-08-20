@@ -35,6 +35,8 @@ Strategic Explainer = fresh user-language adaptation, no decisions
 ## Текущий статус
 
 - [Ship Tasks](specs/ship-tasks.md) — единственная каноническая specification.
+- [Strategic Explainer: стратегическое видение](strategic-explainer.md) —
+  стабильная продуктовая цель и quality bar независимо от implementation.
 - [Strategic Explainer](specs/strategic-explainer.md) — отдельная каноническая
   specification общего Technical Brief → User Brief contract.
 - [ADR-0007](decisions/0007-delivery-policy-and-project-memory.md) — принятое

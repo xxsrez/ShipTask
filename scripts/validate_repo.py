@@ -22,6 +22,7 @@ STRATEGIC_HANDOFF_REFERENCE = SKILL_DIR / "references" / "strategic-explainer.md
 AUTONOMY_REFERENCE = SKILL_DIR / "references" / "autonomy-and-release.md"
 MEMORY_REFERENCE = SKILL_DIR / "references" / "project-memory.md"
 DOCS_INDEX = ROOT / "docs" / "README.md"
+STRATEGIC_VISION_FILE = ROOT / "docs" / "strategic-explainer.md"
 SPEC_FILE = ROOT / "docs" / "specs" / "ship-tasks.md"
 STRATEGIC_SPEC_FILE = ROOT / "docs" / "specs" / "strategic-explainer.md"
 ADAPTER_FILE = ROOT / "docs" / "reference" / "task-manager-adapter.md"
@@ -75,6 +76,7 @@ REQUIRED_FILES = (
     AUTONOMY_REFERENCE,
     MEMORY_REFERENCE,
     DOCS_INDEX,
+    STRATEGIC_VISION_FILE,
     SPEC_FILE,
     STRATEGIC_SPEC_FILE,
     ADAPTER_FILE,
@@ -529,6 +531,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
     strategic_spec_text = STRATEGIC_SPEC_FILE.read_text(encoding="utf-8")
     for fragment in (
         "общий skill `$strategic-explainer`",
+        "стратегическом видении",
         "Technical Brief",
         "User Brief",
         "не является reviewer, incident commander или decision maker",
@@ -541,6 +544,35 @@ def validate_workflow_contract(errors: list[str]) -> None:
     ):
         if fragment not in strategic_spec_text:
             fail(errors, f"Strategic Explainer specification is missing {fragment!r}")
+
+    strategic_vision_text = STRATEGIC_VISION_FILE.read_text(encoding="utf-8")
+    strategic_vision_search_text = re.sub(r"\s+", " ", strategic_vision_text)
+    for fragment in (
+        "Strategic Explainer: стратегическое видение",
+        "независимо от текущей реализации",
+        "Продуктовое обещание",
+        "После одного чтения человек должен понимать",
+        "факты → смысл → решение",
+        "Technical Brief: только факты",
+        "Strategic Explainer: свежий контекст",
+        "User Brief",
+        "Основной агент: решения и действия",
+        "Устойчивые требования",
+        "Свежий контекст",
+        "Человеческие роли вместо внутренних сущностей",
+        "Честная граница знания",
+        "Независимые сценарии остаются независимыми",
+        "Конкретная зависимость от пользователя",
+        "Никакой скрытой управляющей роли",
+        "не принимает status, scope, recovery, release или authority",
+        "не выполняет actions",
+        "Общий, переносимый контракт",
+        "не принадлежит ShipTask",
+        "Quality bar",
+        "не требуется дополнительный prompt",
+    ):
+        if fragment not in strategic_vision_search_text:
+            fail(errors, f"Strategic Explainer vision is missing {fragment!r}")
 
     autonomy_text = AUTONOMY_REFERENCE.read_text(encoding="utf-8")
     for fragment in (
