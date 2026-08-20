@@ -41,6 +41,17 @@ comment или chat handoff, состоящим из reason code, техниче
 - ShipTask может удалить только дублирование между envelope и narrative и
   добавить exact navigation/evidence refs. Он не возвращает technical jargon,
   не меняет смысл `User Brief` и не подменяет его собственной process diary.
+- `User Brief` является единственным источником narrative после успешного
+  invocation. Родитель не может заново собрать пользовательский текст из raw
+  evidence. Для durable Task comment действует compact presentation gate:
+  обычно до 1 600 символов narrative и до трёх bullets/строк; URL, параметры,
+  transport handles, полные UUID, хэши, provider IDs и raw tool errors не
+  попадают в comment без явной необходимости для действия. При нарушении gate
+  comment не публикуется до повторной адаптации.
+- «Свежий» subagent означает запуск без inherited conversation context
+  (`fork_turns="none"` или эквивалент). `fork_turns="all"` и старый
+  Explainer thread считаются недействительными; если изоляция невозможна,
+  используется локальный `degraded-adaptation` с теми же fidelity checks.
 - Перед write обязательны forward trace и reverse coverage. Если input
   противоречив или decision-relevant fact отсутствует, исправляется
   finalization/Technical Brief; гладкий comment по неполному состоянию не

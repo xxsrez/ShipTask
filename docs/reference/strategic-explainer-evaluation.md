@@ -53,6 +53,15 @@ Evaluator не должен видеть intended wording или эталонн�
 - не создаётся новый blocker «на всякий случай»;
 - если фактов недостаточно, они перечислены в `PARENT NOTES`, а не угаданы.
 
+### Durable-channel presentation
+
+- при `Output language and channel` для comment/report brief остаётся
+  компактным и outcome-first;
+- raw URL, параметры, endpoint paths, signed URLs, transport handles, полные
+  UUID, хэши и tool errors не перепечатаны без явной необходимости для действия;
+- большой объём исходного evidence не используется как оправдание для
+  user-visible dump.
+
 ## Качественные критерии
 
 Каждый критерий оценивается `0 | 1 | 2`:
@@ -112,6 +121,14 @@ Brief не угадывает impact; точный пробел возвраща
 Результат полностью подтверждён, действие пользователя не требуется. Brief
 остаётся одной-двумя фразами без шаблонных секций, таблицы и рассказа о
 внутренней работе.
+
+### 6. Durable report с большим evidence
+
+Technical Brief содержит deployment URL, provider IDs, hashes, transport
+handles и подробный список операций, но читателю нужен только итог, граница и
+следующий шаг. Ожидается компактный User Brief: технические значения заменены
+сводными фактами, а exact identifier оставлен только для необходимой
+навигации. Трёхэкранный список параметров, URL или raw refs — `FAIL`.
 
 ## Формат evaluator report
 

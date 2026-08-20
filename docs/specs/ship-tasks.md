@@ -849,11 +849,23 @@ authoritative state, exact result, evidence, impact и допустимый next
 заново. Explainer адаптирует только человеческое объяснение и не выбирает
 report state.
 
-Final comment состоит из authoritative envelope (`State`, Task, result identity,
-report key и exact evidence) и task-scoped `User Brief` с outcome, impact,
-понятной причиной/границей и next state. Перед write ShipTask выполняет forward
-trace и reverse coverage. Нельзя публиковать process diary вместо brief или
-выдавать Explainer output за evidence.
+Final comment состоит из authoritative envelope (`State`, Task, короткий result
+identity и report key) и task-scoped `User Brief` с outcome, impact, понятной
+причиной/границей и next state. Exact evidence остаётся внутренним, кроме
+минимального идентификатора, который действительно нужен человеку для
+навигации или действия. Перед write ShipTask выполняет forward trace и reverse
+coverage. Нельзя публиковать process diary вместо brief или выдавать Explainer
+output за evidence.
+
+`User Brief` — единственный источник narrative. После успешного ответа
+Explainer родитель не переписывает пользовательское объяснение по raw evidence
+и не расширяет его полным списком проверок. Для durable `TASK_COMMENT` действует
+presentation gate: обычно не более 1 600 символов narrative, не более трёх
+bullets/строк и без URL, query parameters, endpoint paths, signed URLs,
+`file_id`/`download_url`, полных UUID, хэшей, provider/environment IDs, raw
+errors или полного inventory. Если assembled comment не проходит gate, нужен
+новый узкий brief либо локальный `degraded-adaptation`; raw technical summary
+не является допустимым fallback.
 
 Report остаётся task-specific: shared batch evidence кратко отразить в каждом
 member, но не копировать полный batch log. Comment write и status update считать
@@ -915,8 +927,11 @@ Blocker считается существующим до фактическог�
 inventory. Task comments не заменяют общий interaction report.
 
 Перед каждым Task report comment ShipTask создаёт task-scoped `Technical Brief`
-и запускает новый субагент без истории текущего разговора. Субагент применяет
-`$strategic-explainer` и возвращает `User Brief`. Для user-facing terminal run
+и запускает новый субагент без истории текущего разговора (`fork_turns="none"`
+или эквивалент). `fork_turns="all"`, старый Explainer thread или inherited
+tactical context нарушают контракт свежего handoff; при отсутствии изоляции
+используется локальный `degraded-adaptation`, а не такой запуск. Субагент
+применяет `$strategic-explainer` и возвращает `User Brief`. Для user-facing terminal run
 report ShipTask переиспользует этот brief только при идентичном single-Task
 scope и неизменившемся material meaning. Planned comment/read-back и terminal
 status reconciliation не делают brief stale, если совпали с переданным

@@ -423,6 +423,12 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Перед comment-level Technical Brief выполнить task-level finalization",
         "task-scoped Strategic Explainer pipeline",
         "authoritative envelope",
+        'fork_turns="none"',
+        "Fresh handoff",
+        "User Brief` — единственный источник",
+        "presentation gate",
+        "1 600 символов",
+        "raw technical summary запрещён",
         "До публикации `BLOCKED` comment",
         "scope-level explanation",
         "Planned comment/read-back и terminal status",
@@ -472,6 +478,10 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Strategic Explainer: fresh user-language adaptation, no decisions",
         "собственной specification",
         "запускает новый субагент без истории текущего",
+        'fork_turns="none"',
+        "presentation gate",
+        "Exact evidence остаётся внутренним",
+        "raw technical summary",
         "Каждый новый report comment независимо от state",
         "выполняет task-level finalization",
         "Простой success не является исключением",
@@ -537,6 +547,9 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "forward trace и reverse coverage",
         "Task-level Strategic Explainer explanation должен существовать до write",
         "degraded-adaptation",
+        "presentation gate",
+        "1 600 символов",
+        "Raw technical summary не является fallback",
     ):
         if fragment not in report_text:
             fail(errors, f"delivery-report reference is missing {fragment!r}")
@@ -576,6 +589,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "VERIFIED | FAILED | UNVERIFIED | NOT_APPLICABLE",
         "built-in `default` agent",
         "fork_turns=\"none\"",
+        "fork_turns=\"all\"",
         "$strategic-explainer",
         "не вызывать tools",
         "reverse coverage",
@@ -584,6 +598,9 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Переиспользовать brief между `TASK_COMMENT` и `RUN_REPORT`",
         "material meaning change делают brief stale",
         "Raw technical comment не является допустимым fallback",
+        "единственным источником narrative",
+        "presentation gate",
+        "1 600 символов",
         "не создаёт facts, authority, lifecycle status или решение",
         "degraded-adaptation",
     ):
@@ -600,6 +617,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "не выполняет writes",
         "не заменяет evidence",
         "новый субагент без унаследованной истории",
+        'fork_turns="none"',
         "не вызывает tools",
         "Reader purpose",
         "Next-state contract",
@@ -612,6 +630,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Что нужно от вас",
         "Не добавлять декоративные картинки",
         "communication layer, не как",
+        "1 600 символов",
+        "raw evidence dump",
     ):
         if fragment not in strategic_spec_text:
             fail(errors, f"Strategic Explainer specification is missing {fragment!r}")
@@ -663,6 +683,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Два независимых unverified сценария",
         "Неизвестный user impact",
         "Простой success",
+        "Durable-channel presentation",
+        "Durable report с большим evidence",
         "User testing остаётся более сильной проверкой",
     ):
         if fragment not in strategic_evaluation_text:
