@@ -61,6 +61,9 @@
 - [Task Manager adapter](reference/task-manager-adapter.md) — точный discovery,
   identity, lifecycle, concurrency и текущие capability gaps OAuth/MCP
   connector.
+- [Strategic Explainer evaluation](reference/strategic-explainer-evaluation.md)
+  — critical fidelity/authority gates, lossless-by-relevance audit, scoring
+  rubric и обязательные regression cases.
 - [Project memory contract](../ship-tasks/references/project-memory.md) —
   runtime-схема current scope и project profile, precedence, bootstrap,
   freshness, alarms и cross-surface ограничения.
@@ -72,6 +75,10 @@
 
 ## Reports
 
+- [Исследование подходов для Strategic Explainer](reports/2026-08-20-strategic-explainer-research.md)
+  — official agent guidance, clear-communication и handoff patterns,
+  существующие skills, принятые механизмы, отклонённые альтернативы и
+  ограничения evidence.
 - [Предложение по развитию ShipTask skill](reports/2026-08-16-shiptask-skill-change-proposal.md)
   — целевая граница business policy, explicit/implicit modes, project-memory
   contract, runtime refactor, trigger matrix и согласованный cutover.

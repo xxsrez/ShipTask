@@ -25,6 +25,12 @@ DOCS_INDEX = ROOT / "docs" / "README.md"
 STRATEGIC_VISION_FILE = ROOT / "docs" / "strategic-explainer.md"
 SPEC_FILE = ROOT / "docs" / "specs" / "ship-tasks.md"
 STRATEGIC_SPEC_FILE = ROOT / "docs" / "specs" / "strategic-explainer.md"
+STRATEGIC_EVALUATION_FILE = (
+    ROOT / "docs" / "reference" / "strategic-explainer-evaluation.md"
+)
+STRATEGIC_RESEARCH_FILE = (
+    ROOT / "docs" / "reports" / "2026-08-20-strategic-explainer-research.md"
+)
 ADAPTER_FILE = ROOT / "docs" / "reference" / "task-manager-adapter.md"
 DECISION_FILE = ROOT / "docs" / "decisions" / "0001-task-manager-only.md"
 REPORT_DECISION_FILE = (
@@ -79,6 +85,8 @@ REQUIRED_FILES = (
     STRATEGIC_VISION_FILE,
     SPEC_FILE,
     STRATEGIC_SPEC_FILE,
+    STRATEGIC_EVALUATION_FILE,
+    STRATEGIC_RESEARCH_FILE,
     ADAPTER_FILE,
     DECISION_FILE,
     REPORT_DECISION_FILE,
@@ -288,6 +296,11 @@ def validate_strategic_explainer(errors: list[str]) -> None:
         "Не объединять независимые сценарии",
         "Что нужно от вас",
         "PARENT NOTES",
+        "VERIFIED",
+        "NOT_APPLICABLE",
+        "need-to-know filter",
+        "forward trace",
+        "reverse coverage",
         "визуализац",
         "не создавать отдельный media artifact",
         "Читателю не нужно знать внутренние tools",
@@ -519,9 +532,15 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "material partial/blocked outcome",
         "Technical Brief",
         "Candidate user dependency",
+        "Reader purpose",
+        "Next-state contract",
+        "VERIFIED | FAILED | UNVERIFIED | NOT_APPLICABLE",
         "built-in `default` agent",
         "fork_turns=\"none\"",
         "$strategic-explainer",
+        "не вызывать tools",
+        "reverse coverage",
+        "внутренней orchestration",
         "не создаёт facts, authority, lifecycle status или решение",
         "degraded adaptation",
     ):
@@ -538,6 +557,15 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "не выполняет writes",
         "не заменяет evidence",
         "новый субагент без унаследованной истории",
+        "не вызывает tools",
+        "Reader purpose",
+        "Next-state contract",
+        "VERIFIED | FAILED | UNVERIFIED | NOT_APPLICABLE",
+        "load-bearing",
+        "need-to-know filter",
+        "forward trace",
+        "reverse coverage",
+        "внутреннюю orchestration",
         "Что нужно от вас",
         "Не добавлять декоративные картинки",
         "communication layer, не как",
@@ -563,6 +591,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Честная граница знания",
         "Независимые сценарии остаются независимыми",
         "Конкретная зависимость от пользователя",
+        "Lossless by relevance",
+        "Внутренний механизм невидим читателю",
         "Никакой скрытой управляющей роли",
         "не принимает status, scope, recovery, release или authority",
         "не выполняет actions",
@@ -573,6 +603,42 @@ def validate_workflow_contract(errors: list[str]) -> None:
     ):
         if fragment not in strategic_vision_search_text:
             fail(errors, f"Strategic Explainer vision is missing {fragment!r}")
+
+    strategic_evaluation_text = STRATEGIC_EVALUATION_FILE.read_text(
+        encoding="utf-8"
+    )
+    for fragment in (
+        "Strategic Explainer evaluation contract",
+        "Factual fidelity",
+        "Reverse coverage",
+        "State separation",
+        "Authority boundary",
+        "User-dependency integrity",
+        "Lossless-by-relevance audit",
+        "Проверка совместного доступа",
+        "Внутренняя ошибка с доступным recovery",
+        "Два независимых unverified сценария",
+        "Неизвестный user impact",
+        "Простой success",
+        "User testing остаётся более сильной проверкой",
+    ):
+        if fragment not in strategic_evaluation_text:
+            fail(errors, f"Strategic Explainer evaluation is missing {fragment!r}")
+
+    strategic_research_text = STRATEGIC_RESEARCH_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        "Strategic Explainer: исследование подходов",
+        "Готового компонента с тем же contract не найдено",
+        "Свежий bounded context полезен для синтеза",
+        "Основной агент должен владеть финальным ответом",
+        "Понятность начинается с главного сообщения и действия",
+        "Точность и читаемость нужно оценивать отдельно",
+        "Принятые изменения",
+        "Что сознательно не принято",
+        "Ограничения и следующий шаг",
+    ):
+        if fragment not in strategic_research_text:
+            fail(errors, f"Strategic Explainer research is missing {fragment!r}")
 
     autonomy_text = AUTONOMY_REFERENCE.read_text(encoding="utf-8")
     for fragment in (
@@ -723,6 +789,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "built-in типа `default` без унаследованной истории",
         "зарегистрированный native custom agent",
         "communication layer",
+        "manager-style specialist",
+        "lossless-by-relevance audit",
         "не создаёт новый blocker",
         "будущий перенос skill в отдельный plugin",
     ):

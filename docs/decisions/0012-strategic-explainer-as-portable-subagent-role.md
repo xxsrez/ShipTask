@@ -7,7 +7,9 @@ plugin, первоначально зафиксированный в
 
 Устойчивую продуктовую цель определяет
 [стратегическое видение](../strategic-explainer.md); этот ADR фиксирует только
-текущий технический способ её реализовать и распространять.
+текущий технический способ её реализовать и распространять. Design evidence и
+рассмотренные альтернативы находятся в
+[research report](../reports/2026-08-20-strategic-explainer-research.md).
 
 ## Контекст
 
@@ -24,11 +26,15 @@ mechanics, status transitions и verification details. Технические т
 Текущий [официальный Codex contract](https://learn.chatgpt.com/docs/agent-configuration/subagents)
 позволяет определять native custom agents только как personal
 `~/.codex/agents/*.toml` или project-scoped `.codex/agents/*.toml`.
-[Plugin contract](https://learn.chatgpt.com/docs/plugins) распространяет skills
-и другие plugin components, но не custom-agent TOML. Глобальная personal
-installation нарушила бы требование хранить компонент в том же переносимом
-plugin, а project-scoped agent из репозитория ShipTask был бы недоступен в
-других проектах.
+[Plugin contract](https://developers.openai.com/plugins/concepts/plugins)
+распространяет skills и MCP components, но не custom-agent TOML. Глобальная
+personal installation нарушила бы требование хранить компонент в том же
+переносимом plugin, а project-scoped agent из репозитория ShipTask был бы
+недоступен в других проектах.
+
+По [официальной модели orchestration](https://developers.openai.com/api/docs/guides/agents/orchestration)
+Explainer является manager-style specialist, а не handoff owner: основной агент
+остаётся владельцем user-facing ответа, решений и действий.
 
 ## Решение
 
@@ -47,6 +53,8 @@ plugin, а project-scoped agent из репозитория ShipTask был бы
   built-in типа `default` без унаследованной истории разговора и явно просить
   его применить `$strategic-explainer` к одному самодостаточному
   `Technical Brief`.
+- При полном Technical Brief не выдавать субагенту исследовательскую задачу и
+  явно запрещать tool calls. Недостающие факты возвращаются в `PARENT NOTES`.
 - Использовать отдельный task name `strategic_explainer`, но не выдавать его за
   зарегистрированный native custom agent: plugin contract этого пока не
   поддерживает.
@@ -54,6 +62,10 @@ plugin, а project-scoped agent из репозитория ShipTask был бы
   подтверждённую границу знания, конкретный user dependency и понятный next
   state. Он не выполняет writes, не выбирает Task/Goal status, не решает scope
   или authority и не публикует ответ пользователю.
+- Сохранять scenario-level state `VERIFIED | FAILED | UNVERIFIED |
+  NOT_APPLICABLE`, concrete action contract и lossless-by-relevance audit:
+  forward trace всех output claims и reverse coverage всех decision-relevant
+  input facts.
 - Основной агент принимает решения и выполняет actions только по исходному
   evidence и authority. `User Brief` используется как communication layer и
   проверка понятности, но не как новое evidence.
@@ -80,6 +92,8 @@ plugin, а project-scoped agent из репозитория ShipTask был бы
   policy;
 - будущий перенос skill в отдельный plugin не требует менять его input/output
   contract.
+- manager-style ownership не позволяет communication helper незаметно стать
+  decision maker или источником новой authority.
 
 Ограничения:
 
@@ -87,5 +101,8 @@ plugin, а project-scoped agent из репозитория ShipTask был бы
 - дополнительный model run увеличивает latency и token usage;
 - качество brief ограничено полнотой `Technical Brief`; свежий context не
   исправляет отсутствующие или ложные исходные факты;
+- self-audit и regression cases из
+  [evaluation contract](../reference/strategic-explainer-evaluation.md) не
+  заменяют проверку понятности на реальных получателях;
 - plugin временно содержит capability, не совпадающую с его узким историческим
   названием. Это осознанный промежуточный packaging tradeoff.
