@@ -55,6 +55,9 @@
 - [0012: Strategic Explainer как переносимая роль свежего субагента](decisions/0012-strategic-explainer-as-portable-subagent-role.md)
   — общий sibling-skill поставляется в том же plugin и применяется в новом
   default-субагенте без выдачи за неподдерживаемый plugin-defined custom agent.
+- [0013: Strategic Explainer для всех ShipTask report narratives](decisions/0013-strategic-explainer-for-shiptask-report-narratives.md)
+  — каждый новый success/failure/blocker Task comment получает объяснение через
+  Explainer contract, а blocking handoff имеет отдельный communication barrier.
 
 ## Reference
 

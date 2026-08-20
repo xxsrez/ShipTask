@@ -66,6 +66,12 @@ STRATEGIC_EXPLAINER_DECISION_FILE = (
     / "decisions"
     / "0012-strategic-explainer-as-portable-subagent-role.md"
 )
+STRATEGIC_REPORTS_DECISION_FILE = (
+    ROOT
+    / "docs"
+    / "decisions"
+    / "0013-strategic-explainer-for-shiptask-report-narratives.md"
+)
 
 REQUIRED_FILES = (
     ROOT / "README.md",
@@ -99,6 +105,7 @@ REQUIRED_FILES = (
     BLOCKER_REPORT_DECISION_FILE,
     SEPARATE_PLUGIN_DECISION_FILE,
     STRATEGIC_EXPLAINER_DECISION_FILE,
+    STRATEGIC_REPORTS_DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
@@ -412,6 +419,14 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Strategic Explainer handoff",
         "$strategic-explainer",
         "ограниченный `Technical Brief`",
+        "Каждый новый `COMPLETED`, `REWORK REQUIRED`, `BLOCKED` или `CANCELED` comment",
+        "Перед comment-level Technical Brief выполнить task-level finalization",
+        "task-scoped Strategic Explainer pipeline",
+        "authoritative envelope",
+        "До публикации `BLOCKED` comment",
+        "scope-level explanation",
+        "Planned comment/read-back и terminal status",
+        "summary не является допустимым fallback",
         "communication layer",
         "communication helper не создаёт новый terminal blocker",
         "finalization pass",
@@ -457,6 +472,15 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Strategic Explainer: fresh user-language adaptation, no decisions",
         "собственной specification",
         "запускает новый субагент без истории текущего",
+        "Каждый новый report comment независимо от state",
+        "выполняет task-level finalization",
+        "Простой success не является исключением",
+        "authoritative envelope",
+        "Task comment получает task-level explanation",
+        "scope-level explanation",
+        "Простота success не отменяет обязательную",
+        "адаптацию Task comment",
+        "Planned comment/read-back и terminal",
         "communication helper не",
         "Finalization pass обязан",
         "Blocker считается существующим до фактического устранения",
@@ -505,6 +529,14 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Не публиковать `ACCEPTANCE READY`",
         "REWORK REQUIRED",
         "Confidence: CONFIRMED | PROBABLE | UNKNOWN",
+        "Strategic Explainer composition",
+        "Любой новый ShipTask report comment со state `COMPLETED`, `REWORK REQUIRED`,",
+        "ShipTask выполняет task-level finalization",
+        "Target surface: TASK_COMMENT",
+        "authoritative envelope",
+        "forward trace и reverse coverage",
+        "Task-level Strategic Explainer explanation должен существовать до write",
+        "degraded-adaptation",
     ):
         if fragment not in report_text:
             fail(errors, f"delivery-report reference is missing {fragment!r}")
@@ -522,6 +554,12 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Подтверждение",
         "Осталось / следующий шаг",
         "После status write финальный ответ должен отражать фактический Goal status",
+        "Каждый новый Task report comment проходит отдельный task-scoped",
+        "включая простой",
+        "aggregate batch",
+        "comment/read-back и terminal status reconciliation",
+        "до `update_goal(status=\"blocked\")` scope-level plain-language explanation",
+        "summary не являются допустимым fallback",
     ):
         if fragment not in run_report_text:
             fail(errors, f"run-report reference is missing {fragment!r}")
@@ -529,11 +567,12 @@ def validate_workflow_contract(errors: list[str]) -> None:
     handoff_text = STRATEGIC_HANDOFF_REFERENCE.read_text(encoding="utf-8")
     for fragment in (
         "Strategic Explainer handoff для ShipTask",
-        "material partial/blocked outcome",
         "Technical Brief",
         "Candidate user dependency",
         "Reader purpose",
         "Next-state contract",
+        "Target surface: TASK_COMMENT | RUN_REPORT",
+        "Authoritative report state",
         "VERIFIED | FAILED | UNVERIFIED | NOT_APPLICABLE",
         "built-in `default` agent",
         "fork_turns=\"none\"",
@@ -541,8 +580,12 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "не вызывать tools",
         "reverse coverage",
         "внутренней orchestration",
+        "Простой success не освобождает Task comment",
+        "Переиспользовать brief между `TASK_COMMENT` и `RUN_REPORT`",
+        "material meaning change делают brief stale",
+        "Raw technical comment не является допустимым fallback",
         "не создаёт facts, authority, lifecycle status или решение",
-        "degraded adaptation",
+        "degraded-adaptation",
     ):
         if fragment not in handoff_text:
             fail(errors, f"Strategic Explainer handoff is missing {fragment!r}")
@@ -791,11 +834,52 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "communication layer",
         "manager-style specialist",
         "lossless-by-relevance audit",
+        "ADR-0013",
         "не создаёт новый blocker",
         "будущий перенос skill в отдельный plugin",
     ):
         if fragment not in decision_text:
             fail(errors, f"ADR-0012 is missing Strategic Explainer contract {fragment!r}")
+
+    decision_text = STRATEGIC_REPORTS_DECISION_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        "Strategic Explainer для всех ShipTask report narratives",
+        "Любой новый ShipTask delivery-report comment",
+        "До invocation ShipTask самостоятельно выполняет task-level finalization",
+        "Простота success не отменяет это требование",
+        "authoritative envelope",
+        "Explainer narrative",
+        "`BLOCKED` имеет двойной communication barrier",
+        "до публикации `BLOCKED` comment",
+        "до user-facing blocking handoff",
+        "byte-for-meaning совпадают",
+        "terminal status",
+        "reconciliation не делают brief stale",
+        "aggregate batch result",
+        "degraded-adaptation",
+        "не запускают Explainer",
+    ):
+        if fragment not in decision_text:
+            fail(errors, f"ADR-0013 is missing report-narrative contract {fragment!r}")
+
+    for path in (
+        SKILL_FILE,
+        SPEC_FILE,
+        RUN_REPORT_REFERENCE,
+        STRATEGIC_HANDOFF_REFERENCE,
+        STRATEGIC_EXPLAINER_DECISION_FILE,
+    ):
+        text = path.read_text(encoding="utf-8")
+        for forbidden in (
+            "Для простого success отдельный субагент не нужен",
+            "для тривиального success отдельный субагент не нужен",
+            "Для простого success без technical burden новый субагент не требуется",
+        ):
+            if forbidden in text:
+                fail(
+                    errors,
+                    f"{path.relative_to(ROOT)} contains retired optional-success contract {forbidden!r}",
+                )
 
     decision_text = TERMINAL_CAPABILITY_DECISION_FILE.read_text(encoding="utf-8")
     for fragment in (

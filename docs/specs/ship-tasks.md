@@ -839,6 +839,22 @@ completion, пока Task остаётся в рабочем scope.
 - не backfill-ить pre-existing terminal Tasks и не писать отдельный report в
   `Duplicate` без explicit authority.
 
+Каждый новый report comment независимо от state `COMPLETED`, `REWORK REQUIRED`,
+`BLOCKED` или `CANCELED` проходит обязательный Strategic Explainer pipeline из
+[ADR-0013](../decisions/0013-strategic-explainer-for-shiptask-report-narratives.md).
+Простой success не является исключением. До invocation ShipTask сам фиксирует
+authoritative state, exact result, evidence, impact и допустимый next action.
+Для этого он выполняет task-level finalization: перечитывает Task/result/effects,
+проверяет safe self-recovery и после material state change начинает этот шаг
+заново. Explainer адаптирует только человеческое объяснение и не выбирает
+report state.
+
+Final comment состоит из authoritative envelope (`State`, Task, result identity,
+report key и exact evidence) и task-scoped `User Brief` с outcome, impact,
+понятной причиной/границей и next state. Перед write ShipTask выполняет forward
+trace и reverse coverage. Нельзя публиковать process diary вместо brief или
+выдавать Explainer output за evidence.
+
 Report остаётся task-specific: shared batch evidence кратко отразить в каждом
 member, но не копировать полный batch log. Comment write и status update считать
 разными side effects и reconciliate независимо, пока connector не гарантирует
@@ -865,6 +881,11 @@ trigger, root cause с confidence, recovery/rework, prevention и remaining risk
 Писать blameless, отделять evidence от inference и не создавать follow-up Tasks
 без отдельной authority. Обычный red/green test внутри implementation не
 является material incident сам по себе.
+
+Человекочитаемые секции каждого Task comment берутся из task-scoped `User Brief`.
+ShipTask сохраняет служебный envelope и exact evidence, но не переписывает
+narrative обратно в technical vocabulary. В comment не упоминаются субагент,
+Strategic Explainer, Technical Brief или внутренняя orchestration.
 
 ### 9.3 Осмысленная финализация и terminal interaction report
 
@@ -893,19 +914,29 @@ Blocker считается существующим до фактическог�
 результату; не выгружать process diary, raw logs/tool calls или исчерпывающий
 inventory. Task comments не заменяют общий interaction report.
 
-Перед user-facing handoff с material partial/blocked outcome, запросом user
-action/authority или сложным technical terminal result ShipTask создаёт
-ограниченный `Technical Brief` и запускает новый субагент без истории текущего
-разговора. Субагент применяет `$strategic-explainer` и возвращает `User Brief`.
-ShipTask использует brief для адаптации сообщения, но выбирает status,
-recovery, action и Goal transition только по исходному evidence и authority.
+Перед каждым Task report comment ShipTask создаёт task-scoped `Technical Brief`
+и запускает новый субагент без истории текущего разговора. Субагент применяет
+`$strategic-explainer` и возвращает `User Brief`. Для user-facing terminal run
+report ShipTask переиспользует этот brief только при идентичном single-Task
+scope и неизменившемся material meaning. Planned comment/read-back и terminal
+status reconciliation не делают brief stale, если совпали с переданным
+next-state contract и не обнаружили drift. Для aggregate batch, нескольких
+blockers или другого audience создаётся свежий scope-level brief.
+
+ShipTask использует brief для адаптации сообщения, но выбирает status, recovery,
+action, report identity и Goal transition только по исходному evidence и
+authority. Любой `BLOCKED` Task comment получает task-level explanation до
+write. До blocking user handoff и допустимого `update_goal(status="blocked")`
+должно существовать scope-level explanation; при exact single-Task совпадении
+оно может быть тем же проверенным brief.
 
 Нельзя передавать Explainer raw process diary или просить его решить, является
 ли состояние blocker. Brief обязан отдельно назвать confirmed outcome,
 непроверенный сценарий, user impact, current capability/attempts и только
 подтверждённый candidate user dependency. Если recovery изменил состояние,
-старый brief недействителен. Для простого success без technical burden новый
-субагент не требуется.
+старый brief недействителен. Простота success не отменяет обязательную
+адаптацию Task comment; compatible single-Task brief можно переиспользовать для
+финального chat report без второго model run.
 
 Если отдельный субагент или `$strategic-explainer` недоступен, ShipTask применяет
 тот же User Brief contract самостоятельно. Потеря communication helper не

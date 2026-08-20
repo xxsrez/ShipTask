@@ -1,6 +1,7 @@
 # 0012. Strategic Explainer как переносимая роль свежего субагента
 
-Статус: accepted, 2026-08-20. Дополняет
+Статус: accepted architecture, 2026-08-20. ShipTask invocation policy расширена
+[ADR-0013](0013-strategic-explainer-for-shiptask-report-narratives.md). Дополняет
 [ADR-0010](0010-blocker-analysis-and-human-run-report.md) и изменяет состав
 plugin, первоначально зафиксированный в
 [ADR-0011](0011-separate-shiptask-plugin-distribution.md).
@@ -69,11 +70,9 @@ Explainer является manager-style specialist, а не handoff owner: ос
 - Основной агент принимает решения и выполняет actions только по исходному
   evidence и authority. `User Brief` используется как communication layer и
   проверка понятности, но не как новое evidence.
-- Для material partial/blocked outcome и запроса user action/authority
-  ShipTask обязан использовать свежий Strategic Explainer перед user-facing
-  handoff. Для сложного terminal success использование обязательно, если
-  техническая модель иначе попадёт в ответ; для тривиального success отдельный
-  субагент не нужен.
+- Конкретные ShipTask invocation surfaces определяет ADR-0013: все новые Task
+  report comments проходят Explainer pipeline, а blocking и aggregate
+  user-facing handoffs получают отдельную либо доказанно совместимую адаптацию.
 - После recovery или другого изменения facts старый brief считать stale и при
   необходимости вызвать новый свежий субагент.
 - Если multi-agent tools или skill недоступны, ShipTask не скрывает фактический

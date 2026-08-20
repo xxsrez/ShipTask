@@ -2,6 +2,12 @@
 
 Статус: completed research, 2026-08-20.
 
+Update 2026-08-20: [ADR-0013](../decisions/0013-strategic-explainer-for-shiptask-report-narratives.md)
+сознательно предпочёл единый quality bar экономии model run и сделал
+Explainer обязательным для каждого нового ShipTask Task report comment,
+включая простой success. Общая рекомендация ниже остаётся применимой к другим
+workflows без такого durable communication contract.
+
 ## Краткий вывод
 
 Готового компонента с тем же contract не найдено. Существующие решения обычно
