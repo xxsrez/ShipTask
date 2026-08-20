@@ -54,22 +54,31 @@ Explainer является manager-style specialist, а не handoff owner: ос
   built-in типа `default` без унаследованной истории разговора и явно просить
   его применить `$strategic-explainer` к одному самодостаточному
   `Technical Brief`.
+- В Codex запускать такого субагента с `fork_turns="none"`. Перед анализом он
+  проверяет, что видит только system/developer instructions, runtime skill и
+  один текущий handoff. Более ранние user/assistant turns или tool transcript
+  означают загрязнённый вызов: субагент возвращает
+  `CONTEXT_INTEGRITY_ERROR` с инструкцией корректного перезапуска и не выполняет
+  анализ.
 - При полном Technical Brief не выдавать субагенту исследовательскую задачу и
-  явно запрещать tool calls. Недостающие факты возвращаются в `PARENT NOTES`.
+  явно запрещать tool calls. При неполном input он обычным текстом сообщает
+  родителю, каких фактов не хватает для честного вывода.
 - Использовать отдельный task name `strategic_explainer`, но не выдавать его за
   зарегистрированный native custom agent: plugin contract этого пока не
   поддерживает.
-- Strategic Explainer возвращает только `User Brief`: outcome, impact,
-  подтверждённую границу знания, конкретный user dependency и понятный next
-  state. Он не выполняет writes, не выбирает Task/Goal status, не решает scope
-  или authority и не публикует ответ пользователю.
+- Strategic Explainer возвращает свободное стратегическое объяснение: outcome,
+  impact, подтверждённую границу знания, конкретный user dependency и понятный
+  next state. Это не structured result и не copy-ready comment. Он не выполняет
+  writes, не выбирает Task/Goal status, не решает scope или authority и не
+  публикует ответ пользователю.
 - Сохранять scenario-level state `VERIFIED | FAILED | UNVERIFIED |
   NOT_APPLICABLE`, concrete action contract и lossless-by-relevance audit:
   forward trace всех output claims и reverse coverage всех decision-relevant
   input facts.
 - Основной агент принимает решения и выполняет actions только по исходному
-  evidence и authority. `User Brief` используется как communication layer и
-  проверка понятности, но не как новое evidence.
+  evidence и authority. Он читает объяснение как смысловую основу и сам пишет
+  окончательный user-facing текст своими словами; не копирует ответ механически
+  и не заменяет его собственной process diary.
 - Конкретные ShipTask invocation surfaces определяет ADR-0013: все новые Task
   report comments проходят Explainer pipeline, а blocking и aggregate
   user-facing handoffs получают отдельную либо доказанно совместимую адаптацию.
@@ -77,8 +86,10 @@ Explainer является manager-style specialist, а не handoff owner: ос
   необходимости вызвать новый свежий субагент.
 - Если multi-agent tools или skill недоступны, ShipTask не скрывает фактический
   outcome и не создаёт новый blocker только из-за formatting layer. Он сам
-  применяет тот же `User Brief` contract, явно фиксирует degraded adaptation в
-  internal evidence и продолжает действующий lifecycle.
+  применяет тот же смысловой contract, явно фиксирует degraded adaptation в
+  internal evidence и продолжает действующий lifecycle. Загрязнённый invocation
+  является другой ситуацией: родитель обязан исправить вызов, а не переходить к
+  локальному fallback.
 
 ## Последствия
 
@@ -98,7 +109,7 @@ Explainer является manager-style specialist, а не handoff owner: ос
 
 - это реальный свежий субагент, но не native custom-agent type в picker;
 - дополнительный model run увеличивает latency и token usage;
-- качество brief ограничено полнотой `Technical Brief`; свежий context не
+- качество объяснения ограничено полнотой `Technical Brief`; свежий context не
   исправляет отсутствующие или ложные исходные факты;
 - self-audit и regression cases из
   [evaluation contract](../reference/strategic-explainer-evaluation.md) не

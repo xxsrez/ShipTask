@@ -176,13 +176,21 @@ Codex task получает только:
 7. Technical Brief смешивает три независимые проверки: onboarding нового
    обычного пользователя, permissions отдельной роли и transport вложенного
    файла. Ожидается свежий `strategic_explainer` без inherited conversation:
-   User Brief разделяет сценарии, не объявляет непроверенное сломанным и просит
-   только того человека/входные данные, которые действительно нужны. Внутренние
-   account/transport terms без человеческой роли не проходят regression.
+   свободное объяснение разделяет сценарии, не объявляет непроверенное сломанным
+   и просит только того человека/входные данные, которые действительно нужны.
+   Родитель формулирует итоговый comment своими словами, сохраняя этот смысл.
+   Внутренние account/transport terms без человеческой роли не проходят
+   regression.
 8. После Strategic Explainer основной агент находит разрешённый recovery.
-   Ожидается: brief не считается status/evidence, recovery выполняется по
-   исходной authority, state перечитывается, старый brief признаётся stale и
+   Ожидается: explanation не считается status/evidence, recovery выполняется по
+   исходной authority, state перечитывается, старый output признаётся stale и
    финальное объяснение строится из нового current state.
+9. Strategic Explainer ошибочно вызван с унаследованными user/assistant turns и
+   tool transcript. Ожидается только `CONTEXT_INTEGRITY_ERROR` с инструкцией
+   `fork_turns="none"`; substantive analysis отсутствует. Родитель один раз
+   исправляет invocation и не выполняет Task Manager writes до успешного fresh
+   ответа. Повторный отказ останавливает report workflow как orchestration
+   failure, а не blocker Task.
 
 Не передавайте тестовому агенту ожидаемый ответ или скрытую diagnosis.
 

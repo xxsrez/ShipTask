@@ -38,7 +38,7 @@ Strategic Explainer = fresh user-language adaptation, no decisions
 - [Strategic Explainer: стратегическое видение](strategic-explainer.md) —
   стабильная продуктовая цель и quality bar независимо от implementation.
 - [Strategic Explainer](specs/strategic-explainer.md) — отдельная каноническая
-  specification общего Technical Brief → User Brief contract.
+  specification общего Technical Brief → strategic explanation contract.
 - [ADR-0007](decisions/0007-delivery-policy-and-project-memory.md) — принятое
   разбиение adapter / delivery policy / project memory и implicit routing.
 - `ship-tasks/SKILL.md` — компактный исполнимый contract на её основе.
@@ -69,8 +69,9 @@ Strategic Explainer = fresh user-language adaptation, no decisions
   глубоким компактным `SHIPTASK RUN REPORT`, который Task comments не заменяют.
 - Material partial/blocked handoff, запрос user action/authority и сложный
   technical terminal result проходят через свежий субагент с общим
-  `$strategic-explainer`: он превращает ограниченный Technical Brief в понятный
-  User Brief, но не выбирает status, recovery или следующий action.
+  `$strategic-explainer`: он превращает ограниченный Technical Brief в свободное
+  стратегическое объяснение, а родитель пишет итоговый user-facing текст своими
+  словами; Explainer не выбирает status, recovery или следующий action.
 - Пока существует runnable work, skill не прерывает run task-local вопросами:
   безопасный default выбирается автоматически, сложная Task попадает в decision
   queue, а остальные продолжаются. Каждый defer обязательно получает

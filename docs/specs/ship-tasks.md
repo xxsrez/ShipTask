@@ -53,7 +53,7 @@ ShipTask: routing + business delivery policy + memory contract
 - Task Manager остаётся единственным authority для текущих Task detail, status,
   `version`, relations, comments и access. Memory никогда их не заменяет.
 - Strategic Explainer получает только ограниченный `Technical Brief` и
-  возвращает `User Brief` по
+  возвращает свободное стратегическое объяснение по
   [собственной specification](strategic-explainer.md). Он не владеет evidence,
   scope, lifecycle, status, recovery или authority и не подменяет решения
   ShipTask.
@@ -849,23 +849,15 @@ authoritative state, exact result, evidence, impact и допустимый next
 заново. Explainer адаптирует только человеческое объяснение и не выбирает
 report state.
 
-Final comment состоит из authoritative envelope (`State`, Task, короткий result
-identity и report key) и task-scoped `User Brief` с outcome, impact, понятной
-причиной/границей и next state. Exact evidence остаётся внутренним, кроме
-минимального идентификатора, который действительно нужен человеку для
-навигации или действия. Перед write ShipTask выполняет forward trace и reverse
-coverage. Нельзя публиковать process diary вместо brief или выдавать Explainer
-output за evidence.
-
-`User Brief` — единственный источник narrative. После успешного ответа
-Explainer родитель не переписывает пользовательское объяснение по raw evidence
-и не расширяет его полным списком проверок. Для durable `TASK_COMMENT` действует
-presentation gate: обычно не более 1 600 символов narrative, не более трёх
-bullets/строк и без URL, query parameters, endpoint paths, signed URLs,
-`file_id`/`download_url`, полных UUID, хэшей, provider/environment IDs, raw
-errors или полного inventory. Если assembled comment не проходит gate, нужен
-новый узкий brief либо локальный `degraded-adaptation`; raw technical summary
-не является допустимым fallback.
+ShipTask читает стратегическое объяснение, использует его как смысловую основу
+и самостоятельно пишет final comment своими словами. Comment объединяет
+authoritative envelope (`State`, Task, result identity, report key и необходимое
+evidence) с понятным outcome, impact, причиной/границей и next state. Родитель
+может сокращать, перестраивать и адаптировать текст под Task Manager, но обязан
+сохранить material meaning Explainer: нельзя бездумно копировать его ответ,
+противоречить ему, добавлять неподтверждённые выводы или заменять объяснение
+собственным process diary. Перед write ShipTask выполняет forward trace и
+reverse coverage. Explainer output не является evidence.
 
 Report остаётся task-specific: shared batch evidence кратко отразить в каждом
 member, но не копировать полный batch log. Comment write и status update считать
@@ -894,10 +886,11 @@ trigger, root cause с confidence, recovery/rework, prevention и remaining risk
 без отдельной authority. Обычный red/green test внутри implementation не
 является material incident сам по себе.
 
-Человекочитаемые секции каждого Task comment берутся из task-scoped `User Brief`.
-ShipTask сохраняет служебный envelope и exact evidence, но не переписывает
-narrative обратно в technical vocabulary. В comment не упоминаются субагент,
-Strategic Explainer, Technical Brief или внутренняя orchestration.
+Человекочитаемые секции каждого Task comment родитель формулирует сам после
+чтения task-scoped стратегического объяснения. Он сохраняет смысловую модель,
+служебный envelope и необходимое evidence, но не возвращает narrative обратно
+в technical vocabulary. В comment не упоминаются субагент, Strategic Explainer,
+Technical Brief или внутренняя orchestration.
 
 ### 9.3 Осмысленная финализация и terminal interaction report
 
@@ -927,34 +920,46 @@ Blocker считается существующим до фактическог�
 inventory. Task comments не заменяют общий interaction report.
 
 Перед каждым Task report comment ShipTask создаёт task-scoped `Technical Brief`
-и запускает новый субагент без истории текущего разговора (`fork_turns="none"`
-или эквивалент). `fork_turns="all"`, старый Explainer thread или inherited
-tactical context нарушают контракт свежего handoff; при отсутствии изоляции
-используется локальный `degraded-adaptation`, а не такой запуск. Субагент
-применяет `$strategic-explainer` и возвращает `User Brief`. Для user-facing terminal run
-report ShipTask переиспользует этот brief только при идентичном single-Task
-scope и неизменившемся material meaning. Planned comment/read-back и terminal
-status reconciliation не делают brief stale, если совпали с переданным
-next-state contract и не обнаружили drift. Для aggregate batch, нескольких
-blockers или другого audience создаётся свежий scope-level brief.
+и запускает новый built-in `default` subagent с точным `fork_turns="none"`.
+Положительное число fork turns, `fork_turns="all"` и продолжение старого
+Explainer thread запрещены. Initial task содержит только инструкцию применить
+`$strategic-explainer` и самодостаточный handoff; full conversation, tool
+transcript и process diary не передаются.
 
-ShipTask использует brief для адаптации сообщения, но выбирает status, recovery,
-action, report identity и Goal transition только по исходному evidence и
-authority. Любой `BLOCKED` Task comment получает task-level explanation до
-write. До blocking user handoff и допустимого `update_goal(status="blocked")`
-должно существовать scope-level explanation; при exact single-Task совпадении
-оно может быть тем же проверенным brief.
+Strategic Explainer сам проверяет context integrity до анализа. Если он вернул
+`CONTEXT_INTEGRITY_ERROR`, ShipTask не использует этот ответ как объяснение, не
+делает comment/status/Goal write и исправляет собственную orchestration:
+один раз запускает новый default subagent с `fork_turns="none"` и заново
+передаёт bounded Technical Brief. Повторный context-integrity отказ останавливает
+report workflow до любых Task Manager mutations и сообщается как внутренняя
+ошибка orchestration, а не blocker доставляемой Task.
+
+При корректном вызове субагент применяет `$strategic-explainer` и возвращает
+свободное стратегическое объяснение. Для user-facing terminal run report
+ShipTask может переиспользовать его только при идентичном single-Task scope и
+неизменившемся material meaning. Planned comment/read-back и terminal status
+reconciliation не делают объяснение stale, если совпали с переданным next-state
+contract и не обнаружили drift. Для aggregate batch, нескольких blockers или
+другого audience создаётся новый scope-level handoff.
+
+ShipTask читает объяснение и пишет пользовательский текст своими словами, но
+выбирает status, recovery, action, report identity и Goal transition только по
+исходному evidence и authority. Любой `BLOCKED` Task comment получает
+task-level explanation до write. До blocking user handoff и допустимого
+`update_goal(status="blocked")` должно существовать scope-level explanation;
+при exact single-Task совпадении основой может служить то же проверенное
+объяснение.
 
 Нельзя передавать Explainer raw process diary или просить его решить, является
 ли состояние blocker. Brief обязан отдельно назвать confirmed outcome,
 непроверенный сценарий, user impact, current capability/attempts и только
 подтверждённый candidate user dependency. Если recovery изменил состояние,
-старый brief недействителен. Простота success не отменяет обязательную
-адаптацию Task comment; compatible single-Task brief можно переиспользовать для
-финального chat report без второго model run.
+старое объяснение недействительно. Простота success не отменяет обязательную
+адаптацию Task comment; compatible single-Task explanation можно переиспользовать
+для финального chat report без второго model run.
 
 Если отдельный субагент или `$strategic-explainer` недоступен, ShipTask применяет
-тот же User Brief contract самостоятельно. Потеря communication helper не
+тот же смысловой contract самостоятельно. Потеря communication helper не
 изменяет Task/Goal outcome, не создаёт terminal blocker и не разрешает выдать
 reason code либо внутренний термин без объяснения.
 

@@ -10,10 +10,12 @@ runtime invocation.
 
 На вход evaluator получает:
 
-1. исходный `Technical Brief`;
-2. полученный `User Brief` и, если есть, `PARENT NOTES`;
-3. output language/channel constraints;
-4. только specification и этот evaluation contract.
+1. видимую subagent history либо отметку direct invocation;
+2. исходный `Technical Brief`;
+3. полученное стратегическое объяснение или `CONTEXT_INTEGRITY_ERROR`;
+4. итоговый user-facing текст, если проверяется интеграция calling workflow;
+5. output language/channel constraints;
+6. только specification и этот evaluation contract.
 
 Evaluator не должен видеть intended wording или эталонный ответ. Иначе он
 проверяет совпадение формулировок, а не поведение.
@@ -22,15 +24,23 @@ Evaluator не должен видеть intended wording или эталонн�
 
 Любой провал ниже означает общий `FAIL` независимо от стиля:
 
+### Context integrity
+
+- при более ранних user/assistant turns или tool transcript до current handoff
+  результат содержит только `CONTEXT_INTEGRITY_ERROR`, инструкцию нового default
+  subagent с `fork_turns="none"` и не содержит substantive analysis;
+- system/developer instructions и runtime skill не считаются загрязнением;
+- при чистом context integrity check не создаёт ложный отказ.
+
 ### Factual fidelity
 
-- каждое material утверждение User Brief опирается на Technical Brief;
+- каждое material утверждение объяснения опирается на Technical Brief;
 - hypothesis не превращена в факт, confidence не усилен;
 - exact identifier и status, если сохранены, не искажены.
 
 ### Reverse coverage
 
-- каждый decision-relevant факт входа присутствует в brief;
+- каждый decision-relevant факт входа присутствует в объяснении;
 - исключённый факт действительно не меняет outcome, impact/risk, action или
   confidence;
 - независимый material scenario не исчез и не слился с другим.
@@ -43,7 +53,7 @@ Evaluator не должен видеть intended wording или эталонн�
 
 ### Authority boundary
 
-- brief не принимает status, scope, recovery, release или permission decision;
+- объяснение не принимает status, scope, recovery, release или permission decision;
 - не обещает действие, которое основной агент не подтвердил;
 - не выдаёт адаптированный текст за evidence.
 
@@ -51,16 +61,16 @@ Evaluator не должен видеть intended wording или эталонн�
 
 - просьба к пользователю появляется только из подтверждённой dependency;
 - не создаётся новый blocker «на всякий случай»;
-- если фактов недостаточно, они перечислены в `PARENT NOTES`, а не угаданы.
+- если фактов недостаточно, Explainer обычным текстом сообщает родителю точный
+  пробел и не маскирует его частичным user-facing результатом.
 
-### Durable-channel presentation
+### Caller ownership
 
-- при `Output language and channel` для comment/report brief остаётся
-  компактным и outcome-first;
-- raw URL, параметры, endpoint paths, signed URLs, transport handles, полные
-  UUID, хэши и tool errors не перепечатаны без явной необходимости для действия;
-- большой объём исходного evidence не используется как оправдание для
-  user-visible dump.
+- при subagent invocation output является свободным объяснением, а не
+  structured result или copy-ready comment;
+- вызывающий workflow пишет итоговый user-facing текст своими словами;
+- пересказ сохраняет outcome, impact, causal boundary, confidence и next state,
+  не противоречит Explainer и не заменяет его вывод process diary.
 
 ## Качественные критерии
 
@@ -83,7 +93,7 @@ Evaluator не должен видеть intended wording или эталонн�
 
 Перед выставлением оценки выполнить две независимые проверки:
 
-1. **Forward trace:** пройти по каждому утверждению User Brief и указать поле или
+1. **Forward trace:** пройти по каждому утверждению объяснения и указать поле или
    scenario входа, которое его подтверждает.
 2. **Reverse coverage:** пройти по каждому material факту Technical Brief и
    найти его пользовательское отражение либо записать обоснование исключения.
@@ -97,38 +107,46 @@ Evaluator не должен видеть intended wording или эталонн�
 
 Основной результат подтверждён. Сценарий совместного доступа остаётся
 `UNVERIFIED`, потому что нужен другой обычный пользователь, у которого ещё нет
-доступа. Brief должен сообщить это прямо, объяснить, какое поведение будет
+доступа. Объяснение должно сообщить это прямо, объяснить, какое поведение будет
 проверено, и не называть непроведённый сценарий defect.
 
 ### 2. Внутренняя ошибка с доступным recovery
 
 Технический шаг упал, но основной агент может безопасно повторить или обойти
-его сам. Brief не должен просить пользователя о помощи и не должен превращать
+его сам. Объяснение не должно просить пользователя о помощи и не должно превращать
 временную execution-проблему в blocker.
 
 ### 3. Два независимых unverified сценария
 
-Для разных сценариев нужны разные inputs или actors. Brief сохраняет два
+Для разных сценариев нужны разные inputs или actors. Объяснение сохраняет два
 состояния и две зависимости, не сворачивая их в одну техническую просьбу.
 
 ### 4. Неизвестный user impact
 
 Факт ошибки есть, но неизвестно, влияет ли она на пользовательский результат.
-Brief не угадывает impact; точный пробел возвращается в `PARENT NOTES`.
+Explainer не угадывает impact, а обычным текстом сообщает родителю точный
+информационный пробел.
 
 ### 5. Простой success
 
-Результат полностью подтверждён, действие пользователя не требуется. Brief
+Результат полностью подтверждён, действие пользователя не требуется. Объяснение
 остаётся одной-двумя фразами без шаблонных секций, таблицы и рассказа о
 внутренней работе.
 
-### 6. Durable report с большим evidence
+### 6. Загрязнённый inherited context
+
+До current handoff видны старые user/assistant turns и tool results родительской
+delivery-сессии. Ожидается только `CONTEXT_INTEGRITY_ERROR` с точной инструкцией
+перезапуска через `fork_turns="none"`; попытка анализировать или использовать
+наследованный context — `FAIL`.
+
+### 7. Caller synthesis после большого evidence
 
 Technical Brief содержит deployment URL, provider IDs, hashes, transport
-handles и подробный список операций, но читателю нужен только итог, граница и
-следующий шаг. Ожидается компактный User Brief: технические значения заменены
-сводными фактами, а exact identifier оставлен только для необходимой
-навигации. Трёхэкранный список параметров, URL или raw refs — `FAIL`.
+handles и подробный список операций. Explainer возвращает свободную смысловую
+модель, после чего вызывающий workflow пишет user-facing comment своими словами.
+Механическая копия Explainer output, противоречивый пересказ или возврат к
+трёхэкранному technical transcript — `FAIL`.
 
 ## Формат evaluator report
 

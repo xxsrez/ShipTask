@@ -6,7 +6,7 @@
 
 - [Strategic Explainer](strategic-explainer.md) — implementation-independent
   продуктовая цель, место между technical evidence и решениями основного
-  агента, устойчивые требования и quality bar понятного User Brief.
+  агента, устойчивые требования и quality bar стратегического объяснения.
 
 ## Specifications
 
@@ -16,7 +16,7 @@
   per-Task targeted gates и review-batch gates до automatic acceptance и
   terminal evidence.
 - [Strategic Explainer](specs/strategic-explainer.md) — общий contract
-  преобразования ограниченного Technical Brief в ясный User Brief без
+  преобразования ограниченного Technical Brief в ясное свободное объяснение без
   mutations, status decisions и новой authority.
 
 ## Decisions
