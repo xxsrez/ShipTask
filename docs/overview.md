@@ -29,14 +29,19 @@ Goal/shared authority останавливает run с
 Task Manager skill  = technical adapter
 ShipTask skill      = business delivery policy
 Project Memories    = scope selectors + project-specific profile
+Strategic Explainer = fresh user-language adaptation, no decisions
 ```
 
 ## Текущий статус
 
 - [Ship Tasks](specs/ship-tasks.md) — единственная каноническая specification.
+- [Strategic Explainer](specs/strategic-explainer.md) — отдельная каноническая
+  specification общего Technical Brief → User Brief contract.
 - [ADR-0007](decisions/0007-delivery-policy-and-project-memory.md) — принятое
   разбиение adapter / delivery policy / project memory и implicit routing.
 - `ship-tasks/SKILL.md` — компактный исполнимый contract на её основе.
+- `strategic-explainer/SKILL.md` — generic runtime contract, который можно
+  применять напрямую или внутри свежего субагента другого workflow.
 - `ship-tasks/references/project-memory.md` — логическая схема, bootstrap,
   freshness, precedence и alarm contract project memory.
 - [Task Manager adapter](reference/task-manager-adapter.md) — точный OAuth/MCP
@@ -60,6 +65,10 @@ Project Memories    = scope selectors + project-specific profile
   остаётся blocker до устранения; пока meaningful progress возможен, финальный
   Goal status `blocked` ещё не обоснован. Каждый terminal exit заканчивается
   глубоким компактным `SHIPTASK RUN REPORT`, который Task comments не заменяют.
+- Material partial/blocked handoff, запрос user action/authority и сложный
+  technical terminal result проходят через свежий субагент с общим
+  `$strategic-explainer`: он превращает ограниченный Technical Brief в понятный
+  User Brief, но не выбирает status, recovery или следующий action.
 - Пока существует runnable work, skill не прерывает run task-local вопросами:
   безопасный default выбирается автоматически, сложная Task попадает в decision
   queue, а остальные продолжаются. Каждый defer обязательно получает
@@ -71,8 +80,8 @@ Project Memories    = scope selectors + project-specific profile
 - Terminal-ready result автоматически принимается и переводится в `Done` без
   вопроса пользователю. Если позже обнаружен bug, пользователь reopen-ит Task
   либо создаёт новую проблему для следующего ShipTask scope.
-- Marketplace runtime и installed cache должны быть byte-identical repository
-  source; standalone user-level копия отсутствует.
+- Marketplace runtime и installed cache обоих sibling-skills должны быть
+  byte-identical repository source; standalone user-level копии отсутствуют.
 
 ## Целевой продуктовый поток
 

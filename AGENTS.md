@@ -5,8 +5,9 @@
 ## Назначение
 
 - Репозиторий является source of truth для Task Manager-only Codex skill
-  `$ship-tasks`.
-- Исполнимый skill находится в `ship-tasks/`.
+  `$ship-tasks` и общего communication skill `$strategic-explainer`.
+- Исполнимые skills находятся в sibling-каталогах `ship-tasks/` и
+  `strategic-explainer/`.
 - Документация проекта находится в `docs/`; `docs/README.md` — её
   канонический индекс.
 - Основной язык документации — русский. Точные protocol/state/tool names можно
@@ -17,21 +18,26 @@
 - `$ship-tasks` работает только через Task Manager connector. Не добавляйте
   fallback providers, generic task-source abstraction или альтернативный
   tracker workflow.
+- `$strategic-explainer` остаётся generic: не добавляйте в его runtime contract
+  ShipTask, Task Manager, конкретный tracker, project lifecycle или право
+  принимать решения/выполнять mutations.
 - Project и Release refs, repository path, branch, deployment provider,
   environment, URL, команды проекта и production policy брать из текущего
   project context, а не зашивать в skill.
-- Каноническая specification описывает единственный текущий workflow. Не
-  создавайте параллельные поколения или альтернативные specifications.
-- Распространяйте runtime skill только через отдельный plugin
+- Каждая каноническая specification описывает один текущий workflow. Не
+  создавайте параллельные поколения или альтернативные specifications одного
+  и того же runtime skill.
+- Распространяйте оба runtime skills только через отдельный plugin
   `ship-tasks@srez-marketplace`. Task Manager connector устанавливается
   отдельно как adapter-only `task-manager@srez-marketplace`; не помещайте
   ShipTask внутрь его package. Не создавайте и не синхронизируйте
-  standalone user-level копию `~/.codex/skills/ship-tasks`.
+  standalone user-level копии `~/.codex/skills/ship-tasks` и
+  `~/.codex/skills/strategic-explainer`.
 
 ## Изменения
 
 - Для поведенческого изменения сначала обновите применимую specification,
-  затем `ship-tasks/SKILL.md`.
+  затем соответствующий runtime `SKILL.md`.
 - Сохраняйте `SKILL.md` компактным и переносите подробные объяснения в
   проектную документацию, а не в runtime context skill.
 - Не создавайте пустые каталоги или placeholder-документы.
@@ -39,24 +45,26 @@
 
 ## Definition of done для изменения skill
 
-Поведенческое или distribution-изменение `$ship-tasks` не завершено, пока
+Поведенческое или distribution-изменение любого runtime skill не завершено, пока
 одновременно не выполнены все три критерия:
 
 1. Exact repository scope закоммичен в этом репозитории.
 2. Этот commit запушен в `origin/main`, а local `HEAD` совпадает с
    `origin/main`.
 3. Отдельный Marketplace package является единственной runtime-дистрибуцией:
-   `Srez Marketplace/plugins/ship-tasks/skills/ship-tasks` byte-identical
-   repository source, а installed cache byte-identical marketplace source и
-   отображается installed/enabled. Если изменился runtime payload, manifest
-   version или cachebuster обновлён, соответствующий marketplace commit запушен
-   в `origin/main`, а plugin переустановлен из
+   `Srez Marketplace/plugins/ship-tasks/skills/ship-tasks` и
+   `Srez Marketplace/plugins/ship-tasks/skills/strategic-explainer`
+   byte-identical соответствующим repository sources, а installed cache
+   byte-identical marketplace source и отображается installed/enabled. Если
+   изменился runtime payload, manifest version или cachebuster обновлён,
+   соответствующий marketplace commit запушен в `origin/main`, а plugin переустановлен из
    `ship-tasks@srez-marketplace`. Отдельно установленный
    `task-manager@srez-marketplace` остаётся adapter-only и не содержит
-   `skills/ship-tasks`.
+   `skills/ship-tasks` или `skills/strategic-explainer`.
 
-Standalone user-level каталог `~/.codex/skills/ship-tasks` должен
-отсутствовать, а fresh `skills/list` не должен возвращать отдельный user skill.
+Standalone user-level каталоги `~/.codex/skills/ship-tasks` и
+`~/.codex/skills/strategic-explainer` должны отсутствовать, а fresh
+`skills/list` не должен возвращать отдельные user skills.
 Plugin-managed marketplace snapshot и installed cache являются внутренними
 копиями одной plugin installation и не удаляются вручную.
 
@@ -71,6 +79,7 @@ Plugin-managed marketplace snapshot и installed cache являются внут
 ```bash
 python3 scripts/validate_repo.py
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```

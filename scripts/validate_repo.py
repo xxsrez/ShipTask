@@ -13,12 +13,17 @@ AGENTS_FILE = ROOT / "AGENTS.md"
 SKILL_DIR = ROOT / "ship-tasks"
 SKILL_FILE = SKILL_DIR / "SKILL.md"
 OPENAI_FILE = SKILL_DIR / "agents" / "openai.yaml"
+STRATEGIC_SKILL_DIR = ROOT / "strategic-explainer"
+STRATEGIC_SKILL_FILE = STRATEGIC_SKILL_DIR / "SKILL.md"
+STRATEGIC_OPENAI_FILE = STRATEGIC_SKILL_DIR / "agents" / "openai.yaml"
 REPORT_REFERENCE = SKILL_DIR / "references" / "delivery-report.md"
 RUN_REPORT_REFERENCE = SKILL_DIR / "references" / "run-report.md"
+STRATEGIC_HANDOFF_REFERENCE = SKILL_DIR / "references" / "strategic-explainer.md"
 AUTONOMY_REFERENCE = SKILL_DIR / "references" / "autonomy-and-release.md"
 MEMORY_REFERENCE = SKILL_DIR / "references" / "project-memory.md"
 DOCS_INDEX = ROOT / "docs" / "README.md"
 SPEC_FILE = ROOT / "docs" / "specs" / "ship-tasks.md"
+STRATEGIC_SPEC_FILE = ROOT / "docs" / "specs" / "strategic-explainer.md"
 ADAPTER_FILE = ROOT / "docs" / "reference" / "task-manager-adapter.md"
 DECISION_FILE = ROOT / "docs" / "decisions" / "0001-task-manager-only.md"
 REPORT_DECISION_FILE = (
@@ -48,6 +53,12 @@ BLOCKER_REPORT_DECISION_FILE = (
 SEPARATE_PLUGIN_DECISION_FILE = (
     ROOT / "docs" / "decisions" / "0011-separate-shiptask-plugin-distribution.md"
 )
+STRATEGIC_EXPLAINER_DECISION_FILE = (
+    ROOT
+    / "docs"
+    / "decisions"
+    / "0012-strategic-explainer-as-portable-subagent-role.md"
+)
 
 REQUIRED_FILES = (
     ROOT / "README.md",
@@ -56,12 +67,16 @@ REQUIRED_FILES = (
     ROOT / ".gitattributes",
     SKILL_FILE,
     OPENAI_FILE,
+    STRATEGIC_SKILL_FILE,
+    STRATEGIC_OPENAI_FILE,
     REPORT_REFERENCE,
     RUN_REPORT_REFERENCE,
+    STRATEGIC_HANDOFF_REFERENCE,
     AUTONOMY_REFERENCE,
     MEMORY_REFERENCE,
     DOCS_INDEX,
     SPEC_FILE,
+    STRATEGIC_SPEC_FILE,
     ADAPTER_FILE,
     DECISION_FILE,
     REPORT_DECISION_FILE,
@@ -73,6 +88,7 @@ REQUIRED_FILES = (
     TERMINAL_CAPABILITY_DECISION_FILE,
     BLOCKER_REPORT_DECISION_FILE,
     SEPARATE_PLUGIN_DECISION_FILE,
+    STRATEGIC_EXPLAINER_DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
@@ -228,6 +244,73 @@ def validate_skill(errors: list[str]) -> None:
             fail(errors, f"agents/openai.yaml is missing {fragment!r}")
 
 
+def validate_strategic_explainer(errors: list[str]) -> None:
+    text = STRATEGIC_SKILL_FILE.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    if not lines or lines[0] != "---":
+        fail(errors, "strategic-explainer/SKILL.md must start with YAML frontmatter")
+        return
+    try:
+        closing = lines.index("---", 1)
+    except ValueError:
+        fail(errors, "strategic-explainer/SKILL.md frontmatter is not closed")
+        return
+
+    keys: list[str] = []
+    for line in lines[1:closing]:
+        match = re.match(r"^([a-z_][a-z0-9_-]*):(?:\s|$)", line)
+        if match:
+            keys.append(match.group(1))
+    if keys != ["name", "description"]:
+        fail(
+            errors,
+            "strategic-explainer frontmatter must contain only name and description",
+        )
+    if "name: strategic-explainer" not in "\n".join(lines[1:closing]):
+        fail(errors, "Strategic Explainer skill name must be strategic-explainer")
+    if len(lines) > 240:
+        fail(
+            errors,
+            f"strategic-explainer/SKILL.md is too long: {len(lines)} lines",
+        )
+
+    for fragment in (
+        "$strategic-explainer",
+        "Technical Brief",
+        "User Brief",
+        "Не выполнять writes",
+        "Не решать, завершена ли работа",
+        "CONFIRMED",
+        "PROBABLE",
+        "UNKNOWN",
+        "Не объединять независимые сценарии",
+        "Что нужно от вас",
+        "PARENT NOTES",
+        "визуализац",
+        "не создавать отдельный media artifact",
+        "Читателю не нужно знать внутренние tools",
+    ):
+        if fragment not in text:
+            fail(errors, f"Strategic Explainer skill is missing {fragment!r}")
+
+    for forbidden in ("ShipTask", "Task Manager", "$ship-tasks", "TM-123"):
+        if forbidden in text:
+            fail(
+                errors,
+                f"Strategic Explainer runtime is coupled to a consumer: {forbidden!r}",
+            )
+
+    metadata = STRATEGIC_OPENAI_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        'display_name: "Strategic Explainer"',
+        'short_description: "Объяснить технический результат простым языком"',
+        "$strategic-explainer",
+        "allow_implicit_invocation: true",
+    ):
+        if fragment not in metadata:
+            fail(errors, f"Strategic Explainer openai.yaml is missing {fragment!r}")
+
+
 def validate_trigger_matrix(errors: list[str]) -> None:
     spec_text = SPEC_FILE.read_text(encoding="utf-8")
     marker = "### 1.3 Проверяемая trigger matrix"
@@ -270,12 +353,14 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "local `HEAD` совпадает с",
         "все три критерия",
         "Srez Marketplace/plugins/ship-tasks/skills/ship-tasks",
+        "Srez Marketplace/plugins/ship-tasks/skills/strategic-explainer",
         "ship-tasks@srez-marketplace",
         "task-manager@srez-marketplace` остаётся adapter-only",
         "installed cache",
         "installed/enabled",
-        "Standalone user-level каталог `~/.codex/skills/ship-tasks` должен",
-        "fresh `skills/list` не должен возвращать отдельный user skill",
+        "Standalone user-level каталоги `~/.codex/skills/ship-tasks`",
+        "~/.codex/skills/strategic-explainer",
+        "`skills/list` не должен возвращать отдельные user skills",
         "не удаляются вручную",
     ):
         if fragment not in agents_text:
@@ -309,6 +394,11 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "active write target равен `1`",
         "Не начинать новую Task, если занятые lanes",
         "run-report reference",
+        "Strategic Explainer handoff",
+        "$strategic-explainer",
+        "ограниченный `Technical Brief`",
+        "communication layer",
+        "communication helper не создаёт новый terminal blocker",
         "finalization pass",
         "Blocker остаётся blocker до устранения",
         "SHIPTASK RUN REPORT",
@@ -349,6 +439,10 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "status-reconciliation barrier",
         "начинать следующую `To Do` запрещено",
         "### 9.3 Осмысленная финализация и terminal interaction report",
+        "Strategic Explainer: fresh user-language adaptation, no decisions",
+        "собственной specification",
+        "запускает новый субагент без истории текущего",
+        "communication helper не",
         "Finalization pass обязан",
         "Blocker считается существующим до фактического устранения",
         "SHIPTASK RUN REPORT",
@@ -416,6 +510,37 @@ def validate_workflow_contract(errors: list[str]) -> None:
     ):
         if fragment not in run_report_text:
             fail(errors, f"run-report reference is missing {fragment!r}")
+
+    handoff_text = STRATEGIC_HANDOFF_REFERENCE.read_text(encoding="utf-8")
+    for fragment in (
+        "Strategic Explainer handoff для ShipTask",
+        "material partial/blocked outcome",
+        "Technical Brief",
+        "Candidate user dependency",
+        "built-in `default` agent",
+        "fork_turns=\"none\"",
+        "$strategic-explainer",
+        "не создаёт facts, authority, lifecycle status или решение",
+        "degraded adaptation",
+    ):
+        if fragment not in handoff_text:
+            fail(errors, f"Strategic Explainer handoff is missing {fragment!r}")
+
+    strategic_spec_text = STRATEGIC_SPEC_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        "общий skill `$strategic-explainer`",
+        "Technical Brief",
+        "User Brief",
+        "не является reviewer, incident commander или decision maker",
+        "не выполняет writes",
+        "не заменяет evidence",
+        "новый субагент без унаследованной истории",
+        "Что нужно от вас",
+        "Не добавлять декоративные картинки",
+        "communication layer, не как",
+    ):
+        if fragment not in strategic_spec_text:
+            fail(errors, f"Strategic Explainer specification is missing {fragment!r}")
 
     autonomy_text = AUTONOMY_REFERENCE.read_text(encoding="utf-8")
     for fragment in (
@@ -548,6 +673,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "содержит только adapter skill `task-manager`",
         "не содержит `.mcp.json`",
         "plugins/ship-tasks/skills/ship-tasks",
+        "plugins/ship-tasks/skills/strategic-explainer",
         "~/.codex/skills/ship-tasks",
         "ship-tasks:ship-tasks",
         "task-manager:ship-tasks",
@@ -555,6 +681,21 @@ def validate_workflow_contract(errors: list[str]) -> None:
     ):
         if fragment not in decision_text:
             fail(errors, f"ADR-0011 is missing separate-plugin contract {fragment!r}")
+
+    decision_text = STRATEGIC_EXPLAINER_DECISION_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        "Strategic Explainer как переносимая роль свежего субагента",
+        "распространяет skills",
+        "общий sibling-skill `$strategic-explainer`",
+        "Не включать в его runtime contract ShipTask, Task Manager",
+        "built-in типа `default` без унаследованной истории",
+        "зарегистрированный native custom agent",
+        "communication layer",
+        "не создаёт новый blocker",
+        "будущий перенос skill в отдельный plugin",
+    ):
+        if fragment not in decision_text:
+            fail(errors, f"ADR-0012 is missing Strategic Explainer contract {fragment!r}")
 
     decision_text = TERMINAL_CAPABILITY_DECISION_FILE.read_text(encoding="utf-8")
     for fragment in (
@@ -645,6 +786,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
 def repository_text_files() -> list[Path]:
     paths = [ROOT / "README.md", ROOT / "AGENTS.md", OPENAI_FILE]
     paths.extend(sorted(SKILL_DIR.rglob("*.md")))
+    paths.append(STRATEGIC_OPENAI_FILE)
+    paths.extend(sorted(STRATEGIC_SKILL_DIR.rglob("*.md")))
     paths.extend(sorted((ROOT / "docs").rglob("*.md")))
     paths.extend(sorted((ROOT / "scripts").rglob("*.py")))
     return paths
@@ -669,6 +812,7 @@ def validate_single_task_manager_contract(errors: list[str]) -> None:
 def markdown_files() -> list[Path]:
     roots = [ROOT / "README.md", ROOT / "AGENTS.md"]
     roots.extend(sorted(SKILL_DIR.rglob("*.md")))
+    roots.extend(sorted(STRATEGIC_SKILL_DIR.rglob("*.md")))
     roots.extend(sorted((ROOT / "docs").rglob("*.md")))
     return roots
 
@@ -718,6 +862,7 @@ def main() -> int:
 
     if not errors:
         validate_skill(errors)
+        validate_strategic_explainer(errors)
         validate_trigger_matrix(errors)
         validate_workflow_contract(errors)
         validate_single_task_manager_contract(errors)

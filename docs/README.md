@@ -2,13 +2,16 @@
 
 Начните с [обзора](overview.md), чтобы понять назначение и границы skill.
 
-## Specification
+## Specifications
 
 - [Ship Tasks](specs/ship-tasks.md) — канонический Task Manager-only workflow
   для explicit invocation и natural-language delivery с однозначным Task
   Manager anchor: single без Goal, batch с Goal, project-memory context,
   per-Task targeted gates и review-batch gates до automatic acceptance и
   terminal evidence.
+- [Strategic Explainer](specs/strategic-explainer.md) — общий contract
+  преобразования ограниченного Technical Brief в ясный User Brief без
+  mutations, status decisions и новой authority.
 
 ## Decisions
 
@@ -41,7 +44,11 @@
   доступные проблемы и только затем даёт человеку сжатое причинное объяснение.
 - [0011: Separate ShipTask plugin distribution](decisions/0011-separate-shiptask-plugin-distribution.md)
   — ShipTask и Task Manager connector устанавливаются как два независимых
-  Marketplace plugin; Task Manager package остаётся adapter-only.
+  Marketplace plugin; Task Manager package остаётся adapter-only; состав
+  ShipTask plugin позднее расширен ADR-0012.
+- [0012: Strategic Explainer как переносимая роль свежего субагента](decisions/0012-strategic-explainer-as-portable-subagent-role.md)
+  — общий sibling-skill поставляется в том же plugin и применяется в новом
+  default-субагенте без выдачи за неподдерживаемый plugin-defined custom agent.
 
 ## Reference
 

@@ -36,7 +36,8 @@ user intent
    ↓
 ShipTask: routing + business delivery policy + memory contract
    ├── project memory: selectors + project-specific profile
-   └── Task Manager adapter: connector mechanics + live task state
+   ├── Task Manager adapter: connector mechanics + live task state
+   └── Strategic Explainer: fresh user-language adaptation, no decisions
 ```
 
 - Task Manager skill владеет техническим adapter contract: connection,
@@ -51,6 +52,11 @@ ShipTask: routing + business delivery policy + memory contract
   [project-memory reference](../../ship-tasks/references/project-memory.md).
 - Task Manager остаётся единственным authority для текущих Task detail, status,
   `version`, relations, comments и access. Memory никогда их не заменяет.
+- Strategic Explainer получает только ограниченный `Technical Brief` и
+  возвращает `User Brief` по
+  [собственной specification](strategic-explainer.md). Он не владеет evidence,
+  scope, lifecycle, status, recovery или authority и не подменяет решения
+  ShipTask.
 
 ### 1.2 Invocation gate и классификация execution mode
 
@@ -886,6 +892,25 @@ Blocker считается существующим до фактическог�
 только необходимые evidence, ограничения и следующий шаг. Форму адаптировать к
 результату; не выгружать process diary, raw logs/tool calls или исчерпывающий
 inventory. Task comments не заменяют общий interaction report.
+
+Перед user-facing handoff с material partial/blocked outcome, запросом user
+action/authority или сложным technical terminal result ShipTask создаёт
+ограниченный `Technical Brief` и запускает новый субагент без истории текущего
+разговора. Субагент применяет `$strategic-explainer` и возвращает `User Brief`.
+ShipTask использует brief для адаптации сообщения, но выбирает status,
+recovery, action и Goal transition только по исходному evidence и authority.
+
+Нельзя передавать Explainer raw process diary или просить его решить, является
+ли состояние blocker. Brief обязан отдельно назвать confirmed outcome,
+непроверенный сценарий, user impact, current capability/attempts и только
+подтверждённый candidate user dependency. Если recovery изменил состояние,
+старый brief недействителен. Для простого success без technical burden новый
+субагент не требуется.
+
+Если отдельный субагент или `$strategic-explainer` недоступен, ShipTask применяет
+тот же User Brief contract самостоятельно. Потеря communication helper не
+изменяет Task/Goal outcome, не создаёт terminal blocker и не разрешает выдать
+reason code либо внутренний термин без объяснения.
 
 ## 10. Defects и recovery
 

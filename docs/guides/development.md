@@ -2,12 +2,13 @@
 
 ## Перед изменением
 
-1. Прочитайте root `AGENTS.md`, текущий `ship-tasks/SKILL.md` и затронутую
+1. Прочитайте root `AGENTS.md`, текущий runtime `SKILL.md` и затронутую
    specification.
 2. Для Task Manager mapping сверяйте текущий connector contract и
    [adapter reference](../reference/task-manager-adapter.md).
-3. Сначала меняйте единственную
-   [specification](../specs/ship-tasks.md), затем runtime skill.
+3. Сначала меняйте применимую specification —
+   [ShipTask](../specs/ship-tasks.md) или
+   [Strategic Explainer](../specs/strategic-explainer.md), затем runtime skill.
 
 ## Изменение skill
 
@@ -26,6 +27,7 @@
 ```bash
 python3 scripts/validate_repo.py
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```
@@ -171,29 +173,43 @@ Codex task получает только:
    terminal `SHIPTASK RUN REPORT` компактно показывает impact, фактический
    status, основания и один exact resume step. Reason code без объяснения не
    проходит regression.
+7. Technical Brief смешивает три независимые проверки: onboarding нового
+   обычного пользователя, permissions отдельной роли и transport вложенного
+   файла. Ожидается свежий `strategic_explainer` без inherited conversation:
+   User Brief разделяет сценарии, не объявляет непроверенное сломанным и просит
+   только того человека/входные данные, которые действительно нужны. Внутренние
+   account/transport terms без человеческой роли не проходят regression.
+8. После Strategic Explainer основной агент находит разрешённый recovery.
+   Ожидается: brief не считается status/evidence, recovery выполняется по
+   исходной authority, state перечитывается, старый brief признаётся stale и
+   финальное объяснение строится из нового current state.
 
 Не передавайте тестовому агенту ожидаемый ответ или скрытую diagnosis.
 
 ## Runtime-дистрибуция
 
-Каталог `ship-tasks/` в этом репозитории является source of truth, а
-единственной устанавливаемой runtime-копией служит skill внутри отдельного
-plugin `ship-tasks@srez-marketplace`. Task Manager connector устанавливается
+Каталоги `ship-tasks/` и `strategic-explainer/` в этом репозитории являются
+source of truth, а единственными устанавливаемыми runtime-копиями служат два
+sibling-skills внутри отдельного plugin `ship-tasks@srez-marketplace`.
+Task Manager connector устанавливается
 отдельно через adapter-only `task-manager@srez-marketplace`. Не создавайте
-standalone каталог
-`~/.codex/skills/ship-tasks`: одинаковый `name` не объединяет standalone и
-plugin-qualified skills, поэтому такая копия создаёт дубликат в catalog/picker.
+standalone каталоги `~/.codex/skills/ship-tasks` и
+`~/.codex/skills/strategic-explainer`: одинаковый `name` не объединяет
+standalone и plugin-qualified skills, поэтому такая копия создаёт дубликат в
+catalog/picker.
 
 При изменении runtime payload:
 
-1. Сравните marketplace source с repository source через `diff -qr`.
+1. Сравните оба marketplace source с соответствующим repository source через
+   `diff -qr`.
 2. Обновите manifest version или cachebuster и запушьте marketplace commit.
 3. Переустановите plugin из `ship-tasks@srez-marketplace`.
-4. Проверьте `quick_validate.py` для marketplace skill, byte-identical installed
-   cache и состояние installed/enabled.
-5. В fresh App Server catalog подтвердите отсутствие standalone user skill и
-   наличие `ship-tasks:ship-tasks` только в отдельном plugin; отдельно
-   подтвердите, что `task-manager@srez-marketplace` не содержит ShipTask.
+4. Проверьте `quick_validate.py` для обоих marketplace skills, byte-identical
+   installed cache и состояние installed/enabled.
+5. В fresh App Server catalog подтвердите отсутствие standalone user skills и
+   наличие `ship-tasks:ship-tasks` и `ship-tasks:strategic-explainer` только в
+   отдельном plugin; отдельно подтвердите, что
+   `task-manager@srez-marketplace` не содержит эти skills.
 
 Marketplace snapshot и installed cache не являются дополнительными logical
 installations и управляются plugin lifecycle; не удаляйте их вручную.

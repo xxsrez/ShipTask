@@ -22,6 +22,12 @@ description никогда не используется как fallback.
 обещанный и фактический результат, самостоятельно устраняет доступные in-scope
 проблемы и только затем выдаёт глубокий компактный отчёт понятным человеку
 языком.
+Для material partial/blocked handoff, подтверждённого запроса user
+action/authority и сложного technical terminal result ShipTask запускает свежий
+субагент с общим `$strategic-explainer`. Он превращает ограниченный Technical
+Brief в понятный User Brief, но не принимает lifecycle/authority decisions и не
+выполняет mutations. Тот же generic skill можно использовать отдельно от
+ShipTask.
 Старые memory, rollout или report записи о ручной приёмке не меняют этот
 contract: пользователь подключается только через reopen либо новую Task.
 Task-local вопросы откладывают только конкретную Task, не прерывая остальные;
@@ -33,9 +39,11 @@ non-production releases выполняются автоматически, а pr
 ## Структура
 
 - [`ship-tasks/SKILL.md`](ship-tasks/SKILL.md) — исполнимый skill.
+- [`strategic-explainer/SKILL.md`](strategic-explainer/SKILL.md) — общий
+  outcome-first communication skill для свежего субагента или прямого вызова.
 - [`ship-tasks/references/project-memory.md`](ship-tasks/references/project-memory.md)
   — runtime contract project scope/profile memory.
-- [Документация](docs/README.md) — единственная specification, Task Manager
+- [Документация](docs/README.md) — канонические specifications, Task Manager
   adapter reference, architecture decisions и engineering reports.
 - [`scripts/validate_repo.py`](scripts/validate_repo.py) — переносимая
   проверка структуры и project-specific residue.
@@ -45,15 +53,16 @@ non-production releases выполняются автоматически, а pr
 ```bash
 python3 scripts/validate_repo.py
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```
 
-Единственная runtime-дистрибуция ShipTask — отдельный plugin
+Единственная runtime-дистрибуция обоих sibling-skills — отдельный plugin
 `ship-tasks@srez-marketplace`. Task Manager connector устанавливается отдельно
 как adapter-only `task-manager@srez-marketplace`; ShipTask в его package не
-входит. Standalone каталог
-`~/.codex/skills/ship-tasks` не устанавливается: он создаёт второй logical
-skill рядом с plugin-qualified `ship-tasks:ship-tasks`. Repository source
-публикуется через отдельный marketplace package и сверяется с installed plugin
-cache.
+входит. Standalone каталоги `~/.codex/skills/ship-tasks` и
+`~/.codex/skills/strategic-explainer` не устанавливаются: они создают вторые
+logical skills рядом с plugin-qualified `ship-tasks:ship-tasks` и
+`ship-tasks:strategic-explainer`. Repository sources публикуются через один
+marketplace package и сверяются с installed plugin cache.
