@@ -69,9 +69,10 @@ Strategic Explainer = fresh user-language adaptation, no decisions
   глубоким компактным `SHIPTASK RUN REPORT`, который Task comments не заменяют.
 - Material partial/blocked handoff, запрос user action/authority и сложный
   technical terminal result проходят через свежий субагент с общим
-  `$strategic-explainer`: он превращает ограниченный Technical Brief в свободное
-  стратегическое объяснение, а родитель пишет итоговый user-facing текст своими
-  словами; Explainer не выбирает status, recovery или следующий action.
+  `$ship-tasks:strategic-explainer`: он превращает ограниченный Technical Brief
+  в свободное стратегическое объяснение, а родитель пишет итоговый user-facing
+  текст своими словами; Explainer не выбирает status, recovery или следующий
+  action.
 - Пока существует runnable work, skill не прерывает run task-local вопросами:
   безопасный default выбирается автоматически, сложная Task попадает в decision
   queue, а остальные продолжаются. Каждый defer обязательно получает

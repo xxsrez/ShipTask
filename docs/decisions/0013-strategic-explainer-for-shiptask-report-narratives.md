@@ -32,8 +32,8 @@ comment или chat handoff, состоящим из reason code, техниче
   lifecycle state, blocker, recovery, authority или terminal transition.
 - Для каждого comment формируется task-scoped `Technical Brief` с target
   surface `TASK_COMMENT`. Свежий built-in `default` субагент применяет
-  `$strategic-explainer` и возвращает свободное стратегическое объяснение без
-  tool calls. Это не structured result и не готовый comment body.
+  `$ship-tasks:strategic-explainer` и возвращает свободное стратегическое
+  объяснение без tool calls. Это не structured result и не готовый comment body.
 - «Свежий» subagent означает built-in `default` с точным
   `fork_turns="none"`. `fork_turns="all"`, положительное число fork turns и
   старый Explainer thread запрещены.

@@ -292,7 +292,6 @@ def validate_strategic_explainer(errors: list[str]) -> None:
         )
 
     for fragment in (
-        "$strategic-explainer",
         "Technical Brief",
         "свободное стратегическое объяснение",
         "structured result",
@@ -341,7 +340,7 @@ def validate_strategic_explainer(errors: list[str]) -> None:
     for fragment in (
         'display_name: "Strategic Explainer"',
         'short_description: "Объяснить технический результат простым языком"',
-        "$strategic-explainer",
+        "Strategic Explainer",
         "allow_implicit_invocation: true",
     ):
         if fragment not in metadata:
@@ -432,7 +431,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Не начинать новую Task, если занятые lanes",
         "run-report reference",
         "Strategic Explainer handoff",
-        "$strategic-explainer",
+        "$ship-tasks:strategic-explainer",
         "ограниченный `Technical Brief`",
         "Каждый новый `COMPLETED`, `REWORK REQUIRED`, `BLOCKED` или `CANCELED` comment",
         "Перед comment-level Technical Brief выполнить task-level finalization",
@@ -614,7 +613,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "built-in `default` agent",
         "fork_turns=\"none\"",
         "fork_turns=\"all\"",
-        "$strategic-explainer",
+        "$ship-tasks:strategic-explainer",
         "не вызывать tools",
         "reverse coverage",
         "внутренней orchestration",
@@ -883,6 +882,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Strategic Explainer как переносимая роль свежего субагента",
         "распространяет skills",
         "общий sibling-skill `$strategic-explainer`",
+        "$ship-tasks:strategic-explainer",
         "Не включать в его runtime contract ShipTask, Task Manager",
         "built-in типа `default` без унаследованной истории",
         "зарегистрированный native custom agent",
@@ -906,6 +906,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "До invocation ShipTask самостоятельно выполняет task-level finalization",
         "Простота success не отменяет это требование",
         "Authoritative envelope",
+        "$ship-tasks:strategic-explainer",
         'fork_turns="none"',
         "CONTEXT_INTEGRITY_ERROR",
         "один раз повторяет fresh invocation",

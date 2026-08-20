@@ -923,8 +923,8 @@ inventory. Task comments не заменяют общий interaction report.
 и запускает новый built-in `default` subagent с точным `fork_turns="none"`.
 Положительное число fork turns, `fork_turns="all"` и продолжение старого
 Explainer thread запрещены. Initial task содержит только инструкцию применить
-`$strategic-explainer` и самодостаточный handoff; full conversation, tool
-transcript и process diary не передаются.
+`$ship-tasks:strategic-explainer` и самодостаточный handoff; full conversation,
+tool transcript и process diary не передаются.
 
 Strategic Explainer сам проверяет context integrity до анализа. Если он вернул
 `CONTEXT_INTEGRITY_ERROR`, ShipTask не использует этот ответ как объяснение, не
@@ -934,13 +934,14 @@ Strategic Explainer сам проверяет context integrity до анали�
 report workflow до любых Task Manager mutations и сообщается как внутренняя
 ошибка orchestration, а не blocker доставляемой Task.
 
-При корректном вызове субагент применяет `$strategic-explainer` и возвращает
-свободное стратегическое объяснение. Для user-facing terminal run report
-ShipTask может переиспользовать его только при идентичном single-Task scope и
-неизменившемся material meaning. Planned comment/read-back и terminal status
-reconciliation не делают объяснение stale, если совпали с переданным next-state
-contract и не обнаружили drift. Для aggregate batch, нескольких blockers или
-другого audience создаётся новый scope-level handoff.
+При корректном вызове субагент применяет
+`$ship-tasks:strategic-explainer` и возвращает свободное стратегическое
+объяснение. Для user-facing terminal run report ShipTask может переиспользовать
+его только при идентичном single-Task scope и неизменившемся material meaning.
+Planned comment/read-back и terminal status reconciliation не делают объяснение
+stale, если совпали с переданным next-state contract и не обнаружили drift. Для
+aggregate batch, нескольких blockers или другого audience создаётся новый
+scope-level handoff.
 
 ShipTask читает объяснение и пишет пользовательский текст своими словами, но
 выбирает status, recovery, action, report identity и Goal transition только по
@@ -958,10 +959,10 @@ task-level explanation до write. До blocking user handoff и допусти�
 адаптацию Task comment; compatible single-Task explanation можно переиспользовать
 для финального chat report без второго model run.
 
-Если отдельный субагент или `$strategic-explainer` недоступен, ShipTask применяет
-тот же смысловой contract самостоятельно. Потеря communication helper не
-изменяет Task/Goal outcome, не создаёт terminal blocker и не разрешает выдать
-reason code либо внутренний термин без объяснения.
+Если отдельный субагент или `$ship-tasks:strategic-explainer` недоступен,
+ShipTask применяет тот же смысловой contract самостоятельно. Потеря
+communication helper не изменяет Task/Goal outcome, не создаёт terminal blocker
+и не разрешает выдать reason code либо внутренний термин без объяснения.
 
 ## 10. Defects и recovery
 

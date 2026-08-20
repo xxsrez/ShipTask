@@ -52,8 +52,8 @@ Explainer является manager-style specialist, а не handoff owner: ос
   правила. ShipTask является первым consumer, но не владельцем роли.
 - При интеграции из ShipTask запускать новый read-only-by-contract субагент
   built-in типа `default` без унаследованной истории разговора и явно просить
-  его применить `$strategic-explainer` к одному самодостаточному
-  `Technical Brief`.
+  его применить установленный catalog skill
+  `$ship-tasks:strategic-explainer` к одному самодостаточному `Technical Brief`.
 - В Codex запускать такого субагента с `fork_turns="none"`. Перед анализом он
   проверяет, что видит только system/developer instructions, runtime skill и
   один текущий handoff. Более ранние user/assistant turns или tool transcript
