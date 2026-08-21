@@ -6,6 +6,8 @@ invocation и технически центрированный brief замен
 discovery из [ADR-0014](0014-problem-first-bounded-strategic-discovery.md). Меняет
 invocation policy для ShipTask. Lifecycle, comment capability и terminal-effect
 правила из [ADR-0006](0006-delivery-comment-as-terminal-effect.md) не меняются.
+Fail-closed status-write часть для proven rework уточнена
+[ADR-0015](0015-single-pass-review-disposition.md).
 
 ## Контекст
 
@@ -29,7 +31,7 @@ comment или chat handoff, состоящим из reason code, техниче
 - До invocation ShipTask самостоятельно выполняет task-level finalization и
   фиксирует authoritative facts: перечитанные Task/result/effects, выбранный
   report state, verified и unverified scenarios, impact, evidence/confidence,
-  ограничения и уже разрешённый next action. Safe self-recovery выполняется до
+  ограничения и уже разрешённый next action. Safe bounded repair выполняется до
   brief; material state change перезапускает finalization. Explainer не выбирает
   lifecycle state, blocker, recovery, authority или terminal transition.
 - Для каждого comment формируется task-scoped `Technical Brief` с target
@@ -42,10 +44,10 @@ comment или chat handoff, состоящим из reason code, техниче
 - Сам Explainer до анализа проверяет context integrity. Более ранние
   user/assistant turns или tool transcript приводят только к
   `CONTEXT_INTEGRITY_ERROR` с инструкцией корректного запуска. ShipTask
-  исправляет orchestration и один раз повторяет fresh invocation; до успешного
-  результата не выполняет comment/status/Goal writes. Повторный отказ
-  останавливает report workflow как внутреннюю orchestration failure, а не как
-  blocker доставляемой Task.
+  исправляет orchestration и один раз повторяет fresh invocation. Повторный отказ
+  использует локальную `degraded-adaptation`: communication helper не блокирует
+  truthful rework status, но `COMPLETED` comment остаётся обязательным перед
+  `Done`.
 - ShipTask читает стратегическое объяснение и самостоятельно пишет final
   comment своими словами. Он сохраняет outcome, user impact, причинную границу,
   confidence и next state, но может сокращать и перестраивать изложение под
@@ -60,8 +62,7 @@ comment или chat handoff, состоящим из reason code, техниче
   публикуется.
 - `BLOCKED` имеет двойной communication barrier:
   1. task-level explanation существует до публикации `BLOCKED` comment;
-  2. scope-level explanation существует до user-facing blocking handoff и до
-     допустимого `update_goal(status="blocked")`.
+  2. scope-level explanation существует до user-facing blocking handoff.
 - Одно стратегическое объяснение можно переиспользовать между Task comment и chat report
   только когда audience, scope, facts, state, user dependency и next action
   совпадают по смыслу. Planned comment write/read-back и terminal status

@@ -52,7 +52,7 @@ automatic acceptance недостаточно: нужен явный retirement 
   evidence. Оно не создаёт current authority, blocker или decision queue.
 - При resume старого Goal, заблокированного только ручной приёмкой, отбросить
   retired blocker, повторно проверить exact evidence и автоматически завершить
-  passing Tasks. Не повторять blocker threshold для этой причины.
+  passing Tasks. Не повторять тот же acceptance scenario для этой причины.
 
 ## Последствия
 

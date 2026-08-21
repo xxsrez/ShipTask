@@ -3,7 +3,8 @@
 Статус: accepted, 2026-08-16. Human-acceptance часть заменена
 [ADR-0005](0005-automatic-terminal-acceptance.md). Blocker analysis и terminal
 interaction report уточнены
-[ADR-0010](0010-blocker-analysis-and-human-run-report.md).
+[ADR-0010](0010-blocker-analysis-and-human-run-report.md), а task-local Goal
+behavior — [ADR-0015](0015-single-pass-review-disposition.md).
 
 ## Контекст
 
@@ -30,10 +31,10 @@ production release. Terminal acceptance теперь определяется AD
   независимые Tasks. Не создавать отдельную Task и не закрывать исходную.
 - Обязательно публиковать в deferred Task `BLOCKED` report: причина, last safe
   checkpoint, уже выполненное, рекомендуемый default, точное решение/authority
-  и resume step. Если comment write/read недоступен, включать его доставку в
-  blocker без fallback в `description` и сохранять те же данные в consolidated
+  и resume step. Если comment write/read недоступен, оставлять communication
+  remainder без fallback в `description` и сохранять те же данные в consolidated
   decision queue.
-- Перед blocking input или Goal `blocked` выполнить причинный анализ по
+- Перед blocking input выполнить причинный анализ по
   ADR-0010. Если доступное безопасное действие устраняет причину, выполнить его
   и продолжить вместо блокировки. Каждый terminal exit заканчивается
   человекочитаемым `SHIPTASK RUN REPORT`.
@@ -55,8 +56,8 @@ production release. Terminal acceptance теперь определяется AD
   integration/shared state или authority, который делает небезопасной любую
   оставшуюся мутацию.
 - Сохранять Goal активным, пока deferred Tasks входят в рабочие критерии.
-  Отсутствие runnable Tasks не означает completion; Goal `blocked` подчиняется
-  отдельному строгому tool threshold.
+  Отсутствие runnable Tasks не означает completion. Task-local blocker не
+  переводит Goal в `blocked` и не требует одинаковых повторных turns.
 - Считать invocation `$ship-tasks` standing authority для обычного in-scope
   non-production release workflow: build/package, deploy/redeploy, required
   non-production migration, smoke, bounded diagnosis и repair/rollback. Не
@@ -91,8 +92,8 @@ production release. Terminal acceptance теперь определяется AD
 
 Ограничения:
 
-- stale connector без comments оставляет affected Task deferred и требует
-  refresh/reconnect; interaction output сохраняет handoff до resume;
+- stale connector без comments оставляет communication remainder и требует
+  refresh/reconnect; truthful Task status и interaction handoff сохраняются;
 - Task Manager status catalog пока не имеет обязательного portable `Blocked`
   status, поэтому defer не маскируется ложным terminal/status transition;
 - automatic terminal acceptance регулируется ADR-0005 и не расширяет

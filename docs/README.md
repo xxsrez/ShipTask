@@ -62,6 +62,9 @@
   — caller обязан передать решаемую проблему, а свежий Explainer сам находит
   релевантный Epic/design/vision через bounded read-only tooling и возвращает
   проверяемый source basis.
+- [0015: Однократная классификация приёмки](decisions/0015-single-pass-review-disposition.md)
+  — разводит противоречивую Task, доказанный defect, доказанный success и реальную
+  невозможность проверки; запрещает одинаковые повторы ради Goal status.
 
 ## Reference
 
@@ -71,6 +74,9 @@
 - [Strategic Explainer evaluation](reference/strategic-explainer-evaluation.md)
   — critical fidelity/authority gates, lossless-by-relevance audit, scoring
   rubric и обязательные regression cases.
+- [Проверка классификации `In Review`](reference/shiptask-review-disposition-evaluation.md)
+  — decision-level cases для task-contract conflict, proven failure,
+  verification blocker, comment gap и Goal behavior.
 - [Project memory contract](../ship-tasks/references/project-memory.md) —
   runtime-схема current scope и project profile, precedence, bootstrap,
   freshness, alarms и cross-surface ограничения.

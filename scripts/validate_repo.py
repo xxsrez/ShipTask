@@ -28,6 +28,9 @@ STRATEGIC_SPEC_FILE = ROOT / "docs" / "specs" / "strategic-explainer.md"
 STRATEGIC_EVALUATION_FILE = (
     ROOT / "docs" / "reference" / "strategic-explainer-evaluation.md"
 )
+REVIEW_DISPOSITION_EVALUATION_FILE = (
+    ROOT / "docs" / "reference" / "shiptask-review-disposition-evaluation.md"
+)
 STRATEGIC_RESEARCH_FILE = (
     ROOT / "docs" / "reports" / "2026-08-20-strategic-explainer-research.md"
 )
@@ -78,6 +81,12 @@ STRATEGIC_DISCOVERY_DECISION_FILE = (
     / "decisions"
     / "0014-problem-first-bounded-strategic-discovery.md"
 )
+REVIEW_DISPOSITION_DECISION_FILE = (
+    ROOT
+    / "docs"
+    / "decisions"
+    / "0015-single-pass-review-disposition.md"
+)
 
 REQUIRED_FILES = (
     ROOT / "README.md",
@@ -98,6 +107,7 @@ REQUIRED_FILES = (
     SPEC_FILE,
     STRATEGIC_SPEC_FILE,
     STRATEGIC_EVALUATION_FILE,
+    REVIEW_DISPOSITION_EVALUATION_FILE,
     STRATEGIC_RESEARCH_FILE,
     ADAPTER_FILE,
     DECISION_FILE,
@@ -113,6 +123,7 @@ REQUIRED_FILES = (
     STRATEGIC_EXPLAINER_DECISION_FILE,
     STRATEGIC_REPORTS_DECISION_FILE,
     STRATEGIC_DISCOVERY_DECISION_FILE,
+    REVIEW_DISPOSITION_DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
@@ -179,6 +190,65 @@ TRIGGER_MATRIX = (
         "Просто добавь это в backlog",
         "нет",
         "backlog capture, без delivery flow",
+    ),
+)
+
+REVIEW_DISPOSITION_CASES = (
+    (
+        "Current acceptance противоречит самому себе",
+        "`task-contract-conflict`",
+        "`In Review`",
+        "`BLOCKED` с точным conflict и decision",
+        "запрещён",
+    ),
+    (
+        "Exact candidate воспроизводимо нарушает критерий",
+        "`verified-failure`",
+        "`In Progress`",
+        "`REWORK REQUIRED`",
+        "не нужен; начать rework",
+    ),
+    (
+        "Test harness сломан",
+        "`verification-blocked`",
+        "`In Review`",
+        "`BLOCKED` и 2–4 способа проверки",
+        "запрещён без repair/change",
+    ),
+    (
+        "Batch gate упал, виновная Task не установлена",
+        "`verification-blocked` для неразличимых members",
+        "`In Review`",
+        "`BLOCKED` и diagnostic options",
+        "запрещён без нового separating evidence",
+    ),
+    (
+        "Полный evidence доказывает критерии",
+        "`verified-success`",
+        "`Done` после comment",
+        "`COMPLETED`",
+        "не нужен",
+    ),
+    (
+        "Comment channel отсутствует при proven failure",
+        "`verified-failure`",
+        "`In Progress`",
+        "communication remainder в run report",
+        "приёмку не повторять",
+    ),
+    (
+        "Comment channel отсутствует при success",
+        "`verified-success`, terminal effect incomplete",
+        "`In Review`",
+        "pending `COMPLETED`",
+        "приёмку не повторять",
+    ),
+    (
+        "Все remaining Tasks verification-blocked",
+        "task-local blockers",
+        "без изменений",
+        "один consolidated handoff",
+        "Goal остаётся active, искусственные turns запрещены",
     ),
 )
 
@@ -328,6 +398,8 @@ def validate_strategic_explainer(errors: list[str]) -> None:
         "Не объединять независимые сценарии",
         "VERIFIED",
         "NOT_APPLICABLE",
+        "Decision support request",
+        "2–4 реально",
         "need-to-know filter",
         "Forward trace",
         "Reverse coverage",
@@ -401,6 +473,92 @@ def validate_trigger_matrix(errors: list[str]) -> None:
             fail(errors, f"runtime gate is missing regression example {prompt!r}")
 
 
+def validate_review_disposition_contract(errors: list[str]) -> None:
+    evaluation_text = REVIEW_DISPOSITION_EVALUATION_FILE.read_text(encoding="utf-8")
+    rows = [line for line in evaluation_text.splitlines() if line.startswith("| ")]
+
+    for case, classification, status, report, retry in REVIEW_DISPOSITION_CASES:
+        matching = [line for line in rows if line.startswith(f"| {case} |")]
+        if len(matching) != 1:
+            fail(errors, f"review disposition matrix needs one row for {case!r}")
+            continue
+        row = matching[0]
+        for expected in (classification, status, report, retry):
+            if expected not in row:
+                fail(
+                    errors,
+                    f"review disposition case {case!r} is missing {expected!r}",
+                )
+
+    for path, fragments in (
+        (
+            SPEC_FILE,
+            (
+                "Однократная классификация `In Review`",
+                "`task-contract-conflict`",
+                "`verified-success`",
+                "`verified-failure`",
+                "`verification-blocked`",
+                "Ошибка test harness",
+                "2–4 реалистичных способа провести приёмку",
+                "создавать дополнительные ходы",
+            ),
+        ),
+        (
+            SKILL_FILE,
+            (
+                "Разобрать `In Review` за один проход",
+                "`task-contract-conflict`",
+                "`verified-success`",
+                "`verified-failure`",
+                "`verification-blocked`",
+                "Недоступный comment channel",
+                "2–4 способа провести приёмку",
+                "не добиваться Goal `blocked` искусственными повторами",
+            ),
+        ),
+        (
+            REVIEW_DISPOSITION_DECISION_FILE,
+            (
+                "Однократная классификация приёмки",
+                "Статус: accepted, 2026-08-21",
+                "строгого Goal blocker threshold",
+                "`In Review → In Progress`",
+                "communication remainder",
+                "2–4",
+                "искусственными повторами",
+            ),
+        ),
+    ):
+        text = path.read_text(encoding="utf-8")
+        for fragment in fragments:
+            if fragment not in text:
+                fail(
+                    errors,
+                    f"{path.relative_to(ROOT)} is missing review disposition contract {fragment!r}",
+                )
+
+    for path in (
+        SKILL_FILE,
+        SPEC_FILE,
+        REPORT_REFERENCE,
+        RUN_REPORT_REFERENCE,
+        AUTONOMY_REFERENCE,
+    ):
+        text = path.read_text(encoding="utf-8")
+        for forbidden in (
+            "строгого tool threshold",
+            "строгого model-tool threshold",
+            "blocker occurrence",
+            "self-recovery",
+        ):
+            if forbidden in text:
+                fail(
+                    errors,
+                    f"{path.relative_to(ROOT)} retains repeat-driven blocker rule {forbidden!r}",
+                )
+
+
 def validate_workflow_contract(errors: list[str]) -> None:
     agents_text = AGENTS_FILE.read_text(encoding="utf-8")
     for fragment in (
@@ -451,7 +609,9 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Task Manager adapter",
         "Создать Goal только для batch",
         "В `single`, `memory-maintenance` и `non-delivery` не вызывать Goal tools",
-        "Любая `In Review` Task означает `completion-remains`",
+        "Любая `In Review` Task означает незавершённую классификацию результата",
+        "Разобрать `In Review` за один проход",
+        "`verification-blocked`",
         "per-Task targeted gate",
         "review-batch gate",
         "status-reconciliation",
@@ -529,6 +689,10 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Обязательный Goal только для batch",
         "`single`, `memory-maintenance` и `non-delivery` не вызывают",
         "### 5.3 Terminal invariant и automatic acceptance",
+        "#### 5.3.1 Однократная классификация `In Review`",
+        "`task-contract-conflict`",
+        "`verified-failure`",
+        "`verification-blocked`",
         "### 6.1 Двухуровневая verification",
         "`active_write_target` и `batch_target` — разные величины",
         "status-reconciliation barrier",
@@ -604,7 +768,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Report key: shiptask/",
         "`not-available`",
         "`write-outcome-unknown`",
-        "блокирует `Done` affected",
+        "блокирует `Done`",
         "COMPLETED",
         "Не публиковать `ACCEPTANCE READY`",
         "REWORK REQUIRED",
@@ -622,6 +786,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "один раз повторить fresh spawn",
         "самостоятельно написать final comment своими словами",
         "Не копировать Explainer output механически",
+        "2–4 способа получить недостающее",
+        "truthful `In Review → In Progress`",
     ):
         if fragment not in report_text:
             fail(errors, f"delivery-report reference is missing {fragment!r}")
@@ -631,19 +797,20 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Осмысленная финализация и ShipTask run report",
         "Не выбирать terminal outcome по последнему tool result",
         "Blocker — фактическое условие",
-        "meaningful progress был возможен",
+        "Task `BLOCKED`, run `PARTIAL`/`BLOCKED` и Goal status",
+        "Не повторять тот же",
         "Глубокий компактный отчёт",
         "SHIPTASK RUN REPORT",
         "Итог и статус",
         "Почему так",
         "Подтверждение",
         "Осталось / следующий шаг",
-        "После status write финальный ответ должен отражать фактический Goal status",
+        "Финальный ответ должен отражать фактический Goal status",
         "Каждый новый Task report comment проходит отдельный task-scoped",
         "включая простой",
         "aggregate batch",
         "comment/read-back и terminal status reconciliation",
-        "до `update_goal(status=\"blocked\")` scope-level plain-language explanation",
+        "до blocking handoff scope-level plain-language explanation",
         "summary не являются допустимым fallback",
         'fork_turns="none"',
         "пишет окончательный report своими",
@@ -664,6 +831,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Candidate user dependency",
         "Reader purpose",
         "Next-state contract",
+        "Decision support request",
         "Target surface: TASK_COMMENT | RUN_REPORT",
         "Authoritative report state",
         "VERIFIED | FAILED | UNVERIFIED | NOT_APPLICABLE",
@@ -692,6 +860,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Нельзя копировать ответ",
         "не создаёт facts, authority, lifecycle",
         "degraded-adaptation",
+        "2–4 реалистичных способа получить недостающее доказательство",
     ):
         if fragment not in handoff_text:
             fail(errors, f"Strategic Explainer handoff is missing {fragment!r}")
@@ -724,6 +893,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Reader purpose",
         "Next-state contract",
         "VERIFIED | FAILED | UNVERIFIED | NOT_APPLICABLE",
+        "Decision support request",
         "load-bearing",
         "need-to-know filter",
         "forward trace",
@@ -734,6 +904,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Не добавлять декоративные картинки",
         "не как copy-ready payload",
         "raw evidence dump",
+        "2–4 реально различающихся варианта",
     ):
         if fragment not in strategic_spec_text:
             fail(errors, f"Strategic Explainer specification is missing {fragment!r}")
@@ -763,6 +934,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Честная граница знания",
         "Независимые сценарии остаются независимыми",
         "Конкретная зависимость от пользователя",
+        "Несколько вариантов без скрытого решения",
         "Lossless by relevance",
         "Внутренний механизм невидим читателю",
         "Никакой скрытой управляющей роли",
@@ -806,6 +978,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Загрязнённый inherited context",
         "Caller synthesis после большого evidence",
         "Read-only boundary",
+        "Несколько способов провести проверку",
         "User testing остаётся более сильной проверкой",
     ):
         if fragment not in strategic_evaluation_text:
@@ -846,11 +1019,11 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Production release требует explicit user approval",
         "production-approval-required",
         "Deferred-only handoff",
-        "Finalization analysis and self-recovery",
+        "Finalization analysis and bounded repair",
         "Terminal run report",
         "SHIPTASK RUN REPORT",
         "Blocker остаётся blocker до устранения",
-        "meaningful progress ещё возможен",
+        "Не повторять acceptance, poll или дополнительный Goal",
     ):
         if fragment not in autonomy_text:
             fail(errors, f"autonomy reference is missing {fragment!r}")
@@ -1274,6 +1447,7 @@ def main() -> int:
         validate_skill(errors)
         validate_strategic_explainer(errors)
         validate_trigger_matrix(errors)
+        validate_review_disposition_contract(errors)
         validate_workflow_contract(errors)
         validate_single_task_manager_contract(errors)
         validate_links(errors)
