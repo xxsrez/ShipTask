@@ -2,6 +2,11 @@
 
 Статус: completed research, 2026-08-20.
 
+Update 2026-08-21: [ADR-0014](../decisions/0014-problem-first-bounded-strategic-discovery.md)
+заменил принятое ниже ограничение «не собирать дополнительный context» на
+обязательный problem gate и bounded read-only strategic discovery. Исходный
+вывод сохранён как историческое design evidence.
+
 Update 2026-08-20: [ADR-0013](../decisions/0013-strategic-explainer-for-shiptask-report-narratives.md)
 сознательно предпочёл единый quality bar экономии model run и сделал
 Explainer обязательным для каждого нового ShipTask Task report comment,

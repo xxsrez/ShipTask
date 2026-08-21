@@ -22,12 +22,12 @@ description никогда не используется как fallback.
 обещанный и фактический результат, самостоятельно устраняет доступные in-scope
 проблемы и только затем выдаёт глубокий компактный отчёт понятным человеку
 языком.
-Для material partial/blocked handoff, подтверждённого запроса user
-action/authority и сложного technical terminal result ShipTask запускает свежий
-субагент с общим `$strategic-explainer`. Он превращает ограниченный Technical
-Brief в понятный User Brief, но не принимает lifecycle/authority decisions и не
-выполняет mutations. Тот же generic skill можно использовать отдельно от
-ShipTask.
+Для каждого Task report и material terminal handoff ShipTask запускает свежий
+субагент с общим `$strategic-explainer`. Caller передаёт обязательный `Problem to
+solve` и current-state facts, а Explainer сам находит bounded strategic context
+через read-only tools и объясняет смысл результата. Он не принимает
+lifecycle/authority decisions и не выполняет mutations. Тот же generic skill
+можно использовать отдельно от ShipTask.
 Старые memory, rollout или report записи о ручной приёмке не меняют этот
 contract: пользователь подключается только через reopen либо новую Task.
 Task-local вопросы откладывают только конкретную Task, не прерывая остальные;
@@ -40,7 +40,8 @@ non-production releases выполняются автоматически, а pr
 
 - [`ship-tasks/SKILL.md`](ship-tasks/SKILL.md) — исполнимый skill.
 - [`strategic-explainer/SKILL.md`](strategic-explainer/SKILL.md) — общий
-  outcome-first communication skill для свежего субагента или прямого вызова.
+  problem-first strategic discovery и communication skill для свежего
+  субагента или прямого вызова.
 - [`ship-tasks/references/project-memory.md`](ship-tasks/references/project-memory.md)
   — runtime contract project scope/profile memory.
 - [Документация](docs/README.md) — канонические specifications, Task Manager

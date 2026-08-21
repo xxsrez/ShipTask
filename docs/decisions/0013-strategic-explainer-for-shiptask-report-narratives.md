@@ -1,7 +1,9 @@
 # 0013. Strategic Explainer для всех ShipTask report narratives
 
 Статус: accepted, 2026-08-20. Расширяет
-[ADR-0012](0012-strategic-explainer-as-portable-subagent-role.md) и меняет
+[ADR-0012](0012-strategic-explainer-as-portable-subagent-role.md). No-tools
+invocation и технически центрированный brief заменены problem-first bounded
+discovery из [ADR-0014](0014-problem-first-bounded-strategic-discovery.md). Меняет
 invocation policy для ShipTask. Lifecycle, comment capability и terminal-effect
 правила из [ADR-0006](0006-delivery-comment-as-terminal-effect.md) не меняются.
 

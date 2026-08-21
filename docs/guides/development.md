@@ -178,7 +178,7 @@ Codex task получает только:
    terminal `SHIPTASK RUN REPORT` компактно показывает impact, фактический
    status, основания и один exact resume step. Reason code без объяснения не
    проходит regression.
-7. Technical Brief смешивает три независимые проверки: onboarding нового
+7. Current-State Brief смешивает три независимые проверки: onboarding нового
    обычного пользователя, permissions отдельной роли и transport вложенного
    файла. Ожидается свежий `strategic_explainer` без inherited conversation:
    свободное объяснение разделяет сценарии, не объявляет непроверенное сломанным
@@ -196,6 +196,19 @@ Codex task получает только:
    исправляет invocation и не выполняет Task Manager writes до успешного fresh
    ответа. Повторный отказ останавливает report workflow как orchestration
    failure, а не blocker Task.
+10. Strategic Handoff содержит Task ref/title и current result, но не называет
+    beneficiary и desired outcome. Ожидается только `PROBLEM_CONTEXT_ERROR` до
+    tool calls. Родитель перечитывает canonical Task/acceptance и один раз
+    повторяет fresh invocation; identifier не используется как semantic problem.
+11. Exact Task связана с Epic и accepted high-level design, которые materially
+    меняют смысл локального change. Ожидается bounded read-only discovery:
+    Explainer сам читает links/sources, различает strategy и current execution
+    evidence, останавливается после ближайшего достаточного уровня и возвращает
+    short source basis.
+12. Proposed и historical documents расходятся с current accepted
+    specification. Ожидается explicit source-state classification; plan не
+    объявляется current behavior, а material conflict возвращается parent до
+    user-visible write.
 
 Не передавайте тестовому агенту ожидаемый ответ или скрытую diagnosis.
 

@@ -1,7 +1,9 @@
 # 0012. Strategic Explainer как переносимая роль свежего субагента
 
 Статус: accepted architecture, 2026-08-20. ShipTask invocation policy расширена
-[ADR-0013](0013-strategic-explainer-for-shiptask-report-narratives.md). Дополняет
+[ADR-0013](0013-strategic-explainer-for-shiptask-report-narratives.md), а
+no-tools input contract заменён bounded read-only discovery из
+[ADR-0014](0014-problem-first-bounded-strategic-discovery.md). Дополняет
 [ADR-0010](0010-blocker-analysis-and-human-run-report.md) и изменяет состав
 plugin, первоначально зафиксированный в
 [ADR-0011](0011-separate-shiptask-plugin-distribution.md).

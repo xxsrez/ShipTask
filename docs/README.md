@@ -16,8 +16,8 @@
   per-Task targeted gates и review-batch gates до automatic acceptance и
   terminal evidence.
 - [Strategic Explainer](specs/strategic-explainer.md) — общий contract
-  преобразования ограниченного Technical Brief в ясное свободное объяснение без
-  mutations, status decisions и новой authority.
+  обязательного problem gate, bounded read-only strategic discovery и свободного
+  объяснения без mutations, status decisions и новой authority.
 
 ## Decisions
 
@@ -58,6 +58,10 @@
 - [0013: Strategic Explainer для всех ShipTask report narratives](decisions/0013-strategic-explainer-for-shiptask-report-narratives.md)
   — каждый новый success/failure/blocker Task comment получает объяснение через
   Explainer contract, а blocking handoff имеет отдельный communication barrier.
+- [0014: Problem-first и bounded strategic discovery](decisions/0014-problem-first-bounded-strategic-discovery.md)
+  — caller обязан передать решаемую проблему, а свежий Explainer сам находит
+  релевантный Epic/design/vision через bounded read-only tooling и возвращает
+  проверяемый source basis.
 
 ## Reference
 

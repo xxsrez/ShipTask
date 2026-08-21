@@ -72,6 +72,12 @@ STRATEGIC_REPORTS_DECISION_FILE = (
     / "decisions"
     / "0013-strategic-explainer-for-shiptask-report-narratives.md"
 )
+STRATEGIC_DISCOVERY_DECISION_FILE = (
+    ROOT
+    / "docs"
+    / "decisions"
+    / "0014-problem-first-bounded-strategic-discovery.md"
+)
 
 REQUIRED_FILES = (
     ROOT / "README.md",
@@ -106,6 +112,7 @@ REQUIRED_FILES = (
     SEPARATE_PLUGIN_DECISION_FILE,
     STRATEGIC_EXPLAINER_DECISION_FILE,
     STRATEGIC_REPORTS_DECISION_FILE,
+    STRATEGIC_DISCOVERY_DECISION_FILE,
 )
 
 FORBIDDEN_SKILL_PATTERNS = {
@@ -292,7 +299,14 @@ def validate_strategic_explainer(errors: list[str]) -> None:
         )
 
     for fragment in (
-        "Technical Brief",
+        "Strategic Handoff",
+        "Problem to solve",
+        "Current-State Brief",
+        "PROBLEM_CONTEXT_ERROR",
+        "не передана содержательная задача, которую мы решаем",
+        "для кого предназначен результат",
+        "какой наблюдаемый outcome нужен",
+        "Одного identifier или технического",
         "свободное стратегическое объяснение",
         "structured result",
         "Не выполнять writes",
@@ -301,7 +315,13 @@ def validate_strategic_explainer(errors: list[str]) -> None:
         "CONTEXT_INTEGRITY_ERROR",
         'fork_turns="none"',
         "System/developer instructions",
-        "Не пытаться игнорировать унаследованную историю",
+        "игнорировать унаследованную историю",
+        "bounded read-only tools",
+        "current/accepted",
+        "proposed",
+        "historical",
+        "source note",
+        "stop condition",
         "CONFIRMED",
         "PROBABLE",
         "UNKNOWN",
@@ -309,13 +329,13 @@ def validate_strategic_explainer(errors: list[str]) -> None:
         "VERIFIED",
         "NOT_APPLICABLE",
         "need-to-know filter",
-        "forward trace",
-        "reverse coverage",
-        "сформулирует своими словами",
+        "Forward trace",
+        "Reverse coverage",
+        "сформулирует окончательный user-facing текст своими",
         "comment payload",
         "визуализац",
         "не создавать отдельный media artifact",
-        "Читателю не нужно знать внутренние tools",
+        "читателю не нужны внутренние tools",
     ):
         if fragment not in text:
             fail(errors, f"Strategic Explainer skill is missing {fragment!r}")
@@ -339,8 +359,8 @@ def validate_strategic_explainer(errors: list[str]) -> None:
     metadata = STRATEGIC_OPENAI_FILE.read_text(encoding="utf-8")
     for fragment in (
         'display_name: "Strategic Explainer"',
-        'short_description: "Объяснить технический результат простым языком"',
-        "Strategic Explainer",
+        'short_description: "Связать проблему, стратегию и текущий результат"',
+        "$strategic-explainer",
         "allow_implicit_invocation: true",
     ):
         if fragment not in metadata:
@@ -440,14 +460,20 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "run-report reference",
         "Strategic Explainer handoff",
         "$ship-tasks:strategic-explainer",
-        "ограниченный `Technical Brief`",
+        "bounded `Strategic Handoff`",
+        "`Problem to solve`",
+        "`Current-State Brief`",
+        "bounded read-only strategic discovery",
+        "source basis",
         "Каждый новый `COMPLETED`, `REWORK REQUIRED`, `BLOCKED` или `CANCELED` comment",
-        "Перед comment-level Technical Brief выполнить task-level finalization",
+        "Перед comment-level Strategic Handoff выполнить task-level finalization",
         "task-scoped Strategic Explainer pipeline",
         "Authoritative envelope",
         'fork_turns="none"',
         "Fresh handoff",
         "CONTEXT_INTEGRITY_ERROR",
+        "PROBLEM_CONTEXT_ERROR",
+        "semantic problem",
         "положительное число fork turns",
         "один раз перезапустить",
         "пишет своими словами",
@@ -458,7 +484,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "comment/read-back и terminal status reconciliation",
         "summary не является допустимым fallback",
         "communication layer",
-        "communication helper не создаёт новый terminal blocker",
+        "Communication helper не создаёт новый terminal blocker",
         "finalization pass",
         "Blocker остаётся blocker до устранения",
         "SHIPTASK RUN REPORT",
@@ -508,15 +534,24 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "status-reconciliation barrier",
         "начинать следующую `To Do` запрещено",
         "### 9.3 Осмысленная финализация и terminal interaction report",
-        "Strategic Explainer: fresh user-language adaptation, no decisions",
+        "Strategic Explainer = problem-first read-only strategic discovery, no decisions",
         "собственной specification",
-        "запускает новый built-in `default` subagent",
+        "новый built-in",
+        "`default` subagent",
         'fork_turns="none"',
         "CONTEXT_INTEGRITY_ERROR",
+        "PROBLEM_CONTEXT_ERROR",
+        "не передана содержательная задача, которую мы решаем",
+        "какой наблюдаемый outcome нужен",
+        "Strategic Handoff",
+        "Problem to solve",
+        "Current-State Brief",
+        "read-only tools",
+        "source basis",
         "Положительное число fork turns",
         "один раз запускает новый default subagent",
         "пишет пользовательский текст своими словами",
-        "свободное стратегическое объяснение",
+        "свободное problem-first объяснение",
         "Каждый новый report comment независимо от state",
         "выполняет task-level finalization",
         "Простой success не является исключением",
@@ -611,7 +646,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "до `update_goal(status=\"blocked\")` scope-level plain-language explanation",
         "summary не являются допустимым fallback",
         'fork_turns="none"',
-        "пишет окончательный report своими словами",
+        "пишет окончательный report своими",
         "CONTEXT_INTEGRITY_ERROR",
     ):
         if fragment not in run_report_text:
@@ -620,7 +655,12 @@ def validate_workflow_contract(errors: list[str]) -> None:
     handoff_text = STRATEGIC_HANDOFF_REFERENCE.read_text(encoding="utf-8")
     for fragment in (
         "Strategic Explainer handoff для ShipTask",
-        "Technical Brief",
+        "Strategic Handoff",
+        "Problem to solve",
+        "Beneficiary",
+        "Desired outcome",
+        "Current-State Brief",
+        "Strategic discovery anchors",
         "Candidate user dependency",
         "Reader purpose",
         "Next-state contract",
@@ -631,20 +671,26 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "fork_turns=\"none\"",
         "fork_turns=\"all\"",
         "$ship-tasks:strategic-explainer",
-        "не вызывать tools",
+        "bounded strategic discovery",
+        "доступные read-only tools",
+        "current/accepted",
+        "proposed",
+        "historical",
+        "source basis",
         "reverse coverage",
-        "внутренней orchestration",
+        "внутреннюю orchestration",
         "Простой success не освобождает Task comment",
-        "Переиспользовать brief между `TASK_COMMENT` и `RUN_REPORT`",
-        "material meaning change делают brief stale",
+        "Переиспользовать explanation между `TASK_COMMENT` и `RUN_REPORT`",
+        "material meaning change делают explanation stale",
         "CONTEXT_INTEGRITY_ERROR",
+        "PROBLEM_CONTEXT_ERROR",
         "один раз создать",
         "свободное стратегическое объяснение",
         "не structured result и не copy-ready comment",
-        "самостоятельно написать Task comment",
+        "самостоятельно пишет Task comment",
         "своими словами",
         "Нельзя копировать ответ",
-        "не создаёт facts, authority, lifecycle status или решение",
+        "не создаёт facts, authority, lifecycle",
         "degraded-adaptation",
     ):
         if fragment not in handoff_text:
@@ -654,18 +700,27 @@ def validate_workflow_contract(errors: list[str]) -> None:
     for fragment in (
         "общий skill `$strategic-explainer`",
         "стратегическом видении",
-        "Technical Brief",
+        "Strategic Handoff",
+        "Problem to solve",
+        "Current-State Brief",
+        "PROBLEM_CONTEXT_ERROR",
+        "Strategic discovery anchors",
+        "read-only tools",
+        "current/accepted",
+        "proposed",
+        "historical",
+        "source note",
         "свободное стратегическое объяснение",
         "не структурированный result object",
         "не является reviewer, incident commander или decision maker",
         "не выполняет writes",
-        "не заменяет evidence",
+        "не заменяет current execution evidence",
         "новый субагент без унаследованной истории",
         'fork_turns="none"',
         "CONTEXT_INTEGRITY_ERROR",
         "более ранние user/assistant turns",
         "System/developer instructions",
-        "не вызывает",
+        "до любого tool call",
         "Reader purpose",
         "Next-state contract",
         "VERIFIED | FAILED | UNVERIFIED | NOT_APPLICABLE",
@@ -690,9 +745,16 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "независимо от текущей реализации",
         "Продуктовое обещание",
         "После одного чтения человек должен понимать",
-        "факты → смысл → решение",
-        "Technical Brief: только факты",
-        "Strategic Explainer: свежий контекст",
+        "проблема → strategic context → текущие факты → смысл → решение",
+        "Caller: Problem to solve + Current-State Brief",
+        "bounded read-only discovery",
+        "Обязательная задача, которую решаем",
+        "Самостоятельный strategic view",
+        "PROBLEM_CONTEXT_ERROR",
+        "current/accepted",
+        "proposed",
+        "historical",
+        "source note",
         "Свободное стратегическое объяснение",
         "Основной агент: собственная формулировка",
         "Устойчивые требования",
@@ -719,6 +781,10 @@ def validate_workflow_contract(errors: list[str]) -> None:
     )
     for fragment in (
         "Strategic Explainer evaluation contract",
+        "Problem gate",
+        "PROBLEM_CONTEXT_ERROR",
+        "Discovery discipline",
+        "Source-state и provenance",
         "Factual fidelity",
         "Reverse coverage",
         "State separation",
@@ -726,7 +792,12 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "User-dependency integrity",
         "Context integrity",
         "Caller ownership",
-        "Lossless-by-relevance audit",
+        "Три независимых аудита",
+        "Discovery audit",
+        "Missing Problem to solve",
+        "Linked Epic меняет смысл локальной Task",
+        "Strategic documents отсутствуют",
+        "Proposed и historical sources конфликтуют",
         "Проверка совместного доступа",
         "Внутренняя ошибка с доступным recovery",
         "Два независимых unverified сценария",
@@ -734,6 +805,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "Простой success",
         "Загрязнённый inherited context",
         "Caller synthesis после большого evidence",
+        "Read-only boundary",
         "User testing остаётся более сильной проверкой",
     ):
         if fragment not in strategic_evaluation_text:
@@ -742,6 +814,8 @@ def validate_workflow_contract(errors: list[str]) -> None:
     strategic_research_text = STRATEGIC_RESEARCH_FILE.read_text(encoding="utf-8")
     for fragment in (
         "Strategic Explainer: исследование подходов",
+        "ADR-0014",
+        "bounded read-only strategic discovery",
         "Готового компонента с тем же contract не найдено",
         "Свежий bounded context полезен для синтеза",
         "Основной агент должен владеть финальным ответом",
@@ -910,6 +984,7 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "manager-style specialist",
         "lossless-by-relevance audit",
         "ADR-0013",
+        "ADR-0014",
         "не создаёт новый blocker",
         "будущий перенос skill в отдельный plugin",
     ):
@@ -939,9 +1014,31 @@ def validate_workflow_contract(errors: list[str]) -> None:
         "aggregate batch result",
         "degraded-adaptation",
         "не запускают Explainer",
+        "ADR-0014",
     ):
         if fragment not in decision_text:
             fail(errors, f"ADR-0013 is missing report-narrative contract {fragment!r}")
+
+    decision_text = STRATEGIC_DISCOVERY_DECISION_FILE.read_text(encoding="utf-8")
+    for fragment in (
+        "Problem-first и bounded strategic discovery",
+        "Заменяет\nих no-tools часть",
+        "Обязательный problem gate",
+        "Problem to solve",
+        "PROBLEM_CONTEXT_ERROR",
+        "Current-State Brief",
+        "Strategic discovery anchors",
+        "bounded read-only",
+        "current/accepted",
+        "proposed",
+        "historical",
+        "Narrative/attention order",
+        "Evidence authority order",
+        "source note",
+        "не выбирает\n  status, blocker, recovery, permission, release или terminal transition",
+    ):
+        if fragment not in decision_text:
+            fail(errors, f"ADR-0014 is missing strategic-discovery contract {fragment!r}")
 
     for path in (
         SKILL_FILE,
@@ -987,6 +1084,28 @@ def validate_workflow_contract(errors: list[str]) -> None:
                     errors,
                     f"{path.relative_to(ROOT)} contains obsolete Explainer handoff contract {forbidden!r}",
                 )
+
+    for path in (
+        ROOT / "README.md",
+        ROOT / "docs" / "README.md",
+        ROOT / "docs" / "overview.md",
+        STRATEGIC_VISION_FILE,
+        SPEC_FILE,
+        STRATEGIC_SPEC_FILE,
+        STRATEGIC_EVALUATION_FILE,
+        ROOT / "docs" / "guides" / "development.md",
+        SKILL_FILE,
+        REPORT_REFERENCE,
+        RUN_REPORT_REFERENCE,
+        STRATEGIC_HANDOFF_REFERENCE,
+        STRATEGIC_SKILL_FILE,
+    ):
+        text = path.read_text(encoding="utf-8")
+        if "Technical Brief" in text:
+            fail(
+                errors,
+                f"{path.relative_to(ROOT)} retains superseded Technical Brief contract",
+            )
 
     decision_text = TERMINAL_CAPABILITY_DECISION_FILE.read_text(encoding="utf-8")
     for fragment in (

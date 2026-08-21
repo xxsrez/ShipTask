@@ -29,7 +29,7 @@ Goal/shared authority останавливает run с
 Task Manager skill  = technical adapter
 ShipTask skill      = business delivery policy
 Project Memories    = scope selectors + project-specific profile
-Strategic Explainer = fresh user-language adaptation, no decisions
+Strategic Explainer = problem-first read-only strategic discovery, no decisions
 ```
 
 ## Текущий статус
@@ -38,7 +38,7 @@ Strategic Explainer = fresh user-language adaptation, no decisions
 - [Strategic Explainer: стратегическое видение](strategic-explainer.md) —
   стабильная продуктовая цель и quality bar независимо от implementation.
 - [Strategic Explainer](specs/strategic-explainer.md) — отдельная каноническая
-  specification общего Technical Brief → strategic explanation contract.
+  specification общего problem gate + strategic discovery → explanation contract.
 - [ADR-0007](decisions/0007-delivery-policy-and-project-memory.md) — принятое
   разбиение adapter / delivery policy / project memory и implicit routing.
 - `ship-tasks/SKILL.md` — компактный исполнимый contract на её основе.
@@ -67,12 +67,11 @@ Strategic Explainer = fresh user-language adaptation, no decisions
   остаётся blocker до устранения; пока meaningful progress возможен, финальный
   Goal status `blocked` ещё не обоснован. Каждый terminal exit заканчивается
   глубоким компактным `SHIPTASK RUN REPORT`, который Task comments не заменяют.
-- Material partial/blocked handoff, запрос user action/authority и сложный
-  technical terminal result проходят через свежий субагент с общим
-  `$ship-tasks:strategic-explainer`: он превращает ограниченный Technical Brief
-  в свободное стратегическое объяснение, а родитель пишет итоговый user-facing
-  текст своими словами; Explainer не выбирает status, recovery или следующий
-  action.
+- Каждый Task report и material terminal handoff проходят через свежий субагент
+  с общим `$ship-tasks:strategic-explainer`: caller передаёт semantic `Problem to
+  solve` и current facts, Explainer сам восстанавливает bounded strategic view
+  через read-only sources, а родитель пишет итоговый user-facing текст своими
+  словами. Explainer не выбирает status, recovery или следующий action.
 - Пока существует runnable work, skill не прерывает run task-local вопросами:
   безопасный default выбирается автоматически, сложная Task попадает в decision
   queue, а остальные продолжаются. Каждый defer обязательно получает
