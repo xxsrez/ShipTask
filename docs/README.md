@@ -13,8 +13,8 @@
 - [Ship Tasks](specs/ship-tasks.md) — канонический Task Manager-only workflow
   для explicit invocation и natural-language delivery с однозначным Task
   Manager anchor: single без Goal, batch с Goal, constitution-first требования,
-  обязательные comments при существенных lifecycle transitions, required-tool
-  recovery и фактическая классификация приёмки.
+  обязательные comments при существенных lifecycle transitions, свобода выбора
+  инструментов и фактическая классификация приёмки.
 - [Strategic Explainer](specs/strategic-explainer.md) — общий contract
   обязательного problem gate, bounded read-only strategic discovery и свободного
   объяснения без mutations, status decisions и новой authority.
@@ -69,9 +69,11 @@
   — сохраняет нейтральный смысл `In Review` и task-level defect attribution;
   прежнее разделение status/comment effect заменено ADR-0017.
 - [0017: Constitution-first runtime contract](decisions/0017-constitution-first-runtime-contract.md)
-  — текущие высокоуровневые требования: свобода исполнения, обязательный
-  comment до существенного transition и восстановление нужного инструмента до
-  обхода.
+  — исходное constitution-first решение; обязательная tool-recovery
+  последовательность заменена ADR-0018.
+- [0018: Конституция управляет результатом, а не инструментами](decisions/0018-outcomes-not-tool-choreography.md)
+  — текущая граница: skill задаёт качество evidence и lifecycle outcomes, а
+  агент сам выбирает браузер, диагностику, repair и способ приёмки.
 
 ## Reference
 

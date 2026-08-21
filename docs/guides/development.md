@@ -19,7 +19,8 @@
 - Жёсткий порядок нужен там, где effects необратимо расходятся: для
   существенного lifecycle transition comment и read-back предшествуют status
   write.
-- Не разрешайте более слабый workaround сломанного необходимого инструмента.
+- Не превращайте первый выбранный или однажды сломавшийся инструмент в общий
+  обязательный путь. Проверяйте достаточность итогового evidence.
 - Не добавляйте фиксированное число попыток. Проверяйте основание для повтора и
   реальное условие остановки.
 - Strategic Explainer улучшает человеческое объяснение, но не получает право
@@ -61,13 +62,13 @@ skill, реалистичный exact Task Manager scope и обычный proje
 - готовый candidate получает comment/read-back до `In Review`;
 - proven defect получает понятный comment до `In Progress`, после чего rework
   продолжается в том же run;
-- verification blocker сначала вызывает repair нужного tool/environment, а при
-  невозможности — comment с 2–4 способами приёмки и сохраняет `In Review`;
+- verification blocker означает отсутствие достаточного способа доказать
+  success/failure в current scope; comment даёт 2–4 способа приёмки и сохраняет
+  `In Review`;
 - proven success получает completion comment/read-back до `Done`;
 - reopen, cancel и duplicate не выполняются молча;
-- missing comment tools сначала диагностируются и восстанавливаются; без
-  восстановления существенный transition и новые недокументируемые delivery
-  mutations не выполняются;
+- существенный transition проверяется по фактическому comment/read-back, а не по
+  предписанному способу работы comment tools;
 - failed batch gate без task attribution не возвращает весь batch в rework;
 - Goal не вводит счётчик попыток и не заменяет Task state;
 - нужный non-production release выполняется, production ждёт explicit approval;

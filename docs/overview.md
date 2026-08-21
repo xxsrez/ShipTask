@@ -13,7 +13,8 @@ Strategic Explainer = помощник по человеческому объя�
 
 ## Constitution-first подход
 
-Текущий contract задан [ADR-0017](decisions/0017-constitution-first-runtime-contract.md).
+Текущий contract задан [ADR-0018](decisions/0018-outcomes-not-tool-choreography.md),
+который уточняет [ADR-0017](decisions/0017-constitution-first-runtime-contract.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
 результатов и жёстких границ. Агент свободен выбирать порядок, инструменты,
 реализацию и достаточные проверки.
@@ -25,8 +26,10 @@ Strategic Explainer = помощник по человеческому объя�
 - существенный status transition сначала получает понятный native comment и
   comment read-back; исключение — обычный старт `To Do → In Progress`;
 - material blocker также получает comment, даже без status change;
-- нужный сломанный инструмент сначала диагностируется и восстанавливается;
-- более слабая проверка не подменяет acceptance;
+- агент сам выбирает и меняет инструменты, способ диагностики и приёмки;
+- сбой одного средства сам по себе ничего не доказывает и не обязывает чинить
+  именно его;
+- acceptance не ослабляется, непроверенное не называется verified;
 - Strategic Explainer помогает сформулировать смысл, но не принимает решения;
 - production и другие sensitive effects сохраняют явную authority boundary.
 
@@ -65,9 +68,9 @@ completion comment предшествует `Done`.
 3. status write;
 4. Task read-back.
 
-Ответ в Codex, Goal, reason code или `description` comment не заменяют. Если
-comment channel сломан, агент сначала пытается его восстановить; без этого
-существенный status transition не выполняется.
+Ответ в Codex, Goal, reason code или `description` comment не заменяют.
+Существенный status transition считается завершённым только при фактическом
+comment и read-back; технический путь к этому результату выбирает агент.
 
 ## Приёмка
 
@@ -80,20 +83,21 @@ Current facts дают один из четырёх исходов:
 
 При defect comment объясняет причину возврата, затем Task переходит в
 `In Progress`, и rework продолжается в том же run. При невозможности приёмки
-сначала восстанавливаются нужные инструменты; если это невозможно, Task остаётся
-`In Review`, а comment предлагает 2–4 способа получить доказательство. История
+Task остаётся `In Review`, а comment предлагает 2–4 способа получить
+доказательство. История
 редакций acceptance и число прошлых попыток сами по себе не являются problem.
 
 ## Инструменты и остановка
 
-Нужный сломанный инструмент нельзя тихо обойти. Агент устанавливает поломку,
-пытается безопасно восстановить основной способ и после изменения повторяет
-исходную операцию. Альтернатива допустима только при той же доказательной силе.
+Skill не выбирает браузер, test harness или другой инструмент. Агент может
+чинить, заменять или сочетать средства по собственному инженерному решению.
+Важно только, чтобы итоговый evidence действительно доказывал current
+acceptance.
 
-Нет счётчика обязательных повторов. Повтор нужен после material state change;
-остановка — когда продолжение требует новой authority, внешнего изменения или
-небезопасного действия. Тогда причина, impact и условие возобновления сообщаются
-прямо.
+Нет счётчика обязательных повторов и общей последовательности repair. Остановка
+означает, что в текущем scope и полномочиях агент не нашёл достаточного
+безопасного способа продолжить. Тогда причина, impact и условие возобновления
+сообщаются прямо.
 
 ## Autonomy, Goal и release
 
@@ -110,6 +114,7 @@ secrets/privacy/access-policy changes, external recipients и unbounded cost
 
 - [Каноническая specification](specs/ship-tasks.md)
 - [Constitution-first ADR](decisions/0017-constitution-first-runtime-contract.md)
+- [Outcome, не tool choreography](decisions/0018-outcomes-not-tool-choreography.md)
 - [Task Manager adapter contract](reference/task-manager-adapter.md)
 - [Lifecycle evaluation](reference/shiptask-review-disposition-evaluation.md)
 - [Strategic Explainer specification](specs/strategic-explainer.md)

@@ -52,6 +52,7 @@ ADR = {
         ("0015", "0015-single-pass-review-disposition.md"),
         ("0016", "0016-current-lifecycle-and-reporting-contract.md"),
         ("0017", "0017-constitution-first-runtime-contract.md"),
+        ("0018", "0018-outcomes-not-tool-choreography.md"),
     )
 }
 
@@ -96,7 +97,7 @@ CURRENT_CONTRACT_FILES = (
     AUTONOMY,
     MEMORY,
     HANDOFF,
-    ADR["0017"],
+    ADR["0018"],
 )
 
 LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
@@ -229,13 +230,13 @@ def validate_ship_skill(errors: list[str]) -> None:
     require(
         errors,
         SHIP_SKILL,
-        "hasMore=false",
+        "полный exact scope",
         "TASK CONTEXT ALARM",
-        "comment create",
-        "comment list/read",
-        "не выполняй существенный",
-        "диагностируй и попытайся безопасно восстановить",
-        "не более слабое",
+        "Доказательство важнее выбранного способа",
+        "Сбой одного выбранного способа",
+        "не делает его обязательным",
+        "Нельзя снижать current acceptance",
+        "как обеспечить это, решает агент",
         "task-contract-conflict",
         "verified-success",
         "verified-failure",
@@ -243,9 +244,8 @@ def validate_ship_skill(errors: list[str]) -> None:
         "In Review → In Progress",
         "2–4 способа",
         "продолжай rework в этом же run",
-        "fork_turns=\"none\"",
         "$ship-tasks:strategic-explainer",
-        "Без Strategic Explainer",
+        "способ выполнения этого требования выбирает агент",
         "SHIPTASK RUN REPORT",
     )
 
@@ -342,11 +342,11 @@ REVIEW_CASES = {
         "In Progress",
         "продолжить rework в том же run",
     ),
-    "Необходимый test/runtime tool сломан, но чинится": (
-        "восстановить tool",
-        "повторить исходную операцию",
+    "Первый выбранный способ проверки не сработал": (
+        "агент сам выбирает",
+        "считать первый инструмент обязательным",
     ),
-    "Test harness или среда не восстановлены в текущей authority": (
+    "В current scope нет достаточного способа доказать success/failure": (
         "verification-blocked",
         "In Review",
         "2–4 способа",
@@ -364,8 +364,8 @@ REVIEW_CASES = {
         "terminal reason",
         "terminal status",
     ),
-    "Comment channel отсутствует или сломан": (
-        "infrastructure failure",
+    "Обязательный comment фактически не создан или не перечитан": (
+        "transition не завершён",
         "не выполнять существенный transition",
         "fallback в description",
     ),
@@ -394,12 +394,13 @@ def validate_current_contract(errors: list[str]) -> None:
         errors,
         SPEC,
         "Статус: current contract, 2026-08-21",
-        "ADR-0017",
+        "ADR-0018",
         "## 2. Конституция",
         "comment",
         "до status write",
-        "сначала восстанавливается",
-        "не ослабляет",
+        "не является обязательным",
+        "current acceptance не ослаблен",
+        "не найден достаточный безопасный способ продолжить",
         "Нет фиксированного числа попыток",
         "продолжает исправление в том же run",
     )
@@ -408,15 +409,17 @@ def validate_current_contract(errors: list[str]) -> None:
         OVERVIEW,
         "Constitution-first подход",
         "comment read-back",
-        "сначала пытается его восстановить",
-        "более слабая проверка не подменяет acceptance",
-        "ADR-0017",
+        "агент сам выбирает и меняет инструменты",
+        "не обязывает чинить именно его",
+        "не называется verified",
+        "ADR-0018",
     )
     require(
         errors,
         REPORT,
         "Только затем",
-        "существенный status transition запрещён",
+        "transition не завершён",
+        "не предписывает, какой tool выбрать",
         "Приёмка заблокирована",
         "2–4 различных способа",
         "Ответ в Codex не является durable Task comment",
@@ -424,27 +427,28 @@ def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         AUTONOMY,
-        "Сбой нужного инструмента",
-        "выполни безопасный bounded repair",
-        "Альтернатива должна доказывать тот же requirement",
+        "Свобода способа и качество evidence",
+        "не создаёт обязанности чинить именно его",
+        "итоговый evidence",
+        "выбор технического пути",
         "Task-local blocker",
         "Production workflow требует явного approval",
     )
     require(
         errors,
         HANDOFF,
-        "локальный текст не выдаётся за применение",
-        "зависимый lifecycle transition не выполняется",
+        "Конституция не задаёт конкретный invocation или recovery flow",
+        "Обязательный результат",
     )
     require(
         errors,
-        ADR["0017"],
-        "Конституция вместо сценария по шагам",
-        "Комментарий — часть существенного перехода",
-        "Сломанный необходимый инструмент — сначала предмет работы",
-        "Нет business-счётчика попыток",
-        "Приёмка различает четыре фактических исхода",
-        "Goal — только учёт batch progress",
+        ADR["0018"],
+        "Конституция управляет результатом, а не инструментами",
+        "не выбирает за агента инструменты",
+        "Сбой одного способа сам по себе не доказывает",
+        "не нашёл достаточного безопасного способа",
+        "не задаёт tool flow",
+        "Фиксированного числа попыток",
     )
 
     contradiction_patterns = {
@@ -488,6 +492,19 @@ def validate_current_contract(errors: list[str]) -> None:
             "self-recovery",
             "Technical Brief",
             "communication remainder",
+        )
+
+    for path in CURRENT_CONTRACT_FILES:
+        if path == ADR["0018"]:
+            continue
+        forbid(
+            errors,
+            path,
+            "Необходимый инструмент сначала",
+            "сначала восстанови нужные инструменты",
+            "после material repair повтори",
+            "только затем оцени равноценную альтернативу",
+            "сначала пытается его восстановить",
         )
 
 
@@ -551,6 +568,7 @@ def validate_supersession(errors: list[str]) -> None:
         "0013": ("ADR-0014", "ADR-0016", "ADR-0017"),
         "0015": ("partially superseded", "ADR-0017"),
         "0016": ("partially superseded", "ADR-0017"),
+        "0017": ("partially superseded", "ADR-0018"),
     }
     for number, terms in required_markers.items():
         header = "\n".join(read(ADR[number]).splitlines()[:18])
@@ -611,7 +629,7 @@ def current_task_source_files() -> tuple[Path, ...]:
         AUTONOMY,
         MEMORY,
         HANDOFF,
-        ADR["0017"],
+        ADR["0018"],
     )
 
 
