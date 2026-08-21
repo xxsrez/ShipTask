@@ -9,7 +9,10 @@ invocation policy для ShipTask. Lifecycle, comment capability и terminal-eff
 Fail-closed status-write часть для proven rework уточнена
 [ADR-0015](0015-single-pass-review-disposition.md), а единая граница между
 comment effect и status write —
-[ADR-0016](0016-current-lifecycle-and-reporting-contract.md).
+[ADR-0016](0016-current-lifecycle-and-reporting-contract.md). Current
+constitution сохраняет Explainer для обязательных lifecycle/blocker comments,
+но заменяет procedural pipeline и status/comment fallback правила через
+[ADR-0017](0017-constitution-first-runtime-contract.md).
 
 ## Контекст
 

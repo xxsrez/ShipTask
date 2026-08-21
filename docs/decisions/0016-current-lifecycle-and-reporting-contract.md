@@ -1,6 +1,10 @@
 # 0016. Единый действующий контракт lifecycle и отчётности
 
-Статус: accepted, 2026-08-21. Уточняет ADR-0006, ADR-0010, ADR-0013 и
+Статус: partially superseded, 2026-08-21. Нейтральный смысл `In Review`,
+task-level defect attribution и отказ от счётчика повторов сохраняются. Разрыв
+между comment и non-terminal status, `communication remainder` и procedural
+form заменены [ADR-0017](0017-constitution-first-runtime-contract.md).
+Исторически уточнял ADR-0006, ADR-0010, ADR-0013 и
 ADR-0015. Отменяет оставшиеся в действующих документах формулировки о
 массовом rework без task-level доказательства, трёх повторах ради Goal
 `blocked`, обязательной диаграмме и задержке truthful non-terminal

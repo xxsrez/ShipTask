@@ -51,6 +51,7 @@ ADR = {
         ("0014", "0014-problem-first-bounded-strategic-discovery.md"),
         ("0015", "0015-single-pass-review-disposition.md"),
         ("0016", "0016-current-lifecycle-and-reporting-contract.md"),
+        ("0017", "0017-constitution-first-runtime-contract.md"),
     )
 }
 
@@ -95,8 +96,7 @@ CURRENT_CONTRACT_FILES = (
     AUTONOMY,
     MEMORY,
     HANDOFF,
-    ADR["0015"],
-    ADR["0016"],
+    ADR["0017"],
 )
 
 LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
@@ -195,7 +195,7 @@ def validate_frontmatter(
 
 
 def validate_ship_skill(errors: list[str]) -> None:
-    validate_frontmatter(errors, SHIP_SKILL, "ship-tasks", 360)
+    validate_frontmatter(errors, SHIP_SKILL, "ship-tasks", 220)
     text = read(SHIP_SKILL)
     description = text.split("---", 2)[1] if text.count("---") >= 2 else ""
 
@@ -207,24 +207,20 @@ def validate_ship_skill(errors: list[str]) -> None:
         "Одного delivery-глагола недостаточно",
         "Create-and-deliver",
         "Bare $ship-tasks",
-        "single без Goal",
-        "batch с Goal",
+        "single работает без Goal",
+        "batch — с Goal",
         "backlog capture",
     ):
         if term not in description:
             fail(errors, f"ship-tasks description is missing routing concept {term!r}")
 
     required_sections = (
-        "## 1. Проверить запуск и выбрать mode",
-        "## 2. Разрешить exact scope и live state",
-        "## 3. Создать Goal только для batch",
-        "## 4. Согласовать lifecycle с фактами",
-        "## 5. Разобрать каждую `In Review` за один проход",
-        "## 6. Выполнить и проверить",
-        "## 7. Продолжать автономно и соблюдать release boundary",
-        "## 8. Никогда не ждать ручную приёмку",
-        "## 9. Опубликовать понятный Task report",
-        "## 10. Финализировать run",
+        "## 1. Выбери mode и exact scope",
+        "## 2. Соблюдай обязательные требования",
+        "## 3. Выполни и проверь result",
+        "## 4. Разбери `In Review` по текущим фактам",
+        "## 5. Используй Strategic Explainer для человеческих объяснений",
+        "## 6. Продолжай автономно и финализируй",
     )
     for heading in required_sections:
         if section(text, heading) is None:
@@ -234,21 +230,22 @@ def validate_ship_skill(errors: list[str]) -> None:
         errors,
         SHIP_SKILL,
         "hasMore=false",
-        "version_conflict",
         "TASK CONTEXT ALARM",
+        "comment create",
+        "comment list/read",
+        "не выполняй существенный",
+        "диагностируй и попытайся безопасно восстановить",
+        "не более слабое",
         "task-contract-conflict",
         "verified-success",
         "verified-failure",
         "verification-blocked",
         "In Review → In Progress",
         "2–4 способа",
-        "unclear attribution",
-        "runnable_count > 0",
-        "production-approval-required",
-        "ACCEPTANCE READY",
+        "продолжай rework в этом же run",
         "fork_turns=\"none\"",
         "$ship-tasks:strategic-explainer",
-        "degraded-adaptation",
+        "Без Strategic Explainer",
         "SHIPTASK RUN REPORT",
     )
 
@@ -260,7 +257,7 @@ def validate_ship_skill(errors: list[str]) -> None:
         "$ship-tasks",
         'value: "task-manager"',
         "allow_implicit_invocation: true",
-        "In Review Task",
+        "In Review",
     )
 
 
@@ -320,7 +317,7 @@ TRIGGER_CASES = {
 
 
 def validate_trigger_matrix(errors: list[str]) -> None:
-    rows = table_rows(read(SPEC), "### 1.3 Проверяемая trigger matrix")
+    rows = table_rows(read(SPEC), "### 1.2 Проверяемая trigger matrix")
     data = {cells[0].strip("`"): cells[1:] for cells in rows[1:] if len(cells) == 3}
     if set(data) != set(TRIGGER_CASES):
         missing = sorted(set(TRIGGER_CASES) - set(data))
@@ -334,58 +331,47 @@ def validate_trigger_matrix(errors: list[str]) -> None:
 
 
 REVIEW_CASES = {
+    "Обычный старт `To Do`": ("не требуется", "In Progress"),
+    "Candidate готов к review": ("read-back до transition", "In Review"),
     "Current acceptance противоречит самому себе": (
         "task-contract-conflict",
         "In Review",
-        "BLOCKED",
-    ),
-    "Contract conflict однозначно разрешается": ("исправить contract", "read-back"),
-    "История acceptance длинная, current contract однозначен": (
-        "продолжить проверку current contract",
     ),
     "Exact candidate воспроизводимо нарушает критерий": (
         "verified-failure",
         "In Progress",
-        "REWORK REQUIRED",
+        "продолжить rework в том же run",
     ),
-    "Test harness сломан": ("verification-blocked", "In Review", "2–4"),
-    "Batch gate упал, виновная Task не установлена": (
+    "Необходимый test/runtime tool сломан, но чинится": (
+        "восстановить tool",
+        "повторить исходную операцию",
+    ),
+    "Test harness или среда не восстановлены в текущей authority": (
         "verification-blocked",
+        "In Review",
+        "2–4 способа",
+    ),
+    "Batch gate упал, виновная Task не установлена": (
         "In Review",
         "separating evidence",
-    ),
-    "Нет нужного внешнего actor или доступа": (
-        "verification-blocked",
-        "In Review",
-        "2–4",
     ),
     "Полный evidence доказывает критерии": (
         "verified-success",
         "Done",
-        "COMPLETED",
     ),
-    "Comment channel отсутствует при proven failure": (
-        "verified-failure",
-        "In Progress",
-        "communication remainder",
+    "Reopen terminal Task": ("причину reopen", "working status"),
+    "Новый `Canceled` или `Duplicate`": (
+        "terminal reason",
+        "terminal status",
     ),
-    "Comment channel отсутствует при success": (
-        "verified-success",
-        "In Review",
-        "pending `COMPLETED`",
+    "Comment channel отсутствует или сломан": (
+        "infrastructure failure",
+        "не выполнять существенный transition",
+        "fallback в description",
     ),
-    "Comment channel отсутствует при verification blocker": (
-        "verification-blocked",
-        "In Review",
-        "communication remainder",
-    ),
-    "Новый canceled outcome, comment channel отсутствует": (
-        "не писать `Canceled`",
-        "pending `CANCELED`",
-    ),
-    "Все remaining Tasks verification-blocked": (
-        "task-local blockers",
-        "Goal остаётся active",
+    "Task-local blocker в batch": (
+        "Goal",
+        "продолжить независимые Tasks",
     ),
 }
 
@@ -408,54 +394,63 @@ def validate_current_contract(errors: list[str]) -> None:
         errors,
         SPEC,
         "Статус: current contract, 2026-08-21",
-        "ADR-0016",
-        "#### 5.3.1 Однократная классификация `In Review`",
-        "Падение aggregate gate",
-        "task-level attribution",
-        "terminal report (`COMPLETED`",
-        "нового `CANCELED` transition",
-        "не повторять тот же acceptance scenario",
+        "ADR-0017",
+        "## 2. Конституция",
+        "comment",
+        "до status write",
+        "сначала восстанавливается",
+        "не ослабляет",
+        "Нет фиксированного числа попыток",
+        "продолжает исправление в том же run",
     )
     require(
         errors,
         OVERVIEW,
-        "Сам status не доказывает проверку",
-        "только Tasks с доказанным failure",
-        "отдельной незавершённой публикацией",
-        "ADR-0016",
+        "Constitution-first подход",
+        "comment read-back",
+        "сначала пытается его восстановить",
+        "более слабая проверка не подменяет acceptance",
+        "ADR-0017",
     )
     require(
         errors,
         REPORT,
-        "proven failure",
-        "verification-blocked",
-        "нового canceled",
-        "не доказывает failure каждого member",
-        "2–4 способа получить недостающее",
+        "Только затем",
+        "существенный status transition запрещён",
+        "Приёмка заблокирована",
+        "2–4 различных способа",
+        "Ответ в Codex не является durable Task comment",
     )
     require(
         errors,
         AUTONOMY,
-        "verification-blocked",
-        "task-contract-conflict",
-        "попытаться опубликовать",
-        "не меняет уже установленный review disposition",
-        "runnable_count",
+        "Сбой нужного инструмента",
+        "выполни безопасный bounded repair",
+        "Альтернатива должна доказывать тот же requirement",
+        "Task-local blocker",
+        "Production workflow требует явного approval",
     )
     require(
         errors,
-        ADR["0016"],
-        "`In Review` нейтрален",
-        "Defect требует прямого доказательства",
-        "Status и комментарий — разные эффекты",
-        "Нет счётчика повторов",
-        "Форма отчёта подчинена смыслу",
-        "Источники истины",
+        HANDOFF,
+        "локальный текст не выдаётся за применение",
+        "зависимый lifecycle transition не выполняется",
+    )
+    require(
+        errors,
+        ADR["0017"],
+        "Конституция вместо сценария по шагам",
+        "Комментарий — часть существенного перехода",
+        "Сломанный необходимый инструмент — сначала предмет работы",
+        "Нет business-счётчика попыток",
+        "Приёмка различает четыре фактических исхода",
+        "Goal — только учёт batch progress",
     )
 
     contradiction_patterns = {
-        "three-turn blocker threshold": re.compile(
-            r"(?:тр[её]х|три)\s+(?:consecutive\s+)?(?:Goal\s+)?turn", re.I
+        "comment deferred after status": re.compile(
+            r"status.{0,100}(?:вс[её]\s+равно|сначала).{0,100}(?:communication remainder|комментари)",
+            re.I | re.S,
         ),
         "unclear batch reopened into rework": re.compile(
             r"неясн\w*\s+attribution.{0,120}(?:весь|все).{0,80}In Progress",
@@ -492,6 +487,7 @@ def validate_current_contract(errors: list[str]) -> None:
             "Tasks с недействительным evidence в `In Progress`",
             "self-recovery",
             "Technical Brief",
+            "communication remainder",
         )
 
 
@@ -547,13 +543,14 @@ def validate_supersession(errors: list[str]) -> None:
     required_markers = {
         "0002": ("superseded", "ADR-0003"),
         "0008": ("superseded ADR-0011",),
-        "0009": ("superseded", "ADR-0010", "не является текущим runtime contract"),
-        "0005": ("ADR-0015", "ADR-0016"),
-        "0006": ("ADR-0016", "диаграммы"),
-        "0010": ("ADR-0015", "ADR-0016"),
+        "0009": ("superseded", "ADR-0010", "ADR-0017"),
+        "0005": ("ADR-0016", "ADR-0017"),
+        "0006": ("ADR-0016", "ADR-0017"),
+        "0010": ("ADR-0016", "ADR-0017"),
         "0012": ("ADR-0014", "no-tools"),
-        "0013": ("ADR-0014", "ADR-0015", "ADR-0016"),
-        "0015": ("ADR-0016",),
+        "0013": ("ADR-0014", "ADR-0016", "ADR-0017"),
+        "0015": ("partially superseded", "ADR-0017"),
+        "0016": ("partially superseded", "ADR-0017"),
     }
     for number, terms in required_markers.items():
         header = "\n".join(read(ADR[number]).splitlines()[:18])
@@ -614,7 +611,7 @@ def current_task_source_files() -> tuple[Path, ...]:
         AUTONOMY,
         MEMORY,
         HANDOFF,
-        ADR["0016"],
+        ADR["0017"],
     )
 
 

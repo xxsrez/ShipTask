@@ -5,8 +5,10 @@
 comment lifecycle из [ADR-0006](0006-delivery-comment-as-terminal-effect.md).
 Требование строгого Goal blocker threshold и повторных attempts заменено
 [ADR-0015](0015-single-pass-review-disposition.md); finalization и human-report
-части этого решения остаются current. Единые lifecycle/reporting границы
-собраны в [ADR-0016](0016-current-lifecycle-and-reporting-contract.md).
+части этого решения сохраняются как rationale. Единые lifecycle/reporting
+границы из ADR-0016, фиксированная форма pass и порядок recovery заменены
+[ADR-0017](0017-constitution-first-runtime-contract.md), который является
+current runtime contract.
 
 ## Контекст
 

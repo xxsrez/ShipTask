@@ -5,6 +5,8 @@
 fields и формат отчёта из ADR-0003 сохраняются. Влияние недоступного
 comment channel на truthful non-terminal status и требование обязательной
 диаграммы заменены [ADR-0016](0016-current-lifecycle-and-reporting-contract.md).
+Current порядок comment read-back до любого существенного transition и required
+tool recovery задан [ADR-0017](0017-constitution-first-runtime-contract.md).
 
 ## Контекст
 

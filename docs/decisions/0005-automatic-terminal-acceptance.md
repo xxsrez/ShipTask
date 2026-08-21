@@ -1,10 +1,12 @@
 # 0005. Automatic terminal acceptance
 
 Статус: accepted, 2026-08-16. Заменяет human-acceptance часть ADR-0004.
-Порядок обязательного delivery comment перед `Done` уточнён ADR-0006.
+Порядок обязательного delivery comment перед `Done` уточнён ADR-0006 и заменён
+constitution contract из [ADR-0017](0017-constitution-first-runtime-contract.md).
 Классификация failed/insufficient evidence заменена
 [ADR-0015](0015-single-pass-review-disposition.md) и сведена с comment/status
-правилами в [ADR-0016](0016-current-lifecycle-and-reporting-contract.md).
+правилами в [ADR-0016](0016-current-lifecycle-and-reporting-contract.md), а
+current runtime boundary принадлежит ADR-0017.
 
 ## Контекст
 

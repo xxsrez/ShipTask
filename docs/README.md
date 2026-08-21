@@ -12,9 +12,9 @@
 
 - [Ship Tasks](specs/ship-tasks.md) — канонический Task Manager-only workflow
   для explicit invocation и natural-language delivery с однозначным Task
-  Manager anchor: single без Goal, batch с Goal, project-memory context,
-  per-Task targeted gates и review-batch gates до automatic acceptance и
-  terminal evidence.
+  Manager anchor: single без Goal, batch с Goal, constitution-first требования,
+  обязательные comments при существенных lifecycle transitions, required-tool
+  recovery и фактическая классификация приёмки.
 - [Strategic Explainer](specs/strategic-explainer.md) — общий contract
   обязательного problem gate, bounded read-only strategic discovery и свободного
   объяснения без mutations, status decisions и новой authority.
@@ -63,12 +63,15 @@
   релевантный Epic/design/vision через bounded read-only tooling и возвращает
   проверяемый source basis.
 - [0015: Однократная классификация приёмки](decisions/0015-single-pass-review-disposition.md)
-  — разводит противоречивую Task, доказанный defect, доказанный success и реальную
-  невозможность проверки; запрещает одинаковые повторы ради Goal status.
+  — историческое основание четырёх исходов приёмки; fixed pass и status/comment
+  fallback заменены ADR-0017.
 - [0016: Единый действующий контракт lifecycle и отчётности](decisions/0016-current-lifecycle-and-reporting-contract.md)
-  — фиксирует нейтральный смысл `In Review`, отделяет status от comment effect,
-  запрещает mass rework без task-level defect evidence, счётчик повторов и
-  обязательные диаграммы.
+  — сохраняет нейтральный смысл `In Review` и task-level defect attribution;
+  прежнее разделение status/comment effect заменено ADR-0017.
+- [0017: Constitution-first runtime contract](decisions/0017-constitution-first-runtime-contract.md)
+  — текущие высокоуровневые требования: свобода исполнения, обязательный
+  comment до существенного transition и восстановление нужного инструмента до
+  обхода.
 
 ## Reference
 
@@ -96,8 +99,8 @@
   существующие skills, принятые механизмы, отклонённые альтернативы и
   ограничения evidence.
 - [Глубокая ревизия ShipTask](reports/2026-08-21-shiptask-deep-contract-review.md)
-  — три прохода по lifecycle, приёмке, отчётности, полномочиям, legacy и
-  distribution; найденные противоречия, принятый итоговый контракт и проверки.
+  — исторический snapshot ревизии до ADR-0017; найденные тогда противоречия и
+  проверки, но не текущая fallback policy.
 - [Предложение по развитию ShipTask skill](reports/2026-08-16-shiptask-skill-change-proposal.md)
   — целевая граница business policy, explicit/implicit modes, project-memory
   contract, runtime refactor, trigger matrix и согласованный cutover.

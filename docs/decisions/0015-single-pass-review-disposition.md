@@ -1,6 +1,8 @@
 # 0015. Однократная классификация приёмки
 
-Статус: accepted, 2026-08-21. Уточняет ADR-0005, ADR-0006, ADR-0010 и
+Статус: partially superseded, 2026-08-21. Четыре фактических исхода сохраняются,
+а fixed single-pass wording и разрешение менять status без comment заменены
+[ADR-0017](0017-constitution-first-runtime-contract.md). Исторически уточнял ADR-0005, ADR-0006, ADR-0010 и
 ADR-0013. Отменяет использование строгого Goal blocker threshold как части
 business workflow для task-local приёмки; остальные system/tool ограничения на
 Goal остаются внешней границей. Status/comment эффекты и отмена
