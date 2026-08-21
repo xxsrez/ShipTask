@@ -2,6 +2,9 @@
 
 Статус: accepted, 2026-08-16. Заменяет human-acceptance часть ADR-0004.
 Порядок обязательного delivery comment перед `Done` уточнён ADR-0006.
+Классификация failed/insufficient evidence заменена
+[ADR-0015](0015-single-pass-review-disposition.md) и сведена с comment/status
+правилами в [ADR-0016](0016-current-lifecycle-and-reporting-contract.md).
 
 ## Контекст
 
@@ -30,10 +33,10 @@ automatic acceptance недостаточно: нужен явный retirement 
 - Считать `In Review` actionable completion stage. После passing evidence
   опубликовать и перечитать обязательный `COMPLETED` report, затем перевести
   Task в `Done`, выполнить Task read-back и продолжить scope.
-- При failed/insufficient evidence автоматически выполнить разрешённый
-  rework/retest. Defer использовать только для конкретного material decision,
-  отсутствующей внешней authority или state change, а не как surrogate ручной
-  приёмки.
+- При неполном или отрицательном результате проверки применить классификацию
+  ADR-0015. Только прямое доказательство defect разрешает rework; невозможность
+  установить success или failure оставляет Task в `In Review` с понятным
+  `BLOCKED` handoff. Ни один из исходов не является surrogate ручной приёмки.
 - Не публиковать `ACCEPTANCE READY`. Batch/review packet остаётся evidence и
   human-readable explanation, но не blocking decision surface.
 - После `Done` считать user-initiated reopen authoritative сигналом rework.

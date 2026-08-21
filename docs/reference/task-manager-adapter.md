@@ -1,6 +1,6 @@
 # Task Manager adapter
 
-Статус: compatibility contract, 2026-08-16.
+Статус: current compatibility contract, повторно сверен 2026-08-21.
 
 Документ фиксирует только техническую границу между ShipTask и Task Manager
 skill/connector. Business delivery policy, lifecycle decisions, Goal,
@@ -9,13 +9,14 @@ automatic acceptance, release authority и project memory определяютс
 
 ## Проверенная база
 
-Профиль сверялся с Task Manager repository/plugin и live connector
-2026-08-16. Это датированный snapshot. При фактическом запуске authoritative
-остаются current tool descriptions, capabilities и ответы connector.
-
-Marketplace Task Manager skill пока содержит часть старого delivery workflow.
-До отдельного cutover ShipTask является policy authority, а этот reference
-определяет минимальный совместимый adapter contract.
+Профиль повторно сверен с marketplace source и installed cache
+`task-manager@srez-marketplace` версии `0.7.5+codex.20260821121000`.
+Package содержит только adapter skill `task-manager`, не содержит
+`ship-tasks`/`strategic-explainer`, а marketplace source и installed cache совпадают.
+Текущий Task Manager `SKILL.md` прямо запрещает adapter самостоятельно
+определять delivery, Goal, verification, release, report-content и terminal-status
+policy. При фактическом запуске authoritative остаются current tool descriptions,
+capabilities и ответы connector.
 
 ## Adapter responsibility
 

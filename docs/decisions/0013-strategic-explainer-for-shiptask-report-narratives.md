@@ -7,7 +7,9 @@ discovery из [ADR-0014](0014-problem-first-bounded-strategic-discovery.md). М
 invocation policy для ShipTask. Lifecycle, comment capability и terminal-effect
 правила из [ADR-0006](0006-delivery-comment-as-terminal-effect.md) не меняются.
 Fail-closed status-write часть для proven rework уточнена
-[ADR-0015](0015-single-pass-review-disposition.md).
+[ADR-0015](0015-single-pass-review-disposition.md), а единая граница между
+comment effect и status write —
+[ADR-0016](0016-current-lifecycle-and-reporting-contract.md).
 
 ## Контекст
 

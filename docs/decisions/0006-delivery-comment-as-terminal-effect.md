@@ -2,7 +2,9 @@
 
 Статус: accepted, 2026-08-16. Заменяет capability-optional часть
 [ADR-0003](0003-delivery-reports-as-task-comments.md); запрет fallback в Task
-fields и формат отчёта из ADR-0003 сохраняются.
+fields и формат отчёта из ADR-0003 сохраняются. Влияние недоступного
+comment channel на truthful non-terminal status и требование обязательной
+диаграммы заменены [ADR-0016](0016-current-lifecycle-and-reporting-contract.md).
 
 ## Контекст
 
@@ -56,8 +58,9 @@ Task пользователю было невозможно восстанови
 
 Ограничения:
 
-- устаревшая сессия Codex без comment tools должна оставить Task non-terminal и
-  продолжить после refresh/reconnect, даже если code/effect уже готовы;
+- устаревшая сессия Codex без comment tools не может выполнить новый terminal
+  status write и должна продолжить после refresh/reconnect; доказанный
+  non-terminal outcome всё равно отражается правдивым status по ADR-0016;
 - comment write и status update остаются неатомарными, поэтому между ними нужен
   явный read-back и recovery;
 - это решение не backfill-ит старые terminal Tasks без отдельного запроса.

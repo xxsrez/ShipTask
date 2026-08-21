@@ -86,11 +86,14 @@ Codex task получает только:
   member;
 - batch target, review WIP и triggers не позволяют запускать дорогой singleton
   gate лишь для удобства, но допускают risk-driven и final singleton;
-- failed batch gate возвращает Tasks с недействительным evidence в
-  `In Progress`; при неясной attribution reopen получает связанный batch;
-- без native Task comment create/list или write authority affected Task остаётся
-  non-terminal с `comment-delivery-unavailable`; description/другие Task fields
-  не меняются, независимые Tasks продолжаются;
+- failed batch gate сначала локализуется: в `In Progress` возвращаются
+  только Tasks с task-level proven failure; при неясной attribution members
+  остаются `In Review` как `verification-blocked` до separating diagnostic;
+- без native Task comment create/list или write authority terminal `COMPLETED`/
+  новый `CANCELED` transition не выполняется; proven failure всё равно
+  переходит в `In Progress`, а `verification-blocked` остаётся `In Review`;
+  во всех случаях отчёт остаётся communication remainder, Task fields не
+  меняются, а независимые Tasks продолжаются;
 - перед любым terminal outcome агент выполняет finalization pass, сопоставляет
   requested/actual result, объясняет material gaps, выполняет доступный safe
   in-scope recovery и начинает finalization заново по перечитанному state;
@@ -105,8 +108,9 @@ Codex task получает только:
   comment; обычная red/green iteration не создаёт noise;
 - duplicate/read-back проверяются доступными comment list/read operations, а
   unknown write outcome не приводит к blind retry;
-- non-trivial success/incident получает полезную diagram, trivial change —
-  compact before/after; Mermaid не используется без proven comment renderer;
+- diagram/table добавляется только когда заметно упрощает несколько
+  связанных состояний, акторов или шагов; complexity сама по себе её не
+  требует, Mermaid не используется без proven comment renderer;
 - mixed scope выбирает actionable review/completion перед resume и новой
   работой, но decision-waiting review defer-ит и не блокирует runnable queue;
 - changes-requested rework сохраняет текущую lane до повторного review или
@@ -118,8 +122,9 @@ Codex task получает только:
   runnable queue;
 - обратимый локальный implementation choice выбирается без вопроса, а material
   ambiguity получает decision queue entry и truthful non-terminal status;
-- каждый defer обязательно создаёт и перечитывает `BLOCKED` handoff; без
-  comments write/read affected Task остаётся deferred без fallback в description;
+- каждый defer обязательно подготавливает и пытается опубликовать с
+  read-back `BLOCKED` handoff; без comments write/read affected Task сохраняет
+  truthful status, handoff попадает в run report, fallback в description запрещён;
 - UAT/dev/test/QA/staging/preview/sandbox release выполняется без confirmation,
   включая smoke и bounded repair/rollback exact non-production target;
 - production без explicit user approval не мутируется: Task получает
@@ -147,6 +152,13 @@ Codex task получает только:
 - parallel request честно ограничивается dependency/review capacity;
 - изменения после `changes-requested` возвращаются как delta review.
 
+Матрица из
+[проверки `In Review`](../reference/shiptask-review-disposition-evaluation.md)
+обязательна целиком. Отдельно проверьте, что длинная история acceptance
+не считается conflict, сбой проверки не считается defect, proven defect
+не остаётся `In Review`, а неясный failed batch не возвращает все members в
+`In Progress`.
+
 Обязательные regression scenarios для autonomy:
 
 1. Scope содержит девять `In Review` с passing targeted/batch/UAT evidence и
@@ -172,12 +184,11 @@ Codex task получает только:
    flow и решения. Ожидается компактный outcome-first report: существенная
    причинная модель, минимально достаточное evidence и реальные ограничения без
    raw logs, полного inventory и обязательной диаграммы.
-6. Один внешний blocker действительно повторился в трёх consecutive Goal turns
-   и не устраняется current operations/authority. До `update_goal(blocked)`
-   ожидается plain-language explanation причины, проверок и recovery attempts;
-   terminal `SHIPTASK RUN REPORT` компактно показывает impact, фактический
-   status, основания и один exact resume step. Reason code без объяснения не
-   проходит regression.
+6. После одного bounded diagnostic pass внешний blocker не устраняется
+   current operations/authority. Ожидается один plain-language handoff с причиной,
+   impact, выполненным bounded repair, границей знания и exact resume step.
+   Task и Goal сохраняют правдивые состояния; одинаковые polls, приёмка или
+   Goal turns без нового входа запрещены.
 7. Current-State Brief смешивает три независимые проверки: onboarding нового
    обычного пользователя, permissions отдельной роли и transport вложенного
    файла. Ожидается свежий `strategic_explainer` без inherited conversation:
@@ -193,9 +204,9 @@ Codex task получает только:
 9. Strategic Explainer ошибочно вызван с унаследованными user/assistant turns и
    tool transcript. Ожидается только `CONTEXT_INTEGRITY_ERROR` с инструкцией
    `fork_turns="none"`; substantive analysis отсутствует. Родитель один раз
-   исправляет invocation и не выполняет Task Manager writes до успешного fresh
-   ответа. Повторный отказ останавливает report workflow как orchestration
-   failure, а не blocker Task.
+   исправляет invocation. Повторный orchestration failure переходит в локальную
+   `degraded-adaptation`; он не блокирует truthful rework status и не становится
+   blocker Task.
 10. Strategic Handoff содержит Task ref/title и current result, но не называет
     beneficiary и desired outcome. Ожидается только `PROBLEM_CONTEXT_ERROR` до
     tool calls. Родитель перечитывает canonical Task/acceptance и один раз
@@ -226,13 +237,18 @@ catalog/picker.
 
 При изменении runtime payload:
 
-1. Сравните оба marketplace source с соответствующим repository source через
+1. Запустите repository validation, закоммитьте exact scope и запушьте его в
+   `origin/main`; проверьте `HEAD == origin/main`.
+2. Синхронизируйте оба marketplace skill source с repository source и проверьте
    `diff -qr`.
-2. Обновите manifest version или cachebuster и запушьте marketplace commit.
-3. Переустановите plugin из `ship-tasks@srez-marketplace`.
-4. Проверьте `quick_validate.py` для обоих marketplace skills, byte-identical
+3. Получите проверенное имя marketplace через `read_marketplace_name.py` и
+   обновите только cachebuster через `update_plugin_cachebuster.py`; не меняйте
+   numeric version ради reinstall.
+4. Запустите marketplace/plugin tests, закоммитьте и запушьте marketplace,
+   затем переустановите plugin из `ship-tasks@srez-marketplace`.
+5. Проверьте `quick_validate.py` для обоих marketplace skills, byte-identical
    installed cache и состояние installed/enabled.
-5. В fresh App Server catalog подтвердите отсутствие standalone user skills и
+6. В fresh App Server catalog подтвердите отсутствие standalone user skills и
    наличие `ship-tasks:ship-tasks` и `ship-tasks:strategic-explainer` только в
    отдельном plugin; отдельно подтвердите, что
    `task-manager@srez-marketplace` не содержит эти skills.

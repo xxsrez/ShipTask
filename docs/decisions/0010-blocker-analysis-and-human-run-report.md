@@ -5,7 +5,8 @@
 comment lifecycle из [ADR-0006](0006-delivery-comment-as-terminal-effect.md).
 Требование строгого Goal blocker threshold и повторных attempts заменено
 [ADR-0015](0015-single-pass-review-disposition.md); finalization и human-report
-части этого решения остаются current.
+части этого решения остаются current. Единые lifecycle/reporting границы
+собраны в [ADR-0016](0016-current-lifecycle-and-reporting-contract.md).
 
 ## Контекст
 
@@ -47,8 +48,8 @@ pause и Goal `blocked`.
   итог, текущий статус, основания и следующий шаг.
 - Успешный report объясняет полученный результат, существенные решения и причины,
   проверку и реальные ограничения. Blocked/partial report объясняет недостигнутый
-  результат, root cause или честную границу знания, self-recovery, причину
-  остановки и точный resume condition.
+  результат, root cause или честную границу знания, что агент уже сделал для
+  продолжения, причину остановки и точное условие возобновления.
 - Не превращать report в process diary, postmortem по шаблону или выгрузку
   protocol details. Reason codes, tool names, raw errors, полные Task/file lists
   и technical evidence включать только когда они действительно объясняют или

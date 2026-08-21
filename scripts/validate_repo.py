@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the portable ShipTask repository without third-party packages."""
+"""Validate ShipTask structure and current behavioral invariants."""
 
 from __future__ import annotations
 
@@ -9,1424 +9,663 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-AGENTS_FILE = ROOT / "AGENTS.md"
-SKILL_DIR = ROOT / "ship-tasks"
-SKILL_FILE = SKILL_DIR / "SKILL.md"
-OPENAI_FILE = SKILL_DIR / "agents" / "openai.yaml"
-STRATEGIC_SKILL_DIR = ROOT / "strategic-explainer"
-STRATEGIC_SKILL_FILE = STRATEGIC_SKILL_DIR / "SKILL.md"
-STRATEGIC_OPENAI_FILE = STRATEGIC_SKILL_DIR / "agents" / "openai.yaml"
-REPORT_REFERENCE = SKILL_DIR / "references" / "delivery-report.md"
-RUN_REPORT_REFERENCE = SKILL_DIR / "references" / "run-report.md"
-STRATEGIC_HANDOFF_REFERENCE = SKILL_DIR / "references" / "strategic-explainer.md"
-AUTONOMY_REFERENCE = SKILL_DIR / "references" / "autonomy-and-release.md"
-MEMORY_REFERENCE = SKILL_DIR / "references" / "project-memory.md"
+SHIP_SKILL = ROOT / "ship-tasks" / "SKILL.md"
+SHIP_METADATA = ROOT / "ship-tasks" / "agents" / "openai.yaml"
+STRATEGIC_SKILL = ROOT / "strategic-explainer" / "SKILL.md"
+STRATEGIC_METADATA = ROOT / "strategic-explainer" / "agents" / "openai.yaml"
+SPEC = ROOT / "docs" / "specs" / "ship-tasks.md"
+STRATEGIC_SPEC = ROOT / "docs" / "specs" / "strategic-explainer.md"
+OVERVIEW = ROOT / "docs" / "overview.md"
 DOCS_INDEX = ROOT / "docs" / "README.md"
-STRATEGIC_VISION_FILE = ROOT / "docs" / "strategic-explainer.md"
-SPEC_FILE = ROOT / "docs" / "specs" / "ship-tasks.md"
-STRATEGIC_SPEC_FILE = ROOT / "docs" / "specs" / "strategic-explainer.md"
-STRATEGIC_EVALUATION_FILE = (
-    ROOT / "docs" / "reference" / "strategic-explainer-evaluation.md"
-)
-REVIEW_DISPOSITION_EVALUATION_FILE = (
+DEVELOPMENT = ROOT / "docs" / "guides" / "development.md"
+REVIEW_MATRIX = (
     ROOT / "docs" / "reference" / "shiptask-review-disposition-evaluation.md"
 )
-STRATEGIC_RESEARCH_FILE = (
-    ROOT / "docs" / "reports" / "2026-08-20-strategic-explainer-research.md"
+STRATEGIC_EVALUATION = (
+    ROOT / "docs" / "reference" / "strategic-explainer-evaluation.md"
 )
-ADAPTER_FILE = ROOT / "docs" / "reference" / "task-manager-adapter.md"
-DECISION_FILE = ROOT / "docs" / "decisions" / "0001-task-manager-only.md"
-REPORT_DECISION_FILE = (
-    ROOT / "docs" / "decisions" / "0002-managed-delivery-report-in-task.md"
-)
-COMMENT_REPORT_DECISION_FILE = (
-    ROOT / "docs" / "decisions" / "0003-delivery-reports-as-task-comments.md"
-)
-AUTONOMY_DECISION_FILE = (
-    ROOT / "docs" / "decisions" / "0004-autonomous-continuation-and-release-authority.md"
-)
-AUTO_ACCEPTANCE_DECISION_FILE = (
-    ROOT / "docs" / "decisions" / "0005-automatic-terminal-acceptance.md"
-)
-POLICY_MEMORY_DECISION_FILE = (
-    ROOT / "docs" / "decisions" / "0007-delivery-policy-and-project-memory.md"
-)
-PLUGIN_DISTRIBUTION_DECISION_FILE = (
-    ROOT / "docs" / "decisions" / "0008-plugin-only-runtime-distribution.md"
-)
-TERMINAL_CAPABILITY_DECISION_FILE = (
-    ROOT / "docs" / "decisions" / "0009-terminal-report-capability-preflight.md"
-)
-BLOCKER_REPORT_DECISION_FILE = (
-    ROOT / "docs" / "decisions" / "0010-blocker-analysis-and-human-run-report.md"
-)
-SEPARATE_PLUGIN_DECISION_FILE = (
-    ROOT / "docs" / "decisions" / "0011-separate-shiptask-plugin-distribution.md"
-)
-STRATEGIC_EXPLAINER_DECISION_FILE = (
-    ROOT
-    / "docs"
-    / "decisions"
-    / "0012-strategic-explainer-as-portable-subagent-role.md"
-)
-STRATEGIC_REPORTS_DECISION_FILE = (
-    ROOT
-    / "docs"
-    / "decisions"
-    / "0013-strategic-explainer-for-shiptask-report-narratives.md"
-)
-STRATEGIC_DISCOVERY_DECISION_FILE = (
-    ROOT
-    / "docs"
-    / "decisions"
-    / "0014-problem-first-bounded-strategic-discovery.md"
-)
-REVIEW_DISPOSITION_DECISION_FILE = (
-    ROOT
-    / "docs"
-    / "decisions"
-    / "0015-single-pass-review-disposition.md"
-)
+ADAPTER = ROOT / "docs" / "reference" / "task-manager-adapter.md"
+VISION = ROOT / "docs" / "strategic-explainer.md"
+REPORT = ROOT / "ship-tasks" / "references" / "delivery-report.md"
+RUN_REPORT = ROOT / "ship-tasks" / "references" / "run-report.md"
+AUTONOMY = ROOT / "ship-tasks" / "references" / "autonomy-and-release.md"
+MEMORY = ROOT / "ship-tasks" / "references" / "project-memory.md"
+HANDOFF = ROOT / "ship-tasks" / "references" / "strategic-explainer.md"
 
-REQUIRED_FILES = (
-    ROOT / "README.md",
-    AGENTS_FILE,
-    ROOT / ".gitignore",
-    ROOT / ".gitattributes",
-    SKILL_FILE,
-    OPENAI_FILE,
-    STRATEGIC_SKILL_FILE,
-    STRATEGIC_OPENAI_FILE,
-    REPORT_REFERENCE,
-    RUN_REPORT_REFERENCE,
-    STRATEGIC_HANDOFF_REFERENCE,
-    AUTONOMY_REFERENCE,
-    MEMORY_REFERENCE,
-    DOCS_INDEX,
-    STRATEGIC_VISION_FILE,
-    SPEC_FILE,
-    STRATEGIC_SPEC_FILE,
-    STRATEGIC_EVALUATION_FILE,
-    REVIEW_DISPOSITION_EVALUATION_FILE,
-    STRATEGIC_RESEARCH_FILE,
-    ADAPTER_FILE,
-    DECISION_FILE,
-    REPORT_DECISION_FILE,
-    COMMENT_REPORT_DECISION_FILE,
-    AUTONOMY_DECISION_FILE,
-    AUTO_ACCEPTANCE_DECISION_FILE,
-    POLICY_MEMORY_DECISION_FILE,
-    PLUGIN_DISTRIBUTION_DECISION_FILE,
-    TERMINAL_CAPABILITY_DECISION_FILE,
-    BLOCKER_REPORT_DECISION_FILE,
-    SEPARATE_PLUGIN_DECISION_FILE,
-    STRATEGIC_EXPLAINER_DECISION_FILE,
-    STRATEGIC_REPORTS_DECISION_FILE,
-    STRATEGIC_DISCOVERY_DECISION_FILE,
-    REVIEW_DISPOSITION_DECISION_FILE,
-)
-
-FORBIDDEN_SKILL_PATTERNS = {
-    "ExampleNotes": re.compile(r"mind\s*diary", re.IGNORECASE),
-    "Sites": re.compile(r"\bsites\b", re.IGNORECASE),
-    "legacy skill name": re.compile(
-        r"ship-(?:lin" r"ear|work)-release", re.IGNORECASE
-    ),
+ADR = {
+    number: ROOT / "docs" / "decisions" / name
+    for number, name in (
+        ("0001", "0001-task-manager-only.md"),
+        ("0002", "0002-managed-delivery-report-in-task.md"),
+        ("0003", "0003-delivery-reports-as-task-comments.md"),
+        ("0004", "0004-autonomous-continuation-and-release-authority.md"),
+        ("0005", "0005-automatic-terminal-acceptance.md"),
+        ("0006", "0006-delivery-comment-as-terminal-effect.md"),
+        ("0007", "0007-delivery-policy-and-project-memory.md"),
+        ("0008", "0008-plugin-only-runtime-distribution.md"),
+        ("0009", "0009-terminal-report-capability-preflight.md"),
+        ("0010", "0010-blocker-analysis-and-human-run-report.md"),
+        ("0011", "0011-separate-shiptask-plugin-distribution.md"),
+        ("0012", "0012-strategic-explainer-as-portable-subagent-role.md"),
+        ("0013", "0013-strategic-explainer-for-shiptask-report-narratives.md"),
+        ("0014", "0014-problem-first-bounded-strategic-discovery.md"),
+        ("0015", "0015-single-pass-review-disposition.md"),
+        ("0016", "0016-current-lifecycle-and-reporting-contract.md"),
+    )
 }
 
-RETIRED_PROVIDER_RE = re.compile("lin" + "ear", re.IGNORECASE)
-SKILL_GENERATION_RE = re.compile(
-    r"(?:ship[- ]?tasks|shiptask)\s*-?\s*v\d+", re.IGNORECASE
+CORE_FILES = (
+    ROOT / "README.md",
+    ROOT / "AGENTS.md",
+    ROOT / ".gitignore",
+    ROOT / ".gitattributes",
+    SHIP_SKILL,
+    SHIP_METADATA,
+    STRATEGIC_SKILL,
+    STRATEGIC_METADATA,
+    SPEC,
+    STRATEGIC_SPEC,
+    OVERVIEW,
+    DOCS_INDEX,
+    DEVELOPMENT,
+    REVIEW_MATRIX,
+    STRATEGIC_EVALUATION,
+    ADAPTER,
+    VISION,
+    REPORT,
+    RUN_REPORT,
+    AUTONOMY,
+    MEMORY,
+    HANDOFF,
+    *ADR.values(),
+)
+
+# These files describe current behavior. Historical reports and superseded ADRs
+# may retain old wording, but cannot act as fallback policy.
+CURRENT_CONTRACT_FILES = (
+    ROOT / "README.md",
+    SHIP_SKILL,
+    SHIP_METADATA,
+    SPEC,
+    OVERVIEW,
+    DEVELOPMENT,
+    REVIEW_MATRIX,
+    REPORT,
+    RUN_REPORT,
+    AUTONOMY,
+    MEMORY,
+    HANDOFF,
+    ADR["0015"],
+    ADR["0016"],
 )
 
 LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 
-TRIGGER_MATRIX = (
-    ("$ship-tasks", "да", "`batch` по memory `current_scope`"),
-    ("Выполни TM-123", "да", "`single` для exact существующей Task"),
-    (
-        "Доведи выбранный Task Manager Project Alpha",
-        "да",
-        "`batch` выбранного Project",
-    ),
-    (
-        "Выпусти выбранный Task Manager Release 0.2",
-        "да",
-        "`batch` выбранного Release",
-    ),
-    (
-        "Доведи текущий Task Manager scope",
-        "да",
-        "`batch` уже выбранного current scope",
-    ),
-    (
-        "Создай ровно одну Task в Task Manager: исправить импорт, и сразу начни выполнять её",
-        "да",
-        "`single create-and-deliver`",
-    ),
-    (
-        "Почини X сейчас",
-        "нет",
-        "обычная реализация без Task Manager scope",
-    ),
-    (
-        "Исправь баг в plugin",
-        "нет",
-        "обычная реализация без Task Manager scope",
-    ),
-    (
-        "Реализуй это изменение в коде",
-        "нет",
-        "обычная реализация без Task Manager scope",
-    ),
-    ("Покажи статус TM-123", "нет", "read-only Task Manager adapter"),
-    ("Проведи аудит TM-123", "нет", "read-only Task Manager adapter"),
-    (
-        "Создай Task в Task Manager",
-        "нет",
-        "planning/write через adapter, без delivery flow",
-    ),
-    (
-        "Просто добавь это в backlog",
-        "нет",
-        "backlog capture, без delivery flow",
-    ),
-)
 
-REVIEW_DISPOSITION_CASES = (
-    (
-        "Current acceptance противоречит самому себе",
-        "`task-contract-conflict`",
-        "`In Review`",
-        "`BLOCKED` с точным conflict и decision",
-        "запрещён",
-    ),
-    (
-        "Exact candidate воспроизводимо нарушает критерий",
-        "`verified-failure`",
-        "`In Progress`",
-        "`REWORK REQUIRED`",
-        "не нужен; начать rework",
-    ),
-    (
-        "Test harness сломан",
-        "`verification-blocked`",
-        "`In Review`",
-        "`BLOCKED` и 2–4 способа проверки",
-        "запрещён без repair/change",
-    ),
-    (
-        "Batch gate упал, виновная Task не установлена",
-        "`verification-blocked` для неразличимых members",
-        "`In Review`",
-        "`BLOCKED` и diagnostic options",
-        "запрещён без нового separating evidence",
-    ),
-    (
-        "Полный evidence доказывает критерии",
-        "`verified-success`",
-        "`Done` после comment",
-        "`COMPLETED`",
-        "не нужен",
-    ),
-    (
-        "Comment channel отсутствует при proven failure",
-        "`verified-failure`",
-        "`In Progress`",
-        "communication remainder в run report",
-        "приёмку не повторять",
-    ),
-    (
-        "Comment channel отсутствует при success",
-        "`verified-success`, terminal effect incomplete",
-        "`In Review`",
-        "pending `COMPLETED`",
-        "приёмку не повторять",
-    ),
-    (
-        "Все remaining Tasks verification-blocked",
-        "task-local blockers",
-        "без изменений",
-        "один consolidated handoff",
-        "Goal остаётся active, искусственные turns запрещены",
-    ),
-)
+def read(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def relative(path: Path) -> str:
+    return str(path.relative_to(ROOT))
 
 
 def fail(errors: list[str], message: str) -> None:
     errors.append(message)
 
 
-def validate_frontmatter(errors: list[str], text: str) -> None:
+def require(errors: list[str], path: Path, *terms: str) -> None:
+    text = read(path)
+    normalized_text = normalize(text)
+    for term in terms:
+        if term not in text and normalize(term) not in normalized_text:
+            fail(errors, f"{relative(path)} is missing required concept {term!r}")
+
+
+def forbid(errors: list[str], path: Path, *terms: str) -> None:
+    text = read(path)
+    for term in terms:
+        if term in text:
+            fail(errors, f"{relative(path)} contains retired contract {term!r}")
+
+
+def normalize(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def section(text: str, heading: str) -> str | None:
+    """Return a Markdown section beginning at an exact heading."""
+    lines = text.splitlines()
+    try:
+        start = lines.index(heading)
+    except ValueError:
+        return None
+    level = len(heading) - len(heading.lstrip("#"))
+    end = len(lines)
+    for index in range(start + 1, len(lines)):
+        match = re.match(r"^(#+)\s", lines[index])
+        if match and len(match.group(1)) <= level:
+            end = index
+            break
+    return "\n".join(lines[start:end])
+
+
+def table_rows(text: str, heading: str) -> list[list[str]]:
+    body = section(text, heading)
+    if body is None:
+        return []
+    rows: list[list[str]] = []
+    for line in body.splitlines():
+        if not line.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if not cells or all(re.fullmatch(r":?-+:?", cell) for cell in cells):
+            continue
+        rows.append(cells)
+    return rows
+
+
+def validate_frontmatter(
+    errors: list[str], path: Path, expected_name: str, max_lines: int
+) -> None:
+    text = read(path)
     lines = text.splitlines()
     if not lines or lines[0] != "---":
-        fail(errors, "ship-tasks/SKILL.md must start with YAML frontmatter")
+        fail(errors, f"{relative(path)} must start with YAML frontmatter")
         return
     try:
         closing = lines.index("---", 1)
     except ValueError:
-        fail(errors, "ship-tasks/SKILL.md frontmatter is not closed")
+        fail(errors, f"{relative(path)} frontmatter is not closed")
         return
 
-    keys: list[str] = []
+    keys = []
     for line in lines[1:closing]:
         match = re.match(r"^([a-z_][a-z0-9_-]*):(?:\s|$)", line)
         if match:
             keys.append(match.group(1))
     if keys != ["name", "description"]:
-        fail(
-            errors,
-            "SKILL.md frontmatter must contain only name and description, in order",
-        )
-    if "name: ship-tasks" not in "\n".join(lines[1:closing]):
-        fail(errors, "SKILL.md name must be ship-tasks")
-    if len(lines) > 500:
-        fail(errors, f"SKILL.md is too long for runtime context: {len(lines)} lines")
+        fail(errors, f"{relative(path)} frontmatter must contain name and description")
+    if f"name: {expected_name}" not in "\n".join(lines[1:closing]):
+        fail(errors, f"{relative(path)} name must be {expected_name}")
+    if len(lines) > max_lines:
+        fail(errors, f"{relative(path)} is too long: {len(lines)} > {max_lines}")
+    if "[TODO" in text or "TODO:" in text:
+        fail(errors, f"{relative(path)} contains an unfinished placeholder")
 
 
-def validate_skill(errors: list[str]) -> None:
-    text = SKILL_FILE.read_text(encoding="utf-8")
-    validate_frontmatter(errors, text)
+def validate_ship_skill(errors: list[str]) -> None:
+    validate_frontmatter(errors, SHIP_SKILL, "ship-tasks", 360)
+    text = read(SHIP_SKILL)
+    description = text.split("---", 2)[1] if text.count("---") >= 2 else ""
 
-    frontmatter = text.split("---", 2)[1] if text.count("---") >= 2 else ""
-    for fragment in (
+    for term in (
         "$ship-tasks",
-        "однозначно выбранный Task Manager scope",
-        "implicit invocation — только",
-        "exact существующей Task (например TM-123)",
-        "выбранным Task Manager Project/Release/current scope",
+        "Task Manager scope",
+        "implicit invocation",
+        "TM-123",
         "Одного delivery-глагола недостаточно",
-        "исправить продукт, код, repository или plugin",
-        "ровно одну Task именно в Task Manager",
-        "ShipTask project memory",
-        "Bare $ship-tasks запускает batch",
-        "exact Task — single без Goal",
-        "Не использовать для чтения",
+        "Create-and-deliver",
+        "Bare $ship-tasks",
+        "single без Goal",
+        "batch с Goal",
         "backlog capture",
     ):
-        if fragment not in frontmatter:
-            fail(errors, f"SKILL.md description is missing trigger contract {fragment!r}")
+        if term not in description:
+            fail(errors, f"ship-tasks description is missing routing concept {term!r}")
 
-    for forbidden in (
-        "по естественным просьбам выполнить, исправить или довести",
-        "создать одну Task и сразу начать",
-    ):
-        if forbidden in frontmatter:
-            fail(errors, f"SKILL.md description contains broad trigger {forbidden!r}")
+    required_sections = (
+        "## 1. Проверить запуск и выбрать mode",
+        "## 2. Разрешить exact scope и live state",
+        "## 3. Создать Goal только для batch",
+        "## 4. Согласовать lifecycle с фактами",
+        "## 5. Разобрать каждую `In Review` за один проход",
+        "## 6. Выполнить и проверить",
+        "## 7. Продолжать автономно и соблюдать release boundary",
+        "## 8. Никогда не ждать ручную приёмку",
+        "## 9. Опубликовать понятный Task report",
+        "## 10. Финализировать run",
+    )
+    for heading in required_sections:
+        if section(text, heading) is None:
+            fail(errors, f"ship-tasks/SKILL.md is missing section {heading!r}")
 
-    if "[TODO" in text or "TODO:" in text:
-        fail(errors, "SKILL.md contains a template TODO")
-    if "Task Manager" not in text:
-        fail(errors, "SKILL.md must use Task Manager as its only task source")
-    for label, pattern in FORBIDDEN_SKILL_PATTERNS.items():
-        match = pattern.search(text)
-        if match:
-            line = text.count("\n", 0, match.start()) + 1
-            fail(errors, f"SKILL.md contains {label} residue at line {line}")
+    require(
+        errors,
+        SHIP_SKILL,
+        "hasMore=false",
+        "version_conflict",
+        "TASK CONTEXT ALARM",
+        "task-contract-conflict",
+        "verified-success",
+        "verified-failure",
+        "verification-blocked",
+        "In Review → In Progress",
+        "2–4 способа",
+        "unclear attribution",
+        "runnable_count > 0",
+        "production-approval-required",
+        "ACCEPTANCE READY",
+        "fork_turns=\"none\"",
+        "$ship-tasks:strategic-explainer",
+        "degraded-adaptation",
+        "SHIPTASK RUN REPORT",
+    )
 
-    metadata = OPENAI_FILE.read_text(encoding="utf-8")
-    required_fragments = (
+    require(
+        errors,
+        SHIP_METADATA,
         'display_name: "Ship Tasks"',
         'short_description: "Доставить выбранный Task Manager scope"',
         "$ship-tasks",
-        "создать ровно одну Task в Task Manager",
         'value: "task-manager"',
         "allow_implicit_invocation: true",
+        "In Review Task",
     )
-    for fragment in required_fragments:
-        if fragment not in metadata:
-            fail(errors, f"agents/openai.yaml is missing {fragment!r}")
 
 
-def validate_strategic_explainer(errors: list[str]) -> None:
-    text = STRATEGIC_SKILL_FILE.read_text(encoding="utf-8")
-    lines = text.splitlines()
-    if not lines or lines[0] != "---":
-        fail(errors, "strategic-explainer/SKILL.md must start with YAML frontmatter")
-        return
-    try:
-        closing = lines.index("---", 1)
-    except ValueError:
-        fail(errors, "strategic-explainer/SKILL.md frontmatter is not closed")
-        return
-
-    keys: list[str] = []
-    for line in lines[1:closing]:
-        match = re.match(r"^([a-z_][a-z0-9_-]*):(?:\s|$)", line)
-        if match:
-            keys.append(match.group(1))
-    if keys != ["name", "description"]:
-        fail(
-            errors,
-            "strategic-explainer frontmatter must contain only name and description",
-        )
-    if "name: strategic-explainer" not in "\n".join(lines[1:closing]):
-        fail(errors, "Strategic Explainer skill name must be strategic-explainer")
-    if len(lines) > 240:
-        fail(
-            errors,
-            f"strategic-explainer/SKILL.md is too long: {len(lines)} lines",
-        )
-
-    for fragment in (
-        "Strategic Handoff",
+def validate_strategic_skill(errors: list[str]) -> None:
+    validate_frontmatter(errors, STRATEGIC_SKILL, "strategic-explainer", 240)
+    require(
+        errors,
+        STRATEGIC_SKILL,
         "Problem to solve",
         "Current-State Brief",
-        "PROBLEM_CONTEXT_ERROR",
-        "не передана содержательная задача, которую мы решаем",
-        "для кого предназначен результат",
-        "какой наблюдаемый outcome нужен",
-        "Одного identifier или технического",
-        "свободное стратегическое объяснение",
-        "structured result",
-        "Не выполнять writes",
-        "Не решать, завершена ли работа",
-        "Проверить чистоту subagent context",
         "CONTEXT_INTEGRITY_ERROR",
-        'fork_turns="none"',
-        "System/developer instructions",
-        "игнорировать унаследованную историю",
+        "PROBLEM_CONTEXT_ERROR",
+        "fork_turns=\"none\"",
         "bounded read-only tools",
         "current/accepted",
         "proposed",
         "historical",
-        "source note",
-        "stop condition",
-        "CONFIRMED",
-        "PROBABLE",
-        "UNKNOWN",
-        "Не объединять независимые сценарии",
-        "VERIFIED",
-        "NOT_APPLICABLE",
         "Decision support request",
-        "2–4 реально",
-        "need-to-know filter",
+        "2–4",
         "Forward trace",
         "Reverse coverage",
-        "сформулирует окончательный user-facing текст своими",
-        "comment payload",
-        "визуализац",
-        "не создавать отдельный media artifact",
-        "читателю не нужны внутренние tools",
-    ):
-        if fragment not in text:
-            fail(errors, f"Strategic Explainer skill is missing {fragment!r}")
-
-    for forbidden in ("ShipTask", "Task Manager", "$ship-tasks", "TM-123"):
-        if forbidden in text:
-            fail(
-                errors,
-                f"Strategic Explainer runtime is coupled to a consumer: {forbidden!r}",
-            )
-
-    for forbidden in (
-        "PARENT NOTES",
-        "игнорировать её и не извлекать",
-        "можно вставить в указанную user-visible поверхность",
-        "1 600 символов",
-    ):
-        if forbidden in text:
-            fail(errors, f"Strategic Explainer runtime retains obsolete contract {forbidden!r}")
-
-    metadata = STRATEGIC_OPENAI_FILE.read_text(encoding="utf-8")
-    for fragment in (
+        "source basis",
+        "не готовый comment payload",
+    )
+    text = read(STRATEGIC_SKILL)
+    for coupling in ("ShipTask", "Task Manager", "$ship-tasks", "TM-123"):
+        if coupling in text:
+            fail(errors, f"Strategic Explainer runtime is coupled to {coupling!r}")
+    require(
+        errors,
+        STRATEGIC_METADATA,
         'display_name: "Strategic Explainer"',
         'short_description: "Связать проблему, стратегию и текущий результат"',
         "$strategic-explainer",
         "allow_implicit_invocation: true",
-    ):
-        if fragment not in metadata:
-            fail(errors, f"Strategic Explainer openai.yaml is missing {fragment!r}")
+    )
+
+
+TRIGGER_CASES = {
+    "$ship-tasks": ("да", "`batch` по memory `current_scope`"),
+    "Выполни TM-123": ("да", "`single` для exact существующей Task"),
+    "Доведи выбранный Task Manager Project Alpha": ("да", "`batch` выбранного Project"),
+    "Выпусти выбранный Task Manager Release 0.2": ("да", "`batch` выбранного Release"),
+    "Доведи текущий Task Manager scope": ("да", "`batch` уже выбранного current scope"),
+    "Создай ровно одну Task в Task Manager: исправить импорт, и сразу начни выполнять её": (
+        "да",
+        "`single create-and-deliver`",
+    ),
+    "Почини X сейчас": ("нет", "обычная реализация без Task Manager scope"),
+    "Исправь баг в plugin": ("нет", "обычная реализация без Task Manager scope"),
+    "Реализуй это изменение в коде": ("нет", "обычная реализация без Task Manager scope"),
+    "Покажи статус TM-123": ("нет", "read-only Task Manager adapter"),
+    "Проведи аудит TM-123": ("нет", "read-only Task Manager adapter"),
+    "Создай Task в Task Manager": ("нет", "planning/write через adapter, без delivery flow"),
+    "Просто добавь это в backlog": ("нет", "backlog capture, без delivery flow"),
+}
 
 
 def validate_trigger_matrix(errors: list[str]) -> None:
-    spec_text = SPEC_FILE.read_text(encoding="utf-8")
-    marker = "### 1.3 Проверяемая trigger matrix"
-    if marker not in spec_text:
-        fail(errors, "canonical specification is missing the trigger matrix")
+    rows = table_rows(read(SPEC), "### 1.3 Проверяемая trigger matrix")
+    data = {cells[0].strip("`"): cells[1:] for cells in rows[1:] if len(cells) == 3}
+    if set(data) != set(TRIGGER_CASES):
+        missing = sorted(set(TRIGGER_CASES) - set(data))
+        extra = sorted(set(data) - set(TRIGGER_CASES))
+        fail(errors, f"trigger matrix mismatch; missing={missing}, extra={extra}")
         return
+    for prompt, expected in TRIGGER_CASES.items():
+        actual = tuple(data[prompt])
+        if actual != expected:
+            fail(errors, f"trigger case {prompt!r} is {actual}, expected {expected}")
 
-    section = spec_text.split(marker, 1)[1].split("\n### ", 1)[0]
-    for prompt, activation, result in TRIGGER_MATRIX:
-        expected = f"| `{prompt}` | {activation} | {result} |"
-        if expected not in section:
-            fail(errors, f"trigger matrix is missing exact case {prompt!r}")
 
-    matrix_rows = [line for line in section.splitlines() if line.startswith("| `")]
-    if len(matrix_rows) != len(TRIGGER_MATRIX):
-        fail(
+REVIEW_CASES = {
+    "Current acceptance противоречит самому себе": (
+        "task-contract-conflict",
+        "In Review",
+        "BLOCKED",
+    ),
+    "Contract conflict однозначно разрешается": ("исправить contract", "read-back"),
+    "История acceptance длинная, current contract однозначен": (
+        "продолжить проверку current contract",
+    ),
+    "Exact candidate воспроизводимо нарушает критерий": (
+        "verified-failure",
+        "In Progress",
+        "REWORK REQUIRED",
+    ),
+    "Test harness сломан": ("verification-blocked", "In Review", "2–4"),
+    "Batch gate упал, виновная Task не установлена": (
+        "verification-blocked",
+        "In Review",
+        "separating evidence",
+    ),
+    "Нет нужного внешнего actor или доступа": (
+        "verification-blocked",
+        "In Review",
+        "2–4",
+    ),
+    "Полный evidence доказывает критерии": (
+        "verified-success",
+        "Done",
+        "COMPLETED",
+    ),
+    "Comment channel отсутствует при proven failure": (
+        "verified-failure",
+        "In Progress",
+        "communication remainder",
+    ),
+    "Comment channel отсутствует при success": (
+        "verified-success",
+        "In Review",
+        "pending `COMPLETED`",
+    ),
+    "Comment channel отсутствует при verification blocker": (
+        "verification-blocked",
+        "In Review",
+        "communication remainder",
+    ),
+    "Новый canceled outcome, comment channel отсутствует": (
+        "не писать `Canceled`",
+        "pending `CANCELED`",
+    ),
+    "Все remaining Tasks verification-blocked": (
+        "task-local blockers",
+        "Goal остаётся active",
+    ),
+}
+
+
+def validate_review_matrix(errors: list[str]) -> None:
+    rows = table_rows(read(REVIEW_MATRIX), "## Обязательная матрица")
+    data = {cells[0]: " | ".join(cells[1:]) for cells in rows[1:] if len(cells) == 6}
+    for case, terms in REVIEW_CASES.items():
+        row = data.get(case)
+        if row is None:
+            fail(errors, f"review matrix is missing case {case!r}")
+            continue
+        for term in terms:
+            if term not in row:
+                fail(errors, f"review case {case!r} is missing {term!r}")
+
+
+def validate_current_contract(errors: list[str]) -> None:
+    require(
+        errors,
+        SPEC,
+        "Статус: current contract, 2026-08-21",
+        "ADR-0016",
+        "#### 5.3.1 Однократная классификация `In Review`",
+        "Падение aggregate gate",
+        "task-level attribution",
+        "terminal report (`COMPLETED`",
+        "нового `CANCELED` transition",
+        "не повторять тот же acceptance scenario",
+    )
+    require(
+        errors,
+        OVERVIEW,
+        "Сам status не доказывает проверку",
+        "только Tasks с доказанным failure",
+        "отдельной незавершённой публикацией",
+        "ADR-0016",
+    )
+    require(
+        errors,
+        REPORT,
+        "proven failure",
+        "verification-blocked",
+        "нового canceled",
+        "не доказывает failure каждого member",
+        "2–4 способа получить недостающее",
+    )
+    require(
+        errors,
+        AUTONOMY,
+        "verification-blocked",
+        "task-contract-conflict",
+        "попытаться опубликовать",
+        "не меняет уже установленный review disposition",
+        "runnable_count",
+    )
+    require(
+        errors,
+        ADR["0016"],
+        "`In Review` нейтрален",
+        "Defect требует прямого доказательства",
+        "Status и комментарий — разные эффекты",
+        "Нет счётчика повторов",
+        "Форма отчёта подчинена смыслу",
+        "Источники истины",
+    )
+
+    contradiction_patterns = {
+        "three-turn blocker threshold": re.compile(
+            r"(?:тр[её]х|три)\s+(?:consecutive\s+)?(?:Goal\s+)?turn", re.I
+        ),
+        "unclear batch reopened into rework": re.compile(
+            r"неясн\w*\s+attribution.{0,120}(?:весь|все).{0,80}In Progress",
+            re.I | re.S,
+        ),
+        "review status asserted as verified": re.compile(
+            r"In Review.{0,30}(?:targeted-verified|machine-verified)", re.I | re.S
+        ),
+        "mandatory diagram by complexity": re.compile(
+            r"non-trivial.{0,60}(?:получает|требует).{0,30}diagram", re.I | re.S
+        ),
+        "orchestration failure stops reporting": re.compile(
+            r"повторн\w*\s+отказ.{0,80}останавливает\s+report", re.I | re.S
+        ),
+        "stale adapter cutover": re.compile(
+            r"Task Manager skill пока содержит.{0,80}старого delivery", re.I | re.S
+        ),
+    }
+    for path in CURRENT_CONTRACT_FILES:
+        text = read(path)
+        for label, pattern in contradiction_patterns.items():
+            match = pattern.search(text)
+            if match:
+                line = text.count("\n", 0, match.start()) + 1
+                fail(errors, f"{relative(path)} has {label} at line {line}")
+
+    for path in CURRENT_CONTRACT_FILES:
+        forbid(
             errors,
-            "trigger matrix must contain exactly the validated positive/negative cases",
+            path,
+            "acceptance-required state",
+            "ACCEPTANCE READY report",
+            "reopen получает весь связанный batch",
+            "Tasks с недействительным evidence в `In Progress`",
+            "self-recovery",
+            "Technical Brief",
         )
 
-    skill_text = SKILL_FILE.read_text(encoding="utf-8")
-    for prompt in (
-        "$ship-tasks",
-        "Выполни TM-123",
-        "Доведи выбранный Task Manager Project/Release/current scope",
-        "Создай ровно одну Task в Task Manager и сразу начни выполнять её",
-        "Почини X сейчас",
-        "Исправь баг в plugin",
-        "Реализуй это изменение в коде",
-    ):
-        if prompt not in skill_text:
-            fail(errors, f"runtime gate is missing regression example {prompt!r}")
 
-
-def validate_review_disposition_contract(errors: list[str]) -> None:
-    evaluation_text = REVIEW_DISPOSITION_EVALUATION_FILE.read_text(encoding="utf-8")
-    rows = [line for line in evaluation_text.splitlines() if line.startswith("| ")]
-
-    for case, classification, status, report, retry in REVIEW_DISPOSITION_CASES:
-        matching = [line for line in rows if line.startswith(f"| {case} |")]
-        if len(matching) != 1:
-            fail(errors, f"review disposition matrix needs one row for {case!r}")
-            continue
-        row = matching[0]
-        for expected in (classification, status, report, retry):
-            if expected not in row:
-                fail(
-                    errors,
-                    f"review disposition case {case!r} is missing {expected!r}",
-                )
-
-    for path, fragments in (
-        (
-            SPEC_FILE,
-            (
-                "Однократная классификация `In Review`",
-                "`task-contract-conflict`",
-                "`verified-success`",
-                "`verified-failure`",
-                "`verification-blocked`",
-                "Ошибка test harness",
-                "2–4 реалистичных способа провести приёмку",
-                "создавать дополнительные ходы",
-            ),
-        ),
-        (
-            SKILL_FILE,
-            (
-                "Разобрать `In Review` за один проход",
-                "`task-contract-conflict`",
-                "`verified-success`",
-                "`verified-failure`",
-                "`verification-blocked`",
-                "Недоступный comment channel",
-                "2–4 способа провести приёмку",
-                "не добиваться Goal `blocked` искусственными повторами",
-            ),
-        ),
-        (
-            REVIEW_DISPOSITION_DECISION_FILE,
-            (
-                "Однократная классификация приёмки",
-                "Статус: accepted, 2026-08-21",
-                "строгого Goal blocker threshold",
-                "`In Review → In Progress`",
-                "communication remainder",
-                "2–4",
-                "искусственными повторами",
-            ),
-        ),
-    ):
-        text = path.read_text(encoding="utf-8")
-        for fragment in fragments:
-            if fragment not in text:
-                fail(
-                    errors,
-                    f"{path.relative_to(ROOT)} is missing review disposition contract {fragment!r}",
-                )
-
-    for path in (
-        SKILL_FILE,
-        SPEC_FILE,
-        REPORT_REFERENCE,
-        RUN_REPORT_REFERENCE,
-        AUTONOMY_REFERENCE,
-    ):
-        text = path.read_text(encoding="utf-8")
-        for forbidden in (
-            "строгого tool threshold",
-            "строгого model-tool threshold",
-            "blocker occurrence",
-            "self-recovery",
-        ):
-            if forbidden in text:
-                fail(
-                    errors,
-                    f"{path.relative_to(ROOT)} retains repeat-driven blocker rule {forbidden!r}",
-                )
-
-
-def validate_workflow_contract(errors: list[str]) -> None:
-    agents_text = AGENTS_FILE.read_text(encoding="utf-8")
-    for fragment in (
-        "## Definition of done для изменения skill",
-        "Exact repository scope закоммичен",
-        "local `HEAD` совпадает с",
-        "все три критерия",
-        "Srez Marketplace/plugins/ship-tasks/skills/ship-tasks",
-        "Srez Marketplace/plugins/ship-tasks/skills/strategic-explainer",
-        "ship-tasks@srez-marketplace",
-        "task-manager@srez-marketplace` остаётся adapter-only",
-        "installed cache",
-        "installed/enabled",
-        "Standalone user-level каталоги `~/.codex/skills/ship-tasks`",
-        "~/.codex/skills/strategic-explainer",
-        "`skills/list` не должен возвращать отдельные user skills",
-        "не удаляются вручную",
-    ):
-        if fragment not in agents_text:
-            fail(errors, f"AGENTS.md is missing delivery DoD contract {fragment!r}")
-
-    required_skill_fragments = (
-        "## Проверить invocation gate",
-        "ровно один однозначный Task Manager delivery anchor",
-        "Один delivery verb недостаточен",
-        "не активируют ShipTask",
-        "Не читать memory и не вызывать",
-        "Если gate не пройден, ShipTask не владеет запросом",
-        "Natural-language read/status/audit/explain/plan/backlog request не активирует",
-        "## Необязательно назвать свежий Codex thread",
-        "UI metadata, не Task Manager write",
-        "codex_app__read_thread",
-        "codex_app__set_thread_title",
-        "первый пользовательский",
-        "setter\nне более одного раза",
-        "Title, начинающийся с `ShipTask ·`, повторно не менять",
-        "Если app title tool отсутствует",
-        "Классифицировать intent до mutations",
-        "Bare `$ship-tasks`",
-        "`single` требует ровно одну canonical",
-        "`single create-and-deliver`",
-        "Не завершать flow после одного `create_task`",
-        "exact Task, только что",
-        "перевести её в `In Progress`",
-        "`memory-maintenance`",
-        "project-memory reference",
-        "Exact selector в текущем prompt выше memory default",
-        "Task Manager adapter",
-        "Создать Goal только для batch",
-        "В `single`, `memory-maintenance` и `non-delivery` не вызывать Goal tools",
-        "Любая `In Review` Task означает незавершённую классификацию результата",
-        "Разобрать `In Review` за один проход",
-        "`verification-blocked`",
-        "per-Task targeted gate",
-        "review-batch gate",
-        "status-reconciliation",
-        "active write target равен `1`",
-        "Не начинать новую Task, если занятые lanes",
-        "run-report reference",
-        "Strategic Explainer handoff",
-        "$ship-tasks:strategic-explainer",
-        "bounded `Strategic Handoff`",
-        "`Problem to solve`",
-        "`Current-State Brief`",
-        "bounded read-only strategic discovery",
-        "source basis",
-        "Каждый новый `COMPLETED`, `REWORK REQUIRED`, `BLOCKED` или `CANCELED` comment",
-        "Перед comment-level Strategic Handoff выполнить task-level finalization",
-        "task-scoped Strategic Explainer pipeline",
-        "Authoritative envelope",
-        'fork_turns="none"',
-        "Fresh handoff",
-        "CONTEXT_INTEGRITY_ERROR",
-        "PROBLEM_CONTEXT_ERROR",
-        "semantic problem",
-        "положительное число fork turns",
-        "один раз перезапустить",
-        "пишет своими словами",
-        "structured result",
-        "не copy-ready comment",
-        "До публикации `BLOCKED` comment",
-        "scope-level explanation",
-        "comment/read-back и terminal status reconciliation",
-        "summary не является допустимым fallback",
-        "communication layer",
-        "Communication helper не создаёт новый terminal blocker",
-        "finalization pass",
-        "Blocker остаётся blocker до устранения",
-        "SHIPTASK RUN REPORT",
-        "delivery-report reference",
-        "published/read-back `COMPLETED`",
-        "Никогда не писать",
-        "autonomy and release reference",
-        "Не задавать пользователю вопрос",
-        "`deferred`",
-        "`runnable_count > 0`",
-        "## Никогда не требовать ручную приёмку",
-        "автоматически принять exact",
-        "superseded historical evidence",
-        "Никогда не переводить Goal в `blocked` по этой причине",
-        "verified non-production target",
-        "Никогда не выполнять production release",
-        "Осмыслить и завершить по mode",
-    )
-    required_spec_fragments = (
-        "### 1.1 Слои ответственности",
-        "### 1.2 Invocation gate и классификация execution mode",
-        "однозначный Task Manager delivery anchor",
-        "Один delivery verb недостаточен",
-        "нельзя читать их, чтобы задним числом",
-        "### 1.3 Проверяемая trigger matrix",
-        "### 1.4 Необязательное название текущего Codex thread",
-        "UI metadata",
-        "codex_app__read_thread",
-        "codex_app__set_thread_title",
-        "первый пользовательский\n   ход нового thread",
-        "Любой другой непустой\n   title считать пользовательским",
-        "После разрешения scope вызвать title setter не более одного раза",
-        "Если setter отсутствует или вернул ошибку",
-        "ShipTask · <Task ref> · <short Task title>",
-        "Bare `$ship-tasks`",
-        "`single` (`create-and-deliver`)",
-        "не является backlog",
-        "только что созданная самим workflow",
-        "только затем начинать",
-        "`memory-maintenance`",
-        "приоритет над memory default",
-        "Обязательный Goal только для batch",
-        "`single`, `memory-maintenance` и `non-delivery` не вызывают",
-        "### 5.3 Terminal invariant и automatic acceptance",
-        "#### 5.3.1 Однократная классификация `In Review`",
-        "`task-contract-conflict`",
-        "`verified-failure`",
-        "`verification-blocked`",
-        "### 6.1 Двухуровневая verification",
-        "`active_write_target` и `batch_target` — разные величины",
-        "status-reconciliation barrier",
-        "начинать следующую `To Do` запрещено",
-        "### 9.3 Осмысленная финализация и terminal interaction report",
-        "Strategic Explainer = problem-first read-only strategic discovery, no decisions",
-        "собственной specification",
-        "новый built-in",
-        "`default` subagent",
-        'fork_turns="none"',
-        "CONTEXT_INTEGRITY_ERROR",
-        "PROBLEM_CONTEXT_ERROR",
-        "не передана содержательная задача, которую мы решаем",
-        "какой наблюдаемый outcome нужен",
-        "Strategic Handoff",
-        "Problem to solve",
-        "Current-State Brief",
-        "read-only tools",
-        "source basis",
-        "Положительное число fork turns",
-        "один раз запускает новый default subagent",
-        "пишет пользовательский текст своими словами",
-        "свободное problem-first объяснение",
-        "Каждый новый report comment независимо от state",
-        "выполняет task-level finalization",
-        "Простой success не является исключением",
-        "authoritative envelope",
-        "Task comment получает",
-        "scope-level explanation",
-        "Простота success не отменяет обязательную",
-        "адаптацию Task comment",
-        "Planned comment/read-back и terminal",
-        "communication helper не",
-        "Finalization pass обязан",
-        "Blocker считается существующим до фактического устранения",
-        "SHIPTASK RUN REPORT",
-        "Не запускать полный дорогой project gate для каждой Task",
-        "Failed batch gate сначала локализовать",
-        "final review batch прошёл gate",
-        "### 9.1 Delivery report как Task comment",
-        "обязательный completion report",
-        "Никогда не записывать report в `description`",
-        "### 5.4 Autonomous continuation и task-local defer",
-        "### 5.5 Environment и release authority",
-        "`production-approval-required`",
-        "одну consolidated decision queue",
-        "blocking input запрещён",
-        "non-blocking final finding",
-        "не блокировать batch Goal ожиданием",
-        "Automatic terminal policy не настраивается Project",
-        "superseded historical evidence",
-        "не переводить Goal в `blocked` по этой причине",
-        "Reopen исходной Task",
-    )
-
-    for path, fragments in (
-        (SKILL_FILE, required_skill_fragments),
-        (SPEC_FILE, required_spec_fragments),
-    ):
-        text = path.read_text(encoding="utf-8")
-        for fragment in fragments:
-            if fragment not in text:
-                fail(
-                    errors,
-                    f"{path.relative_to(ROOT)} is missing workflow contract {fragment!r}",
-                )
-
-    report_text = REPORT_REFERENCE.read_text(encoding="utf-8")
-    for fragment in (
-        "Delivery report как Task comment",
-        "native comment-create operation",
-        "Не менять `description`",
-        "Report key: shiptask/",
-        "`not-available`",
-        "`write-outcome-unknown`",
-        "блокирует `Done`",
-        "COMPLETED",
-        "Не публиковать `ACCEPTANCE READY`",
-        "REWORK REQUIRED",
-        "Confidence: CONFIRMED | PROBABLE | UNKNOWN",
-        "Strategic Explainer composition",
-        "Любой новый ShipTask report comment со state `COMPLETED`, `REWORK REQUIRED`,",
-        "ShipTask выполняет task-level finalization",
-        "Target surface: TASK_COMMENT",
-        "authoritative envelope",
-        "forward trace и reverse coverage",
-        "Task-level Strategic Explainer explanation должен существовать до write",
-        "degraded-adaptation",
-        'fork_turns="none"',
-        "CONTEXT_INTEGRITY_ERROR",
-        "один раз повторить fresh spawn",
-        "самостоятельно написать final comment своими словами",
-        "Не копировать Explainer output механически",
-        "2–4 способа получить недостающее",
-        "truthful `In Review → In Progress`",
-    ):
-        if fragment not in report_text:
-            fail(errors, f"delivery-report reference is missing {fragment!r}")
-
-    run_report_text = RUN_REPORT_REFERENCE.read_text(encoding="utf-8")
-    for fragment in (
-        "Осмысленная финализация и ShipTask run report",
-        "Не выбирать terminal outcome по последнему tool result",
-        "Blocker — фактическое условие",
-        "Task `BLOCKED`, run `PARTIAL`/`BLOCKED` и Goal status",
-        "Не повторять тот же",
-        "Глубокий компактный отчёт",
-        "SHIPTASK RUN REPORT",
-        "Итог и статус",
-        "Почему так",
-        "Подтверждение",
-        "Осталось / следующий шаг",
-        "Финальный ответ должен отражать фактический Goal status",
-        "Каждый новый Task report comment проходит отдельный task-scoped",
-        "включая простой",
-        "aggregate batch",
-        "comment/read-back и terminal status reconciliation",
-        "до blocking handoff scope-level plain-language explanation",
-        "summary не являются допустимым fallback",
-        'fork_turns="none"',
-        "пишет окончательный report своими",
-        "CONTEXT_INTEGRITY_ERROR",
-    ):
-        if fragment not in run_report_text:
-            fail(errors, f"run-report reference is missing {fragment!r}")
-
-    handoff_text = STRATEGIC_HANDOFF_REFERENCE.read_text(encoding="utf-8")
-    for fragment in (
-        "Strategic Explainer handoff для ShipTask",
-        "Strategic Handoff",
-        "Problem to solve",
-        "Beneficiary",
-        "Desired outcome",
-        "Current-State Brief",
-        "Strategic discovery anchors",
-        "Candidate user dependency",
-        "Reader purpose",
-        "Next-state contract",
-        "Decision support request",
-        "Target surface: TASK_COMMENT | RUN_REPORT",
-        "Authoritative report state",
-        "VERIFIED | FAILED | UNVERIFIED | NOT_APPLICABLE",
-        "built-in `default` agent",
-        "fork_turns=\"none\"",
-        "fork_turns=\"all\"",
-        "$ship-tasks:strategic-explainer",
-        "bounded strategic discovery",
-        "доступные read-only tools",
-        "current/accepted",
-        "proposed",
-        "historical",
-        "source basis",
-        "reverse coverage",
-        "внутреннюю orchestration",
-        "Простой success не освобождает Task comment",
-        "Переиспользовать explanation между `TASK_COMMENT` и `RUN_REPORT`",
-        "material meaning change делают explanation stale",
-        "CONTEXT_INTEGRITY_ERROR",
-        "PROBLEM_CONTEXT_ERROR",
-        "один раз создать",
-        "свободное стратегическое объяснение",
-        "не structured result и не copy-ready comment",
-        "самостоятельно пишет Task comment",
-        "своими словами",
-        "Нельзя копировать ответ",
-        "не создаёт facts, authority, lifecycle",
-        "degraded-adaptation",
-        "2–4 реалистичных способа получить недостающее доказательство",
-    ):
-        if fragment not in handoff_text:
-            fail(errors, f"Strategic Explainer handoff is missing {fragment!r}")
-
-    strategic_spec_text = STRATEGIC_SPEC_FILE.read_text(encoding="utf-8")
-    for fragment in (
+def validate_strategic_contract(errors: list[str]) -> None:
+    require(
+        errors,
+        STRATEGIC_SPEC,
+        "Статус: current contract, 2026-08-21",
         "общий skill `$strategic-explainer`",
-        "стратегическом видении",
-        "Strategic Handoff",
         "Problem to solve",
         "Current-State Brief",
-        "PROBLEM_CONTEXT_ERROR",
         "Strategic discovery anchors",
-        "read-only tools",
-        "current/accepted",
-        "proposed",
-        "historical",
-        "source note",
-        "свободное стратегическое объяснение",
-        "не структурированный result object",
-        "не является reviewer, incident commander или decision maker",
-        "не выполняет writes",
-        "не заменяет current execution evidence",
-        "новый субагент без унаследованной истории",
-        'fork_turns="none"',
+        "PROBLEM_CONTEXT_ERROR",
         "CONTEXT_INTEGRITY_ERROR",
-        "более ранние user/assistant turns",
-        "System/developer instructions",
-        "до любого tool call",
-        "Reader purpose",
-        "Next-state contract",
-        "VERIFIED | FAILED | UNVERIFIED | NOT_APPLICABLE",
         "Decision support request",
-        "load-bearing",
-        "need-to-know filter",
+        "2–4 реально различающихся варианта",
         "forward trace",
         "reverse coverage",
-        "orchestration",
-        "написать user-facing сообщение своими словами",
-        "copy-ready комментарием",
-        "Не добавлять декоративные картинки",
-        "не как copy-ready payload",
-        "raw evidence dump",
-        "2–4 реально различающихся варианта",
-    ):
-        if fragment not in strategic_spec_text:
-            fail(errors, f"Strategic Explainer specification is missing {fragment!r}")
-
-    strategic_vision_text = STRATEGIC_VISION_FILE.read_text(encoding="utf-8")
-    strategic_vision_search_text = re.sub(r"\s+", " ", strategic_vision_text)
-    for fragment in (
-        "Strategic Explainer: стратегическое видение",
-        "независимо от текущей реализации",
-        "Продуктовое обещание",
-        "После одного чтения человек должен понимать",
-        "проблема → strategic context → текущие факты → смысл → решение",
-        "Caller: Problem to solve + Current-State Brief",
-        "bounded read-only discovery",
-        "Обязательная задача, которую решаем",
-        "Самостоятельный strategic view",
-        "PROBLEM_CONTEXT_ERROR",
-        "current/accepted",
-        "proposed",
-        "historical",
         "source note",
-        "Свободное стратегическое объяснение",
-        "Основной агент: собственная формулировка",
-        "Устойчивые требования",
-        "Свежий контекст",
-        "Человеческие роли вместо внутренних сущностей",
-        "Честная граница знания",
-        "Независимые сценарии остаются независимыми",
-        "Конкретная зависимость от пользователя",
-        "Несколько вариантов без скрытого решения",
-        "Lossless by relevance",
-        "Внутренний механизм невидим читателю",
-        "Никакой скрытой управляющей роли",
-        "не принимает status, scope, recovery, release или authority",
-        "не выполняет actions",
-        "Общий, переносимый контракт",
-        "не принадлежит ShipTask",
-        "Quality bar",
-        "не требуется дополнительный prompt",
-    ):
-        if fragment not in strategic_vision_search_text:
-            fail(errors, f"Strategic Explainer vision is missing {fragment!r}")
-
-    strategic_evaluation_text = STRATEGIC_EVALUATION_FILE.read_text(
-        encoding="utf-8"
     )
-    for fragment in (
-        "Strategic Explainer evaluation contract",
+    require(
+        errors,
+        VISION,
+        "Продуктовое обещание",
+        "bounded read-only discovery",
+        "Никакой скрытой управляющей роли",
+        "Визуализация служит пониманию",
+        "Lossless by relevance",
+        "Проверяемый source basis",
+    )
+    require(
+        errors,
+        STRATEGIC_EVALUATION,
         "Problem gate",
-        "PROBLEM_CONTEXT_ERROR",
         "Discovery discipline",
         "Source-state и provenance",
         "Factual fidelity",
-        "Reverse coverage",
-        "State separation",
         "Authority boundary",
-        "User-dependency integrity",
-        "Context integrity",
-        "Caller ownership",
-        "Три независимых аудита",
-        "Discovery audit",
-        "Missing Problem to solve",
-        "Linked Epic меняет смысл локальной Task",
-        "Strategic documents отсутствуют",
-        "Proposed и historical sources конфликтуют",
-        "Проверка совместного доступа",
-        "Внутренняя ошибка с доступным recovery",
-        "Два независимых unverified сценария",
-        "Неизвестный user impact",
-        "Простой success",
-        "Загрязнённый inherited context",
-        "Caller synthesis после большого evidence",
         "Read-only boundary",
         "Несколько способов провести проверку",
-        "User testing остаётся более сильной проверкой",
-    ):
-        if fragment not in strategic_evaluation_text:
-            fail(errors, f"Strategic Explainer evaluation is missing {fragment!r}")
+    )
 
-    strategic_research_text = STRATEGIC_RESEARCH_FILE.read_text(encoding="utf-8")
-    for fragment in (
-        "Strategic Explainer: исследование подходов",
-        "ADR-0014",
-        "bounded read-only strategic discovery",
-        "Готового компонента с тем же contract не найдено",
-        "Свежий bounded context полезен для синтеза",
-        "Основной агент должен владеть финальным ответом",
-        "Понятность начинается с главного сообщения и действия",
-        "Точность и читаемость нужно оценивать отдельно",
-        "Принятые изменения",
-        "Что сознательно не принято",
-        "Ограничения и следующий шаг",
-    ):
-        if fragment not in strategic_research_text:
-            fail(errors, f"Strategic Explainer research is missing {fragment!r}")
+    numbered = []
+    for line in read(VISION).splitlines():
+        match = re.match(r"^### (\d+)\. ", line)
+        if match:
+            numbered.append(int(match.group(1)))
+    if numbered != list(range(1, len(numbered) + 1)):
+        fail(errors, f"strategic vision numbered requirements are not sequential: {numbered}")
 
-    autonomy_text = AUTONOMY_REFERENCE.read_text(encoding="utf-8")
-    for fragment in (
-        "Decision ladder",
-        "Не задавать пользователю вопрос посреди runnable queue",
-        "runnable_count = actionable To Do",
-        "blocking input",
-        "Automatic acceptance",
-        "Stale acceptance context",
-        "superseded historical evidence",
-        "не может переопределить",
-        "current skill",
-        "Reason `acceptance-required` запрещён",
-        "Deferred Task",
-        "обязательно опубликовать",
-        "Non-production release",
-        "Production release требует explicit user approval",
-        "production-approval-required",
-        "Deferred-only handoff",
-        "Finalization analysis and bounded repair",
-        "Terminal run report",
-        "SHIPTASK RUN REPORT",
-        "Blocker остаётся blocker до устранения",
-        "Не повторять acceptance, poll или дополнительный Goal",
-    ):
-        if fragment not in autonomy_text:
-            fail(errors, f"autonomy reference is missing {fragment!r}")
 
-    memory_text = MEMORY_REFERENCE.read_text(encoding="utf-8")
-    for fragment in (
-        "Project memory contract",
-        "Граница ответственности",
-        "Поиск и приоритет источников",
-        "Логическая схема",
-        "Bootstrap и update",
-        "Проверка перед delivery",
-        "TASK CONTEXT ALARM",
-        "Ограничения переносимости",
-        "current_scope",
-        "Task status, `version`",
-        "только по явной просьбе",
-        "не обещает cross-surface visibility",
-    ):
-        if fragment not in memory_text:
-            fail(errors, f"project-memory reference is missing {fragment!r}")
+def validate_supersession(errors: list[str]) -> None:
+    required_markers = {
+        "0002": ("superseded", "ADR-0003"),
+        "0008": ("superseded ADR-0011",),
+        "0009": ("superseded", "ADR-0010", "не является текущим runtime contract"),
+        "0005": ("ADR-0015", "ADR-0016"),
+        "0006": ("ADR-0016", "диаграммы"),
+        "0010": ("ADR-0015", "ADR-0016"),
+        "0012": ("ADR-0014", "no-tools"),
+        "0013": ("ADR-0014", "ADR-0015", "ADR-0016"),
+        "0015": ("ADR-0016",),
+    }
+    for number, terms in required_markers.items():
+        header = "\n".join(read(ADR[number]).splitlines()[:18])
+        for term in terms:
+            if term not in header:
+                fail(errors, f"ADR-{number} header is missing supersession marker {term!r}")
 
-    for path in (SKILL_FILE, SPEC_FILE, REPORT_REFERENCE):
-        text = path.read_text(encoding="utf-8")
-        for forbidden in (
-            "SHIPTASK DELIVERY REPORT: START",
-            "SHIPTASK DELIVERY REPORT: END",
-            "managed delivery-report block",
-        ):
-            if forbidden in text:
-                fail(
-                    errors,
-                    f"{path.relative_to(ROOT)} contains retired description-report contract {forbidden!r}",
-                )
 
-    for path in (SKILL_FILE, SPEC_FILE, REPORT_REFERENCE, AUTONOMY_REFERENCE):
-        text = path.read_text(encoding="utf-8")
-        for forbidden in (
-            "По умолчанию acceptance — явное решение пользователя",
-            "По умолчанию acceptance является явным решением пользователя",
-            "После authorized acceptance",
-            "zero unaccepted review-ready candidates",
-            "Публиковать `ACCEPTANCE READY` только",
-            "acceptance-ready report",
-        ):
-            if forbidden in text:
-                fail(
-                    errors,
-                    f"{path.relative_to(ROOT)} contains retired human-acceptance contract {forbidden!r}",
-                )
-
-    decision_text = AUTO_ACCEPTANCE_DECISION_FILE.read_text(encoding="utf-8")
-    for fragment in (
-        "более старую memory-запись",
-        "cached project context superseded historical",
-        "не создаёт current authority, blocker или decision queue",
-        "заблокированного только ручной приёмкой",
-    ):
-        if fragment not in decision_text:
-            fail(errors, f"ADR-0005 is missing stale-context guard {fragment!r}")
-
-    adapter_text = ADAPTER_FILE.read_text(encoding="utf-8")
-    for fragment in (
-        "только техническую границу",
-        "Adapter responsibility",
-        "не выбирает business scope",
-        "Minimal read contract",
-        "Identity and capability invariants",
-        "Write and concurrency invariants",
+def validate_adapter_and_distribution(errors: list[str]) -> None:
+    require(
+        errors,
+        ADAPTER,
+        "current compatibility contract",
+        "adapter skill `task-manager`",
+        "не содержит\n`ship-tasks`/`strategic-explainer`",
+        "Adapter не выбирает business scope",
         "current Task `version`",
-        "Не повторять `create_task`",
         "Task Manager state доказывает только собственную projection",
-    ):
-        if fragment not in adapter_text:
-            fail(errors, f"Task Manager adapter is missing compatibility contract {fragment!r}")
-
-    decision_text = POLICY_MEMORY_DECISION_FILE.read_text(encoding="utf-8")
-    for fragment in (
-        "Task Manager skill  -> технический adapter",
-        "ShipTask skill      -> intent routing и business delivery policy",
-        "Project Memories    -> current scope и project-specific profile",
-        "implicit invocation требует однозначного Task Manager",
-        "один delivery verb не активирует ShipTask",
-        "Project memory и adapter lookup разрешают уже выбранный scope",
-        "`single` — ровно одна",
-        "`create-and-deliver` intent",
-        "`batch` — Project, Release",
-        "пишет memory только по явной просьбе пользователя",
-    ):
-        if fragment not in decision_text:
-            fail(errors, f"ADR-0007 is missing architecture contract {fragment!r}")
-
-    decision_text = PLUGIN_DISTRIBUTION_DECISION_FILE.read_text(encoding="utf-8")
-    for fragment in (
-        "Статус: superseded ADR-0011",
-        "Решение о bundled ShipTask внутри Task Manager plugin отменено",
-    ):
-        if fragment not in decision_text:
-            fail(errors, f"ADR-0008 is missing superseded distribution marker {fragment!r}")
-
-    decision_text = SEPARATE_PLUGIN_DECISION_FILE.read_text(encoding="utf-8")
-    for fragment in (
-        "Единственная runtime installation skill",
+    )
+    require(
+        errors,
+        ADR["0011"],
         "ship-tasks@srez-marketplace",
         "task-manager@srez-marketplace",
-        "содержит только adapter skill `task-manager`",
-        "не содержит `.mcp.json`",
-        "plugins/ship-tasks/skills/ship-tasks",
-        "plugins/ship-tasks/skills/strategic-explainer",
-        "~/.codex/skills/ship-tasks",
-        "ship-tasks:ship-tasks",
-        "task-manager:ship-tasks",
+        "adapter skill `task-manager`",
+        "skills/strategic-explainer",
         "fresh Codex session",
-    ):
-        if fragment not in decision_text:
-            fail(errors, f"ADR-0011 is missing separate-plugin contract {fragment!r}")
-
-    decision_text = STRATEGIC_EXPLAINER_DECISION_FILE.read_text(encoding="utf-8")
-    for fragment in (
-        "Strategic Explainer как переносимая роль свежего субагента",
-        "распространяет skills",
-        "общий sibling-skill `$strategic-explainer`",
-        "$ship-tasks:strategic-explainer",
-        "Не включать в его runtime contract ShipTask, Task Manager",
-        "built-in типа `default` без унаследованной истории",
-        "зарегистрированный native custom agent",
-        'fork_turns="none"',
-        "CONTEXT_INTEGRITY_ERROR",
-        "не structured result и не copy-ready comment",
-        "окончательный user-facing текст своими словами",
-        "manager-style specialist",
-        "lossless-by-relevance audit",
-        "ADR-0013",
-        "ADR-0014",
-        "не создаёт новый blocker",
-        "будущий перенос skill в отдельный plugin",
-    ):
-        if fragment not in decision_text:
-            fail(errors, f"ADR-0012 is missing Strategic Explainer contract {fragment!r}")
-
-    decision_text = STRATEGIC_REPORTS_DECISION_FILE.read_text(encoding="utf-8")
-    for fragment in (
-        "Strategic Explainer для всех ShipTask report narratives",
-        "Любой новый ShipTask delivery-report comment",
-        "До invocation ShipTask самостоятельно выполняет task-level finalization",
-        "Простота success не отменяет это требование",
-        "Authoritative envelope",
-        "$ship-tasks:strategic-explainer",
-        'fork_turns="none"',
-        "CONTEXT_INTEGRITY_ERROR",
-        "один раз повторяет fresh invocation",
-        "самостоятельно пишет final",
-        "своими словами",
-        "Механическое копирование",
-        "`BLOCKED` имеет двойной communication barrier",
-        "до публикации `BLOCKED` comment",
-        "до user-facing blocking handoff",
-        "совпадают по смыслу",
-        "terminal status",
-        "reconciliation не делают explanation stale",
-        "aggregate batch result",
-        "degraded-adaptation",
-        "не запускают Explainer",
-        "ADR-0014",
-    ):
-        if fragment not in decision_text:
-            fail(errors, f"ADR-0013 is missing report-narrative contract {fragment!r}")
-
-    decision_text = STRATEGIC_DISCOVERY_DECISION_FILE.read_text(encoding="utf-8")
-    for fragment in (
-        "Problem-first и bounded strategic discovery",
-        "Заменяет\nих no-tools часть",
-        "Обязательный problem gate",
-        "Problem to solve",
-        "PROBLEM_CONTEXT_ERROR",
-        "Current-State Brief",
-        "Strategic discovery anchors",
-        "bounded read-only",
-        "current/accepted",
-        "proposed",
-        "historical",
-        "Narrative/attention order",
-        "Evidence authority order",
-        "source note",
-        "не выбирает\n  status, blocker, recovery, permission, release или terminal transition",
-    ):
-        if fragment not in decision_text:
-            fail(errors, f"ADR-0014 is missing strategic-discovery contract {fragment!r}")
-
-    for path in (
-        SKILL_FILE,
-        SPEC_FILE,
-        RUN_REPORT_REFERENCE,
-        STRATEGIC_HANDOFF_REFERENCE,
-        STRATEGIC_EXPLAINER_DECISION_FILE,
-    ):
-        text = path.read_text(encoding="utf-8")
-        for forbidden in (
-            "Для простого success отдельный субагент не нужен",
-            "для тривиального success отдельный субагент не нужен",
-            "Для простого success без technical burden новый субагент не требуется",
-        ):
-            if forbidden in text:
-                fail(
-                    errors,
-                    f"{path.relative_to(ROOT)} contains retired optional-success contract {forbidden!r}",
-                )
-
-    for path in (
-        SKILL_FILE,
-        SPEC_FILE,
-        REPORT_REFERENCE,
-        RUN_REPORT_REFERENCE,
-        STRATEGIC_HANDOFF_REFERENCE,
-        STRATEGIC_SKILL_FILE,
-        STRATEGIC_SPEC_FILE,
-        STRATEGIC_EXPLAINER_DECISION_FILE,
-        STRATEGIC_REPORTS_DECISION_FILE,
-    ):
-        text = path.read_text(encoding="utf-8")
-        for forbidden in (
-            "User Brief` — единственный источник",
-            "вставляет brief без изменения смысла",
-            "игнорировать её и не извлекать",
-            "PARENT NOTES",
-            "presentation gate",
-            "1 600 символов",
-        ):
-            if forbidden in text:
-                fail(
-                    errors,
-                    f"{path.relative_to(ROOT)} contains obsolete Explainer handoff contract {forbidden!r}",
-                )
-
-    for path in (
-        ROOT / "README.md",
-        ROOT / "docs" / "README.md",
-        ROOT / "docs" / "overview.md",
-        STRATEGIC_VISION_FILE,
-        SPEC_FILE,
-        STRATEGIC_SPEC_FILE,
-        STRATEGIC_EVALUATION_FILE,
-        ROOT / "docs" / "guides" / "development.md",
-        SKILL_FILE,
-        REPORT_REFERENCE,
-        RUN_REPORT_REFERENCE,
-        STRATEGIC_HANDOFF_REFERENCE,
-        STRATEGIC_SKILL_FILE,
-    ):
-        text = path.read_text(encoding="utf-8")
-        if "Technical Brief" in text:
-            fail(
-                errors,
-                f"{path.relative_to(ROOT)} retains superseded Technical Brief contract",
-            )
-
-    decision_text = TERMINAL_CAPABILITY_DECISION_FILE.read_text(encoding="utf-8")
-    for fragment in (
-        "Статус: superseded",
-        "отменено",
-        "не является текущим runtime contract",
-    ):
-        if fragment not in decision_text:
-            fail(errors, f"ADR-0009 is missing superseded marker {fragment!r}")
-
-    decision_text = BLOCKER_REPORT_DECISION_FILE.read_text(encoding="utf-8")
-    for fragment in (
-        "comment lifecycle из",
-        "Перед любым terminal outcome выполнить finalization pass",
-        "Blocker остаётся blocker до фактического устранения",
-        "глубоким, но компактным",
-        "process diary",
-    ):
-        if fragment not in decision_text:
-            fail(errors, f"ADR-0010 is missing blocker-analysis contract {fragment!r}")
-
-    for path in (
-        SKILL_FILE,
-        SPEC_FILE,
-        RUN_REPORT_REFERENCE,
-        AUTONOMY_REFERENCE,
-        BLOCKER_REPORT_DECISION_FILE,
-        ROOT / "docs" / "overview.md",
-    ):
-        text = path.read_text(encoding="utf-8")
-        if "`blocked` запрещён" in text:
-            fail(
-                errors,
-                f"{path.relative_to(ROOT)} conflates a blocker with terminal Goal blocked",
-            )
-
-    retired_terminal_channel_fragments = {
-        SKILL_FILE: (
-            "terminal-report-channel-unavailable",
-            "Production approval этого не исправляет",
-            "scope-wide blocker ledger",
-        ),
-        REPORT_REFERENCE: (
-            "Это scope-wide blocker",
-            "остановить новый dispatch",
-        ),
-        ROOT / "docs" / "guides" / "development.md": (
-            "terminal-report-channel-unavailable",
-            "zero Task starts, code/Git/deploy",
-        ),
-        SPEC_FILE: (
-            "### 3.4 Mandatory terminal-report capability gate",
-            "scope-wide blocker ledger",
-        ),
-        AUTONOMY_REFERENCE: (
-            "## Shared terminal channel loss",
-            "Production approval не заменяет эту capability",
-        ),
-    }
-    for path, fragments in retired_terminal_channel_fragments.items():
-        text = path.read_text(encoding="utf-8")
-        for fragment in fragments:
-            if fragment in text:
-                fail(
-                    errors,
-                    f"{path.relative_to(ROOT)} contains retired terminal-channel contract {fragment!r}",
-                )
-
-    retired_create_delivery_fragments = {
-        SKILL_FILE: (
-            "`single` требует ровно одну canonical существующую Task",
-        ),
-        SPEC_FILE: (
-            "Skill должен довести выбранный scope уже созданных Task Manager Tasks",
-            "Обычный запуск работает с уже созданным scope",
-        ),
-    }
-    for path, fragments in retired_create_delivery_fragments.items():
-        text = path.read_text(encoding="utf-8")
-        for fragment in fragments:
-            if fragment in text:
-                fail(
-                    errors,
-                    f"{path.relative_to(ROOT)} contains retired create-and-deliver contract {fragment!r}",
-                )
+    )
+    require(
+        errors,
+        ROOT / "AGENTS.md",
+        "Definition of done для изменения skill",
+        "origin/main",
+        "byte-identical",
+        "installed cache",
+        "installed/enabled",
+        "Standalone user-level каталоги",
+        "task-manager@srez-marketplace` остаётся adapter-only",
+    )
+    require(
+        errors,
+        DEVELOPMENT,
+        "read_marketplace_name.py",
+        "update_plugin_cachebuster.py",
+        "не меняйте\n   numeric version",
+        "fresh App Server catalog",
+    )
 
 
-def repository_text_files() -> list[Path]:
-    paths = [ROOT / "README.md", ROOT / "AGENTS.md", OPENAI_FILE]
-    paths.extend(sorted(SKILL_DIR.rglob("*.md")))
-    paths.append(STRATEGIC_OPENAI_FILE)
-    paths.extend(sorted(STRATEGIC_SKILL_DIR.rglob("*.md")))
-    paths.extend(sorted((ROOT / "docs").rglob("*.md")))
-    paths.extend(sorted((ROOT / "scripts").rglob("*.py")))
-    return paths
+def current_task_source_files() -> tuple[Path, ...]:
+    return (
+        SHIP_SKILL,
+        SHIP_METADATA,
+        SPEC,
+        OVERVIEW,
+        REPORT,
+        RUN_REPORT,
+        AUTONOMY,
+        MEMORY,
+        HANDOFF,
+        ADR["0016"],
+    )
 
 
-def validate_single_task_manager_contract(errors: list[str]) -> None:
-    for path in repository_text_files():
-        text = path.read_text(encoding="utf-8")
+def validate_task_source_boundary(errors: list[str]) -> None:
+    retired_provider = re.compile(r"\blinear\b", re.I)
+    generation = re.compile(r"(?:ship[- ]?tasks|shiptask)\s*-?\s*v\d+", re.I)
+    for path in current_task_source_files():
+        text = read(path)
         for label, pattern in (
-            ("retired task provider", RETIRED_PROVIDER_RE),
-            ("numbered ShipTask generation", SKILL_GENERATION_RE),
+            ("retired task provider", retired_provider),
+            ("numbered ShipTask generation", generation),
         ):
             match = pattern.search(text)
             if match:
                 line = text.count("\n", 0, match.start()) + 1
-                fail(
-                    errors,
-                    f"{path.relative_to(ROOT)} contains {label} at line {line}",
-                )
+                fail(errors, f"{relative(path)} contains {label} at line {line}")
 
 
 def markdown_files() -> list[Path]:
-    roots = [ROOT / "README.md", ROOT / "AGENTS.md"]
-    roots.extend(sorted(SKILL_DIR.rglob("*.md")))
-    roots.extend(sorted(STRATEGIC_SKILL_DIR.rglob("*.md")))
-    roots.extend(sorted((ROOT / "docs").rglob("*.md")))
-    return roots
+    files = [ROOT / "README.md", ROOT / "AGENTS.md"]
+    files.extend(sorted((ROOT / "ship-tasks").rglob("*.md")))
+    files.extend(sorted((ROOT / "strategic-explainer").rglob("*.md")))
+    files.extend(sorted((ROOT / "docs").rglob("*.md")))
+    return files
 
 
-def validate_links(errors: list[str]) -> None:
+def validate_links_and_navigation(errors: list[str]) -> None:
     for source in markdown_files():
-        text = source.read_text(encoding="utf-8")
-        for raw_target in LINK_RE.findall(text):
-            target = raw_target.strip().strip("<>").split("#", 1)[0]
+        for raw in LINK_RE.findall(read(source)):
+            target = raw.strip().strip("<>").split("#", 1)[0]
             if not target or "://" in target or target.startswith("mailto:"):
                 continue
             resolved = (source.parent / target).resolve()
             try:
                 resolved.relative_to(ROOT)
             except ValueError:
-                fail(errors, f"{source.relative_to(ROOT)} links outside repository: {target}")
+                fail(errors, f"{relative(source)} links outside repository: {target}")
                 continue
             if not resolved.exists():
-                fail(errors, f"{source.relative_to(ROOT)} has broken link: {target}")
+                fail(errors, f"{relative(source)} has broken link: {target}")
 
-    index_text = DOCS_INDEX.read_text(encoding="utf-8")
     direct_targets = {
         (DOCS_INDEX.parent / raw.strip().strip("<>").split("#", 1)[0]).resolve()
-        for raw in LINK_RE.findall(index_text)
+        for raw in LINK_RE.findall(read(DOCS_INDEX))
         if raw and "://" not in raw
     }
     for document in sorted((ROOT / "docs").rglob("*.md")):
         if document == DOCS_INDEX:
             continue
         if document.resolve() not in direct_targets:
-            fail(errors, f"docs/README.md does not link {document.relative_to(ROOT)}")
+            fail(errors, f"docs/README.md does not link {relative(document)}")
 
 
 def validate_artifacts(errors: list[str]) -> None:
@@ -1434,23 +673,26 @@ def validate_artifacts(errors: list[str]) -> None:
         if ".git" in path.parts:
             continue
         if path.name == "__pycache__" or path.suffix == ".pyc":
-            fail(errors, f"generated Python artifact present: {path.relative_to(ROOT)}")
+            fail(errors, f"generated Python artifact present: {relative(path)}")
 
 
 def main() -> int:
     errors: list[str] = []
-    for path in REQUIRED_FILES:
+    for path in CORE_FILES:
         if not path.is_file():
-            fail(errors, f"missing required file: {path.relative_to(ROOT)}")
+            fail(errors, f"missing required file: {relative(path)}")
 
     if not errors:
-        validate_skill(errors)
-        validate_strategic_explainer(errors)
+        validate_ship_skill(errors)
+        validate_strategic_skill(errors)
         validate_trigger_matrix(errors)
-        validate_review_disposition_contract(errors)
-        validate_workflow_contract(errors)
-        validate_single_task_manager_contract(errors)
-        validate_links(errors)
+        validate_review_matrix(errors)
+        validate_current_contract(errors)
+        validate_strategic_contract(errors)
+        validate_supersession(errors)
+        validate_adapter_and_distribution(errors)
+        validate_task_source_boundary(errors)
+        validate_links_and_navigation(errors)
         validate_artifacts(errors)
 
     if errors:

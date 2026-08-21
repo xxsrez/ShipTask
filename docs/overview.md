@@ -41,6 +41,9 @@ Strategic Explainer = problem-first read-only strategic discovery, no decisions
   specification общего problem gate + strategic discovery → explanation contract.
 - [ADR-0007](decisions/0007-delivery-policy-and-project-memory.md) — принятое
   разбиение adapter / delivery policy / project memory и implicit routing.
+- [ADR-0016](decisions/0016-current-lifecycle-and-reporting-contract.md) —
+  единая current граница между review outcome, Task status, комментарием и
+  повторной попыткой.
 - `ship-tasks/SKILL.md` — компактный исполнимый contract на её основе.
 - `strategic-explainer/SKILL.md` — generic runtime contract, который можно
   применять напрямую или внутри свежего субагента другого workflow.
@@ -58,9 +61,11 @@ Strategic Explainer = problem-first read-only strategic discovery, no decisions
   предложить обновление, но не выполняет его молча.
 - Cross-session scheduler, durable claims и отсутствующие connector capabilities
   не изображаются существующими.
-- Delivery report публикуется только как native Task comment и является
-  обязательным terminal effect. Без comment write/read-back affected Task
-  остаётся non-terminal с явным blocker; `description` не меняется.
+- Delivery report публикуется только как native Task comment; `description` и
+  другие Task fields не используются как fallback. Terminal report является
+  барьером перед `Done`/новым `Canceled`. Недоступный rework/blocker
+  comment остаётся отдельной незавершённой публикацией, но статус всё равно
+  отражает уже доказанный исход.
 - Перед любым terminal outcome агент выполняет finalization pass: сверяет
   обещанный и фактический результат, объясняет material gaps, выполняет
   доступный safe in-scope recovery и перечитывает affected state. Blocker
@@ -74,9 +79,9 @@ Strategic Explainer = problem-first read-only strategic discovery, no decisions
   словами. Explainer не выбирает status, recovery или следующий action.
 - Пока существует runnable work, skill не прерывает run task-local вопросами:
   безопасный default выбирается автоматически, сложная Task попадает в decision
-  queue, а остальные продолжаются. Каждый defer обязательно получает
-  опубликованный и перечитанный `BLOCKED` handoff; иначе comment delivery
-  остаётся частью blocker.
+  queue, а остальные продолжаются. Каждый defer получает понятный `BLOCKED`
+  handoff; если comment channel недоступен, тот же текст показывается в run
+  report, а публикация остаётся отдельной незавершённой работой.
 - Dev/test/QA/UAT/staging/preview/sandbox releases автоматически разрешены в
   границах exact Task и проверенного non-production target. Production release
   выполняется только по явному user approval; без него Task откладывается.
@@ -97,22 +102,23 @@ To Do → In Progress → In Review → Done or Canceled
 ```
 
 `To Do` является входом новой работы, `In Progress` — продолжающейся работой,
-`In Review` — targeted-verified candidate, который ждёт batch gate, required
-effects или terminal reconciliation, но не ручную приёмку. Terminal statuses не
-создают работу.
+`In Review` — предъявленным result с ещё не установленным итогом. Сам
+status не доказывает проверку, success или failure. Ручной
+приёмки этот status не ждёт. Terminal statuses не создают работу.
 `Duplicate` не получает отдельную execution lane, но все связанные duplicates
 обязательно читаются при review основной Task: иной ракурс проблемы должен быть
 покрыт evidence либо стать явным finding.
 
 На каждую Task выполняется быстрый targeted gate. Дорогой aggregate/full gate и
 общие runtime/external checks выполняются периодически на exact integrated
-review batch. Failed batch возвращает затронутые Tasks в `In Progress`; при
-неясной attribution reopen получает весь связанный batch. Это уменьшает
-стоимость проверок, не ослабляя terminal gate.
+review batch. Failed batch сначала локализуется: в `In Progress` возвращаются
+только Tasks с доказанным failure. При неясной attribution members остаются
+в `In Review` до separating diagnostic. Это уменьшает стоимость проверок, не
+ослабляя terminal gate.
 
 Число Tasks в `In Progress` не является размером будущего review batch.
 Последовательный run без реально запущенных isolated workers имеет одну active
-write lane: до старта следующей `To Do` предыдущая targeted-verified и
+write lane: до старта следующей `To Do` предыдущая проверенная на уровне Task и
 интегрированная Task обязана перейти в `In Review` с read-back. Общий commit,
 UAT, full gate или обязательный completion comment выполняются batch cadence,
 но не разрешают накапливать завершённые candidates в `In Progress`.

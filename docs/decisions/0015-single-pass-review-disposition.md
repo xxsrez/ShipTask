@@ -3,7 +3,9 @@
 Статус: accepted, 2026-08-21. Уточняет ADR-0005, ADR-0006, ADR-0010 и
 ADR-0013. Отменяет использование строгого Goal blocker threshold как части
 business workflow для task-local приёмки; остальные system/tool ограничения на
-Goal остаются внешней границей.
+Goal остаются внешней границей. Status/comment эффекты и отмена
+оставшихся legacy формулировок собраны в
+[ADR-0016](0016-current-lifecycle-and-reporting-contract.md).
 
 ## Контекст
 

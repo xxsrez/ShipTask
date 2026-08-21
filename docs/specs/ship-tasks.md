@@ -1,6 +1,10 @@
 # Ship Tasks
 
-Статус: current contract, 2026-08-18.
+Статус: current contract, 2026-08-21.
+
+Единая действующая граница между результатом приёмки, Task status и отчётом
+зафиксирована в
+[ADR-0016](../decisions/0016-current-lifecycle-and-reporting-contract.md).
 
 Документ описывает единственную business delivery policy ShipTask для явного
 `$ship-tasks` и подходящих natural-language запросов. Исполнимый
@@ -359,7 +363,8 @@ To Do → In Progress → In Review → Done
 Duplicate                       (terminal review context, no own execution)
 ```
 
-Нормативный task flow:
+Нормативный task flow для result, который ShipTask сам довёл до
+review:
 
 ```text
 planned
@@ -544,12 +549,13 @@ specification и текущий delivery intent определяют повед�
 и применить обычный terminal transition. Не повторять ожидание несколько
 goal-turns и никогда не переводить Goal в `blocked` по этой причине.
 
-Если gate failed или evidence неполон, автоматически выполнить in-scope
-rework/retest либо defer-нуть Task по конкретной причине, например
-`ambiguous-product-decision`, `production-approval-required` или
-`external-approval-required`. Automatic acceptance не заменяет явное production
-approval, destructive/secret/privacy authority или обязательное решение
-внешнего approver, прямо заданное Task/project policy.
+Если gate failed или evidence неполон, сначала применить классификацию из
+раздела 5.3.1. Rework разрешён только при `verified-failure`; при
+`verification-blocked` Task остаётся `In Review` до названного изменения
+условий проверки. Material decision, production approval или обязательное
+решение внешнего approver остаются отдельными причинами defer. Automatic
+acceptance не заменяет production, destructive/secret/privacy authority либо
+другую явную внешнюю границу.
 
 #### 5.3.1 Однократная классификация `In Review`
 
@@ -611,17 +617,20 @@ Decision ladder:
    который делает небезопасной любую оставшуюся mutation.
 
 Deferred Task сохраняет truthful status: `To Do`, если execution не начинался;
-`In Progress`, если существует partial/rework result; `In Review`, если exact
-candidate machine-verified, но ждёт production/external approval или material
-decision. Не переводить её в `Done`/`Canceled` и не изобретать portable
-`Blocked` status.
+`In Progress`, если существует partial/rework result; `In Review`, если
+предъявленный candidate ждёт material decision, production/external approval
+либо классифицирован как `verification-blocked`. Сам status `In Review` не
+доказывает, что candidate прошёл какую-либо проверку. Не переводить
+её в `Done`/`Canceled` и не изобретать portable `Blocked` status.
 
 В current run вести decision queue с canonical Task ref, reason, last safe
 checkpoint, уже выполненными actions/evidence, recommended default, точным
 decision/authority и resume step. Не переизбирать Task без нового evidence,
-authority или external state change. Обязательно опубликовать и перечитать тот
-же `BLOCKED` handoff в Task; при отсутствии comment write/read включить этот
-terminal effect в blocker без изменения `description`.
+authority или external state change. Обязательно подготовить и попытаться
+опубликовать тот же `BLOCKED` handoff в Task. При отсутствии comment
+write/read сохранить его как communication remainder и показать в
+consolidated handoff. Это не меняет task disposition и не разрешает
+fallback в `description`.
 
 Когда runnable Tasks остаются, продолжать их без вопроса пользователю. Когда
 остались только deferred Tasks, предъявить одну consolidated decision queue.
@@ -684,8 +693,8 @@ active_write_target = min(
 ```
 
 `active_write_target` и `batch_target` — разные величины. Первый ограничивает
-реально исполняемые или дорабатываемые Task, второй — число уже
-targeted-verified candidates, которое выгодно собрать перед общим gate/effect.
+реально исполняемые или дорабатываемые Task, второй — число уже проверенных на
+уровне Task candidates, которое выгодно собрать перед общим gate/effect.
 Review batching никогда не превращает `In Progress` в waiting room: candidate,
 который уже прошёл targeted gate и интегрирован, должен находиться в
 `In Review`, пока ждёт общий commit identity, review-batch gate, UAT/runtime
@@ -699,13 +708,13 @@ Run ведёт явный набор `active_lane_tasks`:
   `active_write_target = 1`, независимо от размера scope и `batch_target`;
 - lane освобождается после подтверждённого `In Review`/terminal read-back либо
   после truthful defer незавершённого partial/rework checkpoint по правилам
-  report/autonomy; targeted-verified candidate нельзя выдавать за partial defer;
+  report/autonomy; проверенный на уровне Task candidate нельзя выдавать за partial defer;
 - unresolved или unknown status write не освобождает lane.
 
 Перед каждым новым `To Do → In Progress` действует обязательный
 status-reconciliation barrier. Для каждой Task, занятой текущим run, но больше
 не находящейся в implementation/rework, workflow обязан сначала выбрать и
-подтвердить ровно один исход: targeted-verified integrated candidate →
+подтвердить ровно один исход: проверенный на уровне Task integrated candidate →
 `In Review` с read-back; незавершённый material blocker → truthful defer;
 terminal result → terminal read-back. Если после этого число занятых lanes не
 меньше `active_write_target`, начинать следующую `To Do` запрещено. В serial run
@@ -805,7 +814,7 @@ rework. Не маскировать конфликт незапланирова�
    Если duplicate описывает материально отдельную проблему, зафиксировать
    finding, defer-нуть affected Task для scope decision и продолжить
    независимые Tasks вместо interrupting question или silent closure.
-6. Интегрировать targeted-verified result, сформировать candidate evidence и
+6. Интегрировать проверенный на уровне Task result, сформировать candidate evidence и
    обновить Task в `In Review`, если она ещё не в этом status. Это provisional
    review-ready state, а не terminal completion. Status write и read-back
    являются barrier перед освобождением lane и стартом replacement Task; общий
@@ -822,17 +831,16 @@ rework. Не маскировать конфликт незапланирова�
    публиковать `ACCEPTANCE READY` и не запрашивать ручную приёмку. До terminal
    transition опубликовать и перечитать обязательный `COMPLETED` report без Task
    field fallback.
-10. При доказанном failure либо failed batch gate подготовить через Strategic
-    Explainer понятный `REWORK REQUIRED` comment и вернуть Tasks, чьё evidence
-    стало недействительным, из `In Review` в `In Progress`. Comment write и
-    truthful status transition reconciliate независимо: недоступный comment
-    оставить communication remainder, но не сохранять доказанно сломанный
-    candidate в `In Review`. Сохранить текущие lanes, выполнить rework и
-    targeted retest, затем собрать и проверить новый exact batch. После полного
-    passing terminal evidence автоматически принять result, обязательно
-    опубликовать и перечитать final report comment, затем обновить Task в `Done`
-    и перечитать. Аналогично
-    обработать подтверждённый `Canceled` outcome.
+10. Failed gate сначала локализовать. Только Task с доказанным прямым
+    расхождением exact candidate с acceptance получает `verified-failure`:
+    подготовить `REWORK REQUIRED`, перевести `In Review → In Progress`,
+    перечитать, выполнить rework и новые gates. Падение aggregate gate или
+    аннулированный success evidence без task-level attribution не доказывают defect:
+    оставить неразличимые members в `In Review`, классифицировать
+    `verification-blocked` и предложить separating diagnostic. Comment write и
+    truthful non-terminal status reconciliate независимо. После полного passing
+    terminal evidence опубликовать/read-back terminal report, затем обновить Task
+    в `Done` либо подтверждённый `Canceled` и перечитать.
 
 При любом task-local blocker сохранить last safe checkpoint, truthful status и
 decision queue entry; обязательно опубликовать и перечитать `BLOCKED` report.
@@ -900,7 +908,8 @@ status text или другой Task field как fallback.
 reconciliate через read-back, не повторять write вслепую и не использовать Task
 fields как fallback. Добавить `comment-delivery-unavailable` либо
 `write-outcome-unknown` в communication queue и продолжить независимые Tasks.
-Для `COMPLETED` этот gap блокирует `Done`. Для `REWORK REQUIRED` он не блокирует
+Для terminal report (`COMPLETED`, а также нового `CANCELED` transition) этот gap
+блокирует следующий terminal status write. Для `REWORK REQUIRED` он не блокирует
 truthful `In Review → In Progress`: статус обязан отражать уже доказанный
 failure, а непубликованный narrative остаётся отдельным communication remainder.
 Для `BLOCKED` Task остаётся в `In Review` по самому review outcome, а не из-за

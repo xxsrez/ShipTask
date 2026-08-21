@@ -188,7 +188,7 @@ bounded `Strategic Handoff`, предоставить read-only discovery anchor
 должно проникать в общую семантику или мешать будущему выделению в отдельный
 plugin.
 
-### 13. Lossless by relevance
+### 14. Lossless by relevance
 
 Понятность не покупается ценой потери существенного факта. Каждое утверждение
 объяснения должно иметь опору в `Problem to solve`, `Current-State Brief` или
@@ -196,14 +196,14 @@ exact discovered source. Каждый decision-relevant факт входа до
 сохранён либо осознанно исключён как не влияющий на понимание, риск, действие
 или уверенность. Factual fidelity и readability оцениваются отдельно.
 
-### 14. Проверяемый source basis
+### 15. Проверяемый source basis
 
 При subagent invocation Explainer возвращает parent короткую source note:
 использованные strategic sources и их состояние `current/accepted`, `proposed`
 или `historical`, либо честную отметку, что дополнительный context не найден.
 Эта provenance не является copy-ready user payload.
 
-### 15. Внутренний механизм невидим читателю
+### 16. Внутренний механизм невидим читателю
 
 В прямом user-facing ответе не рассказывать о субагенте, orchestration,
 Strategic Handoff или самом Strategic Explainer. Когда Explainer работает как

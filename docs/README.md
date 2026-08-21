@@ -65,12 +65,15 @@
 - [0015: Однократная классификация приёмки](decisions/0015-single-pass-review-disposition.md)
   — разводит противоречивую Task, доказанный defect, доказанный success и реальную
   невозможность проверки; запрещает одинаковые повторы ради Goal status.
+- [0016: Единый действующий контракт lifecycle и отчётности](decisions/0016-current-lifecycle-and-reporting-contract.md)
+  — фиксирует нейтральный смысл `In Review`, отделяет status от comment effect,
+  запрещает mass rework без task-level defect evidence, счётчик повторов и
+  обязательные диаграммы.
 
 ## Reference
 
 - [Task Manager adapter](reference/task-manager-adapter.md) — точный discovery,
-  identity, lifecycle, concurrency и текущие capability gaps OAuth/MCP
-  connector.
+  identity, lifecycle, concurrency, текущие возможности и границы connector.
 - [Strategic Explainer evaluation](reference/strategic-explainer-evaluation.md)
   — critical fidelity/authority gates, lossless-by-relevance audit, scoring
   rubric и обязательные regression cases.
@@ -92,6 +95,9 @@
   — official agent guidance, clear-communication и handoff patterns,
   существующие skills, принятые механизмы, отклонённые альтернативы и
   ограничения evidence.
+- [Глубокая ревизия ShipTask](reports/2026-08-21-shiptask-deep-contract-review.md)
+  — три прохода по lifecycle, приёмке, отчётности, полномочиям, legacy и
+  distribution; найденные противоречия, принятый итоговый контракт и проверки.
 - [Предложение по развитию ShipTask skill](reports/2026-08-16-shiptask-skill-change-proposal.md)
   — целевая граница business policy, explicit/implicit modes, project-memory
   contract, runtime refactor, trigger matrix и согласованный cutover.
