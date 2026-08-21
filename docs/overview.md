@@ -13,8 +13,9 @@ Strategic Explainer = помощник по человеческому объя�
 
 ## Constitution-first подход
 
-Текущий contract задан [ADR-0018](decisions/0018-outcomes-not-tool-choreography.md),
-который уточняет [ADR-0017](decisions/0017-constitution-first-runtime-contract.md).
+Текущий contract задан [ADR-0018](decisions/0018-outcomes-not-tool-choreography.md)
+и [ADR-0019](decisions/0019-goal-only-for-multi-task-implementation.md), которые
+уточняют [ADR-0017](decisions/0017-constitution-first-runtime-contract.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
 результатов и жёстких границ. Агент свободен выбирать порядок, инструменты,
 реализацию и достаточные проверки.
@@ -44,8 +45,13 @@ create-and-deliver.
 planning и backlog capture ShipTask не запускают.
 
 - `single`: одна Task, без Goal.
-- `batch`: несколько Tasks/Project/Release/bare scope, с Goal.
+- `batch-implementation`: имплементация/rework минимум двух Tasks, с Goal.
+- `release`: release уже подготовленного candidate, без Goal.
 - project memory меняется только по явной просьбе.
+
+Project, Release, current scope, несколько Tasks и bare invocation являются
+selectors, а не автоматическими признаками batch. Goal не создаётся для общего
+чтения/приёмки Tasks, commit/push, deploy, smoke или production release.
 
 Task Manager live state всегда перечитывается. Memory не является evidence
 текущего status, version, comments, access или runtime result.
@@ -101,8 +107,10 @@ Skill не выбирает инструменты за агента. Агент
 ## Autonomy, Goal и release
 
 Изолированный blocker одной Task не останавливает независимую runnable работу.
-Goal используется только для batch progress и остаётся active, пока в scope есть
-незавершённая работа. Он не определяет Task outcome и число попыток.
+Goal используется только для прогресса массовой имплементации минимум двух Tasks
+и остаётся active, пока в этом scope есть незавершённая работа. Он не определяет
+Task outcome и число попыток. Release-only run Goal не создаёт; release может
+оставаться done criterion уже существующего совместимого Goal.
 
 Нужные non-production releases в local/dev/test/QA/UAT/staging/preview/sandbox
 разрешены после проверки target. Production, destructive durable-data changes,
@@ -114,6 +122,7 @@ secrets/privacy/access-policy changes, external recipients и unbounded cost
 - [Каноническая specification](specs/ship-tasks.md)
 - [Constitution-first ADR](decisions/0017-constitution-first-runtime-contract.md)
 - [Outcome, не tool choreography](decisions/0018-outcomes-not-tool-choreography.md)
+- [Goal только для массовой имплементации](decisions/0019-goal-only-for-multi-task-implementation.md)
 - [Task Manager adapter contract](reference/task-manager-adapter.md)
 - [Lifecycle evaluation](reference/shiptask-review-disposition-evaluation.md)
 - [Strategic Explainer specification](specs/strategic-explainer.md)

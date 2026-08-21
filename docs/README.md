@@ -12,9 +12,9 @@
 
 - [Ship Tasks](specs/ship-tasks.md) — канонический Task Manager-only workflow
   для explicit invocation и natural-language delivery с однозначным Task
-  Manager anchor: single без Goal, batch с Goal, constitution-first требования,
-  обязательные comments при существенных lifecycle transitions, свобода выбора
-  инструментов и фактическая классификация приёмки.
+  Manager anchor: single и release без Goal, Goal только для массовой
+  имплементации минимум двух Tasks, constitution-first требования, обязательные
+  comments, свобода выбора инструментов и фактическая классификация приёмки.
 - [Strategic Explainer](specs/strategic-explainer.md) — общий contract
   обязательного problem gate, bounded read-only strategic discovery и свободного
   объяснения без mutations, status decisions и новой authority.
@@ -70,10 +70,13 @@
   прежнее разделение status/comment effect заменено ADR-0017.
 - [0017: Constitution-first runtime contract](decisions/0017-constitution-first-runtime-contract.md)
   — исходное constitution-first решение; обязательная tool-recovery
-  последовательность заменена ADR-0018.
+  последовательность заменена ADR-0018, selector-based Goal policy — ADR-0019.
 - [0018: Конституция управляет результатом, а не инструментами](decisions/0018-outcomes-not-tool-choreography.md)
   — текущая граница: skill задаёт качество evidence и lifecycle outcomes, а
   агент сам выбирает технический способ достижения результата.
+- [0019: Goal только для массовой имплементации Tasks](decisions/0019-goal-only-for-multi-task-implementation.md)
+  — Project/Release являются selectors; Goal создаётся только для реализации или
+  rework минимум двух Tasks, а release-only выполняется без Goal.
 
 ## Reference
 

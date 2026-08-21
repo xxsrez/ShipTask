@@ -1,8 +1,9 @@
 # ShipTask: канонический контракт
 
 Статус: current contract, 2026-08-21. Основан на
-[ADR-0018](../decisions/0018-outcomes-not-tool-choreography.md), который уточняет
-constitution-first решение ADR-0017.
+[ADR-0018](../decisions/0018-outcomes-not-tool-choreography.md) и
+[ADR-0019](../decisions/0019-goal-only-for-multi-task-implementation.md): первый
+уточняет constitution-first решение ADR-0017, второй отделяет Goal от release.
 
 ## 1. Назначение и запуск
 
@@ -24,10 +25,17 @@ ShipTask. Чтение статуса, аудит, объяснение, пла�
 ### 1.1 Режимы
 
 - `single`: одна exact Task, включая create-and-deliver; Goal не создаётся.
-- `batch`: несколько Tasks, Project, Release или bare `$ship-tasks`; используется
-  Goal как журнал прогресса всего выбранного scope.
+- `batch-implementation`: в одном run реализуются или возвращаются в rework две
+  или больше concrete Tasks; Goal учитывает прогресс этой массовой имплементации.
+- `release`: commit/push/publish/deploy/smoke/rollback уже подготовленного
+  candidate; Goal не создаётся, в том числе при selector `Project` или `Release`.
 - `memory-maintenance`: project memory меняется только по явной просьбе.
 - `non-delivery`: точное чтение или planning mutation без delivery workflow.
+
+Project, Release, current scope, несколько Tasks и bare `$ship-tasks` задают
+границу discovery, но не mode и не основание для Goal. Mode определяется
+фактической работой после live inventory. Чтение, проверка или lifecycle
+reconciliation нескольких Tasks не являются массовой имплементацией.
 
 Bare `$ship-tasks` берёт `current_scope` из project memory. Prompt selector имеет
 приоритет, но не переписывает memory. Task Manager всегда перечитывается: memory
@@ -37,11 +45,12 @@ Bare `$ship-tasks` берёт `current_scope` из project memory. Prompt select
 
 | Prompt | ShipTask | Результат маршрутизации |
 |---|---|---|
-| `$ship-tasks` | да | `batch` по memory `current_scope` |
+| `$ship-tasks` | да | mode по live inventory; Goal только для `batch-implementation` |
 | `Выполни TM-123` | да | `single` для exact существующей Task |
-| `Доведи выбранный Task Manager Project Alpha` | да | `batch` выбранного Project |
-| `Выпусти выбранный Task Manager Release 0.2` | да | `batch` выбранного Release |
-| `Доведи текущий Task Manager scope` | да | `batch` уже выбранного current scope |
+| `Доведи выбранный Task Manager Project Alpha` | да | mode по фактической работе; selector не создаёт Goal |
+| `Выпусти выбранный Task Manager Release 0.2 на production` | да | `release` без Goal; production authority дана exact запросом |
+| `Имплементируй все незавершённые Tasks выбранного Release 0.2` | да | `batch-implementation` с Goal после live inventory |
+| `Доведи текущий Task Manager scope` | да | mode по фактической работе; Goal только при имплементации 2+ Tasks |
 | `Создай ровно одну Task в Task Manager: исправить импорт, и сразу начни выполнять её` | да | `single create-and-deliver` |
 | `Почини X сейчас` | нет | обычная реализация без Task Manager scope |
 | `Исправь баг в plugin` | нет | обычная реализация без Task Manager scope |
@@ -258,22 +267,35 @@ ShipTask проверяет результат, сам пишет окончат
 Out-of-scope finding не исправляется и не превращается автоматически в новую
 Task. Если он не блокирует текущий result, он кратко попадает в final report.
 
-## 8. Batch и Goal
+## 8. Массовая имплементация и Goal
 
-Goal создаётся только для batch после exact scope resolution и до первой
-non-Goal mutation. Он хранит objective, observable done criteria, verification,
-authority и текущий progress. Single Goal не создаёт.
+Goal создаётся только для `batch-implementation`: после exact scope resolution и
+live inventory установлено, что current run действительно реализует или
+возвращает в rework минимум две concrete Tasks. Goal создаётся до первой
+implementation mutation и хранит objective, observable done criteria,
+verification, authority и progress именно этой массовой имплементации.
+
+Ни selector `Project`/`Release`/current scope, ни bare `$ship-tasks`, ни чтение,
+проверка, приёмка или reconciliation нескольких Tasks сами по себе не разрешают
+Goal. `single` и `release` Goal не создают. Commit, push, publish, deploy, smoke,
+bounded repair/rollback и production release уже подготовленного candidate —
+release effects, а не массовая имплементация Tasks.
+
+Release-only run не создаёт, не переиспользует, не ретаргетит и не завершает Goal
+только ради release. Если release является исходным done criterion уже активного
+совместимого Goal массовой имплементации, run может продолжить этот Goal, но сам
+release никогда не является основанием создать новый.
 
 Goal не решает, сколько раз проверять Task, не определяет её status и не
-превращает task-local blocker в глобальный. Пока в scope остаются `To Do`,
-`In Progress`, `In Review`, rework, незавершённые effects или in-scope defect,
-Goal остаётся активным.
+превращает task-local blocker в глобальный. Пока в scope массовой имплементации
+остаются `To Do`, `In Progress`, `In Review`, rework, незавершённые effects или
+in-scope defect, Goal остаётся активным.
 
 Изолированная проблема одной Task не останавливает независимую runnable работу.
-Перед ожиданием пользователя batch повторно читает полный inventory; если есть
-безопасная runnable работа, агент продолжает её. Глобальный stop допустим только
-когда конфликт scope/shared state/authority делает любую оставшуюся mutation
-небезопасной.
+Перед ожиданием пользователя `batch-implementation` повторно читает полный
+inventory; если есть безопасная runnable работа, агент продолжает её. Глобальный
+stop допустим только когда конфликт scope/shared state/authority делает любую
+оставшуюся mutation небезопасной.
 
 ## 9. Release authority
 
@@ -290,8 +312,8 @@ verification, comments и read-back. При отсутствии approval Task �
 ## 10. Завершение run
 
 Перед финальным ответом агент перечитывает affected Tasks, comments, statuses,
-Goal и обязательные external effects. Если есть безопасный in-scope способ
-устранить gap, он делает это до handoff.
+применимый Goal и обязательные external effects. Если есть безопасный in-scope
+способ устранить gap, он делает это до handoff.
 
 Run report начинается с результата и простым языком сообщает:
 
@@ -301,9 +323,10 @@ Run report начинается с результата и простым язы
 - какие исправления уже выполнены;
 - одно точное условие или действие для продолжения.
 
-Run report не заменяет Task comments. Batch Goal отмечается complete только
-после fresh full inventory без незавершённой in-scope работы. Нельзя объявлять
-skill change или distribution завершёнными при частичном выполнении project DoD.
+Run report не заменяет Task comments. Goal `batch-implementation` отмечается
+complete только после fresh full inventory без незавершённой in-scope работы.
+Release-only run не создаёт и не финализирует Goal. Нельзя объявлять skill change
+или distribution завершёнными при частичном выполнении project DoD.
 
 ## 11. Проверяемые сценарии
 

@@ -19,7 +19,9 @@
 | Reopen terminal Task | обнаружен новый material reason | объяснить причину reopen; read-back | правдивый working status | продолжить scoped work | молчаливый reopen |
 | Новый `Canceled` или `Duplicate` | terminal reason доказан | объяснить причину и связь с outcome; read-back | соответствующий terminal status | перечитать Task | terminal status без comment |
 | Обязательный comment фактически не создан или не перечитан | lifecycle transition не завершён | факт публикации не выдумывать | не выполнять существенный transition | агент сам выбирает способ обеспечить обязательный результат | status без comment, fallback в description |
-| Task-local blocker в batch | Task незавершена | понятный blocker comment с read-back | правдивый non-terminal status | продолжить независимые Tasks | завершить или искусственно блокировать Goal |
+| Массовая имплементация минимум двух Tasks | `batch-implementation` | по lifecycle каждой Task | правдивые Task statuses | создать/продолжить Goal всего implementation scope | работать без Goal либо создать отдельный Goal на каждую Task |
+| Release готового candidate по Project/Release selector | `release` | только если lifecycle/blocker требует | statuses по фактам | commit/push/deploy/smoke по authority без нового Goal | создавать Goal из-за selector или production release |
+| Task-local blocker в `batch-implementation` | Task незавершена | понятный blocker comment с read-back | правдивый non-terminal status | продолжить независимые Tasks | завершить или искусственно блокировать Goal |
 
 ## Regression questions
 
@@ -30,8 +32,10 @@
 - Доказан ли defect наблюдением exact candidate, а не сбоем проверки?
 - Получил ли реальный verification blocker несколько кратких путей приёмки?
 - Продолжил ли агент rework после reopen вместо завершения run?
-- Остался ли Goal только учётом batch progress, без искусственного счётчика
-  попыток?
+- Создан ли Goal только для реальной имплементации/rework минимум двух Tasks, а
+  не из-за Project/Release selector, общего чтения или release-only?
+- Остался ли применимый Goal только учётом implementation progress, без
+  искусственного счётчика попыток?
 - Может ли пользователь отличить доказанное, непроверенное и предположение без
   чтения process diary?
 

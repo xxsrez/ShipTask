@@ -6,10 +6,11 @@ ShipTask — репозиторий Codex skill `$ship-tasks`, который ч
 Manager anchor. Один delivery verb или обычная просьба исправить код/продукт/
 plugin без такого anchor ShipTask не активирует. Составная команда явно создать
 ровно одну Task в Task Manager и сразу выполнить её запускает `single`, а не
-backlog capture. Exact одна Task работает в `single` mode без Goal; несколько
-Tasks, Project, Release и bare `$ship-tasks` — в `batch` mode с обязательным
-Goal. Bare scope выбирается из project memory и затем всегда перепроверяется по
-live Task Manager state.
+backlog capture. Exact одна Task работает в `single` mode без Goal. Goal нужен
+только для `batch-implementation`, когда один run реально имплементирует или
+возвращает в rework минимум две concrete Tasks. Project/Release/current scope и
+bare `$ship-tasks` — только selectors: mode определяется по live inventory.
+Release уже подготовленного candidate, включая production, работает без Goal.
 
 Skill построен как constitution: он задаёт обязательные outcomes и safety
 boundaries, но оставляет агенту выбор инструментов, порядка, реализации и
@@ -34,9 +35,9 @@ read-only tools и объясняет смысл результата. Он не
 contract: пользователь подключается только через reopen либо новую Task.
 Task-local вопросы откладывают только конкретную Task, не прерывая остальные;
 non-production releases выполняются автоматически, а production требует явного
-разрешения пользователя. Batch Goal остаётся активным, пока в выбранной границе
-есть Tasks, подходящие под рабочие критерии ShipTask. Project memory хранит
-только selectors/profile и изменяется лишь по явной просьбе пользователя.
+разрешения пользователя. Goal массовой имплементации остаётся активным, пока в
+его границе есть незавершённая работа; сам release не создаёт Goal. Project
+memory хранит только selectors/profile и изменяется лишь по явной просьбе.
 
 ## Структура
 

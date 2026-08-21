@@ -55,8 +55,10 @@ skill, реалистичный exact Task Manager scope и обычный proje
 
 Минимальные случаи:
 
-- exact Task delivery запускает single без Goal; Project/Release/bare scope —
-  batch с Goal; чтение/audit/planning/backlog и generic code request не запускают
+- exact Task delivery запускает single без Goal; массовая имплементация минимум
+  двух Tasks запускает `batch-implementation` с Goal; Project/Release/bare scope
+  сами mode не определяют; release-only, чтение нескольких Tasks и общая приёмка
+  работают без Goal; audit/planning/backlog и generic code request не запускают
   ShipTask;
 - `To Do → In Progress` проходит без лишнего comment;
 - готовый candidate получает comment/read-back до `In Review`;
@@ -70,7 +72,9 @@ skill, реалистичный exact Task Manager scope и обычный proje
 - существенный transition проверяется по фактическому comment/read-back, а не по
   предписанному способу работы comment tools;
 - failed batch gate без task attribution не возвращает весь batch в rework;
-- Goal не вводит счётчик попыток и не заменяет Task state;
+- Goal не вводит счётчик попыток и не заменяет Task state; production release не
+  создаёт Goal, но может быть done criterion уже активного Goal массовой
+  имплементации;
 - нужный non-production release выполняется, production ждёт explicit approval;
 - final report сообщает outcome, proof gaps, primary cause и resume condition,
   но не заменяет Task comment.

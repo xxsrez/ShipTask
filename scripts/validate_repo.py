@@ -53,6 +53,7 @@ ADR = {
         ("0016", "0016-current-lifecycle-and-reporting-contract.md"),
         ("0017", "0017-constitution-first-runtime-contract.md"),
         ("0018", "0018-outcomes-not-tool-choreography.md"),
+        ("0019", "0019-goal-only-for-multi-task-implementation.md"),
     )
 }
 
@@ -98,6 +99,7 @@ CURRENT_CONTRACT_FILES = (
     MEMORY,
     HANDOFF,
     ADR["0018"],
+    ADR["0019"],
 )
 
 LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
@@ -207,9 +209,9 @@ def validate_ship_skill(errors: list[str]) -> None:
         "TM-123",
         "Одного delivery-глагола недостаточно",
         "Create-and-deliver",
-        "Bare $ship-tasks",
-        "single работает без Goal",
-        "batch — с Goal",
+        "Bare $ship-tasks разрешает mode по live inventory",
+        "Single и release работают без Goal",
+        "Goal нужен только для batch-implementation минимум двух Tasks",
         "backlog capture",
     ):
         if term not in description:
@@ -258,6 +260,8 @@ def validate_ship_skill(errors: list[str]) -> None:
         'value: "task-manager"',
         "allow_implicit_invocation: true",
         "In Review",
+        "Goal создавай только для реальной implementation/rework минимум двух Tasks",
+        "release-only, включая production, работают без нового Goal",
     )
 
 
@@ -297,11 +301,27 @@ def validate_strategic_skill(errors: list[str]) -> None:
 
 
 TRIGGER_CASES = {
-    "$ship-tasks": ("да", "`batch` по memory `current_scope`"),
+    "$ship-tasks": (
+        "да",
+        "mode по live inventory; Goal только для `batch-implementation`",
+    ),
     "Выполни TM-123": ("да", "`single` для exact существующей Task"),
-    "Доведи выбранный Task Manager Project Alpha": ("да", "`batch` выбранного Project"),
-    "Выпусти выбранный Task Manager Release 0.2": ("да", "`batch` выбранного Release"),
-    "Доведи текущий Task Manager scope": ("да", "`batch` уже выбранного current scope"),
+    "Доведи выбранный Task Manager Project Alpha": (
+        "да",
+        "mode по фактической работе; selector не создаёт Goal",
+    ),
+    "Выпусти выбранный Task Manager Release 0.2 на production": (
+        "да",
+        "`release` без Goal; production authority дана exact запросом",
+    ),
+    "Имплементируй все незавершённые Tasks выбранного Release 0.2": (
+        "да",
+        "`batch-implementation` с Goal после live inventory",
+    ),
+    "Доведи текущий Task Manager scope": (
+        "да",
+        "mode по фактической работе; Goal только при имплементации 2+ Tasks",
+    ),
     "Создай ровно одну Task в Task Manager: исправить импорт, и сразу начни выполнять её": (
         "да",
         "`single create-and-deliver`",
@@ -369,8 +389,16 @@ REVIEW_CASES = {
         "не выполнять существенный transition",
         "fallback в description",
     ),
-    "Task-local blocker в batch": (
-        "Goal",
+    "Массовая имплементация минимум двух Tasks": (
+        "batch-implementation",
+        "создать/продолжить Goal",
+    ),
+    "Release готового candidate по Project/Release selector": (
+        "release",
+        "без нового Goal",
+    ),
+    "Task-local blocker в `batch-implementation`": (
+        "правдивый non-terminal status",
         "продолжить независимые Tasks",
     ),
 }
@@ -395,6 +423,7 @@ def validate_current_contract(errors: list[str]) -> None:
         SPEC,
         "Статус: current contract, 2026-08-21",
         "ADR-0018",
+        "ADR-0019",
         "## 2. Конституция",
         "comment",
         "до status write",
@@ -403,6 +432,9 @@ def validate_current_contract(errors: list[str]) -> None:
         "не найден достаточный безопасный способ продолжить",
         "Нет фиксированного числа попыток",
         "продолжает исправление в том же run",
+        "Goal создаётся только для `batch-implementation`",
+        "production release уже подготовленного candidate",
+        "Release-only run не создаёт",
     )
     require(
         errors,
@@ -413,6 +445,9 @@ def validate_current_contract(errors: list[str]) -> None:
         "не обязывает чинить именно его",
         "не называется verified",
         "ADR-0018",
+        "ADR-0019",
+        "Goal используется только для прогресса массовой имплементации",
+        "production release",
     )
     require(
         errors,
@@ -449,6 +484,16 @@ def validate_current_contract(errors: list[str]) -> None:
         "не нашёл достаточного безопасного способа",
         "не задаёт tool flow",
         "Фиксированного числа попыток",
+    )
+    require(
+        errors,
+        ADR["0019"],
+        "Goal только для массовой имплементации Tasks",
+        "минимум две concrete Tasks",
+        "не определяют mode и не разрешают Goal",
+        "Release-only не создаёт",
+        "Production отличается дополнительной authority boundary",
+        "Сам release новый Goal не создаёт",
     )
 
     contradiction_patterns = {
@@ -492,6 +537,8 @@ def validate_current_contract(errors: list[str]) -> None:
             "self-recovery",
             "Technical Brief",
             "communication remainder",
+            "batch — с Goal",
+            "Project/Release/bare scope — batch с Goal",
         )
 
     for path in CURRENT_CONTRACT_FILES:
@@ -568,7 +615,8 @@ def validate_supersession(errors: list[str]) -> None:
         "0013": ("ADR-0014", "ADR-0016", "ADR-0017"),
         "0015": ("partially superseded", "ADR-0017"),
         "0016": ("partially superseded", "ADR-0017"),
-        "0017": ("partially superseded", "ADR-0018"),
+        "0007": ("ADR-0019",),
+        "0017": ("partially superseded", "ADR-0018", "ADR-0019"),
     }
     for number, terms in required_markers.items():
         header = "\n".join(read(ADR[number]).splitlines()[:18])
@@ -630,6 +678,7 @@ def current_task_source_files() -> tuple[Path, ...]:
         MEMORY,
         HANDOFF,
         ADR["0018"],
+        ADR["0019"],
     )
 
 

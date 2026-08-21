@@ -2,7 +2,8 @@
 
 Статус: partially superseded, 2026-08-21. Outcome-level требования сохраняются,
 а обязательная последовательность восстановления инструментов заменена
-[ADR-0018](0018-outcomes-not-tool-choreography.md).
+[ADR-0018](0018-outcomes-not-tool-choreography.md), selector-based Goal policy —
+[ADR-0019](0019-goal-only-for-multi-task-implementation.md).
 Это решение ввело ShipTask lifecycle, обязательные комментарии и свободу исполнения.
 Оно частично заменяет ADR-0009, ADR-0010, ADR-0013, ADR-0015 и ADR-0016 там,
 где те задавали иной порядок status/comment effects, разрешали менять status с

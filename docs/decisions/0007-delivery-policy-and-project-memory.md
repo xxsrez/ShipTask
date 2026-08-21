@@ -2,6 +2,11 @@
 
 Статус: accepted. Дата: 2026-08-16.
 
+Классификация `Project`/`Release`/bare scope как автоматического `batch` и
+обязательный Goal для такого selector заменены
+[ADR-0019](0019-goal-only-for-multi-task-implementation.md). Остальные routing и
+project-memory boundaries сохраняются.
+
 Формулировка о загрузке user-level skill в последствиях ниже заменена
 [ADR-0011](0011-separate-shiptask-plugin-distribution.md). Runtime ShipTask
 распространяется отдельным plugin рядом с adapter-only Task Manager plugin.
