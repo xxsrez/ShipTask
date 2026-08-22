@@ -1,20 +1,44 @@
 # ShipTask: канонический контракт
 
-Статус: current contract, 2026-08-22. Основан на
-[ADR-0018](../decisions/0018-outcomes-not-tool-choreography.md) и
-[ADR-0019](../decisions/0019-goal-only-for-multi-task-implementation.md), а
+Статус: current Level 2 contract, 2026-08-22. Применимые Level 1 requirements —
+`ST-*` в локальных
+[требованиях пользователя](requirements.md). Эта architecture описывает
+current архитектуру достижения и не может ослаблять Level 1. Основан на
+[ADR-0018](../../decisions/0018-outcomes-not-tool-choreography.md) и
+[ADR-0019](../../decisions/0019-goal-only-for-multi-task-implementation.md), а
 reporting contract уточнён
-[ADR-0020](../decisions/0020-visible-acceptance-incidents-and-required-comments.md).
+[ADR-0020](../../decisions/0020-visible-acceptance-incidents-and-required-comments.md).
 Общий принцип требований как конституции для агентов закреплён
-[ADR-0021](../decisions/0021-requirements-as-agent-constitution.md), а явное
+[ADR-0021](../../decisions/0021-requirements-as-agent-constitution.md), а явное
 требование независимого Strategic Explainer для каждого комментария —
-[ADR-0022](../decisions/0022-mandatory-independent-strategic-explainer-for-comments.md),
-а adaptive multi-agent default и буквальный opt-out —
-[ADR-0024](../decisions/0024-adaptive-multi-agent-execution-by-default.md), а
+[ADR-0022](../../decisions/0022-mandatory-independent-strategic-explainer-for-comments.md),
+а automatic default, natural-language topology rules и writer/worktree isolation —
+[ADR-0024](../../decisions/0024-adaptive-multi-agent-execution-by-default.md), а
 cost-aware выбор профиля субагента и обязательная эскалация Luna —
-[ADR-0025](../decisions/0025-cost-aware-subagent-profiles.md).
+[ADR-0025](../../decisions/0025-cost-aware-subagent-profiles.md).
 Эти решения соответственно сохраняют свободу способа, отделяют Goal от release
 и делают приёмочные инциденты видимыми во всём run.
+
+## 0. Compilation contract
+
+Эта architecture вместе с локальным `requirements.md` является полным current
+source package `$ship-tasks`. Runtime `ship-tasks/SKILL.md` — производная
+смысловая компиляция этих двух документов: его можно удалить и собрать заново,
+сохранив все `ST-*` и выбранную здесь реализацию примерно эквивалентными по
+наблюдаемому поведению. ADR, reports и evaluations дают rationale и evidence,
+но не являются параллельным current contract.
+
+### 0.1 Current compilation status
+
+Checked-in `ship-tasks/SKILL.md`, его references, metadata и observable
+evaluation являются локальной компиляцией current `ST-*`: `Backlog` исключён из
+delivery, без user rule topology определяется автоматически, а однозначные
+natural-language правила о числе, ролях и условиях delegation исполняются;
+каждый concurrent implementation writer получает собственные branch/worktree,
+а interrupted task-owned checkpoint подхватывается следующей сессией после
+exclusive takeover. Marketplace source и installed cache —
+отдельный distribution step: локальная компиляция сама по себе не доказывает,
+что новый runtime уже released или загружен fresh Codex session.
 
 ## 1. Назначение и запуск
 
@@ -47,6 +71,12 @@ Project, Release, current scope, несколько Tasks и bare `$ship-tasks` 
 границу discovery, но не mode и не основание для Goal. Mode определяется
 фактической работой после live inventory. Чтение, проверка или lifecycle
 reconciliation нескольких Tasks не являются массовой имплементацией.
+
+Delivery inventory исключает canonical status `Backlog`. Такие Tasks можно
+прочитать как context или dependency, но нельзя включить в runnable frontier,
+начать реализовывать либо переводить из `Backlog` без отдельного явного решения
+пользователя начать именно эту запланированную работу. Это фильтр delivery
+scope, а не эвристика приоритета.
 
 Bare `$ship-tasks` берёт `current_scope` из project memory. Prompt selector имеет
 приоритет, но не переписывает memory. Task Manager всегда перечитывается: memory
@@ -130,11 +160,12 @@ task.
 Каждое требование ниже задаёт обязательный результат, его смысл, наблюдаемое
 доказательство и границы полномочий. Обычно оно не управляет внутренней
 организацией агента, декомпозицией, порядком инструментов, числом попыток или
-формой контекста. Явные пользовательские исключения: adaptive multi-agent
-исполнение нескольких независимых work packets по умолчанию, буквальный
-no-subagent opt-out, cost-aware profile routing для субагентов и отдельный
-Strategic Explainer перед каждым комментарием, когда общий opt-out не действует,
-а также однократный безопасный title первой Codex task.
+формой контекста. Явные пользовательские исключения: automatic delegation как
+default без topology rule, обязательное исполнение однозначных правил
+пользователя о числе, ролях и условиях delegation, отдельный worktree каждого
+concurrent implementation writer, cost-aware profile routing и отдельный
+Strategic Explainer перед каждым комментарием, когда effective rule его не
+отключает, а также однократный безопасный title первой Codex task.
 
 ### 2.1 Пользовательский результат важнее внутренней процедуры
 
@@ -165,12 +196,12 @@ ShipTask всегда создаёт и перечитывает обязате�
 по adapter contract; пока comment фактически не существует, связанный
 существенный transition не завершён.
 
-Каждый комментарий, который ShipTask собирается создать по любой причине,
-сначала проходит отдельного независимого Strategic Explainer. Основной агент не
-может заменить этот проход собственной редактурой. Недоступность Explainer
-оставляет комментарий и зависящий от него переход незавершёнными. Единственное
-исключение — явный общий `subagents=off`: тогда основной агент применяет тот же
-quality contract напрямую и не заявляет о независимой проверке.
+Пока effective topology rule не отключает comment Explainer, каждый комментарий
+ShipTask сначала проходит отдельного независимого Strategic Explainer. Основной
+агент не может заменить этот проход собственной редактурой; недоступность роли
+оставляет комментарий и зависящий transition незавершёнными. Если user rule
+отключает Explainer, основной агент применяет тот же quality contract напрямую
+и не заявляет о независимой проверке.
 
 ### 2.3 Приёмочный инцидент виден сразу и остаётся в истории
 
@@ -283,13 +314,14 @@ Explainer. Отдельное существенное событие может
 Достаточен текст, после которого человек понимает решение без чтения сессии.
 Комментарий пишется на языке пользователя; внутренние reason codes, смесь
 жаргона и отчёт о процессе объяснением не являются.
-При `subagents=auto` перед публикацией отдельный Strategic Explainer превращает
-установленные факты в готовый пользовательский текст. Основной агент проверяет
-фактическую точность и при необходимости возвращает исправленный вход Explainer,
-но не переписывает одобренный текст обратно на техническом языке. При общем
-`subagents=off` тот же quality contract применяется напрямую. Статус меняется
-только после публикации и повторного чтения комментария; затем Task также
-перечитывается.
+Пока effective topology rule не отключает comment Explainer, перед публикацией
+отдельный Strategic Explainer превращает установленные факты в готовый
+пользовательский текст. Основной агент проверяет фактическую точность и при
+необходимости возвращает исправленный вход Explainer, но не переписывает
+одобренный текст обратно на техническом языке. Когда rule отключает Explainer,
+тот же quality contract применяется напрямую без claim независимости. Статус
+меняется только после публикации и повторного чтения комментария; затем Task
+также перечитывается.
 
 ### 4.2 Переход в review
 
@@ -366,9 +398,9 @@ comment предшествует reopen, после чего обычный rewo
 
 ## 6. Человеческое объяснение
 
-Каждый комментарий Task Manager, который создаёт ShipTask, обязательно проходит
-отдельного Strategic Explainer, если пользователь не включил общий
-`subagents=off`. Это явное требование к независимой смысловой проверке, а не
+Пока effective topology rule не отключает comment Explainer, каждый комментарий
+Task Manager, который создаёт ShipTask, обязательно проходит отдельного
+Strategic Explainer. Это явное требование к независимой смысловой проверке, а не
 способ, который основной агент может молча заменить собственной редактурой.
 
 ShipTask сам отвечает за факты, статус, границы задачи, полномочия, способ
@@ -388,17 +420,49 @@ Strategic Explainer возвращает готовый текст на язык
 потерян существенный факт, он исправляет вход и повторяет независимую
 адаптацию. Самостоятельно переписать черновик и признать его прошедшим
 Strategic Explainer нельзя. Если субагент недоступен или не дал пригодный текст,
-комментарий не публикуется, а связанный переход остаётся незавершённым. При
-явном общем `subagents=off` отдельный проход не запускается: основной агент сам
-применяет этот quality contract и честно сохраняет отсутствие независимой
-проверки.
+комментарий не публикуется, а связанный переход остаётся незавершённым. Если
+effective user rule отключает Explainer, отдельный проход не запускается:
+основной агент сам применяет этот quality contract и честно сохраняет отсутствие
+независимой проверки.
 
 Подробный quality contract:
-[runtime reference](../../ship-tasks/references/strategic-explainer.md).
+[runtime reference](../../../ship-tasks/references/strategic-explainer.md).
 
 ## 7. Реализация и проверка
 
 Агент самостоятельно выбирает минимальный целостный способ выполнить Task.
+
+### 7.1 Resume-first
+
+Перед созданием новой implementation surface агент ищет current in-scope
+checkpoint: перечитывает Task, comments, status/version и partial external
+effects, затем инвентаризирует релевантные Git worktrees, branches, commits,
+dirty diffs и integration state. Предыдущий handoff помогает найти checkpoint,
+но не заменяет fresh inspection. Связь artifact с exact Task доказывается
+current project/repository evidence, а не только похожим именем branch или
+каталога.
+
+Если task-owned feature branch и worktree содержат незавершённый candidate, а
+прежняя session/agent остановлена и активного writer больше нет, новый
+coordinator передаёт этому же worktree эксклюзивное ownership текущего writer
+либо принимает его сам. Работа продолжается с существующего diff/commits;
+создавать параллельный replacement worktree, повторять уже выполненную работу
+или переносить изменения только ради смены session нельзя. Сохранившаяся branch
+без usable worktree по возможности получает новый checkout этой же branch.
+
+До первой новой mutation агент устанавливает HEAD/base, staged/unstaged и
+untracked changes, выполненные и непроверенные effects, актуальность acceptance
+и возможность дальнейшего fan-in. Existing changes сохраняются; unknown
+effects reconciliate. Если предыдущий writer всё ещё активен, ownership
+неизвестен, artifact относится к другому scope или takeover создаёт риск, этот
+worktree не перехватывается и не очищается. Агент продолжает другую независимую
+safe работу либо сообщает exact boundary.
+
+Resume действует во всех delivery modes и между Codex-сессиями, но не
+перевешивает current Task truth: terminal status без основания reopen,
+изменившийся scope/acceptance или явный отказ пользователя от прежнего candidate
+останавливают автоматическое продолжение старого checkpoint.
+
 Обычно он:
 
 - проверяет repository/project instructions и dirty worktree;
@@ -439,23 +503,52 @@ Goal не решает, сколько раз проверять Task, не оп
 остаются `To Do`, `In Progress`, `In Review`, rework, незавершённые effects или
 in-scope defect, Goal остаётся активным.
 
-Default topology — `subagents=auto`. После live inventory агент выделяет
-dependency-ready work packets; active target равен наименьшей из
-доступных ширин: независимая runnable работа, conflict-free ownership или
-изоляция, runtime capacity и способность интегрировать, проверить и review-ить
-результаты. Любое уменьшение ниже этого target требует конкретного observable
-limiting factor. Когда безопасных полезных lanes минимум две, одновременно
-работают несколько субагентов; основной агент не поглощает такой frontier
-последовательно.
+Сначала coordinator выводит effective topology policy из current prompt и
+применимого conversation context. Однозначные natural-language указания
+пользователя сохраняются как constraints: точное или относительное число,
+разрешённые/запрещённые роли, общий или role-scoped opt-out, условие по
+ожидаемой длительности, сложности либо другому названному признаку. Совместимые
+constraints комбинируются; позднее более конкретное правило заменяет прежнее
+правило того же scope. Root/coordinator не входит в явно названное число
+субагентов.
+
+Только если применимого user rule нет, delegation автоматическая: после live
+inventory агент сам выделяет полезные независимые work packets и решает,
+сколько субагентов применять с учётом dependencies, ownership, доступной
+изоляции, runtime capacity и стоимости integration/verification. Exact count
+означает обязательное число subagents, а не ceiling. Relative rule вроде
+«побольше» materially сдвигает решение к большей полезной delegation
+относительно automatic baseline. Conditional rule проверяется по указанному
+пользователем условию, а не по молча подставленной другой метрике.
+
+Safety, authority, useful ownership, worktree isolation и возможность
+проверяемого fan-in сильнее topology preference. Coordinator не создаёт
+фиктивные packets и не нарушает эти инварианты ради quota. Если обязательное
+rule нельзя выполнить из-за этих границ или фактической runtime capacity, он
+не подменяет его автоматическим решением молча: сообщает exact конфликт,
+фактическую topology и влияние на result.
 
 Основной агент — единственный integration owner и владелец Goal, Task Manager
 comments/status/version writes, целостного candidate и Task attribution. Каждый
-implementation writer получает bounded disjoint ownership.
+concurrent implementation writer получает bounded disjoint ownership,
+собственную feature branch и собственный Git worktree для своей exact Task.
+Writer не пишет в integration target, branch или worktree другой Task. Worktree
+создаётся до первой writable mutation этого packet и остаётся привязанным к
+нему до fan-in или честного отказа от результата. Read-only scouts, reviewers и
+comment Explainer отдельного worktree не требуют.
+
+Остановка writer или Codex-сессии не превращает task-owned worktree в мусор и не
+требует нового checkout. После доказанной quiescence ownership может
+последовательно перейти следующему writer или integration owner; одновременно
+писать в worktree по-прежнему может только один владелец.
+
 Пересекающиеся writes не идут параллельно; при одной safe write lane допустим
-один writer и полезные независимые read-only scouts/reviewers. После завершения,
-blocker или открытия dependencies active target пересчитывается. Большое число
-Tasks и свободных slots без такого frontier не являются основанием для fake
-fan-out.
+один writer и полезные независимые read-only scouts/reviewers. Только integration
+owner выполняет fan-in результатов в exact integration candidate и проверяет
+его после объединения; успешная проверка отдельного worktree не доказывает
+интегрированный результат. После завершения, blocker или открытия dependencies
+агент заново оценивает полезную delegation. Большое число Tasks и свободных
+slots без независимой работы не являются основанием для fake fan-out.
 
 Пользовательский выбор model/effort является главным. Если пользователь не
 задал отдельный профиль субагентов, текущие model/effort основного агента
@@ -497,17 +590,20 @@ capacity соответствующей роли.
 
 Общее явное «не используй субагентов» или «без субагентов» включает
 `subagents=off` для всего текущего run: не запускаются implementation, research,
-review и comment subagents. Узкий запрет действует только для названной роли;
-например, «без субагентов для реализации» сохраняет отдельного Strategic
-Explainer и сообщается как `subagents=auto; implementation=off`. Goal, lifecycle,
-acceptance и authority policy от topology не меняются. Недоступный worker
-снижает target с `workers=not-available`; недоступный comment Explainer отдельно
-блокирует только comment-dependent lifecycle effects и не считается opt-out.
+review и comment subagents. Role-scoped rule меняет только названную роль:
+например, запрет implementation subagents не отключает comment Explainer, а
+запрет Explainer не отключает другие разрешённые lanes. Goal, lifecycle,
+acceptance и authority policy от topology rule не меняются. Недоступность
+worker capacity сообщается, когда мешает исполнить user rule или materially
+влияет на результат; если effective rule сохраняет comment Explainer, его
+недоступность отдельно блокирует comment-dependent lifecycle effects.
 
-Первый содержательный update после inventory сообщает topology и role overrides,
-ready independent lanes, active target, profile allocation и конкретный limiting
-factor. Final report кратко называет фактическую peak width, использованные
-profiles и Luna-to-current escalations либо причину coordinator-only исполнения.
+Updates и final report при заданном user rule называют его effective смысл и
+подтверждают соблюдение либо material deviation. При automatic default
+достаточно сказать о materially важной delegation или capacity gap. Ready
+width, active target, peak width и другая внутренняя scheduler accounting не
+обязательны. Profile и Luna-to-current handoff называются только когда помогают
+понять результат или границу выполнения.
 
 Изолированная проблема одной Task не останавливает независимую runnable работу.
 Перед ожиданием пользователя `batch-implementation` повторно читает полный
@@ -555,6 +651,6 @@ Release-only run не создаёт и не финализирует Goal. Не
 ## 11. Проверяемые сценарии
 
 Обязательная decision-level матрица находится в
-[проверке lifecycle и приёмки](../reference/shiptask-review-disposition-evaluation.md).
+[проверке lifecycle и приёмки](../../reference/shiptask-review-disposition-evaluation.md).
 Она является частью current contract и должна выполняться вместе с repository
 validator. Исторические ADR и датированные reports не являются fallback policy.

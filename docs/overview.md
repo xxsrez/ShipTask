@@ -12,6 +12,16 @@ Project memory      = selector и project-specific context
 Strategic Explainer = помощник по человеческому объяснению
 ```
 
+## Documentation as source
+
+[Source model](skills/README.md) разделяет repository на независимые пакеты
+`docs/skills/<skill>/`. У каждого skill собственные
+`requirements.md` (Level 1) и `architecture.md` (Level 2); требования соседних
+skills не смешиваются. Runtime `SKILL.md` компилирует смысл своей пары
+документов и не может ослаблять Level 1. Изменение способа работы относится к
+локальному Level 2; изменение обязательного outcome или boundary требует явного
+изменения локального Level 1.
+
 ## Constitution-first подход
 
 Текущий contract задан [ADR-0018](decisions/0018-outcomes-not-tool-choreography.md)
@@ -23,8 +33,9 @@ reporting contract —
 [ADR-0022](decisions/0022-mandatory-independent-strategic-explainer-for-comments.md)
 сохраняет default-требование отдельного Explainer перед каждым комментарием.
 [ADR-0024](decisions/0024-adaptive-multi-agent-execution-by-default.md)
-добавляет `subagents=auto` для широкого `batch-implementation` и явный
-`subagents=off`, а
+задаёт automatic delegation только при отсутствии user rule, natural-language
+exact/relative/role/conditional constraints и отдельный worktree каждого
+implementation writer, а
 [ADR-0025](decisions/0025-cost-aware-subagent-profiles.md) направляет только
 genuinely simple packets на Luna Max и эскалирует material uncertainty на
 current profile. Они уточняют
@@ -37,8 +48,11 @@ ADR-0024.
 Неподвижны следующие требования:
 
 - пользовательский outcome важнее Goal, plans и внутренней отчётности;
-- несколько независимых safe lanes по умолчанию получают adaptive subagents и
-  одного integration owner;
+- несколько независимых safe lanes по умолчанию получают автоматически
+  выбранных субагентов и одного integration owner;
+- explicit user topology rule свободным языком имеет приоритет: можно задать
+  exact/relative count, role scope, общий или узкий opt-out и condition; root
+  agent не считается названным субагентом;
 - user-selected subagent profile имеет приоритет; без него только genuinely
   simple packets получают Luna Max, остальные наследуют current model/effort;
 - доказанная первая Codex task с catalog placeholder после live scope resolution
@@ -46,14 +60,18 @@ ADR-0024.
   последующие turns не переименовываются;
 - Luna не занимается recovery: ambiguity, surprising environment или proof gap
   возвращают packet current profile без повторного Luna loop;
-- общее «без субагентов» означает ноль субагентов, а узкий запрет относится
-  только к названной роли;
+- общее «без субагентов» означает ноль субагентов во всём run, а узкое правило
+  изменяет только названную роль или условие;
+- каждый concurrent implementation writer работает в собственной feature branch
+  и собственном Git worktree; writable worktree не разделяется между writers;
+- interrupted task-owned worktree/branch после доказанной остановки прежнего
+  writer подхватывается следующей сессией и продолжается, а не дублируется;
 - status Task соответствует текущим фактам;
 - обычный старт `To Do → In Progress` не создаёт комментарий;
 - существенный status transition сначала получает понятный native comment и
   comment read-back;
-- каждый создаваемый ShipTask-комментарий при разрешённых субагентах до
-  публикации проходит отдельного независимого Strategic Explainer;
+- каждый создаваемый ShipTask-комментарий, пока effective rule не отключает
+  Explainer, до публикации проходит отдельного независимого субагента;
 - material blocker также получает comment, даже без status change;
 - native comments являются гарантированной adapter capability и всегда
   сопровождают material lifecycle reporting;
@@ -63,8 +81,8 @@ ADR-0024.
 - сбой одного средства сам по себе ничего не доказывает и не обязывает чинить
   именно его;
 - acceptance не ослабляется, непроверенное не называется verified;
-- явный общий user override включает `subagents=off` для всего run;
-- вне `subagents=off` основной агент не заменяет отдельного Strategic
+- явный общий user override отключает всех субагентов для всего run;
+- пока effective user rule не отключает comment Explainer, основной агент не заменяет отдельного Strategic
   Explainer собственной редактурой и не публикует комментарий без
   независимого прохода;
 - production и другие sensitive effects сохраняют явную authority boundary.
@@ -89,7 +107,7 @@ projection: новые элементы остаются в `Backlog`, а unknow
 
 - `single`: одна Task, без Goal.
 - `batch-implementation`: имплементация/rework минимум двух Tasks, с Goal и
-  default `subagents=auto`.
+  effective user topology rule либо automatic delegation по default.
 - `release`: release уже подготовленного candidate, без Goal.
 - project memory меняется только по явной просьбе.
 
@@ -122,7 +140,7 @@ completion comment предшествует `Done`.
 Существенный status transition считается завершённым только при фактическом
 comment и read-back; технический путь к этому результату выбирает агент.
 До публикации текст готовит отдельный Strategic Explainer, а основной агент
-проверяет его фактическую точность. При явном `subagents=off` тот же quality
+проверяет его фактическую точность. При effective запрете comment Explainer тот же quality
 contract применяется без отдельного субагента.
 
 ## Приёмка
@@ -167,19 +185,22 @@ secrets/privacy/access-policy changes, external recipients и unbounded cost
 
 ## Источники
 
-- [Каноническая specification](specs/ship-tasks.md)
+- [ShipTask Requirements](skills/ship-tasks/requirements.md)
+- [ShipTask Architecture](skills/ship-tasks/architecture.md)
 - [Constitution-first ADR](decisions/0017-constitution-first-runtime-contract.md)
 - [Outcome, не tool choreography](decisions/0018-outcomes-not-tool-choreography.md)
 - [Goal только для массовой имплементации](decisions/0019-goal-only-for-multi-task-implementation.md)
 - [Видимые приёмочные инциденты и обязательные comments](decisions/0020-visible-acceptance-incidents-and-required-comments.md)
 - [Требования как конституция для агентов](decisions/0021-requirements-as-agent-constitution.md)
 - [Независимый Strategic Explainer для каждого комментария](decisions/0022-mandatory-independent-strategic-explainer-for-comments.md)
-- [Adaptive multi-agent default и explicit opt-out](decisions/0024-adaptive-multi-agent-execution-by-default.md)
+- [Automatic delegation, natural-language topology rules и writer isolation](decisions/0024-adaptive-multi-agent-execution-by-default.md)
 - [Cost-aware профили субагентов](decisions/0025-cost-aware-subagent-profiles.md)
 - [Task Manager adapter contract](reference/task-manager-adapter.md)
 - [Lifecycle evaluation](reference/shiptask-review-disposition-evaluation.md)
-- [Strategic Explainer specification](specs/strategic-explainer.md)
-- [Task Composer specification](specs/task-composer.md)
+- [Strategic Explainer Requirements](skills/strategic-explainer/requirements.md)
+- [Strategic Explainer Architecture](skills/strategic-explainer/architecture.md)
+- [Task Composer Requirements](skills/task-composer/requirements.md)
+- [Task Composer Architecture](skills/task-composer/architecture.md)
 - [Task Composer как planning sibling-skill](decisions/0023-task-composer-as-planning-sibling.md)
 
 Runtime sources — `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и

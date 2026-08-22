@@ -101,7 +101,7 @@ rework, review, постановку, автономность и context switch
 
 ## Что уже отражено в ShipTask
 
-У [текущей specification](../specs/ship-tasks.md) и доклада уже есть сильное
+У [текущей ShipTask Architecture](../skills/ship-tasks/architecture.md) и доклада уже есть сильное
 пересечение:
 
 - planning handoff, acceptance и deterministic checks уменьшают причины
@@ -388,21 +388,25 @@ Dependency, authority и безопасность записи остаются 
 задача может законно прервать batch. Policy должна быть объяснимой в review
 packet или run evidence.
 
-### F. Различить exact и adaptive concurrency
+### F. Историческая идея exact и adaptive concurrency
 
-Текущий контракт правильно запрещает молча переопределять `workers=N`.
-Одновременно тезис ролика полезен для случаев, когда пользователь разрешает
-эластичный режим.
+Ниже сохранена исходная исследовательская идея, но её фиксированная schema не
+является current ShipTask contract. Current Level 1 принимает natural-language
+правила пользователя об exact/relative числе, ролях и условиях delegation, а
+без такого правила выбирает topology автоматически. Пользователю не требуется
+знать или использовать служебные поля proposal, чтобы выразить тот же смысл.
 
-Можно позже определить два явных режима:
+В исходном report предлагались два явных режима:
 
 - `exact` — запрошенная topology является контрактом; недостаточная runtime
   capacity останавливает dispatch;
 - `adaptive` — пользователь задаёт ceiling, а coordinator уменьшает или
   увеличивает `active_target` по dependency frontier и review pressure.
 
-Так ShipTask сможет применять backpressure, не выдавая самовольное снижение
-числа workers за исполнение точного запроса.
+Эта конкретная schema с `active_target` и scheduler telemetry не была принята и
+не должна использоваться для восстановления runtime policy. Её семантика
+применима только в той мере, в какой пользователь сам выразил соответствующее
+natural-language rule.
 
 ### G. Подбирать review packet под task type
 

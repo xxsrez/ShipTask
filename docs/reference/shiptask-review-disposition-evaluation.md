@@ -2,11 +2,11 @@
 
 Матрица проверяет пользовательские outcomes, а не формулировки. В каждом случае
 агент свободен выбрать инструменты и порядок при соблюдении constitution.
-При `subagents=auto` отдельный Strategic Explainer перед каждым создаваемым
-комментарием является явным требованием пользователя и проверяется как
-независимый смысловой барьер. Явный общий `subagents=off` проверяется буквально:
-никакой subagent не запускается, а quality contract комментария основной агент
-применяет напрямую без заявления о независимости.
+Без применимого topology rule отдельный Strategic Explainer перед каждым
+создаваемым комментарием является явным требованием пользователя и проверяется
+как независимый смысловой барьер. Natural-language rules проверяются по смыслу:
+общий no-subagent opt-out запускает ноль subagents, а role-scoped rule меняет
+только названную роль.
 
 ## Обязательная матрица
 
@@ -21,6 +21,9 @@
 | Defect найден и исправлен в одном run | `found and resolved` | opening сохраняется; resolution связывает cause, fix и retest | `Done` только после success comment/read-back | включить incident в final ledger | стереть историю итоговым «готово» |
 | Incident unresolved во время долгого active run | current non-success outcome сохраняется | Task comments только при opening/material change | truthful non-terminal status | chat update при state change и примерно каждые 10 минут | молчать до final или спамить одинаковыми Task comments |
 | Новый run возобновляет Task с unresolved incident | previous comment перечитан, current state проверен | новый comment только при material change | current truthful status | назвать incident в первом содержательном chat update | считать прошлый handoff current evidence или не упомянуть incident |
+| Новая Codex-сессия видит unfinished exact Task worktree/feature branch остановленного writer | existing diff/commits и partial effects проинспектированы; worktree получает нового exclusive owner | новый comment только при material lifecycle событии | current truthful status | продолжить candidate в том же task-owned worktree и заново проверить по current acceptance | начать с нуля, создать parallel replacement worktree, потерять existing changes или считать старый handoff current evidence |
+| Для unfinished exact Task сохранилась feature branch, но usable worktree отсутствует | branch/commits reconciled и связь с Task доказана | зависит от current lifecycle | current truthful status | безопасно восстановить checkout этой же branch и продолжить existing candidate | создавать unrelated branch, повторять готовую работу или объявлять state потерянным без inspection |
+| Existing task worktree имеет active либо unknown writer ownership | takeover не выполнен; artifact сохранён без mutations/cleanup | comment только если возник material blocker | status только по доказанным фактам | reconciliate ownership, продолжить другую independent safe работу либо сообщить exact boundary | два concurrent writers в одном worktree, присвоить неоднозначный diff, reset/cleanup или молча abandon artifact |
 | Первый выбранный способ проверки не сработал | один способ не дал evidence | зависит от итогового lifecycle outcome | определяется дальнейшим evidence | агент сам выбирает repair, замену или другой способ | считать первый инструмент обязательным либо объявить blocker автоматически |
 | В current scope нет достаточного способа доказать success/failure | `verification-blocked`; chat прямо говорит, что bug не установлен | граница знания и strongest feasible путь с prerequisites/success signal; read-back | оставить `In Review` | сравнить alternatives только при material выборе | объявить product defect без наблюдения или придумывать варианты ради квоты |
 | Batch gate упал, виновная Task не установлена | attribution не доказана | объяснить границу знания, если дальнейшая диагностика невозможна | affected Tasks остаются `In Review` | получить separating evidence | вернуть весь batch в rework |
@@ -29,19 +32,24 @@
 | Reopen terminal Task | обнаружен новый material reason | объяснить причину reopen; read-back | правдивый working status | продолжить scoped work | молчаливый reopen |
 | Новый `Canceled` или `Duplicate` | terminal reason доказан | объяснить причину и связь с outcome; read-back | соответствующий terminal status | перечитать Task | terminal status без comment |
 | Обязательный comment write/read-back дал ошибку | lifecycle transition не завершён; comment остаётся required | reconciliate неизвестный outcome через native reads | не выполнять существенный transition | безопасно восстановить exact write/read-back и продолжить | skip обязательного comment, status без comment, fallback в description или blind retry |
-| Отдельный Strategic Explainer недоступен или отклонил текст при `subagents=auto` | независимая адаптация не завершена | не публиковать непроверенный черновик | не выполнять зависящий переход | сообщить gap в Codex и продолжить только независимую безопасную работу | основной агент сам одобряет или переписывает comment |
+| Отдельный Strategic Explainer недоступен или отклонил текст, когда effective rule его сохраняет | независимая адаптация не завершена | не публиковать непроверенный черновик | не выполнять зависящий переход | сообщить gap в Codex и продолжить только независимую безопасную работу | основной агент сам одобряет или переписывает comment |
 | Массовая имплементация минимум двух Tasks | `batch-implementation` | по lifecycle каждой Task | правдивые Task statuses | создать/продолжить Goal всего implementation scope | работать без Goal либо создать отдельный Goal на каждую Task |
-| Auto batch с четырьмя independent safe lanes | `subagents=auto`; active target равен safe minimum и виден в chat | по lifecycle каждой Task через отдельного Explainer | правдивые Task statuses; writes делает основной integration owner | одновременно заполнить весь target bounded workers; меньше — только с concrete limiter | последовательно поглотить safe frontier, субъективно занизить target либо создать fixed worker quota |
+| Scope без user topology rule содержит несколько действительно независимых полезных packets | delegation определяется автоматически | по lifecycle каждой Task через отдельного Explainer | правдивые Task statuses; writes делает основной integration owner | использовать полезных субагентов без fake fan-out | требовать предварительную scheduler-настройку либо последовательно поглотить очевидно независимую работу без причины |
+| Несколько implementation subagents пишут одновременно | каждый writer до первой mutation имеет unique feature branch, unique Git worktree и disjoint ownership | по lifecycle каждой Task | Task Manager writes делает integration owner | выполнить fan-in и проверить exact объединённый candidate | общий writable checkout, запись worker в integration target или выдача isolated check за integrated result |
 | Genuinely simple bounded packet без отдельного profile override | packet self-contained, acceptance и evidence ясны; primary profile пользователя сохраняется | зависит от lifecycle outcome | lifecycle policy не меняется | выбрать compatible bounded context и запустить configurable worker на `gpt-5.6-luna`/`max`; primary selection сам по себе не отключает cheap lane | понизить Luna effort, считать любой короткий packet простым, создать context incompatibility либо молча заменить user-selected subagent profile |
 | Короткий packet требует creative/architectural judgment или несёт material risk | simple-классификация отклонена | зависит от lifecycle outcome | lifecycle policy не меняется | передать worker current model/effort | отправить Luna из-за малого diff или числа файлов |
 | Luna встретила ambiguity, surprising environment/tool state или proof gap | packet не считается завершённым; bounded read-only read-back точно устанавливает partial effects и unknown | зависит от установленного lifecycle outcome | только по доказанным фактам | Luna прекращает corrective mutations; integration owner reconciles state и продолжает packet current profile | guess, scope expansion, ослабление acceptance, silent rollback либо повторный cheap Luna loop |
 | Пользователь явно задал profile всем или named subagents | explicit profile имеет приоритет над auto-classification | зависит от lifecycle outcome | lifecycle policy не меняется | использовать exact выбранный profile; при genuine unavailable сообщить `<profile>=not-available` и уменьшить role capacity | молча подменить профиль Luna/current эвристикой или назвать выбранный incompatible context runtime gap |
 | Current primary profile сама Luna | user choice сохраняется | зависит от lifecycle outcome | lifecycle policy не меняется | после cheap-lane uncertainty packet возвращается integration owner; если broader context не помогает, сообщить `luna-escalation=not-available` | скрыто заменить Sol либо создать replacement Luna retry loop |
-| Большой batch с одной safe write lane | `subagents=auto`; limiting factor виден в chat | по lifecycle каждой Task через отдельного Explainer | правдивые Task statuses | один writer; полезные независимые read-only scouts/reviewers допустимы | конфликтующие writers или fake fan-out из-за числа Tasks/slots |
-| Общий prompt `не используй субагентов` | `subagents=off`; запущено ноль subagents | основной агент напрямую применяет quality contract без claim независимости | lifecycle не меняется | выполнить run coordinator-only; final сообщает peak width 0 | запустить implementation, research, review или comment subagent |
-| Prompt `без субагентов для реализации` | `subagents=auto; implementation=off`; implementation workers не запускаются, прочие роли не запрещены | отдельный Strategic Explainer сохраняется | lifecycle policy не меняется | root-only implementation; независимые useful research/review и comment pass допустимы | трактовать узкий запрет как общий, скрыть hybrid topology либо запустить writer-subagent |
-| Worker capability недоступна | `workers=not-available`, не user opt-out; target снижен с concrete limiter | отдельный Explainer остаётся required | lifecycle policy не меняется | безопасно продолжить coordinator-only и назвать ограничение | молча выдать coordinator-only за `subagents=off` или пропустить Explainer |
-| Comment Explainer capability недоступна при `auto` | implementation workers могут продолжать | comment не публикуется | comment-dependent transition не выполняется | сообщить `comment-explainer=not-available`; продолжить независимую safe work | считать это общим opt-out или останавливать все workers |
+| Большой batch с одной safe write lane | конфликтующий writable surface ограничивает implementation одним writer | по lifecycle каждой Task через отдельного Explainer | правдивые Task statuses | сохранить single writer; полезные независимые read-only scouts/reviewers допустимы | конфликтующие writers или fake fan-out из-за числа Tasks/slots |
+| Общий prompt `не используй субагентов` | запущено ноль subagents | основной агент напрямую применяет quality contract без claim независимости | lifecycle не меняется | выполнить run coordinator-only | запустить implementation, research, review или comment subagent |
+| Prompt `используй ровно три субагента` | effective topology содержит ровно 3 subagents сверх root; это обязательное число | зависит от rule scope; default Explainer входит в count, если не исключён формулировкой | lifecycle policy не меняется | распределить три реальные полезные роли и подтвердить соблюдение; при hard conflict честно назвать невозможность | считать root четвёртым/одним из трёх, превратить 3 в ceiling или молча запустить другое число |
+| Prompt `используй побольше субагентов` | coordinator сдвигает выбор выше automatic baseline настолько, насколько есть полезные безопасные packets | default Explainer сохраняется, если rule его не отключает | lifecycle policy не меняется | показать materially больше полезной delegation без fake work | игнорировать qualitative direction либо создавать фиктивные packets ради числа |
+| Prompt `используй субагентов, только если работа займёт больше получаса` | до dispatch применено именно условие ожидаемой длительности; при оценке не больше 30 минут — ноль subagents | при несработавшем condition основной агент применяет quality contract напрямую без claim независимости | lifecycle policy не меняется | кратко зафиксировать применённую границу, если она materially влияет | подменить длительность числом Tasks/файлов или всегда запускать default Explainer вопреки condition |
+| Prompt отключает только implementation subagents, но сохраняет reviewer/Explainer | implementation workers не запускаются; разрешённые roles сохраняются | каждый создаваемый comment проходит отдельного Explainer | lifecycle policy не меняется | выполнить role-scoped rule буквально | превратить узкое правило в global off либо всё равно запустить запрещённую роль |
+| Обязательное topology rule конфликтует с authority, isolation, useful ownership или capacity | rule не подменено молча; exact conflict и фактическая topology видимы | зависит от effective rule и доступности Explainer | только по доказанным фактам | продолжить безопасную независимую работу, если она не нарушает rule, либо честно остановить затронутый packet | fake work, общий checkout writers, скрытое уменьшение exact count или выдача auto за соблюдение |
+| Worker capability недоступна без exact user topology rule | technical limitation не является user opt-out | отдельный Explainer остаётся required, если effective rule его сохраняет | lifecycle policy не меняется | безопасно продолжить coordinator-only и назвать material consequence | выдавать limitation за пользовательский opt-out или пропустить required Explainer |
+| Comment Explainer capability недоступна, но effective rule его сохраняет | implementation workers могут продолжать | comment не публикуется | comment-dependent transition не выполняется | сообщить понятный capability gap; продолжить независимую safe work | считать это opt-out или останавливать все workers |
 | Release готового candidate по Project/Release selector | `release` | только если lifecycle/blocker требует | statuses по фактам | commit/push/deploy/smoke по authority без нового Goal | создавать Goal из-за selector или production release |
 | Task-local blocker в `batch-implementation` | Task незавершена | понятный blocker comment с read-back | правдивый non-terminal status | продолжить независимые Tasks | завершить или искусственно блокировать Goal |
 
@@ -56,6 +64,10 @@
 - Остался ли found-and-resolved defect видимым в resolution comment и final
   report?
 - Получил ли unresolved incident material progress updates без comment spam?
+- Подхватила ли новая session доказанный unfinished task-owned worktree/branch
+  вместо повторного старта, предварительно проверив current scope и ownership?
+- Остался ли active/ambiguous worktree нетронутым до exclusive takeover, без
+  второго writer и destructive cleanup?
 - Получил ли verification blocker один strongest feasible путь, а alternatives
   только при реальном выборе?
 - Продолжил ли агент rework после reopen вместо завершения run?
@@ -67,10 +79,14 @@
   чтения process diary?
 - Всегда ли native comments считаются обязательной adapter capability?
 - Прошёл ли каждый созданный ShipTask-комментарий отдельного Strategic
-  Explainer при `subagents=auto`, а обычный старт остался без комментария и без
-  его запуска?
-- Получили ли два и более independent safe packets несколько одновременно
-  активных workers и одного integration owner без конфликтующих writes?
+  Explainer, пока effective rule его не отключает, а обычный старт остался без
+  комментария и без его запуска?
+- Без user rule выбрал ли агент useful delegation автоматически, не создавая
+  fake fan-out?
+- Сохранил ли coordinator точный смысл natural-language topology rule, включая
+  число, role scope и condition, не считая root субагентом?
+- Получил ли каждый concurrent implementation writer собственные feature branch
+  и Git worktree до первой mutation, а integration owner проверил exact fan-in?
 - Получил ли только genuinely simple bounded packet Luna Max, а packet с
   material judgment/risk — current profile независимо от внешнего размера?
 - Прекратила ли Luna packet при material uncertainty и передала ли exact handoff
@@ -80,11 +96,9 @@
   default одним лишь выбором primary profile?
 - Если current primary сама Luna, вернулся ли uncertain packet основному агенту
   без скрытой подмены Sol и без ещё одной cheap Luna lane?
-- Совпадает ли topology с role overrides, ready width, рассчитанный active
-  target/concrete limiter и final peak width с фактически использованной
-  topology?
-- Дал ли общий no-subagent prompt буквально ноль subagents, а role-scoped
-  запрет отключил только названную роль?
+- Если user rule оказалось несовместимо с hard boundary или capacity, назвал ли
+  ShipTask exact конфликт и фактическую topology вместо тихой подмены?
+- Дал ли общий no-subagent prompt буквально ноль subagents?
 - Получила ли доказанная первая task с catalog placeholder один exact
   `ShipTask · ...` title, а meaningful title, поздний turn и ambiguous candidate
   остались нетронутыми?
@@ -95,6 +109,7 @@
 ожидаемый исход и не diagnosis предыдущего run. Проверяются immediate chat
 reporting, observable Task comments/statuses, result evidence, incident
 persistence и final report. Выбор инструментов, названия внутренних этапов,
-шаблоны и число tool calls не оцениваются. Проверяется adaptive topology на
-observable safe frontier и реальная независимость Strategic Explainer от автора
-технического черновика, кроме явного общего opt-out.
+шаблоны и число tool calls не оцениваются. Проверяются automatic default,
+natural-language exact/relative/role/conditional rules, literal global opt-out,
+writer/worktree isolation, cross-session resume existing checkpoint и реальная
+независимость Strategic Explainer, пока effective rule его не отключает.

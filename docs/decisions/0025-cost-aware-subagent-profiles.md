@@ -104,10 +104,10 @@ stronger-profile override; скрыто подменять user choice на Sol 
 
 ### Наблюдаемость
 
-Первый содержательный topology update после inventory кратко сообщает profile
-allocation вместе с ready width и active target. Final report называет реально
-использованные profiles и Luna-to-current escalations. Эти сведения не заменяют
-result evidence и не превращаются в подробный process diary.
+Если model routing materially повлиял на результат, ShipTask кратко сообщает
+использованный profile, недоступный explicit override или Luna-to-current
+handoff. Numeric topology accounting и полный profile ledger не требуются. Эти
+сведения не заменяют result evidence и не превращаются в process diary.
 
 ## Проверяемые признаки
 
@@ -121,8 +121,8 @@ result evidence и не превращаются в подробный process d
   явно выбранный unavailable profile не заменяет молча.
 - Явный model/effort пользователя соблюдён, а общий no-subagent prompt запускает
   ноль субагентов.
-- Acceptance, authority, integration ownership и active target не меняются из-за
-  выбранной модели.
+- Acceptance, authority и integration ownership не меняются из-за выбранной
+  модели.
 
 ## Последствия
 

@@ -1,8 +1,20 @@
 # Task Composer
 
-Статус: current contract, 2026-08-22. Архитектурная роль и distribution
-зафиксированы в
-[ADR-0023](../decisions/0023-task-composer-as-planning-sibling.md).
+Статус: current Level 2 contract, 2026-08-22. Применимые Level 1 requirements —
+`TC-*` в локальных
+[требованиях пользователя](requirements.md). Эта architecture описывает
+current архитектуру достижения и не может ослаблять Level 1. Архитектурная роль
+и distribution зафиксированы в
+[ADR-0023](../../decisions/0023-task-composer-as-planning-sibling.md).
+
+## 0. Compilation contract
+
+Эта architecture вместе с локальным `requirements.md` является полным current
+source package `$ship-tasks:task-composer`. Runtime `task-composer/SKILL.md` —
+производная смысловая компиляция этих двух документов: его можно удалить и
+собрать заново, сохранив все `TC-*` и выбранную здесь реализацию примерно
+эквивалентными по наблюдаемому поведению. ADR, reports и evaluations дают
+rationale и evidence, но не являются параллельным current contract.
 
 Specification описывает Task Manager-only skill `$ship-tasks:task-composer`, который
 формулирует, декомпозирует и по явному planning intent создаёт качественные

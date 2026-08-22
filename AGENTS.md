@@ -14,6 +14,61 @@
 - Основной язык документации — русский. Точные protocol/state/tool names можно
   оставлять на английском.
 
+## Документация как исходный код
+
+Документация является исходным кодом всех трёх skills. Единица source —
+отдельный skill: его Requirements и Architecture находятся только в
+`docs/skills/<skill>/` и не смешиваются с контрактами соседних skills. Для
+каждого source package обязательны три уровня с таким приоритетом:
+
+1. **Level 1 — требования пользователя.**
+   `docs/skills/<skill>/requirements.md` хранит полный current-набор
+   высокоуровневых требований пользователя только для одного skill. Он задаёт
+   обязательный результат, смысл, наблюдаемые признаки и жёсткие
+   scope/truth/safety/authority boundaries. Skill не может ослабить, заменить
+   или нарушить собственный Level 1 и не наследует скрытые требования из
+   Requirements соседнего skill.
+2. **Level 2 — архитектура достижения.**
+   `docs/skills/<skill>/architecture.md` описывает, как этот skill сейчас
+   достигает собственного Level 1. Это agent-owned инерционная память: агент
+   может менять её, когда улучшает способ достижения требований, но не может
+   через Level 2 переписать смысл Level 1 или выдать выбранный механизм за
+   новое требование пользователя. Дополнительные локальные design/reference/
+   evaluation документы допустимы, но не создают второй current contract.
+3. **Level 3 — runtime skills.**
+   `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и
+   `strategic-explainer/SKILL.md` являются компактной исполнимой проекцией Level
+   1 и применимой части Level 2. Формулировка и структура могут отличаться от
+   документации, но агент в runtime должен получить весь применимый смысл Level
+   1 и нести его без семантических потерь.
+
+При конфликте всегда побеждает Level 1. Level 2 нельзя использовать как
+основание удалить, сузить или молча переопределить пользовательское требование.
+Level 1 меняется только из явного решения пользователя: редакционная правка
+разрешена без повторного согласования лишь когда доказано, что смысл не
+изменился. Неясность «это новое требование или изменение способа» не разрешает
+тихую реклассификацию: сохраните current Level 1 и явно отделите вопрос от
+agent-owned архитектурного решения.
+
+Документы не обязаны повторяться дословно. Обязательна смысловая трасса
+`Level 1 requirement → Level 2 design → runtime skill → observable evaluation`.
+Validator проверяет наличие и связность этой трассы, но зелёный validator не
+заменяет содержательную проверку полноты требований.
+
+Каждый `docs/skills/<skill>/` должен быть самодостаточным source package: если
+удалить соответствующий runtime skill и заново смыслово скомпилировать его из
+локальных `requirements.md` и `architecture.md`, должен получиться примерно тот
+же contract и наблюдаемое поведение. Компиляция стохастическая, поэтому
+требуется semantic equivalence, а не дословный output. Cross-skill dependency
+фиксируйте как локальный interface в каждом затронутом package, а не общим
+смешанным Requirements. Shared ADR/reports могут хранить rationale и историю,
+но не добавляют hidden current policy.
+
+Plugin является общим distribution artifact независимых runtime skills. Общие
+manifest/install/byte-identity правила остаются repository-level build policy,
+но не объединяют Requirements или Architecture разных skills. Каноническая
+схема source packages находится в [`docs/skills/README.md`](docs/skills/README.md).
+
 ## Границы
 
 - `$ship-tasks` работает только через Task Manager connector. Не добавляйте
@@ -32,9 +87,9 @@
 - Project и Release refs, repository path, branch, deployment provider,
   environment, URL, команды проекта и production policy брать из текущего
   project context, а не зашивать в skill.
-- Каждая каноническая specification описывает один текущий workflow. Не
-  создавайте параллельные поколения или альтернативные specifications одного
-  и того же runtime skill.
+- Каждый локальный `architecture.md` описывает один current workflow. Не
+  создавайте параллельные поколения или альтернативные Requirements/
+  Architecture одного runtime skill.
 - Распространяйте все три runtime skills только через отдельный plugin
   `ship-tasks@srez-marketplace`. Task Manager connector устанавливается
   отдельно как adapter-only `task-manager@srez-marketplace`; не помещайте
@@ -45,17 +100,28 @@
 
 ## Изменения
 
-- Для поведенческого изменения сначала обновите применимую specification,
-  затем соответствующий runtime `SKILL.md`.
+- Если пользователь меняет обязательный outcome или boundary, сначала обновите
+  `docs/skills/<skill>/requirements.md`. Если меняется только способ достижения,
+  Level 1 не трогайте и обновите локальный `architecture.md`. После этого
+  обновите соответствующий runtime `SKILL.md` и observable evaluation. Не
+  начинайте с runtime и не восстанавливайте требования из памяти, старого ADR,
+  соседнего skill или реализации, когда local current Level 1 им противоречит.
 - Считайте current requirements конституцией для агентов: фиксируйте outcome,
   rationale, observable evidence и authority/safety boundaries, но не
   предписывайте agent topology, tool choreography, число попыток, форму context
   или внутренний reasoning, если только это не является явным требованием
-  пользователя. Текущие явные исключения: ShipTask по умолчанию адаптивно
-  заполняет независимые safe lanes несколькими субагентами; общий явный
-  no-subagent opt-out отключает их все, включая comment Explainer, а узкий —
-  только названную роль; без общего opt-out каждый комментарий проходит
-  отдельного независимого Strategic Explainer; особо простые bounded packets
+  пользователя. Текущие явные исключения: без user rule ShipTask автоматически
+  использует субагентов для действительно независимой полезной работы;
+  однозначное правило пользователя свободным языком — exact/relative count,
+  role scope, общий или узкий opt-out, duration/complexity condition — имеет
+  приоритет и сохраняется по смыслу; root agent не входит в явно названное число
+  субагентов; если effective rule не отключает comment Explainer, каждый
+  комментарий проходит отдельного независимого Strategic Explainer; каждый
+  одновременно пишущий implementation
+  subagent получает собственные feature branch и Git worktree, не разделяемые с
+  другим writer; после interruption или смены сессии доказанно task-owned
+  unfinished worktree/branch подхватывается тем же coordinator или новым
+  exclusive writer после проверки quiescence, а не дублируется; особо простые bounded packets
   без отдельного user override используют `gpt-5.6-luna`/`max`, остальные
   наследуют current model/effort, а Luna при material uncertainty прекращает
   packet и передаёт его current profile без Luna retry loop; доказанная первая

@@ -5,9 +5,9 @@
 Документ фиксирует только техническую границу между ShipTask и Task Manager
 skill/connector. Business delivery policy, lifecycle decisions, Goal,
 automatic acceptance, release authority и project memory определяются
-[ShipTask specification](../specs/ship-tasks.md), а правила постановки,
+[ShipTask Architecture](../skills/ship-tasks/architecture.md), а правила постановки,
 decomposition, `Backlog`, Labels и relations —
-[Task Composer specification](../specs/task-composer.md), а не adapter.
+[Task Composer Architecture](../skills/task-composer/architecture.md), а не adapter.
 
 ## Проверенная база
 

@@ -194,7 +194,8 @@ capability и не входит в это изменение.
 
 После принятия proposal выполнить изменения в таком порядке:
 
-1. **Canonical specification** — обновить `docs/specs/ship-tasks.md` первой:
+1. **Canonical Architecture** — обновить
+   `docs/skills/ship-tasks/architecture.md` первой:
    добавить invocation modes, scope precedence, single-Task semantics, memory
    contract, missing-memory alarm и mode-specific Goal lifecycle.
 2. **Architecture decision** — добавить один accepted ADR о разделении

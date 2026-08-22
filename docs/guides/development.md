@@ -17,9 +17,9 @@
 - Current requirements являются конституцией: фиксируйте what, why, evidence и
   authority boundary; не задавайте agent topology, форму context, число
   attempts/options или внутренний reasoning без явного пользовательского
-  требования. ShipTask adaptive multi-agent default и буквальный no-subagent
-  opt-out, а также Luna Max routing и current-profile escalation являются такими
-  явными topology/profile-требованиями.
+  требования. ShipTask automatic default, natural-language user topology rules,
+  отдельный worktree каждого implementation writer, а также Luna Max routing и
+  current-profile escalation являются такими явными topology/profile-требованиями.
 - Оставляйте агенту свободу выбора инструментов, реализации и достаточной
   проверки, если safety/authority не требуют жёсткого порядка.
 - Жёсткий порядок нужен там, где effects необратимо расходятся: для
@@ -33,10 +33,10 @@
 - Не добавляйте фиксированное число попыток. Проверяйте основание для повтора и
   реальное условие остановки.
 - Strategic Explainer не получает право решать факты, статус, границы работы,
-  полномочия или действие. При `subagents=auto` каждый комментарий ShipTask
-  обязательно проходит отдельного независимого Explainer. Явный общий
-  `subagents=off` — единственное исключение: основной агент применяет quality
-  contract напрямую и не заявляет о независимой проверке.
+  полномочия или действие. Каждый комментарий ShipTask обязательно проходит
+  отдельного независимого Explainer, пока effective user topology rule не
+  отключает эту роль. Тогда основной агент применяет quality contract напрямую
+  и не заявляет о независимой проверке.
 - Обычный переход `To Do → In Progress` не создаёт комментарий и поэтому не
   запускает Strategic Explainer.
 - Не добавляйте fallback task provider. Task Manager остаётся единственным
@@ -63,10 +63,11 @@ git diff --check
 Repository validator проверяет current contract, trigger matrix, lifecycle
 evaluation, retired loopholes, documentation navigation и distribution
 boundaries. Проверка не должна требовать конкретных необязательных слов или
-числа tool calls вместо observable behavior. Evals проверяют adaptive
-`auto`/`off` contract и отдельного независимого Strategic Explainer при
-разрешённых субагентах, но не фиксируют fork mode, prompt envelope, retry count
-или число alternatives. Auto-title является отдельным явным требованием:
+числа tool calls вместо observable behavior. Evals проверяют automatic default,
+сохранение natural-language exact/relative/role/conditional rules,
+writer/worktree isolation и отдельного Strategic Explainer при разрешённой роли,
+но не навязывают topology formula, fork mode, prompt envelope, retry count или
+число alternatives. Auto-title является отдельным явным требованием:
 проверяются доказанная first-turn eligibility, сохранение meaningful title и
 адресация только calling task.
 
@@ -86,8 +87,13 @@ skill, реалистичный exact Task Manager scope и обычный proje
 - первый ShipTask-вызов с catalog placeholder после live scope resolution один
   раз получает `ShipTask · ...`; meaningful title, later turn, incomplete
   history и ambiguous current candidate не переименовываются;
-- несколько independent conflict-free Tasks в `subagents=auto` одновременно
-  получают несколько bounded workers и одного integration owner;
+- несколько independent conflict-free Tasks без user rule автоматически
+  получают полезную delegation и одного integration owner; каждый
+  concurrent implementation writer до первой mutation получает собственные
+  feature branch и Git worktree;
+- новая session при доказанно остановленном прежнем writer подхватывает
+  существующий unfinished task-owned worktree/branch и продолжает его; active
+  или ambiguous ownership не захватывается и artifact не очищается;
 - genuinely simple bounded packet без отдельного profile override получает Luna
   Max, а ordinary/complex packet наследует current model/effort;
 - ambiguity, unexpected environment/tool state или proof gap останавливают Luna
@@ -96,8 +102,9 @@ skill, реалистичный exact Task Manager scope и обычный proje
   по себе не отключает cheap-lane default;
 - shared evolving write surface ограничивает writers до одной safe lane, но не
   запрещает полезные независимые read-only scouts/reviewers;
-- общее «не используй субагентов» даёт ноль subagents, включая Explainer, а
-  узкое «без субагентов для реализации» сохраняет independent comment pass;
+- `ровно три субагента`, `побольше субагентов`, role-scoped opt-out и условие
+  «только если работа дольше получаса» сохраняют свой natural-language смысл;
+- общее «не используй субагентов» даёт ноль subagents, включая Explainer;
 - `To Do → In Progress` проходит без comment и без Strategic Explainer;
 - готовый candidate получает независимо подготовленный Strategic Explainer
   comment и read-back до `In Review`;

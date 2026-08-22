@@ -1,12 +1,15 @@
 # Strategic Explainer: стратегическое видение
 
-Статус: current product vision, 2026-08-22.
+Статус: current Level 2 strategic design, 2026-08-22. Нормативный Level 1 для
+общего skill — `SE-*` в локальных
+[требованиях пользователя](requirements.md). Этот документ раскрывает current
+product concept и может развиваться без изменения Level 1.
 
 Этот документ фиксирует устойчивую цель Strategic Explainer независимо от
 модели, способа запуска, agent topology и plugin packaging. Нормативный contract
-находится в [specification](specs/strategic-explainer.md), а принцип требований
+находится в [architecture](architecture.md), а принцип требований
 как конституции — в
-[ADR-0021](decisions/0021-requirements-as-agent-constitution.md).
+[ADR-0021](../../decisions/0021-requirements-as-agent-constitution.md).
 
 ## Проблема
 
@@ -144,9 +147,9 @@ action и next state; при этом material facts не потеряны, но
 не придуманы, а provenance и uncertainty проверяемы.
 
 Regression cases находятся в
-[evaluation contract](reference/strategic-explainer-evaluation.md). История
+[evaluation contract](../../reference/strategic-explainer-evaluation.md). История
 исследования и прежних implementation choices сохранена в
-[research report](reports/2026-08-20-strategic-explainer-research.md) и ADR, но
+[research report](../../reports/2026-08-20-strategic-explainer-research.md) и ADR, но
 не является fallback current policy.
 
 ## Иллюстративный пример

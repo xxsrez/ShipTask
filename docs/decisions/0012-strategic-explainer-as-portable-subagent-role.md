@@ -13,7 +13,7 @@ plugin, первоначально зафиксированный в
 [ADR-0011](0011-separate-shiptask-plugin-distribution.md).
 
 Устойчивую продуктовую цель и current agent-independent contract определяют
-[стратегическое видение](../strategic-explainer.md); этот ADR фиксирует только
+[стратегическое видение](../skills/strategic-explainer/product-vision.md); этот ADR фиксирует только
 исторический технический способ её реализовать и распространять. Design evidence и
 рассмотренные альтернативы находятся в
 [research report](../reports/2026-08-20-strategic-explainer-research.md).

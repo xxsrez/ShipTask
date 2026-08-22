@@ -1,113 +1,126 @@
-# 0024. Адаптивное multi-agent исполнение по умолчанию
+# 0024. Automatic delegation и natural-language topology rules
 
-Статус: accepted, 2026-08-22. Частично заменяет
+Статус: accepted, уточнён 2026-08-22 по current Level 1. Частично заменяет
 [ADR-0021](0021-requirements-as-agent-constitution.md): topology обычно остаётся
-внутренним решением агента, но для ShipTask пользователь явно потребовал
-адаптивное использование нескольких субагентов по умолчанию и буквальный
-opt-out. Также создаёт узкое исключение из
-[ADR-0022](0022-mandatory-independent-strategic-explainer-for-comments.md), когда
-пользователь запрещает любые субагенты для текущего run. Выбор model/effort для
-этих lanes уточнён [ADR-0025](0025-cost-aware-subagent-profiles.md).
+внутренним решением агента, но ShipTask имеет automatic default и обязан
+исполнять однозначные пользовательские delegation rules свободным языком.
+Topology rule может также изменить обязательность comment Explainer из
+[ADR-0022](0022-mandatory-independent-strategic-explainer-for-comments.md).
+Выбор model/effort уточнён
+[ADR-0025](0025-cost-aware-subagent-profiles.md).
 
 ## Контекст
 
-`batch-implementation` уже отличал массовую реализацию от single и release и
-получал общий Goal, но не задавал execution topology. Поэтому большой scope мог
-последовательно выполняться одним агентом даже при нескольких независимых
-runnable Tasks и свободной безопасной capacity.
+Когда пользователь ничего не задаёт, заранее выбранное постоянное число workers
+не имеет устойчивого смысла: полезная ширина зависит от dependencies, mutable
+surfaces, изоляции, runtime capacity и стоимости fan-in. Поэтому default должен
+оставаться автоматическим.
 
-Фиксированное число workers не решает проблему: ширина меняется с dependencies,
-пересечением writable surfaces, доступной изоляцией, стоимостью интеграции и
-возможностью независимо проверить результат. Число Tasks или свободных slots
-само по себе не доказывает полезный parallelism.
+Однако automatic default не отменяет пользовательское управление. Пользователь
+может естественным языком задать точное число, попросить больше или меньше
+субагентов, ограничить конкретную роль либо сформулировать условие по ожидаемой
+длительности, сложности или другому наблюдаемому признаку. Coordinator обязан
+сохранить смысл правила, а не свести любое указание к `auto` или только к
+глобальному `off`.
 
-Отдельно фраза «не используй субагентов» должна означать ноль субагентов, а не
-скрыто сохранять comment reviewer. Более узкий запрет, например «без субагентов
-для реализации», относится только к названной роли.
+Независимо от topology concurrent writers нельзя помещать в общий writable
+checkout: каждому нужны собственные branch и worktree, а объединяет результат
+один integration owner.
 
 ## Решение
 
-### Default — `subagents=auto`
+### Default без user rule
 
-- Если prompt не ограничивает delegation, ShipTask работает в
-  `subagents=auto`.
-- После live inventory агент выделяет независимые work packets и поддерживает
-  active target, равный наименьшей из реально доступных ширин: dependency-ready
-  work, conflict-free ownership/isolation, runtime capacity и способности
-  интегрировать, проверить и review-ить результаты. Уменьшить target ниже этого
-  значения можно только из-за конкретного observable limiting factor, который
-  агент называет пользователю.
-- Когда существуют минимум два безопасных полезных независимых packets и
-  capacity это позволяет, одновременно работают несколько субагентов. Основной
-  агент не поглощает такой frontier последовательно только ради простоты.
+- Если current prompt и применимый conversation context не задают topology
+  rule, ShipTask сам определяет, где delegation полезна и сколько субагентов
+  использовать.
+- Число Tasks и свободных slots само по себе не создаёт useful work packet.
+  Связанные writes и shared mutable state остаются последовательными;
+  искусственные subtasks ради fan-out не создаются.
 - Основной агент является единственным integration owner и владельцем Goal,
-  Task Manager comments/status/version writes, сохраняя целостность общего
-  candidate и Task attribution. Каждый implementation writer получает bounded
-  ownership; пересекающиеся writes не выполняются параллельно.
-- При одной безопасной write lane допускается один writer и параллельные
-  read-only scouts/reviewers только для реальной независимой работы. Искусственные
-  subtasks ради числа агентов не создаются.
-- После завершения, blocker или открытия dependency frontier active target
-  пересчитывается. Task-local blocker не оставляет другие безопасные lanes
-  простаивать.
+  Task Manager comments/status/version writes, целостного candidate и Task
+  attribution.
 
-Эта политика применяется к любому delivery mode с несколькими независимыми work
-packets; для `batch-implementation` она является обязательным default. В
-сложной `single` или `release` агент использует субагентов, когда декомпозиция
-даёт больше одной безопасной полезной lane, но не обязан создавать фиктивный
-fan-out.
+### User topology rule
 
-### Явный opt-out
+Однозначное правило пользователя имеет приоритет над automatic default. Оно
+может выражаться любым естественным способом, например:
 
-- Общие формулировки «не используй субагентов», «без субагентов» и эквивалентное
-  однозначное указание включают `subagents=off` на весь текущий run. ShipTask не
-  запускает implementation, research, review или Strategic Explainer
-  субагентов. Goal и lifecycle policy от этого не меняются.
-- При `subagents=off` основной агент напрямую применяет quality contract
-  Strategic Explainer к обязательному комментарию, проверяет факты и публикует
-  его без ложного утверждения о независимом проходе. Это единственный
-  no-subagent обход ADR-0022 и действует только из-за прямого указания
-  пользователя.
-- Узкий запрет относится только к названной роли. Например, «без субагентов для
-  реализации» отключает writers/implementers, но сохраняет независимого
-  Strategic Explainer для комментариев. Такое состояние сообщается как
-  `subagents=auto; implementation=off`, а не как общий `off`.
-- Пользователь может явно вернуть `subagents=auto` или задать более узкую
-  topology-границу в том же run; последнее однозначное указание имеет приоритет.
+- exact count: «используй ровно три субагента»;
+- relative direction: «используй побольше субагентов»;
+- role scope: «без implementation-субагентов, но с reviewer»;
+- condition: «используй субагентов, только если работа займёт больше получаса»;
+- общий opt-out: «не используй субагентов».
 
-Если worker capability технически недоступна, ShipTask снижает active target и
-называет `workers=not-available`; это не приравнивается к пользовательскому
-opt-out. Отдельная недоступность comment Explainer называется
-`comment-explainer=not-available` и по ADR-0022 блокирует только comment-dependent
-lifecycle effects.
+Coordinator извлекает смысл, область действия и condition, комбинирует
+совместимые правила и применяет их к current run. Root/coordinator не входит в
+число, явно названное как количество субагентов. Позднее более конкретное
+указание пользователя заменяет прежнее правило того же scope; независимые
+constraints продолжают действовать.
 
-### Наблюдаемость
+Exact count является обязательным count, а не ceiling или пожеланием.
+Qualitative direction исполняется по смыслу: например, «побольше» сдвигает
+выбор к большему числу реально полезных lanes относительно automatic baseline,
+но не создаёт фиктивную работу. Conditional rule применяется к той оценке или
+наблюдаемому сигналу, который назвал пользователь; coordinator не заменяет
+условие собственной другой метрикой.
 
-Первый содержательный update после live inventory сообщает `subagents=auto` или
-`subagents=off`, число ready independent lanes, active target и главный
-ограничивающий фактор. Final report кратко сообщает фактически использованную
-peak width либо причину coordinator-only исполнения. Это доказательство
-применения выбранной политики, а не process diary.
+Safety, authority, useful ownership, worktree isolation и возможность fan-in
+сильнее topology preference. Если обязательное rule нельзя выполнить из-за
+этих границ или runtime capacity, coordinator не подменяет его молча: он
+называет конфликт, фактическую topology и влияние на result.
+
+### Writer isolation
+
+- Каждый одновременно пишущий implementation subagent до первой writable
+  mutation получает собственную feature branch и собственный Git worktree для
+  своей exact Task.
+- Writable worktree принадлежит одному writer и не разделяется с другим
+  implementation subagent. Writer не пишет в integration target, чужую branch
+  или чужой worktree.
+- Если writer/session остановились до fan-in, branch и worktree остаются
+  task-owned checkpoint. После доказанной quiescence следующий writer или
+  integration owner принимает тот же artifact; при active/unknown ownership
+  параллельный takeover запрещён.
+- Read-only scouts, reviewers и comment Explainer отдельного worktree не
+  требуют.
+- Только integration owner делает fan-in и проверяет exact объединённый
+  candidate. Проверка isolated worktree не доказывает интегрированный result.
+
+### Comment Explainer
+
+Без применимого user rule каждый ShipTask comment проходит отдельного Strategic
+Explainer. Общий opt-out отключает все subagents; role-scoped rule может
+отключить только Explainer или, наоборот, сохранить его при запрете
+implementation workers. Когда Explainer отключён пользователем, основной агент
+применяет тот же quality contract напрямую и не заявляет независимую проверку.
+
+### Наблюдаемость без scheduler-бухгалтерии
+
+ShipTask сообщает effective user rule, когда оно задано, и честно показывает
+material deviation или невозможность его выполнить. При automatic default
+достаточно назвать materially важное использование delegation или limitation.
+Внутренняя формула выбора, ready width и peak-width telemetry не обязательны.
 
 ## Проверяемые признаки
 
-- Четыре независимые Tasks с изолированным ownership и достаточной capacity не
-  исполняются одним агентом последовательно: одновременно активны несколько
-  bounded workers и один integration owner.
-- Большой scope с одной safe write lane не получает конфликтующих writers;
-  полезные независимые read-only lanes всё ещё могут выполняться параллельно.
-- При общем «без субагентов» число запущенных субагентов равно нулю, включая
-  comment Explainer; при узком запрете отключены только названные роли.
-- Goal, Task lifecycle, acceptance и authority boundaries одинаковы при
-  `auto` и `off`.
-- Отчёт не выдаёт доступные slots или большое число Tasks за доказательство
-  фактически полезного parallelism.
+- Без user rule coordinator выбирает полезную delegation автоматически и не
+  просит обязательную настройку scheduler.
+- «Ровно три субагента» означает три subagents сверх root, если это возможно без
+  нарушения жёстких границ; невозможность не скрывается.
+- «Побольше субагентов» и conditional rule materially меняют default decision,
+  а не игнорируются как неформальные слова.
+- Role-scoped rule влияет только на названные роли; общий «не используй
+  субагентов» запускает ноль subagents.
+- Каждый concurrent implementation writer имеет уникальные branch и worktree;
+  два writers не разделяют writable checkout.
+- Отчёт подтверждает соблюдение или честное невыполнение user rule, но не
+  превращается в обязательную numeric scheduler telemetry.
 
 ## Последствия
 
-- Большой независимый scope использует доступную multi-agent capacity без
-  необходимости каждый раз просить workers вручную.
-- Ширина остаётся адаптивной, поэтому shared state и integration backpressure
-  естественно уменьшают число writers.
-- Пользователь получает буквальный и проверяемый opt-out, включая существующее
-  исключение для comment subagent.
+- Пользователь может управлять delegation теми словами и на той детализации,
+  которые удобны в конкретном run.
+- Automatic default остаётся удобным, когда пользователь topology не задаёт.
+- Worktree isolation остаётся жёстким инвариантом для concurrent writes, не
+  превращаясь в требование для read-only ролей.

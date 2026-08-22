@@ -39,8 +39,9 @@ model/effort для его субагентов —
 
 Агент самостоятельно выбирает план, декомпозицию, инструменты, порядок
 диагностики, число попыток, форму context и текст ответа. Delegation также
-остаётся свободным выбором, кроме явных adaptive default/opt-out требований
-ShipTask из ADR-0024 и cost-aware profile routing из ADR-0025. Examples, reason
+остаётся свободным выбором, кроме automatic default, natural-language user rules
+и writer/worktree isolation ShipTask из ADR-0024, а также cost-aware profile
+routing из ADR-0025. Examples, reason
 codes и удобные структуры могут помогать, но не становятся обязательными только
 потому, что однажды сработали.
 
@@ -59,8 +60,11 @@ codes и удобные структуры могут помогать, но н�
 
 Это границы корректности внешнего состояния, а не общее управление тем, сколько
 агентов использовать, какие tools вызвать или как организовать reasoning.
-ADR-0024 задаёт отдельное пользовательское topology-требование только для
-ShipTask, а ADR-0025 — узкое profile-требование; они не превращают остальные
+Однако ADR-0024 фиксирует явное пользовательское исключение: без topology rule
+ShipTask выбирает delegation автоматически, а однозначные natural-language
+правила пользователя о точном/относительном числе, ролях или условиях обязан
+исполнить по смыслу. Отдельный worktree concurrent writer и profile-требование
+ADR-0025 остаются узкими инвариантами; эти исключения не превращают остальные
 requirements в agent scripts.
 Технический adapter может описывать protocol, необходимый для безопасной работы
 API, но delivery policy не превращает этот protocol в универсальный agent
@@ -81,17 +85,21 @@ attempts или число alternatives. Если входа недостато�
 material gap и необходимый input, не придумывая цель или факты.
 
 ShipTask обязан получить понятный problem-first comment и run report,
-соответствующие этому quality contract. Вызов sibling skill является доступным
-способом улучшить результат, но не обязательным внутренним ритуалом.
+соответствующие этому quality contract. Для каждого создаваемого ShipTask
+comment отдельный sibling Strategic Explainer обязателен по ADR-0022, пока
+effective user topology rule не отключает эту роль; для остальных текстов
+конкретный invocation mechanism остаётся свободным.
 
 ### Evals проверяют наблюдаемое поведение
 
 Current evals проверяют factual grounding, evidence, state separation,
 read-only/authority boundary, понятность, incident visibility и external
-effects. Они не оценивают topology, кроме observable `auto`/`off` contract
-ADR-0024; fork mode, точный prompt envelope, названия внутренних этапов, tool
-sequence, число попыток, фиксированное число вариантов или совпадение с
-эталонной формулировкой не оцениваются.
+effects. Для topology они проверяют automatic default, сохранение
+natural-language exact/relative/role/conditional rules, буквальный общий
+opt-out и writer/worktree isolation из ADR-0024. Fork mode, точный prompt
+envelope, названия внутренних этапов, tool sequence, число попыток, внутренняя
+scheduler formula, фиксированное число вариантов или совпадение с эталонной
+формулировкой не оцениваются.
 
 ## Последствия
 

@@ -2,29 +2,42 @@
 
 Начните с [обзора](overview.md), чтобы понять назначение и границы skill.
 
-## Strategic vision
+## Skill source packages
 
-- [Strategic Explainer](strategic-explainer.md) — implementation-independent
-  продуктовая цель, место между technical evidence и решениями основного
-  агента, устойчивые требования и quality bar стратегического объяснения.
+[Source model](skills/README.md) задаёт единицу исходного кода: отдельный skill
+со своими Requirements и Architecture. Требования разных skills не смешиваются;
+общими остаются только repository build и plugin distribution rules.
 
-## Specifications
-
-- [Ship Tasks](specs/ship-tasks.md) — канонический Task Manager-only workflow
+- `$ship-tasks`: [Requirements](skills/ship-tasks/requirements.md) и
+  [Architecture](skills/ship-tasks/architecture.md) — канонический Task
+  Manager-only workflow
   для explicit invocation и natural-language delivery с однозначным Task
   Manager anchor: single и release без Goal, Goal только для массовой
-  имплементации минимум двух Tasks, `subagents=auto` для широкого batch,
-  явный `subagents=off`, Luna Max только для genuinely simple packets с
-  эскалацией на current profile, constitution-first требования, обязательные
+  имплементации минимум двух Tasks, automatic delegation при отсутствии user
+  topology rule, natural-language exact/relative/role/conditional overrides,
+  отдельный worktree на каждого
+  concurrent implementation writer, resume existing task-owned worktree/branch
+  после interruption или смены сессии, Luna Max только для genuinely simple
+  packets с эскалацией на current profile, constitution-first требования, обязательные
   comments, видимые acceptance incidents, свобода выбора инструментов и
   фактическая классификация приёмки.
-- [Strategic Explainer](specs/strategic-explainer.md) — общий contract
+- `$ship-tasks:task-composer`:
+  [Requirements](skills/task-composer/requirements.md) и
+  [Architecture](skills/task-composer/architecture.md) — planning-only Task
+  Manager workflow: одна Task либо strategic Epic с конкретными подзадачами,
+  live Labels, hierarchy, semantic relations, `Backlog` и необязательным
+  current Release.
+- `$strategic-explainer`:
+  [Requirements](skills/strategic-explainer/requirements.md),
+  [Architecture](skills/strategic-explainer/architecture.md) и
+  [product vision](skills/strategic-explainer/product-vision.md) — общий contract
   problem-first grounding, bounded read-only strategic discovery и свободного
   объяснения без mutations, status decisions, новой authority или обязательной
   agent orchestration.
-- [Task Composer](specs/task-composer.md) — planning-only Task Manager workflow:
-  одна Task либо strategic Epic с конкретными подзадачами, live Labels,
-  hierarchy, semantic relations, `Backlog` и необязательным current Release.
+
+Документация является исходным кодом. Локальный Level 1 отвечает за «что обязано
+быть истинно», локальный Level 2 — за agent-owned «как сейчас этого достигать»,
+а соответствующий `SKILL.md` — компактная исполнимая проекция обоих уровней.
 
 ## Decisions
 
@@ -98,10 +111,11 @@
 - [0023: Task Composer как planning sibling-skill](decisions/0023-task-composer-as-planning-sibling.md)
   — отделяет качественную постановку и backlog capture от ShipTask delivery и
   добавляет третий runtime skill в тот же Ship Tasks plugin.
-- [0024: Адаптивное multi-agent исполнение по умолчанию](decisions/0024-adaptive-multi-agent-execution-by-default.md)
-  — заполняет независимые safe lanes несколькими субагентами, ограничивает
-  writers реальной conflict-free width и делает общий «без субагентов»
-  буквальным нулевым opt-out.
+- [0024: Automatic delegation и natural-language topology rules](decisions/0024-adaptive-multi-agent-execution-by-default.md)
+  — использует automatic default только без user rule, исполняет exact,
+  relative, role-scoped и conditional указания пользователя, изолирует каждого
+  implementation writer отдельным worktree и сохраняет буквальный общий
+  no-subagent opt-out.
 - [0025: Cost-aware профили субагентов](decisions/0025-cost-aware-subagent-profiles.md)
   — сохраняет пользовательский model/effort, направляет только genuinely simple
   packets на Luna Max и требует current-profile escalation без Luna retry loop.

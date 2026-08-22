@@ -1,14 +1,28 @@
 # Strategic Explainer
 
-Статус: current contract, 2026-08-22. Problem-first bounded discovery принято в
-[ADR-0014](../decisions/0014-problem-first-bounded-strategic-discovery.md), а
+Статус: current Level 2 contract, 2026-08-22. Применимые Level 1 requirements —
+`SE-*` в локальных
+[требованиях пользователя](requirements.md). Эта architecture описывает
+current архитектуру достижения и не может ослаблять Level 1. Problem-first
+bounded discovery принято в
+[ADR-0014](../../decisions/0014-problem-first-bounded-strategic-discovery.md), а
 implementation-specific orchestration заменена
-[ADR-0021](../decisions/0021-requirements-as-agent-constitution.md).
+[ADR-0021](../../decisions/0021-requirements-as-agent-constitution.md).
 
-Продуктовая цель зафиксирована в
-[стратегическом видении](../strategic-explainer.md). Эта specification описывает
+Продуктовая архитектура раскрыта в
+[стратегическом видении](product-vision.md). Эта architecture описывает
 наблюдаемый результат и границы общего skill `$strategic-explainer`; она не
 задаёт внутреннюю архитектуру агента.
+
+## 0. Compilation contract
+
+Эта architecture вместе с локальным `requirements.md` является полным current
+source package `$strategic-explainer`. Runtime `strategic-explainer/SKILL.md` —
+производная смысловая компиляция этих двух документов: его можно удалить и
+собрать заново, сохранив все `SE-*` и выбранную здесь реализацию примерно
+эквивалентными по наблюдаемому поведению. `product-vision.md`, ADR, reports и
+evaluations дают локальный design/rationale и evidence, но не становятся
+параллельным current contract.
 
 ## 1. Конституционный принцип
 
@@ -129,4 +143,4 @@ provenance. Никакой фиксированный output envelope не ну�
 - source basis и material uncertainty остаются проверяемыми.
 
 Regression scenarios проверяются по observable behavior в
-[evaluation contract](../reference/strategic-explainer-evaluation.md).
+[evaluation contract](../../reference/strategic-explainer-evaluation.md).

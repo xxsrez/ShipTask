@@ -15,9 +15,16 @@ COMPOSER_SKILL = ROOT / "task-composer" / "SKILL.md"
 COMPOSER_METADATA = ROOT / "task-composer" / "agents" / "openai.yaml"
 STRATEGIC_SKILL = ROOT / "strategic-explainer" / "SKILL.md"
 STRATEGIC_METADATA = ROOT / "strategic-explainer" / "agents" / "openai.yaml"
-SPEC = ROOT / "docs" / "specs" / "ship-tasks.md"
-COMPOSER_SPEC = ROOT / "docs" / "specs" / "task-composer.md"
-STRATEGIC_SPEC = ROOT / "docs" / "specs" / "strategic-explainer.md"
+SKILL_SOURCES = ROOT / "docs" / "skills"
+SOURCE_INDEX = SKILL_SOURCES / "README.md"
+SHIP_REQUIREMENTS = SKILL_SOURCES / "ship-tasks" / "requirements.md"
+SPEC = SKILL_SOURCES / "ship-tasks" / "architecture.md"
+COMPOSER_REQUIREMENTS = SKILL_SOURCES / "task-composer" / "requirements.md"
+COMPOSER_SPEC = SKILL_SOURCES / "task-composer" / "architecture.md"
+STRATEGIC_REQUIREMENTS = (
+    SKILL_SOURCES / "strategic-explainer" / "requirements.md"
+)
+STRATEGIC_SPEC = SKILL_SOURCES / "strategic-explainer" / "architecture.md"
 OVERVIEW = ROOT / "docs" / "overview.md"
 DOCS_INDEX = ROOT / "docs" / "README.md"
 DEVELOPMENT = ROOT / "docs" / "guides" / "development.md"
@@ -29,7 +36,7 @@ STRATEGIC_EVALUATION = (
 )
 COMPOSER_EVALUATION = ROOT / "docs" / "reference" / "task-composer-evaluation.md"
 ADAPTER = ROOT / "docs" / "reference" / "task-manager-adapter.md"
-VISION = ROOT / "docs" / "strategic-explainer.md"
+VISION = SKILL_SOURCES / "strategic-explainer" / "product-vision.md"
 REPORT = ROOT / "ship-tasks" / "references" / "delivery-report.md"
 RUN_REPORT = ROOT / "ship-tasks" / "references" / "run-report.md"
 AUTONOMY = ROOT / "ship-tasks" / "references" / "autonomy-and-release.md"
@@ -100,6 +107,10 @@ CORE_FILES = (
     SPEC,
     COMPOSER_SPEC,
     STRATEGIC_SPEC,
+    SOURCE_INDEX,
+    SHIP_REQUIREMENTS,
+    COMPOSER_REQUIREMENTS,
+    STRATEGIC_REQUIREMENTS,
     OVERVIEW,
     DOCS_INDEX,
     DEVELOPMENT,
@@ -131,6 +142,10 @@ CURRENT_CONTRACT_FILES = (
     SPEC,
     COMPOSER_SPEC,
     STRATEGIC_SPEC,
+    SOURCE_INDEX,
+    SHIP_REQUIREMENTS,
+    COMPOSER_REQUIREMENTS,
+    STRATEGIC_REQUIREMENTS,
     OVERVIEW,
     DOCS_INDEX,
     DEVELOPMENT,
@@ -251,7 +266,7 @@ def validate_frontmatter(
 
 
 def validate_ship_skill(errors: list[str]) -> None:
-    validate_frontmatter(errors, SHIP_SKILL, "ship-tasks", 235)
+    validate_frontmatter(errors, SHIP_SKILL, "ship-tasks", 250)
     text = read(SHIP_SKILL)
     description = text.split("---", 2)[1] if text.count("---") >= 2 else ""
 
@@ -304,9 +319,20 @@ def validate_ship_skill(errors: list[str]) -> None:
         "каждые 10 минут",
         "incident ledger",
         "$ship-tasks:strategic-explainer",
-        "Адаптивно используй субагентов",
-        "Default — `subagents=auto`",
-        "safe useful width несколькими субагентами",
+        "Canonical `Backlog` не входит в delivery inventory",
+        "`Duplicate` отдельно не\nисполняй",
+        "После смены session и до новой implementation surface найди task-owned Git state",
+        "unfinished worktree/branch существует",
+        "прежний writer остановлен",
+        "прими тот же artifact и продолжай",
+        "active/unknown ownership не перехватывай",
+        "Исполняй topology rule пользователя, иначе выбирай автоматически",
+        "effective topology rule",
+        "exact/relative число",
+        "Root не входит в явно\nназванное число субагентов",
+        "Только без применимого rule сам решай",
+        "rule не подменяй молча",
+        "role-scoped rule меняет только названную роль",
         "только genuinely simple packet запускай на `gpt-5.6-luna`/`max`",
         "Strategic Explainer наследуют current model/effort",
         "Luna прекращает packet без\ncorrective mutations",
@@ -314,13 +340,16 @@ def validate_ship_skill(errors: list[str]) -> None:
         "`luna-escalation=not-available` без скрытой подмены Sol",
         "явный unavailable user profile не подменяй",
         "единственный integration owner",
-        "владелец Goal и Task\nManager comments/status/version writes",
-        "`subagents=off` для всего run, включая comment Explainer",
-        "узкий запрет отключает\nтолько названную роль",
-        "ready width",
-        "фактическую peak width",
-        "При `subagents=auto` каждый Task Manager comment проходит отдельного",
-        "При общем\n`subagents=off` сам примени тот же problem-first quality contract",
+        "владелец Goal, Task Manager\ncomments/status/version writes",
+        "собственную feature branch и собственный Git worktree",
+        "Один writable worktree принадлежит одному writer",
+        "Только integration owner делает fan-in",
+        "Общий no-subagent rule означает ноль субагентов во всём run",
+        "внутренняя target/width accounting не требуется",
+        "сохраняй unrelated пользовательские изменения",
+        "не используй blind rollback или destructive cleanup",
+        "Пока effective rule сохраняет Explainer, каждый Task Manager comment проходит отдельного",
+        "Если effective rule\nотключает Explainer, сам примени тот же problem-first",
         "не переписывай текст самостоятельно",
         "Обычный `To Do → In Progress` не запускает Explainer",
         "SHIPTASK RUN REPORT",
@@ -356,26 +385,31 @@ def validate_ship_skill(errors: list[str]) -> None:
         "$ship-tasks",
         'value: "task-manager"',
         "allow_implicit_invocation: true",
-        "In Review",
-        "Goal создавай только для реальной implementation/rework минимум двух Tasks",
-        "release-only, включая production, работают без нового Goal",
-        "Default subagents=auto",
-        "active target равен min",
+        "Goal создавай только для implementation/rework минимум двух Tasks",
+        "release-only работает без нового Goal",
+        "До новой implementation surface найди существующие exact Task worktrees/branches",
+        "прими тот же task-owned artifact и продолжай там",
+        "active/unknown ownership не перехватывай и не очищай",
+        "effective natural-language topology rule пользователя",
+        "exact/relative число subagents (root не считается)",
+        "role-scoped/global opt-out или условие по длительности",
+        "Только без такого rule автоматически делегируй",
+        "невозможность rule не подменяй молча",
         "единственный integration owner",
         "владелец Goal и Task Manager comments/status/version writes",
+        "собственные feature branch и Git worktree",
+        "один writable worktree не разделяется между writers",
         "только genuinely simple bounded packets запускай на gpt-5.6-luna/max",
         "остальные и Strategic Explainer наследуют current model/effort",
         "Luna прекращает corrective mutations",
-        "exact handoff integration owner/current profile без cheap Luna retry loop",
-        "explicit unavailable profile не подменяй",
-        "означают subagents=off и ноль subagents во всём run",
-        "узкий запрет отключает только названную роль",
+        "передаёт packet integration owner/current profile без cheap retry loop",
+        "Backlog не доставляй",
         "Приёмочный incident немедленно покажи в chat",
         "Обычный To Do → In Progress не создаёт комментарий",
-        "При subagents=auto каждый комментарий ShipTask до публикации обязательно передай отдельному",
-        "при общем off примени quality contract напрямую без claim независимости",
+        "Пока effective rule не отключает comment Explainer",
+        "иначе примени quality contract напрямую без claim независимости",
         "opening comment до repair",
-        "incident ledger в final report",
+        "success закрывай только после completion comment",
     )
 
 
@@ -419,7 +453,9 @@ def validate_composer_skill(errors: list[str]) -> None:
     require(
         errors,
         COMPOSER_SPEC,
-        "Статус: current contract, 2026-08-22",
+        "Статус: current Level 2 contract, 2026-08-22",
+        "`TC-*` в локальных",
+        "[требованиях пользователя](requirements.md)",
         "planning mutations",
         "Проверяемая trigger matrix",
         "не управляет delivery lifecycle",
@@ -663,6 +699,23 @@ REVIEW_CASES = {
         "первом содержательном chat update",
         "material change",
     ),
+    "Новая Codex-сессия видит unfinished exact Task worktree/feature branch остановленного writer": (
+        "нового exclusive owner",
+        "продолжить candidate в том же task-owned worktree",
+        "parallel replacement worktree",
+        "потерять existing changes",
+    ),
+    "Для unfinished exact Task сохранилась feature branch, но usable worktree отсутствует": (
+        "связь с Task доказана",
+        "восстановить checkout этой же branch",
+        "повторять готовую работу",
+    ),
+    "Existing task worktree имеет active либо unknown writer ownership": (
+        "takeover не выполнен",
+        "artifact сохранён без mutations/cleanup",
+        "два concurrent writers",
+        "reset/cleanup",
+    ),
     "Первый выбранный способ проверки не сработал": (
         "агент сам выбирает",
         "считать первый инструмент обязательным",
@@ -697,7 +750,7 @@ REVIEW_CASES = {
         "fallback в description",
         "skip обязательного comment",
     ),
-    "Отдельный Strategic Explainer недоступен или отклонил текст при `subagents=auto`": (
+    "Отдельный Strategic Explainer недоступен или отклонил текст, когда effective rule его сохраняет": (
         "не публиковать непроверенный черновик",
         "не выполнять зависящий переход",
         "основной агент сам одобряет",
@@ -706,13 +759,19 @@ REVIEW_CASES = {
         "batch-implementation",
         "создать/продолжить Goal",
     ),
-    "Auto batch с четырьмя independent safe lanes": (
-        "subagents=auto",
-        "весь target bounded workers",
+    "Scope без user topology rule содержит несколько действительно независимых полезных packets": (
+        "автоматически",
         "основной integration owner",
-        "concrete limiter",
-        "субъективно занизить target",
-        "последовательно поглотить safe frontier",
+        "без fake fan-out",
+        "scheduler-настройку",
+    ),
+    "Несколько implementation subagents пишут одновременно": (
+        "unique feature branch",
+        "unique Git worktree",
+        "до первой mutation",
+        "integration owner",
+        "fan-in",
+        "общий writable checkout",
     ),
     "Genuinely simple bounded packet без отдельного profile override": (
         "gpt-5.6-luna`/`max",
@@ -745,31 +804,48 @@ REVIEW_CASES = {
         "replacement Luna retry loop",
     ),
     "Большой batch с одной safe write lane": (
-        "limiting factor",
-        "один writer",
+        "одним writer",
         "read-only scouts/reviewers",
         "конфликтующие writers",
         "fake fan-out",
     ),
     "Общий prompt `не используй субагентов`": (
-        "subagents=off",
         "ноль subagents",
         "напрямую применяет quality contract",
-        "peak width 0",
         "comment subagent",
     ),
-    "Prompt `без субагентов для реализации`": (
-        "subagents=auto; implementation=off",
+    "Prompt `используй ровно три субагента`": (
+        "ровно 3 subagents сверх root",
+        "обязательное число",
+        "молча запустить другое число",
+    ),
+    "Prompt `используй побольше субагентов`": (
+        "выше automatic baseline",
+        "больше полезной delegation",
+        "фиктивные packets",
+    ),
+    "Prompt `используй субагентов, только если работа займёт больше получаса`": (
+        "ожидаемой длительности",
+        "не больше 30 минут",
+        "подменить длительность",
+    ),
+    "Prompt отключает только implementation subagents, но сохраняет reviewer/Explainer": (
         "implementation workers не запускаются",
-        "отдельный Strategic Explainer сохраняется",
+        "role-scoped rule буквально",
+        "global off",
     ),
-    "Worker capability недоступна": (
-        "workers=not-available",
+    "Обязательное topology rule конфликтует с authority, isolation, useful ownership или capacity": (
+        "exact conflict",
+        "фактическая topology",
+        "скрытое уменьшение exact count",
+    ),
+    "Worker capability недоступна без exact user topology rule": (
+        "technical limitation не является user opt-out",
         "coordinator-only",
-        "отдельный Explainer остаётся required",
+        "effective rule его сохраняет",
     ),
-    "Comment Explainer capability недоступна при `auto`": (
-        "comment-explainer=not-available",
+    "Comment Explainer capability недоступна, но effective rule его сохраняет": (
+        "capability gap",
         "comment-dependent transition не выполняется",
         "implementation workers могут продолжать",
     ),
@@ -797,11 +873,175 @@ def validate_review_matrix(errors: list[str]) -> None:
                 fail(errors, f"review case {case!r} is missing {term!r}")
 
 
+def validate_source_layers(errors: list[str]) -> None:
+    packages = (
+        (SHIP_REQUIREMENTS, "ST", 22),
+        (COMPOSER_REQUIREMENTS, "TC", 10),
+        (STRATEGIC_REQUIREMENTS, "SE", 12),
+    )
+    for requirements, prefix, count in packages:
+        requirement_ids = re.findall(
+            r"^### `([A-Z]+-\d{2})`", read(requirements), re.MULTILINE
+        )
+        expected_ids = [f"{prefix}-{number:02d}" for number in range(1, count + 1)]
+        if requirement_ids != expected_ids:
+            fail(
+                errors,
+                f"{relative(requirements)} requirement IDs are missing, duplicated, "
+                f"or out of order: {requirement_ids}",
+            )
+        require(
+            errors,
+            requirements,
+            "Статус: current Level 1, 2026-08-22",
+            "полный пользовательский исходный код только для",
+            "не могут ослабить, заменить или\nмолча удалить",
+            "Изменение смысла Level 1 требует явного решения пользователя",
+            "`architecture.md` хранит agent-owned current способ достижения",
+            "примерно\nэквивалентен",
+        )
+
+    require(
+        errors,
+        SHIP_REQUIREMENTS,
+        "Backlog вне delivery",
+        "свободным языком изменить эту topology",
+        "запретить всех субагентов\nили только comment Explainer",
+        "Пользователь может свободным языком задать обязательное правило delegation",
+        "точное или относительное количество",
+        "`ровно три`, `побольше`",
+        "`используй субагентов, только если\nработа займёт больше получаса`",
+        "root agent не\nвходит в число явно названных субагентов",
+        "не\nподменяется молча",
+        "Отчёт не обязан показывать внутренний расчёт target/width",
+        "Изоляция concurrent writers",
+        "implementation subagent работает в собственном Git\nworktree и собственной feature branch",
+        "принадлежит ровно одному implementation writer и не разделяется между\nсубагентами",
+        "TASK CONTEXT ALARM",
+        "Lifecycle priority и duplicate context",
+        "Bounded scope и сохранность чужого состояния",
+        "Resume-first и подхватывание начатой работы",
+        "После ошибки, остановки агента, прерывания run",
+        "принимает эксклюзивное владение этим же\nworktree",
+        "branch без доступного worktree",
+        "двум writers одновременно менять один worktree",
+        "Независимая plugin distribution",
+        "должны быть byte-identical",
+    )
+    forbid(
+        errors,
+        SHIP_REQUIREMENTS,
+        "ready independent width",
+        "фактическую peak width",
+        "Единственный пользовательский topology override",
+        "Узкие role-specific opt-outs не являются отдельным публичным",
+        "пользователь не обязан и не должен вручную\nзадавать число",
+    )
+    require(
+        errors,
+        COMPOSER_REQUIREMENTS,
+        "Planning-only boundary",
+        "Strategic Explainer для каждого Epic",
+        "Независимая planning distribution",
+        "искусственный umbrella Epic",
+        "Unknown outcome не\nповторяется вслепую",
+        "должны быть byte-identical",
+    )
+    require(
+        errors,
+        STRATEGIC_REQUIREMENTS,
+        "Никакой скрытой управляющей роли",
+        "отсутствие проверки не называется\ndefect",
+        "контекстный документ не является completion evidence",
+        "Publication-ready и пропорциональный result",
+        "Общий переносимый communication skill",
+        "остаются byte-identical",
+    )
+    forbid(
+        errors,
+        STRATEGIC_REQUIREMENTS,
+        "отсутствие проверки — defect",
+        "контекстный документ — completion evidence",
+    )
+    require(
+        errors,
+        SOURCE_INDEX,
+        "Единица\nисходного кода — отдельный skill",
+        "требования и\nархитектура разных skills не объединяются",
+        "Компилятор здесь стохастический",
+        "примерно тот\nже contract",
+        "Каждый source package должен быть понятен и пригоден для пересборки",
+        "Plugin — общий distribution artifact",
+    )
+    for architecture, prefix in (
+        (SPEC, "ST-*"),
+        (COMPOSER_SPEC, "TC-*"),
+        (STRATEGIC_SPEC, "SE-*"),
+    ):
+        require(
+            errors,
+            architecture,
+            "Статус: current Level 2 contract, 2026-08-22",
+            f"`{prefix}` в локальных",
+            "[требованиях пользователя](requirements.md)",
+            "## 0. Compilation contract",
+            "производная смысловая компиляция",
+            "примерно\nэквивалентными",
+        )
+
+    for obsolete in (
+        ROOT / "docs" / "requirements.md",
+        ROOT / "docs" / "architecture.md",
+        ROOT / "docs" / "specs" / "ship-tasks.md",
+        ROOT / "docs" / "specs" / "task-composer.md",
+        ROOT / "docs" / "specs" / "strategic-explainer.md",
+    ):
+        if obsolete.exists():
+            fail(errors, f"competing monolithic/legacy source exists: {relative(obsolete)}")
+
+    require(
+        errors,
+        ROOT / "AGENTS.md",
+        "Документация как исходный код",
+        "Единица source —\nотдельный skill",
+        "`docs/skills/<skill>/requirements.md`",
+        "`docs/skills/<skill>/architecture.md`",
+        "Level 1 — требования пользователя",
+        "Level 2 — архитектура достижения",
+        "Level 3 — runtime skills",
+        "При конфликте всегда побеждает Level 1",
+        "Level 1 requirement → Level 2 design → runtime skill → observable evaluation",
+        "Компиляция стохастическая",
+        "не объединяют Requirements или Architecture разных skills",
+    )
+    require(
+        errors,
+        ROOT / "README.md",
+        "[`docs/skills/<skill>/`](docs/skills/README.md)",
+        "требования\nтрёх skills не объединяются",
+    )
+    require(
+        errors,
+        DOCS_INDEX,
+        "[Source model](skills/README.md)",
+        "[Requirements](skills/ship-tasks/requirements.md)",
+        "[Architecture](skills/ship-tasks/architecture.md)",
+    )
+    require(
+        errors,
+        VISION,
+        "Статус: current Level 2 strategic design, 2026-08-22",
+        "[требованиях пользователя](requirements.md)",
+    )
+
+
 def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         SPEC,
-        "Статус: current contract, 2026-08-22",
+        "Статус: current Level 2 contract, 2026-08-22",
+        "`ST-*` в локальных",
+        "[требованиях пользователя](requirements.md)",
         "ADR-0018",
         "ADR-0019",
         "ADR-0020",
@@ -815,13 +1055,20 @@ def validate_current_contract(errors: list[str]) -> None:
         "без `threadId` не более одного раза",
         "task-title=not-available",
         "## 2. Конституция",
-        "adaptive multi-agent\nисполнение нескольких независимых work packets",
-        "no-subagent opt-out",
+        "### 7.1 Resume-first",
+        "task-owned feature branch и worktree содержат незавершённый candidate",
+        "создавать параллельный replacement worktree",
+        "предыдущий writer всё ещё активен",
+        "Остановка writer или Codex-сессии не превращает task-owned worktree в мусор",
+        "После доказанной quiescence ownership может",
+        "effective topology policy",
+        "точное или относительное число",
+        "Root/coordinator не входит",
+        "Только если применимого user rule нет",
         "comment",
         "до записи статуса",
         "всегда создаёт и перечитывает обязательный comment",
-        "Каждый комментарий, который ShipTask собирается создать",
-        "исключение — явный общий `subagents=off`",
+        "effective topology rule не отключает comment Explainer",
         "`To Do → In Progress` комментария не создаёт",
         "Приёмочный инцидент виден сразу",
         "примерно каждые 10 минут",
@@ -833,16 +1080,26 @@ def validate_current_contract(errors: list[str]) -> None:
         "Goal создаётся только для `batch-implementation`",
         "production release уже подготовленного candidate",
         "Release-only run не создаёт",
-        "Default topology — `subagents=auto`",
+        "Delivery inventory исключает canonical status `Backlog`",
+        "### 0.1 Current compilation status",
+        "`Backlog` исключён из\ndelivery",
+        "natural-language правила о числе, ролях и условиях delegation",
+        "собственные branch/worktree",
+        "Exact count\nозначает обязательное число subagents",
+        "Conditional rule проверяется по указанному\nпользователем условию",
         "Только genuinely simple packet запускается на\n`gpt-5.6-luna` с `max`",
         "Strategic Explainer по умолчанию наследует current profile",
         "повторно отправлять ту же неразрешённую проблему cheap Luna lane\nнельзя",
         "его собственный выбор несовместимой формы context не делает profile\nunavailable",
         "`<profile>=not-available` уменьшает\ncapacity соответствующей роли",
-        "Luna-to-current escalations",
+        "Luna-to-current handoff",
         "единственный integration owner",
         "владелец Goal, Task Manager\ncomments/status/version writes",
-        "`subagents=off` для всего текущего run",
+        "собственную feature branch и собственный Git worktree",
+        "Read-only scouts, reviewers и\ncomment Explainer отдельного worktree не требуют",
+        "Только integration\nowner выполняет fan-in",
+        "Role-scoped rule меняет только названную роль",
+        "effective смысл и\nподтверждают соблюдение либо material deviation",
         "сохраняет отсутствие независимой\nпроверки",
     )
     require(
@@ -868,7 +1125,12 @@ def validate_current_contract(errors: list[str]) -> None:
         "несколько независимых safe lanes",
         "genuinely\n  simple packets получают Luna Max",
         "без повторного Luna loop",
-        "общее «без субагентов» означает ноль субагентов",
+        "exact/relative count",
+        "root\n  agent не считается названным субагентом",
+        "condition",
+        "собственной feature branch\n  и собственном Git worktree",
+        "interrupted task-owned worktree/branch",
+        "подхватывается следующей сессией",
         "доказанная первая Codex task с catalog placeholder",
         "последующие turns не переименовываются",
         "Task type хранится в Label/hierarchy",
@@ -881,8 +1143,8 @@ def validate_current_contract(errors: list[str]) -> None:
         "До связанного существенного status transition",
         "transition не завершён",
         "всегда создаёт и перечитывает обязательный comment",
-        "При `subagents=auto` каждый комментарий, который ShipTask собирается создать",
-        "При явном общем `subagents=off`",
+        "Пока effective topology rule не отключает comment Explainer",
+        "Когда user rule отключает Explainer",
         "Обычный старт `To Do → In Progress` комментария не создаёт",
         "До repair немедленно сообщить incident",
         "resolution/completion comment",
@@ -897,7 +1159,11 @@ def validate_current_contract(errors: list[str]) -> None:
         "acceptance incident openings",
         "compact ledger всех material acceptance incidents run",
         "found and resolved",
-        "Luna-to-current escalations",
+        "Luna-to-current handoff",
+        "effective topology rule пользователя",
+        "соблюдения либо material\n  deviation",
+        "подхваченный existing checkpoint",
+        "невозможность безопасного takeover",
         "не совместим с clean success",
     )
     require(
@@ -913,13 +1179,18 @@ def validate_current_contract(errors: list[str]) -> None:
         "Повторный cheap Luna loop запрещён",
         "выбранная\ncoordinator форма context не создаёт unavailability",
         "Явный unavailable user profile не\nподменяется",
+        "exact или relative число субагентов",
+        "Role-scoped rule меняет только названную роль",
+        "После ошибки, interrupted run, смены агента/сессии",
+        "прими exclusive ownership этого же\nworktree",
+        "Не делай takeover при живом writer",
         "Production workflow требует явного approval",
     )
     require(
         errors,
         HANDOFF,
-        "При `subagents=auto` каждый комментарий, который создаёт ShipTask",
-        "При явном общем\n`subagents=off`",
+        "Пока effective topology rule не отключает comment Explainer",
+        "Если rule отключает Explainer",
         "отдельного субагента",
         "не переписывает текст обратно",
         "user-facing judgment packet наследует current model/effort",
@@ -981,20 +1252,21 @@ def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         ADR["0024"],
-        "Адаптивное multi-agent исполнение по умолчанию",
-        "Default — `subagents=auto`",
-        "active target",
-        "conflict-free ownership/isolation",
-        "единственным integration owner",
+        "Automatic delegation и natural-language topology rules",
+        "Default без user rule",
+        "User topology rule",
+        "Root/coordinator не входит",
+        "Exact count является обязательным count",
+        "role scope",
+        "condition",
         "Task Manager comments/status/version writes",
-        "Искусственные\n  subtasks ради числа агентов не создаются",
-        "`subagents=off` на весь текущий run",
-        "implementation, research, review или Strategic Explainer",
-        "Узкий запрет относится только к названной роли",
-        "`subagents=auto; implementation=off`",
-        "workers=not-available",
-        "comment-explainer=not-available",
-        "peak width",
+        "Writer isolation",
+        "собственную feature branch и собственный Git worktree",
+        "Writable worktree принадлежит одному writer",
+        "общий opt-out",
+        "role-scoped rule",
+        "Наблюдаемость без scheduler-бухгалтерии",
+        "material deviation",
         "ADR-0025",
     )
     require(
@@ -1014,6 +1286,29 @@ def validate_current_contract(errors: list[str]) -> None:
         "`luna-escalation=not-available`",
         "Sol Extra High или Sol Ultra как универсальный default",
     )
+    for path in (
+        ROOT / "AGENTS.md",
+        ROOT / "README.md",
+        SHIP_SKILL,
+        SHIP_METADATA,
+        SPEC,
+        OVERVIEW,
+        DEVELOPMENT,
+        REVIEW_MATRIX,
+        REPORT,
+        RUN_REPORT,
+        AUTONOMY,
+        HANDOFF,
+    ):
+        forbid(
+            errors,
+            path,
+            "active target равен",
+            "весь target bounded workers",
+            "ready independent lanes",
+            "фактическую peak width",
+            "peak width 0",
+        )
     require(
         errors,
         ADAPTER,
@@ -1131,7 +1426,9 @@ def validate_strategic_contract(errors: list[str]) -> None:
     require(
         errors,
         STRATEGIC_SPEC,
-        "Статус: current contract, 2026-08-22",
+        "Статус: current Level 2 contract, 2026-08-22",
+        "`SE-*` в локальных",
+        "[требованиях пользователя](requirements.md)",
         "общего skill `$strategic-explainer`",
         "Конституционный принцип",
         "не задаёт внутреннюю архитектуру агента",
@@ -1259,10 +1556,15 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "Standalone user-level каталоги",
         "~/.codex/skills/task-composer",
         "task-manager@srez-marketplace` остаётся adapter-only",
-        "без общего opt-out каждый комментарий проходит\n  отдельного независимого Strategic Explainer",
+        "каждый комментарий проходит\n  отдельного независимого Strategic Explainer",
         "`To Do → In Progress` комментария не создаёт",
-        "несколькими субагентами",
-        "общий явный\n  no-subagent opt-out отключает их все",
+        "правило пользователя свободным языком — exact/relative count",
+        "root agent не входит в явно названное число",
+        "duration/complexity condition",
+        "собственные feature branch и Git worktree",
+        "не разделяемые с\n  другим writer",
+        "unfinished worktree/branch подхватывается",
+        "exclusive writer после проверки quiescence",
         "`gpt-5.6-luna`/`max`",
         "Luna retry loop",
         "catalog placeholder после live scope resolution",
@@ -1277,9 +1579,13 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "fresh App Server catalog",
         "ship-tasks:task-composer",
         "existing-only Labels",
-        "При `subagents=auto` каждый комментарий ShipTask\n  обязательно проходит отдельного независимого Explainer",
+        "отдельного Strategic Explainer при разрешённой роли",
         "`To Do → In Progress` не создаёт комментарий",
-        "adaptive multi-agent default",
+        "automatic default",
+        "отдельный worktree каждого implementation writer",
+        "natural-language exact/relative/role/conditional rules",
+        "подхватывает\n  существующий unfinished task-owned worktree/branch",
+        "active\n  или ambiguous ownership не захватывается",
         "ноль subagents",
         "Luna Max routing",
         "current-profile escalation",
@@ -1388,6 +1694,7 @@ def main() -> int:
         validate_trigger_matrix(errors)
         validate_composer_trigger_matrix(errors)
         validate_review_matrix(errors)
+        validate_source_layers(errors)
         validate_current_contract(errors)
         validate_strategic_contract(errors)
         validate_supersession(errors)

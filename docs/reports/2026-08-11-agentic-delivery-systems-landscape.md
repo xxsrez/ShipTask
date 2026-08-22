@@ -854,7 +854,7 @@ authority или смысл completion. Для локального single-user 
 
 ## 15. Что уже сильного в ShipTask
 
-Текущая [specification](../specs/ship-tasks.md) хорошо совпадает с найденным
+Текущая [ShipTask Architecture](../skills/ship-tasks/architecture.md) хорошо совпадает с найденным
 consensus:
 
 - exact planning handoff отделён от execution;
