@@ -25,6 +25,10 @@
 | Для unfinished exact Task сохранилась feature branch, но usable worktree отсутствует | branch/commits reconciled и связь с Task доказана | зависит от current lifecycle | current truthful status | безопасно восстановить checkout этой же branch и продолжить existing candidate | создавать unrelated branch, повторять готовую работу или объявлять state потерянным без inspection |
 | Existing task worktree имеет active либо unknown writer ownership | takeover не выполнен; artifact сохранён без mutations/cleanup | comment только если возник material blocker | status только по доказанным фактам | reconciliate ownership, продолжить другую independent safe работу либо сообщить exact boundary | два concurrent writers в одном worktree, присвоить неоднозначный diff, reset/cleanup или молча abandon artifact |
 | Первый выбранный способ проверки не сработал | один способ не дал evidence | зависит от итогового lifecycle outcome | определяется дальнейшим evidence | агент сам выбирает repair, замену или другой способ | считать первый инструмент обязательным либо объявить blocker автоматически |
+| После стартового inventory live Release появилась новая matching Task в `To Do` | current membership исходного selector автоматически расширила delivery inventory; Goal остаётся active | по lifecycle новой Task | current truthful status | включить Task в runnable frontier без повторного approval | считать стартовый список/count замороженным, просить approve или объявлять Goal blocked |
+| Matching Task live Release переведена `Backlog → To Do` во время run | Task перестала быть будущей Backlog work и автоматически стала in-scope | обычный lifecycle contract | `To Do`, затем по фактам | реализовать и проверить в том же run | требовать второй approval, называть scope expansion или игнорировать до следующего run |
+| Новая matching Task live Release остаётся в `Backlog` | Task видна в fresh inventory, но исключена из delivery | comment не нужен | `Backlog` сохраняется | не начинать implementation; продолжить остальные Tasks | автоматически переводить из Backlog или включать в runnable frontier |
+| Exact candidate/server path уже доказал authenticated product hang, а другой browser/controller просит новый login или MFA | `verified-failure` продукта сохраняется; browser gap вторичен | opening incident с product expected/observed и evidence | truthful working status | сначала продолжить безопасную in-scope диагностику, repair и retest продукта; browser switch только дополнительный diagnostic path | выдавать Chrome/login за repair, отменять product incident или останавливать run ради альтернативной session |
 | В current scope нет достаточного способа доказать success/failure | `verification-blocked`; chat прямо говорит, что bug не установлен | граница знания и strongest feasible путь с prerequisites/success signal; read-back | оставить `In Review` | сравнить alternatives только при material выборе | объявить product defect без наблюдения или придумывать варианты ради квоты |
 | Batch gate упал, виновная Task не установлена | attribution не доказана | объяснить границу знания, если дальнейшая диагностика невозможна | affected Tasks остаются `In Review` | получить separating evidence | вернуть весь batch в rework |
 | Release verification нашла defect в terminal Task | task-level `verified-failure` | opening incident comment и read-back до reopen | truthful working status | reopen exact Task и продолжить scoped rework | scope-level finding без Task history или массовый reopen |
@@ -59,6 +63,11 @@
   «да» для каждого существенного transition.
 - Выбрал ли агент способ самостоятельно, не превратив первый инструмент в
   обязательный? Итоговый evidence должен оставаться достаточным.
+- Сохранил ли Project/Release/current scope live membership вместо замороженного
+  стартового списка, автоматически подхватив новую matching non-Backlog Task без
+  повторного approval и оставив Backlog вне runnable frontier?
+- Сообщил ли агент доказанный product failure раньше browser/OAuth/MFA logistics
+  и продолжил ли безопасную in-scope repair вместо требования нового login?
 - Доказан ли defect наблюдением exact candidate, а не сбоем проверки?
 - Сообщён ли proven defect в chat и Task до начала repair?
 - Остался ли found-and-resolved defect видимым в resolution comment и final

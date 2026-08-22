@@ -32,7 +32,9 @@ source package `$ship-tasks`. Runtime `ship-tasks/SKILL.md` — производ
 
 Checked-in `ship-tasks/SKILL.md`, его references, metadata и observable
 evaluation являются локальной компиляцией current `ST-*`: `Backlog` исключён из
-delivery, без user rule topology определяется автоматически, а однозначные
+delivery, Project/Release/current scope сохраняются как live selectors, а
+стартовый inventory не превращается в scope cap; без user rule topology
+определяется автоматически, а однозначные
 natural-language правила о числе, ролях и условиях delegation исполняются;
 каждый concurrent implementation writer получает собственные branch/worktree,
 а interrupted task-owned checkpoint подхватывается следующей сессией после
@@ -72,11 +74,26 @@ Project, Release, current scope, несколько Tasks и bare `$ship-tasks` 
 фактической работой после live inventory. Чтение, проверка или lifecycle
 reconciliation нескольких Tasks не являются массовой имплементацией.
 
+Selector и inventory — разные сущности. Exact Task и явно перечисленные Task
+refs являются закрытыми selectors. Project, Release и resolved current scope
+являются live selectors: их identity/predicate сохраняются на весь run, а
+membership перечитывается из Task Manager. Стартовый inventory фиксирует
+начальное наблюдение для аудита и планирования, но не замораживает count, диапазон
+refs или список Tasks. Перед scheduling новой frontier, ожиданием пользователя,
+blocking handoff, изменением Goal status и terminal report coordinator получает
+свежий полный paginated inventory live selector.
+
 Delivery inventory исключает canonical status `Backlog`. Такие Tasks можно
 прочитать как context или dependency, но нельзя включить в runnable frontier,
 начать реализовывать либо переводить из `Backlog` без отдельного явного решения
 пользователя начать именно эту запланированную работу. Это фильтр delivery
-scope, а не эвристика приоритета.
+scope, а не эвристика приоритета. Любая current non-Backlog Task, совпадающая с
+live selector, входит в delivery автоматически, даже если появилась или была
+переведена `Backlog → To Do` после старта. Это current membership исходного
+selector, а не расширение scope, поэтому повторное approval не требуется. Если
+Task становится `Backlog` или перестаёт совпадать с selector, новую
+implementation по ней не начинают, а уже произведённые partial effects сначала
+reconciliate и отражают правдиво.
 
 Bare `$ship-tasks` берёт `current_scope` из project memory. Prompt selector имеет
 приоритет, но не переписывает memory. Task Manager всегда перечитывается: memory
@@ -243,6 +260,15 @@ compact ledger всех material incidents, включая найденные и
 Нет фиксированного числа попыток, обязательной последовательности repair или
 предпочтённого инструмента. Сбой отдельного способа сам по себе не является ни
 product defect, ни `verification-blocked`.
+
+Browser/controller/session switch — один из диагностических способов, а не
+repair продукта и не новый acceptance contract. Если совместимое наблюдение
+exact candidate или server path уже достаточно доказывает product failure,
+неудача другого browser login, отсутствие его session или MFA не отменяют этот
+инцидент и не превращаются в обязательное действие пользователя. Пока доступна
+безопасная in-scope диагностика, repair или проверка самого продукта, агент
+продолжает её; browser logistics сообщаются после установленного product
+outcome, только если помогают понять оставшийся proof gap.
 
 Native Task comment остаётся обязательным наблюдаемым результатом существенного
 transition. Как обеспечить его создание и read-back, решает агент. Transition
@@ -476,8 +502,12 @@ Resume действует во всех delivery modes и между Codex-се�
 конкретный контракт, а не соответствие универсальному ритуалу. Недоступное
 доказательство называется `not-available`, а не verified.
 
-Out-of-scope finding не исправляется и не превращается автоматически в новую
-Task. Если он не блокирует текущий result, он кратко попадает в final report.
+Out-of-scope finding определяется только после свежего сопоставления с current
+selector. Новая non-Backlog Task, совпадающая с live selector, не является таким
+finding: она автоматически входит в delivery и применимый Goal. Наблюдение,
+которое действительно не совпадает с selector или ещё не оформлено как Task, не
+исправляется и не превращается автоматически в новую Task. Если оно не блокирует
+текущий result, оно кратко попадает в final report.
 
 ## 8. Массовая имплементация, multi-agent execution и Goal
 
@@ -486,6 +516,10 @@ live inventory установлено, что current run действитель
 возвращает в rework минимум две concrete Tasks. Goal создаётся до первой
 implementation mutation и хранит objective, observable done criteria,
 verification, authority и progress именно этой массовой имплементации.
+Для live selector objective и done criteria фиксируют его canonical identity и
+membership predicate, а не закрытый count, диапазон refs или стартовый список.
+Начальные refs могут сохраняться только как audit baseline. Новая matching
+non-Backlog Task сохраняет Goal active и не требует его retarget или approval.
 
 Ни selector `Project`/`Release`/current scope, ни bare `$ship-tasks`, ни чтение,
 проверка, приёмка или reconciliation нескольких Tasks сами по себе не разрешают
@@ -607,9 +641,10 @@ width, active target, peak width и другая внутренняя scheduler 
 
 Изолированная проблема одной Task не останавливает независимую runnable работу.
 Перед ожиданием пользователя `batch-implementation` повторно читает полный
-inventory; если есть безопасная runnable работа, агент продолжает её. Глобальный
-stop допустим только когда конфликт scope/shared state/authority делает любую
-оставшуюся mutation небезопасной.
+current inventory live selector, включая Tasks, появившиеся после старта; если
+есть безопасная runnable работа, агент продолжает её. Глобальный stop допустим
+только когда конфликт scope/shared state/authority делает любую оставшуюся
+mutation небезопасной.
 
 ## 9. Release authority
 
@@ -639,6 +674,11 @@ Run report начинается с результата и простым язы
 - причину незавершённости, если она есть;
 - какие исправления уже выполнены;
 - одно точное условие или действие для продолжения.
+
+Если доказан product failure, он и доступная in-scope repair frontier сообщаются
+до browser/controller/OAuth/MFA logistics. Переключение средства не называется
+repair, а пользовательский login не запрашивается как blocker, пока остаётся
+безопасная работа с продуктом без этого действия.
 
 Unresolved incident располагается рядом с общим result и не допускает
 clean-success формулировку для affected Task. Compact incident ledger не

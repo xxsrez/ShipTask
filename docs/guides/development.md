@@ -84,6 +84,10 @@ skill, реалистичный exact Task Manager scope и обычный proje
   сами mode не определяют; release-only, чтение нескольких Tasks и общая приёмка
   работают без Goal; audit/planning/backlog и generic code request не запускают
   ShipTask;
+- Project/Release/current scope сохраняют live membership: новая matching `To Do`
+  и `Backlog → To Do` автоматически входят без повторного approval, новая
+  matching `Backlog` Task остаётся вне runnable frontier, а initial inventory не
+  превращается в Goal count/list cap;
 - первый ShipTask-вызов с catalog placeholder после live scope resolution один
   раз получает `ShipTask · ...`; meaningful title, later turn, incomplete
   history и ambiguous current candidate не переименовываются;
@@ -110,6 +114,9 @@ skill, реалистичный exact Task Manager scope и обычный proje
   comment и read-back до `In Review`;
 - proven defect немедленно виден в chat, получает opening comment до repair и
   `In Progress`, после чего rework продолжается в том же run;
+- доказанный authenticated product hang остаётся product incident при сбое
+  другого browser/controller login; агент сообщает product outcome раньше
+  browser/OAuth/MFA logistics и продолжает безопасную in-scope repair;
 - найденный и исправленный в одном run defect сохраняется в Task resolution
   comment и final incident ledger;
 - unresolved incident получает chat update при material state change и

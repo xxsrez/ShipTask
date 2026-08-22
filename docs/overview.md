@@ -115,6 +115,12 @@ Project, Release, current scope, несколько Tasks и bare invocation я�
 selectors, а не автоматическими признаками batch. Goal не создаётся для общего
 чтения/приёмки Tasks, commit/push, deploy, smoke или production release.
 
+Exact Task и явно перечисленные refs — closed selectors. Project, Release и
+resolved current scope — live selectors: стартовый inventory является audit
+snapshot, а не замороженным списком/count cap. Новая matching non-Backlog Task
+автоматически входит в delivery и применимый Goal без повторного approval;
+Backlog остаётся исключённым.
+
 Task Manager live state всегда перечитывается. Memory не является evidence
 текущего status, version, comments, access или runtime result.
 
@@ -165,6 +171,11 @@ Skill не выбирает инструменты за агента. Агент
 сочетать средства по собственному инженерному решению. Важно только, чтобы
 итоговый evidence действительно доказывал current acceptance.
 
+Browser/controller/session switch — диагностический путь, а не repair продукта.
+Если exact candidate или server path уже доказал product failure, отсутствие
+альтернативного login/MFA не отменяет incident и не останавливает безопасную
+in-scope repair. В отчёте product outcome идёт раньше browser/OAuth logistics.
+
 Нет счётчика обязательных повторов и общей последовательности repair. Остановка
 означает, что в текущем scope и полномочиях агент не нашёл достаточного
 безопасного способа продолжить. Тогда причина, impact и условие возобновления
@@ -177,6 +188,8 @@ Goal используется только для прогресса массо�
 и остаётся active, пока в этом scope есть незавершённая работа. Он не определяет
 Task outcome и число попыток. Release-only run Goal не создаёт; release может
 оставаться done criterion уже существующего совместимого Goal.
+Для live selector Goal хранит identity/predicate, не стартовый список или count,
+и завершается только после fresh full current inventory.
 
 Нужные non-production releases в local/dev/test/QA/UAT/staging/preview/sandbox
 разрешены после проверки target. Production, destructive durable-data changes,

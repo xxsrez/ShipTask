@@ -11,6 +11,10 @@ backlog capture. Exact одна Task работает в `single` mode без Go
 возвращает в rework минимум две concrete Tasks. Project/Release/current scope и
 bare `$ship-tasks` — только selectors: mode определяется по live inventory.
 Release уже подготовленного candidate, включая production, работает без Goal.
+Exact Task/явный список refs образуют закрытый selector. Project, Release и
+current scope остаются live selectors: стартовый inventory не замораживает
+membership, поэтому новая matching non-Backlog Task автоматически входит в run
+без повторного approval, а Backlog остаётся вне delivery.
 
 Документация здесь является исходным кодом, причём source unit — отдельный
 skill. В [`docs/skills/<skill>/`](docs/skills/README.md) у каждого skill есть
@@ -66,7 +70,9 @@ comments. Только прямое нарушение acceptance называе
 Агент сам выбирает инструменты, способ диагностики и
 приёмки; сбой одного средства не навязывает его repair. Ограничение относится к
 результату: acceptance нельзя ослаблять, а непроверенное нельзя называть
-verified.
+verified. Browser switch допустим как диагностика, но не как repair или причина
+отложить уже доказанный product failure, пока безопасная in-scope работа над
+продуктом может продолжаться.
 Перед завершением skill сверяет обещанный и фактический результат,
 самостоятельно устраняет доступные проблемы внутри выбранной работы и только
 затем даёт компактное причинное объяснение понятным человеку языком.

@@ -28,6 +28,9 @@ Task Manager остаётся единственным authoritative task source
 Goal, Git и планы не заменяют current Task state. Явный `$ship-tasks` и
 однозначный natural-language delivery intent используют одну policy; чтение,
 status, audit, explanation, planning и backlog capture delivery не запускают.
+Exact Task и явно перечисленные Task refs задают закрытый selector. Project,
+Release и resolved current scope задают live selector: стартовый inventory —
+наблюдение для аудита, а не замороженный список, диапазон refs или scope cap.
 Если exact selector, обязательная adapter capability или общая authority не
 разрешены достаточно для безопасной mutation, ShipTask останавливает writes с
 понятным `TASK CONTEXT ALARM`, а не угадывает scope.
@@ -47,20 +50,33 @@ external effects перечитываются настолько свежо, н�
 comments и финальный ответ должны соответствовать установленным фактам. Task
 Manager, Git candidate, checks, deployment, access policy и другой внешний
 effect являются разными proof domains: состояние одного не доказывает другое.
+Для live selector решения начать, продолжить, ждать, объявить blocker или
+завершить run опираются на свежий полный inventory, а не на стартовый snapshot,
+формулировку Goal или прежнее количество Tasks.
 
 ### `ST-04` — Backlog вне delivery
 
 Tasks в `Backlog` являются будущей запланированной работой и не входят в
 ShipTask delivery inventory. ShipTask не начинает их реализацию и не переводит
 их из `Backlog` без отдельного явного пользовательского решения о начале этой
-работы.
+работы. Для live selector любая current Task, которая совпадает с selector и
+находится не в `Backlog`, автоматически входит в delivery, в том числе если она
+появилась или была переведена `Backlog → To Do` после старта run. Это не scope
+expansion и не требует повторного approval. После перехода Task в `Backlog` или
+её выхода из selector новая implementation по ней не начинается; уже созданные
+effects сначала правдиво reconciliate.
 
 ### `ST-05` — Evidence важнее выбранного способа
 
 Агент сам выбирает implementation, diagnostics, tools и acceptance method.
 Сбой одного средства не делает его обязательным для repair и сам по себе не
 доказывает product defect или verification blocker. Acceptance нельзя ослаблять,
-а недоступное или непроведённое нельзя называть verified.
+а недоступное или непроведённое нельзя называть verified. Переключение браузера,
+controller или authenticated session допустимо как диагностика, но не является
+repair продукта и не отменяет достаточное evidence exact candidate или server
+path. Если product failure уже доказан, отсутствие альтернативного browser login
+или MFA не становится stop condition, пока существует безопасная in-scope
+диагностика, repair или проверка.
 
 ### `ST-06` — Правдивый lifecycle и durable comments
 
@@ -110,8 +126,11 @@ authority делают любую оставшуюся mutation небезопа
 существует, ShipTask не прерывает run серией task-local вопросов: он сохраняет
 правдивый handoff конкретной Task, освобождает lane и продолжает. Когда runnable
 work исчерпан, человеку даётся одна consolidated decision boundary. Новый
-out-of-scope finding не реализуется, не превращается автоматически в Task и не
-расширяет текущий Goal.
+out-of-scope finding определяется только после свежего сопоставления с selector:
+новая non-Backlog Task, совпадающая с live selector, автоматически входит в
+delivery и текущий Goal. Finding, который действительно не совпадает с selector
+или ещё не является Task, не реализуется, не превращается автоматически в Task
+и не расширяет текущий Goal.
 
 ### `ST-11` — Natural-language topology и automatic default
 
@@ -169,6 +188,9 @@ concrete Tasks. Одна Task и release уже подготовленного c
 outcome и не превращает task-local blocker в глобальный; он остаётся active,
 пока fresh full inventory содержит незавершённую in-scope implementation или
 обязательные remnants/effects, и завершается только после Task-level truth.
+Для live selector Goal хранит identity/predicate selector, а не закрытый count,
+диапазон refs или стартовый список; начальные refs допустимы только как audit
+baseline и не ограничивают последующую current membership.
 Release-only run не создаёт, не ретаргетит и не завершает Goal ради самого
 release.
 
@@ -207,7 +229,10 @@ resolution. Meaningful или уже изменённое название не 
 необходимое действие и точное условие продолжения. Любой terminal exit, включая
 success и no-work, начинается с observable outcome и отделяет факты от
 inference; reason codes, tools и process diary остаются только когда помогают
-понять или проверить вывод.
+понять или проверить вывод. Доказанный product failure сообщается раньше
+логистики browser/controller/OAuth/MFA; альтернативное средство не выдаётся за
+repair или обязательное действие пользователя, пока остаётся безопасная
+in-scope работа с самим продуктом.
 
 ### `ST-19` — Lifecycle priority и duplicate context
 
