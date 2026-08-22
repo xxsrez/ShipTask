@@ -411,7 +411,12 @@ fan-out.
 
 Пользовательский выбор model/effort является главным. Если пользователь не
 задал отдельный профиль субагентов, текущие model/effort основного агента
-образуют default profile. Только genuinely simple packet запускается на
+образуют default profile. Требуемое tiering означает: genuinely simple packet —
+Luna Max; большинство packets — current primary profile, обычно выбранный
+пользователем Sol Extra High; ультрасложный run — выбранный пользователем Sol
+Ultra. Последние два имени описывают пользовательский operating profile, а не
+право ShipTask скрыто заменить или повысить модель. Только genuinely simple
+packet запускается на
 `gpt-5.6-luna` с `max`: он self-contained и bounded, имеет ясные inputs и
 acceptance, даёт объективно проверяемый результат, не требует творческого,
 продуктового или архитектурного решения и не несёт material authority/risk или

@@ -21,7 +21,10 @@ rationale, observable evidence и authority/safety boundaries, но оставл
 всём run; узкий запрет отключает только названную роль. Без отдельного user
 override только genuinely simple bounded packets используют Luna Max; остальные
 наследуют current model/effort, а ambiguity или unexpected environment переводят
-Luna packet integration owner на current profile без повторного Luna loop. Перед любым
+Luna packet integration owner на current profile без повторного Luna loop.
+Ожидаемое пользовательское tiering: простое — Luna Max, большинство — выбранный
+current profile (обычно Sol Extra High), ультрасложное — выбранный пользователем
+Sol Ultra; ShipTask не повышает модель скрыто. Перед любым
 существенным status transition сначала
 публикуется и перечитывается понятный native Task comment; обычный старт
 `To Do → In Progress` комментария не создаёт. Task description и ответ в Codex

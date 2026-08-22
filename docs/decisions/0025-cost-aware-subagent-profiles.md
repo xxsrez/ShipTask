@@ -7,6 +7,22 @@ profile для каждого полезного packet и частично за
 пользователь явно потребовал Luna Max для особо простой работы и эскалацию при
 первом material uncertainty.
 
+## Исходное пользовательское требование
+
+- Окончательный выбор primary model/effort остаётся за пользователем.
+- Без отдельного profile override genuinely simple packets получают
+  `gpt-5.6-luna` с `max`: это дешёвый, но не low-effort lane.
+- Большинство packets наследуют current primary profile. В обычном
+  пользовательском сценарии это Sol Extra High, но ShipTask не зашивает его как
+  универсальный default.
+- Для ультрасложного run пользователь может выбрать Sol Ultra как current
+  profile; ShipTask не повышает модель до Ultra скрыто или автоматически.
+- При первой material ambiguity, непредсказуемом environment/tool state либо
+  другой непонятной ситуации Luna останавливается. Тот же packet без повторной
+  Luna-попытки принимает основной integration owner на current profile.
+- Явное «не используй субагентов» отключает все subagent lanes независимо от
+  model policy.
+
 ## Контекст
 
 Одинаковая multi-agent topology не требует одинаковой модели во всех lanes.
