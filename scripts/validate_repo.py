@@ -58,6 +58,10 @@ ADR = {
             "0020",
             "0020-visible-acceptance-incidents-and-required-comments.md",
         ),
+        (
+            "0021",
+            "0021-requirements-as-agent-constitution.md",
+        ),
     )
 }
 
@@ -91,12 +95,19 @@ CORE_FILES = (
 # may retain old wording, but cannot act as fallback policy.
 CURRENT_CONTRACT_FILES = (
     ROOT / "README.md",
+    ROOT / "AGENTS.md",
     SHIP_SKILL,
     SHIP_METADATA,
+    STRATEGIC_SKILL,
+    STRATEGIC_METADATA,
     SPEC,
+    STRATEGIC_SPEC,
     OVERVIEW,
+    DOCS_INDEX,
     DEVELOPMENT,
     REVIEW_MATRIX,
+    STRATEGIC_EVALUATION,
+    VISION,
     REPORT,
     RUN_REPORT,
     AUTONOMY,
@@ -105,6 +116,7 @@ CURRENT_CONTRACT_FILES = (
     ADR["0018"],
     ADR["0019"],
     ADR["0020"],
+    ADR["0021"],
     ADAPTER,
 )
 
@@ -227,7 +239,7 @@ def validate_ship_skill(errors: list[str]) -> None:
         "## 2. Соблюдай обязательные требования",
         "## 3. Выполни и проверь result",
         "## 4. Разбери приёмку по текущим фактам",
-        "## 5. Используй Strategic Explainer для человеческих объяснений",
+        "## 5. Обеспечь человеческое объяснение",
         "## 6. Продолжай автономно и финализируй",
     )
     for heading in required_sections:
@@ -256,7 +268,7 @@ def validate_ship_skill(errors: list[str]) -> None:
         "каждые 10 минут",
         "incident ledger",
         "$ship-tasks:strategic-explainer",
-        "способ выполнения этого требования выбирает агент",
+        "Обязателен понятный grounded result",
         "SHIPTASK RUN REPORT",
     )
 
@@ -282,21 +294,17 @@ def validate_strategic_skill(errors: list[str]) -> None:
     require(
         errors,
         STRATEGIC_SKILL,
-        "Problem to solve",
-        "Current-State Brief",
-        "CONTEXT_INTEGRITY_ERROR",
-        "PROBLEM_CONTEXT_ERROR",
-        "fork_turns=\"none\"",
-        "bounded read-only tools",
+        "problem-first модель",
+        "bounded read-only sources",
+        "Форма context свободна",
+        "material основания отсутствуют",
         "current/accepted",
         "proposed",
         "historical",
-        "Decision support request",
-        "2–4",
-        "Forward trace",
-        "Reverse coverage",
         "source basis",
-        "не готовый comment payload",
+        "не придумывай варианты ради квоты",
+        "decision-relevant факт не потерян",
+        "Не выполняй writes",
     )
     text = read(STRATEGIC_SKILL)
     for coupling in ("ShipTask", "Task Manager", "$ship-tasks", "TM-123"):
@@ -460,7 +468,9 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0018",
         "ADR-0019",
         "ADR-0020",
+        "ADR-0021",
         "## 2. Конституция",
+        "не управляет agent topology",
         "comment",
         "до status write",
         "всегда создаёт и перечитывает обязательный comment",
@@ -486,6 +496,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0018",
         "ADR-0019",
         "ADR-0020",
+        "ADR-0021",
         "гарантированной adapter capability",
         "durable Task history",
         "Goal используется только для прогресса массовой имплементации",
@@ -494,7 +505,8 @@ def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         REPORT,
-        "Только затем",
+        "Инвариант effects",
+        "До связанного существенного status transition",
         "transition не завершён",
         "всегда создаёт и перечитывает обязательный comment",
         "До repair немедленно сообщить incident",
@@ -502,7 +514,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "Приёмка заблокирована",
         "рекомендуемый feasible способ",
         "каждые 10 минут",
-        "Ответ в Codex не является durable Task comment",
+        "ответ в Codex не являются durable Task comment",
     )
     require(
         errors,
@@ -525,8 +537,8 @@ def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         HANDOFF,
-        "Конституция не задаёт конкретный invocation или recovery flow",
-        "Обязательный результат",
+        "Конституция не задаёт agent topology",
+        "Обязательный результат — понятный grounded comment",
     )
     require(
         errors,
@@ -535,7 +547,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "не выбирает за агента инструменты",
         "Сбой одного способа сам по себе не доказывает",
         "не нашёл достаточного безопасного способа",
-        "не задаёт tool flow",
+        "не задаёт invocation или tool flow",
         "Фиксированного числа попыток",
     )
     require(
@@ -557,6 +569,16 @@ def validate_current_contract(errors: list[str]) -> None:
         "примерно в 10 минут",
         "Final success не стирает найденный defect",
         "рекомендует самый сильный feasible",
+    )
+    require(
+        errors,
+        ADR["0021"],
+        "Требования являются конституцией для агентов",
+        "какой пользовательский или системный результат обязателен",
+        "Агент самостоятельно выбирает план",
+        "Когда допустима точность механизма",
+        "Strategic Explainer определяется результатом",
+        "Evals проверяют наблюдаемое поведение",
     )
     require(
         errors,
@@ -645,29 +667,54 @@ def validate_current_contract(errors: list[str]) -> None:
             "comment channel не работает",
         )
 
+    for path in (
+        ROOT / "README.md",
+        SHIP_SKILL,
+        STRATEGIC_SKILL,
+        SPEC,
+        STRATEGIC_SPEC,
+        OVERVIEW,
+        DEVELOPMENT,
+        REVIEW_MATRIX,
+        STRATEGIC_EVALUATION,
+        VISION,
+        REPORT,
+        RUN_REPORT,
+        HANDOFF,
+    ):
+        forbid(
+            errors,
+            path,
+            'fork_turns="none"',
+            "CONTEXT_INTEGRITY_ERROR",
+            "PROBLEM_CONTEXT_ERROR",
+            "2–4 реально различающихся варианта",
+            "2–4 реально различающихся способа",
+            "обязателен новый субагент",
+            "обязательное требование — применить Strategic Explainer",
+            "ShipTask запускает свежий субагент",
+        )
+
 
 def validate_strategic_contract(errors: list[str]) -> None:
     require(
         errors,
         STRATEGIC_SPEC,
-        "Статус: current contract, 2026-08-21",
-        "общий skill `$strategic-explainer`",
-        "Problem to solve",
-        "Current-State Brief",
-        "Strategic discovery anchors",
-        "PROBLEM_CONTEXT_ERROR",
-        "CONTEXT_INTEGRITY_ERROR",
-        "Decision support request",
-        "2–4 реально различающихся варианта",
-        "forward trace",
-        "reverse coverage",
-        "source note",
+        "Статус: current contract, 2026-08-22",
+        "общего skill `$strategic-explainer`",
+        "Конституционный принцип",
+        "не задаёт внутреннюю архитектуру агента",
+        "Достаточный вход",
+        "Bounded strategic discovery",
+        "Exact envelope не требуется",
+        "не придумывает alternatives ради количества",
+        "Completion criteria",
     )
     require(
         errors,
         VISION,
         "Продуктовое обещание",
-        "bounded read-only discovery",
+        "Требования как конституция",
         "Никакой скрытой управляющей роли",
         "Визуализация служит пониманию",
         "Lossless by relevance",
@@ -676,13 +723,14 @@ def validate_strategic_contract(errors: list[str]) -> None:
     require(
         errors,
         STRATEGIC_EVALUATION,
-        "Problem gate",
-        "Discovery discipline",
-        "Source-state и provenance",
-        "Factual fidelity",
-        "Authority boundary",
+        "Problem legitimacy",
+        "Factual grounding и coverage",
+        "Source state и relevance",
+        "Read-only и authority boundary",
+        "Human comprehension",
         "Read-only boundary",
-        "Несколько способов провести проверку",
+        "Реальный выбор способа проверки",
+        "не оценивает agent topology",
     )
 
     numbered = []
@@ -703,12 +751,25 @@ def validate_supersession(errors: list[str]) -> None:
         "0005": ("ADR-0016", "ADR-0017"),
         "0006": ("ADR-0016", "ADR-0017", "ADR-0020"),
         "0010": ("ADR-0016", "ADR-0017"),
-        "0012": ("ADR-0014", "no-tools"),
-        "0013": ("ADR-0014", "ADR-0016", "ADR-0017"),
+        "0012": ("partially superseded", "ADR-0014", "ADR-0021", "no-tools"),
+        "0013": (
+            "partially superseded",
+            "ADR-0014",
+            "ADR-0016",
+            "ADR-0017",
+            "ADR-0021",
+        ),
+        "0014": ("partially superseded", "ADR-0021"),
         "0015": ("partially superseded", "ADR-0017", "ADR-0020"),
         "0016": ("partially superseded", "ADR-0017", "ADR-0020"),
         "0007": ("ADR-0019",),
-        "0017": ("partially superseded", "ADR-0018", "ADR-0019", "ADR-0020"),
+        "0017": (
+            "partially superseded",
+            "ADR-0018",
+            "ADR-0019",
+            "ADR-0020",
+            "ADR-0021",
+        ),
     }
     for number, terms in required_markers.items():
         header = "\n".join(read(ADR[number]).splitlines()[:18])

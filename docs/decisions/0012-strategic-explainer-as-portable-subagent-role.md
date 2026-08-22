@@ -1,6 +1,8 @@
 # 0012. Strategic Explainer как переносимая роль свежего субагента
 
-Статус: accepted architecture, 2026-08-20. ShipTask invocation policy расширена
+Статус: partially superseded, 2026-08-22. Plugin distribution и общая read-only
+роль сохраняются, а обязательные fresh-subagent/fork/context механизмы заменены
+[ADR-0021](0021-requirements-as-agent-constitution.md). ShipTask invocation policy расширена
 [ADR-0013](0013-strategic-explainer-for-shiptask-report-narratives.md), а
 no-tools input contract заменён bounded read-only discovery из
 [ADR-0014](0014-problem-first-bounded-strategic-discovery.md). Дополняет
@@ -8,9 +10,9 @@ no-tools input contract заменён bounded read-only discovery из
 plugin, первоначально зафиксированный в
 [ADR-0011](0011-separate-shiptask-plugin-distribution.md).
 
-Устойчивую продуктовую цель определяет
+Устойчивую продуктовую цель и current agent-independent contract определяют
 [стратегическое видение](../strategic-explainer.md); этот ADR фиксирует только
-текущий технический способ её реализовать и распространять. Design evidence и
+исторический технический способ её реализовать и распространять. Design evidence и
 рассмотренные альтернативы находятся в
 [research report](../reports/2026-08-20-strategic-explainer-research.md).
 

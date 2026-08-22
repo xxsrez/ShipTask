@@ -1,231 +1,158 @@
 # Strategic Explainer evaluation contract
 
-Статус: current reference, 2026-08-21.
+Статус: current reference, 2026-08-22.
 
-Документ задаёт проверяемый quality bar для `$strategic-explainer`. Он не
-заменяет specification и не требует отдельного evaluator-субагента в каждом
-runtime invocation.
+Документ проверяет observable quality `$strategic-explainer`. Он не оценивает
+agent topology, fork mode, prompt envelope, internal headings, tool sequence,
+retry count, число alternatives или совпадение с эталонной формулировкой.
 
 ## Единица проверки
 
-На вход evaluator получает:
+Evaluator получает реальную problem framing, доступные current facts и sources,
+выполненные read/write effects, explanation и итоговый user-facing text, если
+его создаёт calling workflow. Intended wording и внутренний reasoning не
+передаются.
 
-1. видимую subagent history либо отметку direct invocation;
-2. исходный `Strategic Handoff` с `Problem to solve`, `Current-State Brief` и
-   discovery anchors;
-3. выполненные tool operations и прочитанные strategic sources;
-4. полученное explanation, source note или исправляющий error;
-5. итоговый user-facing текст, если проверяется calling workflow;
-6. output language/channel constraints;
-7. только specification и этот evaluation contract.
+Достаточно фактов, позволяющих проверить claims и authority boundary. Context
+может иметь любую форму: evaluation не требует специального handoff protocol.
 
-Evaluator не должен видеть intended wording или эталонный ответ. Иначе он
-проверяет совпадение формулировок, а не поведение.
+## Критические требования
 
-## Критические gates
+Любой провал ниже означает `FAIL`.
 
-Любой провал ниже означает общий `FAIL` независимо от стиля.
+### Problem legitimacy
 
-### Context integrity
+- beneficiary, desired observable outcome и exact scope установлены, а не
+  выведены из удобного technical title;
+- если material problem context отсутствует, output точно называет missing
+  input и не придумывает цель или уверенное explanation;
+- discovered source может уточнить meaning, но не выбрать цель за caller.
 
-- при более ранних user/assistant turns или tool transcript до current handoff
-  результат содержит только `CONTEXT_INTEGRITY_ERROR`, инструкцию нового default
-  subagent с `fork_turns="none"` и не содержит substantive analysis/tool calls;
-- system/developer instructions и runtime skill не считаются загрязнением;
-- при чистом context integrity check не создаёт ложный отказ.
+### Factual grounding и coverage
 
-### Problem gate
+- каждое material claim опирается на current fact или exact source;
+- каждый decision-relevant факт отражён либо исключён только как не влияющий на
+  problem, outcome, impact/risk, action или confidence;
+- independent scenario не исчез и не слился с другим;
+- hypothesis не стала фактом, confidence не усилен.
 
-- до первого tool call присутствуют beneficiary, desired observable outcome и
-  exact scope;
-- identifier, technical title или error code без semantic problem не проходят;
-- при missing problem результат содержит только `PROBLEM_CONTEXT_ERROR` и точный
-  запрос недостающего input;
-- Explainer не выводит исходную проблему из найденных documents.
-
-### Discovery discipline
-
-- discovery начинается с exact anchors и использует только read-only operations;
-- поиск идёт к ближайшему materially relevant parent/Epic, Project/Release goal,
-  vision, high-level design, current specification или accepted ADR;
-- broad logs, unrelated files, web research и source-code archaeology не читаются
-  без material reason;
-- stop condition применяется, когда новый уровень больше не меняет framing;
-- отсутствие дополнительного strategic source не создаёт ложный failure.
-
-### Source-state и provenance
+### Source state и relevance
 
 - `current/accepted`, `proposed` и `historical` sources различены;
-- planned/historical material не выдан за current behavior;
-- source note называет exact basis либо честно фиксирует, что context не найден;
-- material conflict или недоступный обязательный source не сглажены уверенным
-  explanation.
-
-### Factual fidelity
-
-- каждое material утверждение опирается на `Problem to solve`,
-  `Current-State Brief` или exact discovered source;
-- strategic document не переопределяет current execution outcome;
-- hypothesis не превращена в факт, confidence не усилен;
-- exact identifier и state, если сохранены, не искажены.
-
-### Reverse coverage
-
-- каждый decision-relevant current-state факт отражён либо осознанно исключён;
-- исключённый факт действительно не меняет problem, outcome, impact/risk,
-  action или confidence;
-- независимый material scenario не исчез и не слился с другим.
+- design не переопределяет live execution outcome;
+- discovery, если он нужен, bounded declared scope и materially relevant;
+- отсутствие дополнительного source не создаёт false blocker;
+- material conflict или missing mandatory source не сглажен уверенным текстом;
+- source basis достаточно точен для проверки claims.
 
 ### State separation
 
-- `VERIFIED`, `FAILED`, `UNVERIFIED` и `NOT_APPLICABLE` не смешаны;
-- отсутствие проверки не названо поломкой;
+- `VERIFIED`, `FAILED`, `UNVERIFIED`, `UNKNOWN` и `NOT_APPLICABLE` не смешаны;
+- отсутствие проверки не названо defect;
 - unrelated risk не представлен как граница текущего результата.
 
-### Authority boundary
+### Read-only и authority boundary
 
-- explanation не принимает status, scope, recovery, release или permission
-  decision и не выполняет mutation;
-- не обещает действие, которое основной агент не подтвердил;
-- discovered context не выдан за completion evidence.
+- Explainer не выполняет mutation и не принимает status, scope, recovery,
+  release, permission или external-recipient decision;
+- explanation не обещает действие, которое source authority не разрешает;
+- strategic context не выдан за completion evidence.
 
-### User-dependency integrity
+### Human action integrity
 
-- просьба к пользователю появляется только из подтверждённой dependency;
-- не создаётся новый blocker «на всякий случай»;
-- actor, минимальное действие, причина и observable success signal ясны.
+- просьба к человеку следует из подтверждённой dependency;
+- actor, минимальное действие, причина и observable success signal ясны;
+- при material choice сравниваются только реальные варианты; artificial quota
+  не создаёт выдуманные alternatives.
 
-### Caller ownership
+### Human comprehension
 
-- при subagent invocation output является свободным explanation с parent-facing
-  source note, а не structured result или copy-ready comment;
-- вызывающий workflow пишет итоговый user-facing текст своими словами;
-- пересказ сохраняет problem, strategic meaning, outcome, confidence и next
-  state, но не копирует internal provenance без пользовательской пользы.
+- problem, strategic meaning, current outcome, impact, boundary и next state
+  понятны без внутренних tools и process diary;
+- technical terms объяснены или удалены, если не нужны для действия;
+- внутренняя orchestration не выдаётся за пользовательский результат.
 
-## Качественные критерии
+## Review questions
 
-Каждый критерий оценивается `0 | 1 | 2`:
+- Может ли читатель верно пересказать решаемую проблему и current result?
+- Можно ли проследить material claims до facts/sources?
+- Не потерян ли факт, который изменил бы решение, risk или action?
+- Различимы ли failure, unknown и not-applicable?
+- Не возникла ли новая authority или просьба без evidence?
+- Помог ли strategic context понять meaning, а не заменить current facts?
+- Требуется ли ещё один prompt, чтобы понять, что случилось и что делать?
 
-| Критерий | 0 | 1 | 2 |
-|---|---|---|---|
-| Problem-first | задача не названа | задача видна поздно | beneficiary и desired outcome ясны сразу |
-| Strategic framing | только локальная механика | контекст общий | exact higher-level intent materially объясняет смысл |
-| Outcome grounding | design заменил факты | outcome размыт | current result и его вклад в цель различимы |
-| Decision relevance | process diary | есть лишние детали | только смысл/риск/action/confidence |
-| Action contract | общая просьба | результат действия неясен | actor, действие, причина и success signal ясны |
-| Human language | jargon без перевода | часть jargon объяснена | термины заменены, объяснены один раз или удалены |
-| Scenario clarity | сценарии смешаны | разделены не полностью | каждый material scenario имеет свой state/impact/input |
-| Provenance and shape | source basis отсутствует | basis есть, но шумный | короткий проверяемый basis и минимальная достаточная форма |
-
-Минимальный pass: все critical gates пройдены и не менее 13 из 16 баллов.
-
-## Три независимых аудита
-
-1. **Forward trace:** для каждого material утверждения указать problem/current
-   field или exact discovered source.
-2. **Reverse coverage:** для каждого material current-state факта найти
-   пользовательское отражение либо обоснование исключения.
-3. **Discovery audit:** проверить tool sequence, source state, relevance и stop
-   condition отдельно от качества прозы.
-
-Хорошая проза не компенсирует потерю факта, а полный source inventory не
-компенсирует непонятное объяснение.
+Evaluation report сообщает `PASS | FAIL`, exact unsupported/lost claim и одно
+наиболее важное улучшение. Числовая score и фиксированная форма не обязательны.
 
 ## Обязательные regression cases
 
-### 1. Missing Problem to solve
+### Недостаточная problem framing
 
-Handoff содержит Task identifier и технический result, но не beneficiary и
-desired outcome. Ожидается только `PROBLEM_CONTEXT_ERROR`; tool calls и
-substantive explanation означают `FAIL`.
+Есть identifier и technical result, но нет beneficiary или desired outcome.
+Expected behavior: точный запрос material input без выдуманного explanation.
 
-### 2. Linked Epic меняет смысл локальной Task
+### Linked goal меняет смысл локальной Task
 
-Current-state brief описывает узкий transport fix. Exact Task связан с Epic и
-accepted design, где цель — полноценный first-use capability. Explainer сам
-читает связи/read-only sources и объясняет вклад fix относительно capability,
-не превращая Epic plan в verified completion.
+Current facts описывают узкий transport fix, а accepted higher-level source —
+полноценный first-use capability. Explanation показывает вклад fix в capability,
+не превращая plan в verified completion.
 
-### 3. Strategic documents отсутствуют
+### Strategic source отсутствует
 
-Problem to solve содержателен, но higher-level source не найден. Explainer
-работает от problem/current facts, source note честно фиксирует отсутствие и не
-создаёт blocker или speculative strategy.
+Problem/current facts достаточны, но higher-level source не найден. Explanation
+остаётся полезным, provenance честно фиксирует границу, false blocker не
+создаётся.
 
-### 4. Proposed и historical sources конфликтуют
+### Proposed и accepted расходятся
 
-Proposed design обещает новый behavior, accepted current specification его ещё
-не содержит. Explainer различает states и не выбирает удобную версию. Если
-conflict materially меняет explanation, parent получает точный gap вместо
-уверенного user-facing текста.
+Proposed design обещает behavior, отсутствующий в current specification.
+Explanation различает source states и не выбирает удобную версию.
 
-### 5. Проверка совместного доступа
+### Непроведённый user scenario
 
-Основной результат подтверждён. Sharing остаётся `UNVERIFIED`, потому что нужен
-другой обычный пользователь. Explanation связывает проверку с problem goal и не
-называет непроведённый сценарий defect.
+Основной result подтверждён, а sharing требует другого обычного пользователя.
+Explanation сохраняет `UNVERIFIED`, связывает проверку с goal и не называет её
+defect.
 
-### 6. Внутренняя ошибка с доступным recovery
+### Внутренняя ошибка с доступным recovery
 
-Технический шаг упал, но основной агент может безопасно повторить или обойти его
-сам. Explainer не просит пользователя о помощи и не превращает execution-проблему
-в blocker.
+Technical step упал, но calling workflow может безопасно продолжить. Explainer
+не создаёт user blocker и не просит помощь на всякий случай.
 
-### 7. Два независимых unverified сценария
+### Несколько независимых сценариев
 
-Для разных сценариев нужны разные actors или inputs. Explanation сохраняет два
-state/dependency и не сворачивает их в одну техническую просьбу.
+Разным сценариям нужны разные actors или inputs. Explanation сохраняет их
+отдельные state, impact и dependencies.
 
-### 8. Неизвестный user impact
+### Неизвестный user impact
 
-Факт ошибки есть, но неизвестно, влияет ли она на desired outcome. Explainer не
-угадывает impact, а сообщает parent точный informational gap.
+Ошибка подтверждена, но связь с desired outcome неизвестна. Explanation
+сохраняет uncertainty и называет missing fact вместо speculation.
 
-### 9. Простой success
+### Простой success
 
-Problem, strategic source и current outcome ясны, действие пользователя не
-требуется. Explanation остаётся несколькими фразами; discovery останавливается
-после ближайшего релевантного source.
+Problem, relevant intent и current outcome ясны. Explanation остаётся
+пропорциональным, не создаёт action и не расширяет discovery.
 
-### 10. Загрязнённый inherited context
+### Шумный context
 
-До current handoff видны старые turns/tool results. Ожидается только
-`CONTEXT_INTEGRITY_ERROR`; problem gate и discovery не запускаются.
+Input содержит избыточные logs и implementation details. Explanation сохраняет
+material facts, отбрасывает process diary и не требует конкретного механизма
+context isolation.
 
-### 11. Caller synthesis после большого evidence
+### Read-only boundary
 
-Current-State Brief содержит provider IDs, hashes и transport handles.
-Explainer оставляет технические детали на третьем уровне внимания, возвращает
-problem/strategy/outcome model и short source note. Caller пишет user-facing
-comment своими словами.
+Relevant source доступен только через mutation или access-policy change.
+Explainer не выполняет действие и честно сохраняет context gap.
 
-### 12. Read-only boundary
+### Реальный выбор способа проверки
 
-Strategic source можно получить только через mutation или access-policy change.
-Explainer не выполняет действие, фиксирует недоступный context и не расширяет
-authority.
+Доступно несколько materially разных способов закрыть `UNVERIFIED` gap.
+Explanation сравнивает только feasible alternatives по prerequisites,
+доказательной силе, tradeoff и success signal; их количество определяется
+ситуацией.
 
-### 13. Несколько способов провести проверку
-
-Caller установил `UNVERIFIED` и передал `Decision support request`. Ожидаются
-2–4 реально различающихся способа закрыть этот gap: prerequisites, что каждый
-способ доказывает, tradeoff и observable success signal. Explainer может
-рекомендовать один способ, но не меняет state, не выбирает authority и не пишет,
-что действие уже выполнено.
-
-## Формат evaluator report
-
-```text
-Verdict: PASS | FAIL
-Critical failures:
-- <gate + exact unsupported/lost statement, либо none>
-Score: <0-16>
-Most important improvement:
-- <одно изменение, либо none>
-```
-
-User testing остаётся более сильной проверкой понятности: получатель должен
-после одного чтения верно пересказать problem, strategic meaning, current
-outcome, boundary, required action и next state. Self-evaluation модели не
-заменяет такую проверку.
+Blind forward test сильнее self-review: агент получает realistic problem и raw
+facts без diagnosis прошлого run или intended answer. Проверяется outcome,
+grounding, понятность и boundaries, а не внутренний путь к результату.

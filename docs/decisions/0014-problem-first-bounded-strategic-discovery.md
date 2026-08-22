@@ -1,9 +1,12 @@
 # 0014. Problem-first и bounded strategic discovery
 
-Статус: accepted, 2026-08-21. Расширяет
+Статус: partially superseded, 2026-08-22. Problem-first, bounded read-only
+discovery, source-state и no-authority boundaries сохраняются; fixed problem
+fields, error token, fresh context и handoff mechanics заменены
+[ADR-0021](0021-requirements-as-agent-constitution.md). Расширяет
 [ADR-0012](0012-strategic-explainer-as-portable-subagent-role.md) и
 [ADR-0013](0013-strategic-explainer-for-shiptask-report-narratives.md). Заменяет
-их no-tools часть, но сохраняет fresh context, read-only/no-authority границу и
+их no-tools часть; исторически сохраняло fresh context, read-only/no-authority границу и
 ответственность основного агента за финальный текст, решения и mutations.
 
 ## Контекст

@@ -17,8 +17,9 @@
   comments, видимые acceptance incidents, свобода выбора инструментов и
   фактическая классификация приёмки.
 - [Strategic Explainer](specs/strategic-explainer.md) — общий contract
-  обязательного problem gate, bounded read-only strategic discovery и свободного
-  объяснения без mutations, status decisions и новой authority.
+  problem-first grounding, bounded read-only strategic discovery и свободного
+  объяснения без mutations, status decisions, новой authority или обязательной
+  agent orchestration.
 
 ## Decisions
 
@@ -55,15 +56,14 @@
   Marketplace plugin; Task Manager package остаётся adapter-only; состав
   ShipTask plugin позднее расширен ADR-0012.
 - [0012: Strategic Explainer как переносимая роль свежего субагента](decisions/0012-strategic-explainer-as-portable-subagent-role.md)
-  — общий sibling-skill поставляется в том же plugin и применяется в новом
-  default-субагенте без выдачи за неподдерживаемый plugin-defined custom agent.
+  — историческая fresh-subagent implementation; sibling-skill distribution
+  сохраняется, обязательная topology заменена ADR-0021.
 - [0013: Strategic Explainer для всех ShipTask report narratives](decisions/0013-strategic-explainer-for-shiptask-report-narratives.md)
-  — каждый новый success/failure/blocker Task comment получает объяснение через
-  Explainer contract, а blocking handoff имеет отдельный communication barrier.
+  — исторический invocation pipeline; problem-first quality всех material
+  comments сохраняется, отдельный вызов и barrier заменены ADR-0021.
 - [0014: Problem-first и bounded strategic discovery](decisions/0014-problem-first-bounded-strategic-discovery.md)
-  — caller обязан передать решаемую проблему, а свежий Explainer сам находит
-  релевантный Epic/design/vision через bounded read-only tooling и возвращает
-  проверяемый source basis.
+  — сохраняет реальную problem framing, bounded read-only discovery и source
+  basis; fixed fields/error/context mechanics заменены ADR-0021.
 - [0015: Однократная классификация приёмки](decisions/0015-single-pass-review-disposition.md)
   — историческое основание четырёх исходов приёмки; fixed pass и status/comment
   fallback заменены ADR-0017.
@@ -83,14 +83,18 @@
   — native comments являются гарантией adapter contract; failed/blocked
   acceptance немедленно видна в chat, сохраняется в Task history и остаётся в
   final report после repair.
+- [0021: Требования являются конституцией для агентов](decisions/0021-requirements-as-agent-constitution.md)
+  — current requirements задают outcome, evidence и authority boundaries, а не
+  agent topology, context envelope, retries или tool choreography; точный
+  protocol сохраняется только для safety/data-integrity invariants.
 
 ## Reference
 
 - [Task Manager adapter](reference/task-manager-adapter.md) — точный discovery,
   identity, lifecycle, concurrency, текущие возможности и границы connector.
 - [Strategic Explainer evaluation](reference/strategic-explainer-evaluation.md)
-  — critical fidelity/authority gates, lossless-by-relevance audit, scoring
-  rubric и обязательные regression cases.
+  — observable fidelity/authority/comprehension gates и regression cases без
+  проверки внутренней orchestration или фиксированной scoring ceremony.
 - [Проверка классификации `In Review`](reference/shiptask-review-disposition-evaluation.md)
   — decision-level cases для task-contract conflict, proven failure,
   verification blocker, incident persistence и Goal behavior.

@@ -5,7 +5,9 @@
 [ADR-0018](0018-outcomes-not-tool-choreography.md), selector-based Goal policy —
 [ADR-0019](0019-goal-only-for-multi-task-implementation.md), current comment
 guarantee и cross-surface incident reporting —
-[ADR-0020](0020-visible-acceptance-incidents-and-required-comments.md).
+[ADR-0020](0020-visible-acceptance-incidents-and-required-comments.md), а
+agent-independent смысл требований —
+[ADR-0021](0021-requirements-as-agent-constitution.md).
 Это решение ввело ShipTask lifecycle, обязательные комментарии и свободу исполнения.
 Оно частично заменяет ADR-0009, ADR-0010, ADR-0013, ADR-0015 и ADR-0016 там,
 где те задавали иной порядок status/comment effects, разрешали менять status с
@@ -81,6 +83,8 @@ Task остаётся `In Review`, а comment даёт краткие вариа
 уровне проблемы, влияния, ограничения и следующего шага. ShipTask сохраняет
 ответственность за facts, status, authority, action и final wording. Bounded
 read-only discovery применяется по необходимости, а не ради полноты ритуала.
+Обязательный отдельный invocation позднее заменён ADR-0021: current requirement
+относится к качеству explanation.
 
 ### Goal — только учёт batch progress
 

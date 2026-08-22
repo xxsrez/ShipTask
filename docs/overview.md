@@ -17,10 +17,12 @@ Strategic Explainer = помощник по человеческому объя�
 и [ADR-0019](decisions/0019-goal-only-for-multi-task-implementation.md), а
 reporting contract —
 [ADR-0020](decisions/0020-visible-acceptance-incidents-and-required-comments.md).
-Они уточняют [ADR-0017](decisions/0017-constitution-first-runtime-contract.md).
+[ADR-0021](decisions/0021-requirements-as-agent-constitution.md) распространяет
+этот принцип на agent topology, context и evaluation. Они уточняют
+[ADR-0017](decisions/0017-constitution-first-runtime-contract.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
 результатов и жёстких границ. Агент свободен выбирать порядок, инструменты,
-реализацию и достаточные проверки.
+реализацию, декомпозицию, число попыток и способ делегирования.
 
 Неподвижны следующие требования:
 
@@ -37,7 +39,8 @@ reporting contract —
 - сбой одного средства сам по себе ничего не доказывает и не обязывает чинить
   именно его;
 - acceptance не ослабляется, непроверенное не называется verified;
-- Strategic Explainer помогает сформулировать смысл, но не принимает решения;
+- человеческое explanation обязательно, а отдельный вызов Strategic Explainer
+  является доступным способом, не orchestration requirement;
 - production и другие sensitive effects сохраняют явную authority boundary.
 
 ## Запуск
@@ -131,6 +134,7 @@ secrets/privacy/access-policy changes, external recipients и unbounded cost
 - [Outcome, не tool choreography](decisions/0018-outcomes-not-tool-choreography.md)
 - [Goal только для массовой имплементации](decisions/0019-goal-only-for-multi-task-implementation.md)
 - [Видимые приёмочные инциденты и обязательные comments](decisions/0020-visible-acceptance-incidents-and-required-comments.md)
+- [Требования как конституция для агентов](decisions/0021-requirements-as-agent-constitution.md)
 - [Task Manager adapter contract](reference/task-manager-adapter.md)
 - [Lifecycle evaluation](reference/shiptask-review-disposition-evaluation.md)
 - [Strategic Explainer specification](specs/strategic-explainer.md)

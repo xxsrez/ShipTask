@@ -14,6 +14,9 @@
 
 - Оставляйте в `SKILL.md` только инструкции, которые меняют решения агента.
 - Формулируйте observable requirement, а не универсальный порядок tool calls.
+- Current requirements являются конституцией: фиксируйте what, why, evidence и
+  authority boundary; не задавайте agent topology, форму context, число
+  attempts/options или внутренний reasoning.
 - Оставляйте агенту свободу выбора инструментов, реализации и достаточной
   проверки, если safety/authority не требуют жёсткого порядка.
 - Жёсткий порядок нужен там, где effects необратимо расходятся: для
@@ -26,8 +29,9 @@
   обязательный путь. Проверяйте достаточность итогового evidence.
 - Не добавляйте фиксированное число попыток. Проверяйте основание для повтора и
   реальное условие остановки.
-- Strategic Explainer улучшает человеческое объяснение, но не получает право
-  решать facts, status, scope, authority или action.
+- Strategic Explainer задаёт quality bar человеческого объяснения и не получает
+  право решать facts, status, scope, authority или action. Не требуйте отдельный
+  invocation, если observable result уже удовлетворяет contract.
 - Не добавляйте fallback task provider. Task Manager остаётся единственным
   adapter.
 
@@ -48,7 +52,8 @@ git diff --check
 Repository validator проверяет current contract, trigger matrix, lifecycle
 evaluation, retired loopholes, documentation navigation и distribution
 boundaries. Проверка не должна требовать конкретных необязательных слов или
-числа tool calls вместо observable behavior.
+числа tool calls вместо observable behavior. Evals не фиксируют subagent type,
+fork mode, prompt envelope, retry count или число alternatives.
 
 ## Forward test
 

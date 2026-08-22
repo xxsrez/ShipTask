@@ -38,6 +38,11 @@
 
 - Для поведенческого изменения сначала обновите применимую specification,
   затем соответствующий runtime `SKILL.md`.
+- Считайте current requirements конституцией для агентов: фиксируйте outcome,
+  rationale, observable evidence и authority/safety boundaries, но не
+  предписывайте agent topology, tool choreography, число попыток, форму context
+  или внутренний reasoning. Точный порядок оставляйте только для доказуемого
+  инварианта целостности, безопасности или внешнего эффекта.
 - Сохраняйте `SKILL.md` компактным и переносите подробные объяснения в
   проектную документацию, а не в runtime context skill.
 - Не создавайте пустые каталоги или placeholder-документы.

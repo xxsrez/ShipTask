@@ -12,9 +12,10 @@ backlog capture. Exact одна Task работает в `single` mode без Go
 bare `$ship-tasks` — только selectors: mode определяется по live inventory.
 Release уже подготовленного candidate, включая production, работает без Goal.
 
-Skill построен как constitution: он задаёт обязательные outcomes и safety
-boundaries, но оставляет агенту выбор инструментов, порядка, реализации и
-достаточных проверок. Перед любым существенным status transition сначала
+Current requirements являются конституцией для агентов: они задают outcome,
+rationale, observable evidence и authority/safety boundaries, но оставляют
+агенту план, декомпозицию, инструменты, число попыток, делегирование и форму
+context. Перед любым существенным status transition сначала
 публикуется и перечитывается понятный native Task comment; обычный старт
 `To Do → In Progress` является исключением. Task description и ответ в Codex
 комментарий не заменяют. Native comments являются гарантированной частью Task
@@ -35,12 +36,11 @@ verified.
 Перед завершением skill сверяет обещанный и фактический результат,
 самостоятельно устраняет доступные проблемы внутри выбранной работы и только
 затем даёт компактное причинное объяснение понятным человеку языком.
-Для каждого обязательного lifecycle/blocker comment
-ShipTask запускает свежий субагент с общим
-`$ship-tasks:strategic-explainer`. Основной агент передаёт решаемую проблему и
-текущие факты, а Explainer сам находит ограниченный релевантный контекст через
-read-only tools и объясняет смысл результата. Он не выбирает статус,
-полномочия или действие и ничего не меняет. Тот же общий skill можно
+Каждый обязательный lifecycle/blocker comment соответствует problem-first
+quality contract `$ship-tasks:strategic-explainer`. Агент может применить его в
+основном workflow, вызвать skill напрямую или делегировать adaptation; важен
+grounded человеческий результат, а не внутренняя topology. Explainer не выбирает
+status, полномочия или действие и ничего не меняет. Тот же общий skill можно
 использовать отдельно от ShipTask.
 Старые memory, rollout или report записи о ручной приёмке не меняют этот
 contract: пользователь подключается только через reopen либо новую Task.
@@ -54,8 +54,8 @@ memory хранит только selectors/profile и изменяется ли�
 
 - [`ship-tasks/SKILL.md`](ship-tasks/SKILL.md) — исполнимый skill.
 - [`strategic-explainer/SKILL.md`](strategic-explainer/SKILL.md) — общий
-  problem-first strategic discovery и communication skill для свежего
-  субагента или прямого вызова.
+  problem-first strategic discovery и communication skill для прямого или
+  delegated использования без обязательной orchestration scheme.
 - [`ship-tasks/references/project-memory.md`](ship-tasks/references/project-memory.md)
   — runtime contract project scope/profile memory.
 - [Документация](docs/README.md) — канонические specifications, Task Manager

@@ -5,6 +5,8 @@
 [ADR-0019](../decisions/0019-goal-only-for-multi-task-implementation.md), а
 reporting contract уточнён
 [ADR-0020](../decisions/0020-visible-acceptance-incidents-and-required-comments.md).
+Общий принцип требований как конституции для агентов закреплён
+[ADR-0021](../decisions/0021-requirements-as-agent-constitution.md).
 Эти решения соответственно сохраняют свободу способа, отделяют Goal от release
 и делают приёмочные инциденты видимыми во всём run.
 
@@ -70,6 +72,12 @@ Unresolved acceptance incidents из materially relevant comments называю
 Подробный алгоритм не является целью. Агент свободен выбирать инструменты,
 порядок работы, способ реализации и достаточные проверки. Свобода ограничена
 следующими требованиями.
+
+Каждое требование ниже задаёт обязательный outcome, его смысл, observable
+evidence и границы полномочий. Оно не управляет agent topology, декомпозицией,
+tool sequence, числом попыток, формой context или внутренним reasoning. Точный
+порядок указан только там, где иначе Task Manager state, evidence или sensitive
+external effect могут необратимо разойтись.
 
 ### 2.1 Пользовательский результат важнее внутренней процедуры
 
@@ -236,9 +244,9 @@ comment. Иначе Task остаётся `In Review` с рекомендова�
 ### 5.2 Доказанный дефект (`verified-failure`)
 
 Exact candidate в совместимой среде прямо нарушает current acceptance. Агент
-до repair сообщает инцидент в chat и через Strategic Explainer формулирует
-opening comment: что ожидалось, что наблюдается, каково влияние, чем это доказано
-и почему нужен возврат. После comment read-back переводит `In Review → In
+до repair сообщает инцидент в chat и формулирует problem-first opening comment:
+что ожидалось, что наблюдается, каково влияние, чем это доказано и почему нужен
+возврат. После comment read-back переводит `In Review → In
 Progress`, перечитывает Task и продолжает исправление в том же run. Сам переход
 не является завершением ShipTask.
 
@@ -253,7 +261,7 @@ ledger даже при последующем `verified-success`.
 ### 5.3 Приёмку нельзя провести (`verification-blocked`)
 
 Выбранные агентом разумные способы не доказывают ни success, ни failure в
-текущем scope и полномочиях. Через Strategic Explainer он формулирует:
+текущем scope и полномочиях. Human-facing explanation сообщает:
 
 - что именно нельзя установить и почему;
 - что уже доказано;
@@ -268,8 +276,8 @@ ledger даже при последующем `verified-success`.
 ### 5.4 Доказанный успех (`verified-success`)
 
 Current acceptance, применимые проверки, identity интегрированного result и
-обязательные effects доказаны. Агент через Strategic Explainer формулирует
-полученный результат, его значение, ключевое evidence и реальные ограничения,
+обязательные effects доказаны. Агент формулирует полученный результат, его
+значение, ключевое evidence и реальные ограничения,
 публикует и перечитывает comment, затем переводит `In Review → Done` и
 перечитывает Task. Если в этом run был приёмочный инцидент, comment также
 закрывает его или прямо указывает, что он остаётся unresolved.
@@ -282,22 +290,24 @@ evidence opening comment и lifecycle effects получает только exac
 Task. Если release verification обнаружила defect в terminal Task, opening
 comment предшествует reopen, после чего обычный rework lifecycle продолжается.
 
-## 6. Strategic Explainer
+## 6. Человеческое объяснение
 
-Strategic Explainer помогает написать человеческое объяснение, но не выбирает
-факты, статус, scope, authority, способ исправления или terminal outcome.
+Каждый обязательный lifecycle/blocker comment и final run report удовлетворяет
+problem-first quality contract Strategic Explainer: связывает исходную проблему,
+current facts, пользовательский смысл, evidence/unknown и следующий state.
 
-Он используется для каждого обязательного lifecycle/blocker comment. ShipTask
-передаёт содержательную проблему, current facts, известное/неизвестное, влияние
-и ближайшие strategic anchors. Конкретный способ вызова и организации контекста
-агент выбирает сам; discovery остаётся bounded и read-only.
+ShipTask сам отвечает за факты, status, scope, authority, способ исправления и
+terminal outcome. Strategic Explainer доступен как sibling skill для независимой
+адаптации или bounded read-only discovery, когда это улучшает результат. Агент
+сам решает, использовать его напрямую, делегировать работу или применить
+контракт в основном workflow.
 
-ShipTask проверяет результат, сам пишет окончательный comment и не упоминает в
-нём внутреннюю orchestration. Конституция требует применить Strategic Explainer
-и получить понятный comment, но не задаёт конкретный способ invocation,
-диагностики или восстановления.
+Обязателен понятный grounded текст, а не конкретный invocation. Внешний comment
+не упоминает внутреннюю orchestration, если она не имеет пользовательского
+значения.
 
-Подробный handoff: [runtime reference](../../ship-tasks/references/strategic-explainer.md).
+Подробный quality contract:
+[runtime reference](../../ship-tasks/references/strategic-explainer.md).
 
 ## 7. Реализация и проверка
 
