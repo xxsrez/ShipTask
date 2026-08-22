@@ -29,11 +29,12 @@
 | Обязательный comment write/read-back дал ошибку | lifecycle transition не завершён; comment остаётся required | reconciliate неизвестный outcome через native reads | не выполнять существенный transition | безопасно восстановить exact write/read-back и продолжить | skip обязательного comment, status без comment, fallback в description или blind retry |
 | Отдельный Strategic Explainer недоступен или отклонил текст при `subagents=auto` | независимая адаптация не завершена | не публиковать непроверенный черновик | не выполнять зависящий переход | сообщить gap в Codex и продолжить только независимую безопасную работу | основной агент сам одобряет или переписывает comment |
 | Массовая имплементация минимум двух Tasks | `batch-implementation` | по lifecycle каждой Task | правдивые Task statuses | создать/продолжить Goal всего implementation scope | работать без Goal либо создать отдельный Goal на каждую Task |
-| Auto batch с четырьмя independent safe lanes | `subagents=auto`; ready width и active target видны в chat | по lifecycle каждой Task через отдельного Explainer | правдивые Task statuses | одновременно запустить несколько bounded workers; один integration owner | последовательно поглотить safe frontier основным агентом либо создать fixed worker quota |
+| Auto batch с четырьмя independent safe lanes | `subagents=auto`; active target равен safe minimum и виден в chat | по lifecycle каждой Task через отдельного Explainer | правдивые Task statuses; writes делает основной integration owner | одновременно заполнить весь target bounded workers; меньше — только с concrete limiter | последовательно поглотить safe frontier, субъективно занизить target либо создать fixed worker quota |
 | Большой batch с одной safe write lane | `subagents=auto`; limiting factor виден в chat | по lifecycle каждой Task через отдельного Explainer | правдивые Task statuses | один writer; полезные независимые read-only scouts/reviewers допустимы | конфликтующие writers или fake fan-out из-за числа Tasks/slots |
 | Общий prompt `не используй субагентов` | `subagents=off`; запущено ноль subagents | основной агент напрямую применяет quality contract без claim независимости | lifecycle не меняется | выполнить run coordinator-only; final сообщает peak width 0 | запустить implementation, research, review или comment subagent |
-| Prompt `без субагентов для реализации` | role-scoped opt-out; implementation workers не запускаются | отдельный Strategic Explainer сохраняется | lifecycle не меняется | root-only implementation; независимый comment pass | трактовать узкий запрет как общий либо запустить writer-subagent |
-| Default subagent capability недоступна | `not-available`, не user opt-out | отдельный Explainer остаётся required | lifecycle не меняется | безопасно продолжить coordinator-only и назвать ограничение | молча выдать coordinator-only за `subagents=off` или пропустить Explainer |
+| Prompt `без субагентов для реализации` | `subagents=auto; implementation=off`; implementation workers не запускаются, прочие роли не запрещены | отдельный Strategic Explainer сохраняется | lifecycle policy не меняется | root-only implementation; независимые useful research/review и comment pass допустимы | трактовать узкий запрет как общий, скрыть hybrid topology либо запустить writer-subagent |
+| Worker capability недоступна | `workers=not-available`, не user opt-out; target снижен с concrete limiter | отдельный Explainer остаётся required | lifecycle policy не меняется | безопасно продолжить coordinator-only и назвать ограничение | молча выдать coordinator-only за `subagents=off` или пропустить Explainer |
+| Comment Explainer capability недоступна при `auto` | implementation workers могут продолжать | comment не публикуется | comment-dependent transition не выполняется | сообщить `comment-explainer=not-available`; продолжить независимую safe work | считать это общим opt-out или останавливать все workers |
 | Release готового candidate по Project/Release selector | `release` | только если lifecycle/blocker требует | statuses по фактам | commit/push/deploy/smoke по authority без нового Goal | создавать Goal из-за selector или production release |
 | Task-local blocker в `batch-implementation` | Task незавершена | понятный blocker comment с read-back | правдивый non-terminal status | продолжить независимые Tasks | завершить или искусственно блокировать Goal |
 
@@ -63,8 +64,9 @@
   его запуска?
 - Получили ли два и более independent safe packets несколько одновременно
   активных workers и одного integration owner без конфликтующих writes?
-- Совпадает ли `auto`/`off`, ready width, active target/limiting factor и final
-  peak width с фактически использованной topology?
+- Совпадает ли topology с role overrides, ready width, рассчитанный active
+  target/concrete limiter и final peak width с фактически использованной
+  topology?
 - Дал ли общий no-subagent prompt буквально ноль subagents, а role-scoped
   запрет отключил только названную роль?
 
