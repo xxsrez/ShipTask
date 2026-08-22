@@ -385,32 +385,23 @@ def validate_ship_skill(errors: list[str]) -> None:
         "$ship-tasks",
         'value: "task-manager"',
         "allow_implicit_invocation: true",
-        "Goal создавай только для implementation/rework минимум двух Tasks",
-        "release-only работает без нового Goal",
-        "До новой implementation surface найди существующие exact Task worktrees/branches",
-        "прими тот же task-owned artifact и продолжай там",
-        "active/unknown ownership не перехватывай и не очищай",
-        "effective natural-language topology rule пользователя",
-        "exact/relative число subagents (root не считается)",
-        "role-scoped/global opt-out или условие по длительности",
-        "Только без такого rule автоматически делегируй",
-        "невозможность rule не подменяй молча",
-        "единственный integration owner",
-        "владелец Goal и Task Manager comments/status/version writes",
-        "собственные feature branch и Git worktree",
-        "один writable worktree не разделяется между writers",
-        "только genuinely simple bounded packets запускай на gpt-5.6-luna/max",
-        "остальные и Strategic Explainer наследуют current model/effort",
-        "Luna прекращает corrective mutations",
-        "передаёт packet integration owner/current profile без cheap retry loop",
-        "Backlog не доставляй",
-        "Приёмочный incident немедленно покажи в chat",
-        "Обычный To Do → In Progress не создаёт комментарий",
-        "Пока effective rule не отключает comment Explainer",
-        "иначе примени quality contract напрямую без claim независимости",
-        "opening comment до repair",
-        "success закрывай только после completion comment",
+        "live scope",
+        "task-owned worktree/branch",
+        "natural-language правила пользователя",
+        "без такого правила выбери полезную delegation автоматически",
+        "отдельным feature branches и Git worktrees",
+        "Не ослабляй acceptance",
+        "SHIPTASK RUN REPORT",
     )
+    metadata = read(SHIP_METADATA)
+    prompt_match = re.search(r'^\s*default_prompt:\s*"(.*)"\s*$', metadata, re.MULTILINE)
+    if prompt_match is None:
+        fail(errors, f"{relative(SHIP_METADATA)} is missing one-line default_prompt")
+    elif len(prompt_match.group(1)) > 1024:
+        fail(
+            errors,
+            f"{relative(SHIP_METADATA)} default_prompt exceeds App Server limit of 1024 characters",
+        )
 
 
 def validate_composer_skill(errors: list[str]) -> None:
