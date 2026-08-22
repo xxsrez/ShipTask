@@ -2,7 +2,7 @@
 
 Статус: current reference, 2026-08-22.
 
-Проверка оценивает observable planning result `$task-composer`, а не exact
+Проверка оценивает observable planning result `$ship-tasks:task-composer`, а не exact
 wording, agent topology, tool order или число подзадач.
 
 ## Критические требования

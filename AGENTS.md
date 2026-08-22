@@ -5,7 +5,7 @@
 ## Назначение
 
 - Репозиторий является source of truth для Task Manager-only Codex skills
-  `$ship-tasks`, `$task-composer` и общего communication skill
+  `$ship-tasks`, `$ship-tasks:task-composer` и общего communication skill
   `$strategic-explainer`.
 - Исполнимые skills находятся в sibling-каталогах `ship-tasks/`,
   `task-composer/` и `strategic-explainer/`.
@@ -19,14 +19,14 @@
 - `$ship-tasks` работает только через Task Manager connector. Не добавляйте
   fallback providers, generic task-source abstraction или альтернативный
   tracker workflow.
-- `$task-composer` остаётся Task Manager-only planning workflow: не добавляйте
+- `$ship-tasks:task-composer` остаётся Task Manager-only planning workflow: не добавляйте
   delivery, implementation, release, Goal lifecycle, fallback provider или
   право автоматически менять Label taxonomy.
 - `$strategic-explainer` остаётся generic: не добавляйте в его runtime contract
   ShipTask, Task Manager, конкретный tracker, project lifecycle или право
   принимать решения/выполнять mutations.
 - Requests сформулировать, создать, разложить или положить Task Manager работу
-  в backlog направляйте через `$task-composer`, когда он доступен. Это
+  в backlog направляйте через `$ship-tasks:task-composer`, когда он доступен. Это
   planning-only mutation и не запускает ShipTask delivery. Read/status/audit
   без постановки оставляйте техническому Task Manager adapter.
 - Project и Release refs, repository path, branch, deployment provider,

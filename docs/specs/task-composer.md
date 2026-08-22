@@ -4,7 +4,7 @@
 зафиксированы в
 [ADR-0023](../decisions/0023-task-composer-as-planning-sibling.md).
 
-Specification описывает Task Manager-only skill `$task-composer`, который
+Specification описывает Task Manager-only skill `$ship-tasks:task-composer`, который
 формулирует, декомпозирует и по явному planning intent создаёт качественные
 Tasks. Он не выполняет созданную работу и не управляет delivery lifecycle.
 
@@ -20,7 +20,7 @@ Task Composer превращает требования человека в св
 - labels, hierarchy и relations отражают фактический смысл, а не формальную
   полноту карточки.
 
-Skill доступен явно через `$task-composer` и неявно, когда пользователь просит
+Skill доступен явно через `$ship-tasks:task-composer` и неявно, когда пользователь просит
 сформулировать, создать, добавить в backlog или разложить Task Manager работу.
 Draft без просьбы о записи остаётся draft. Явная просьба создать/add/capture
 разрешает только соответствующие planning mutations.
@@ -34,7 +34,7 @@ release, status, audit или простого чтения существующ
 
 | Запрос | Task Composer | Результат |
 |---|---|---|
-| `$task-composer` | да | сформировать planning model; writes только при явном intent |
+| `$ship-tasks:task-composer` | да | сформировать planning model; writes только при явном intent |
 | `Сформулируй Task Manager задачу, пока не создавай` | да | read-only draft |
 | `Создай Task в Task Manager` | да | одна Task либо Epic с подзадачами по реальному scope |
 | `Разбей это на Epic и подзадачи в Task Manager` | да | Epic и достаточные подзадачи |

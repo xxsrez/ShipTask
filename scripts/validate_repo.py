@@ -322,7 +322,7 @@ def validate_composer_skill(errors: list[str]) -> None:
     require(
         errors,
         COMPOSER_SKILL,
-        "$task-composer",
+        "$ship-tasks:task-composer",
         "planning mutations",
         "ShipTask create-and-deliver contract",
         "canonical status `Backlog`",
@@ -346,7 +346,7 @@ def validate_composer_skill(errors: list[str]) -> None:
         COMPOSER_METADATA,
         'display_name: "Task Composer"',
         'short_description: "Сформулировать и связать Task Manager задачи"',
-        "$task-composer",
+        "$ship-tasks:task-composer",
         'value: "task-manager"',
         "live Labels",
         "реальные relations",
@@ -487,7 +487,7 @@ def validate_trigger_matrix(errors: list[str]) -> None:
 
 
 COMPOSER_TRIGGER_CASES = {
-    "$task-composer": (
+    "$ship-tasks:task-composer": (
         "да",
         "сформировать planning model; writes только при явном intent",
     ),
