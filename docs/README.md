@@ -13,9 +13,10 @@
 - [Ship Tasks](specs/ship-tasks.md) — канонический Task Manager-only workflow
   для explicit invocation и natural-language delivery с однозначным Task
   Manager anchor: single и release без Goal, Goal только для массовой
-  имплементации минимум двух Tasks, constitution-first требования, обязательные
-  comments, видимые acceptance incidents, свобода выбора инструментов и
-  фактическая классификация приёмки.
+  имплементации минимум двух Tasks, `subagents=auto` для широкого batch,
+  явный `subagents=off`, constitution-first требования, обязательные comments,
+  видимые acceptance incidents, свобода выбора инструментов и фактическая
+  классификация приёмки.
 - [Strategic Explainer](specs/strategic-explainer.md) — общий contract
   problem-first grounding, bounded read-only strategic discovery и свободного
   объяснения без mutations, status decisions, новой authority или обязательной
@@ -87,15 +88,19 @@
   acceptance немедленно видна в chat, сохраняется в Task history и остаётся в
   final report после repair.
 - [0021: Требования являются конституцией для агентов](decisions/0021-requirements-as-agent-constitution.md)
-  — current requirements задают outcome, evidence и authority boundaries, а не
-  agent topology, context envelope, retries или tool choreography; точный
-  protocol сохраняется только для safety/data-integrity invariants.
+  — current requirements обычно задают outcome, evidence и authority boundaries,
+  а не agent topology, context envelope, retries или tool choreography; явные
+  topology-исключения закреплены ADR-0022 и ADR-0024.
 - [0022: Каждый комментарий ShipTask проходит независимый Strategic Explainer](decisions/0022-mandatory-independent-strategic-explainer-for-comments.md)
-  — восстанавливает явное требование отдельной смысловой проверки каждого
+  — сохраняет default-требование отдельной смысловой проверки каждого
   комментария и запрещает комментарий на обычном старте `To Do → In Progress`.
 - [0023: Task Composer как planning sibling-skill](decisions/0023-task-composer-as-planning-sibling.md)
   — отделяет качественную постановку и backlog capture от ShipTask delivery и
   добавляет третий runtime skill в тот же Ship Tasks plugin.
+- [0024: Адаптивное multi-agent исполнение по умолчанию](decisions/0024-adaptive-multi-agent-execution-by-default.md)
+  — заполняет независимые safe lanes несколькими субагентами, ограничивает
+  writers реальной conflict-free width и делает общий «без субагентов»
+  буквальным нулевым opt-out.
 
 ## Reference
 

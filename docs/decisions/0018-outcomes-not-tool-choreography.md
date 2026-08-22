@@ -4,7 +4,9 @@
 последовательность выбора, диагностики, восстановления и повторного применения
 инструмента. Остальные outcome, lifecycle, comment и authority boundaries
 ADR-0017 сохраняются. [ADR-0021](0021-requirements-as-agent-constitution.md)
-распространяет тот же принцип на agent topology, context и evaluation.
+распространяет тот же принцип на agent topology, context и evaluation; явный
+ShipTask multi-agent default и opt-out позднее выделены в
+[ADR-0024](0024-adaptive-multi-agent-execution-by-default.md).
 
 ## Контекст
 

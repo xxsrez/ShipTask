@@ -14,16 +14,21 @@ Release уже подготовленного candidate, включая producti
 
 Current requirements являются конституцией для агентов: они задают outcome,
 rationale, observable evidence и authority/safety boundaries, но оставляют
-агенту план, декомпозицию, инструменты, число попыток, делегирование и форму
-context. Перед любым существенным status transition сначала
+агенту план, декомпозицию, инструменты, число попыток и форму context. Явное
+исключение — execution topology: ShipTask по умолчанию адаптивно заполняет
+несколько независимых safe lanes субагентами, сохраняя одного integration owner.
+Общие «не используй субагентов»/«без субагентов» означают ноль субагентов во
+всём run; узкий запрет отключает только названную роль. Перед любым
+существенным status transition сначала
 публикуется и перечитывается понятный native Task comment; обычный старт
 `To Do → In Progress` комментария не создаёт. Task description и ответ в Codex
 комментарий не заменяют. Native comments являются гарантированной частью Task
 Manager adapter и всегда используются для material lifecycle reporting.
 
 Каждый комментарий, который создаёт ShipTask, до публикации проходит отдельного
-независимого `$ship-tasks:strategic-explainer`. Основной агент устанавливает и
-проверяет факты, но не заменяет независимую смысловую редактуру собственной.
+независимого `$ship-tasks:strategic-explainer`, пока действует
+`subagents=auto`. При явном `subagents=off` тот же quality contract основной
+агент выполняет сам и не заявляет независимую проверку там, где её не было.
 
 Приёмочный incident сообщается сразу в chat и сохраняется в Task history до
 начала repair. Opening comment остаётся видимым после исправления, resolution
@@ -40,7 +45,7 @@ verified.
 Перед завершением skill сверяет обещанный и фактический результат,
 самостоятельно устраняет доступные проблемы внутри выбранной работы и только
 затем даёт компактное причинное объяснение понятным человеку языком.
-Каждый комментарий ShipTask проходит отдельного
+При `subagents=auto` каждый комментарий ShipTask проходит отдельного
 `$ship-tasks:strategic-explainer`. Субагент переводит установленные факты и
 технические изменения в готовый пользовательский текст; основной агент
 проверяет точность, но не переписывает текст обратно в журнал реализации.
@@ -66,7 +71,7 @@ Epic с problem-first описанием через Strategic Explainer, кон�
   формулировка, декомпозиция и создание Task Manager scope.
 - [`strategic-explainer/SKILL.md`](strategic-explainer/SKILL.md) — общий
   problem-first strategic discovery и communication skill для прямого или
-  delegated использования без обязательной orchestration scheme.
+    delegated использования; обязательную ShipTask topology задаёт calling skill.
 - [`ship-tasks/references/project-memory.md`](ship-tasks/references/project-memory.md)
   — runtime contract project scope/profile memory.
 - [Документация](docs/README.md) — канонические specifications, Task Manager

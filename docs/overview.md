@@ -21,21 +21,29 @@ reporting contract —
 [ADR-0021](decisions/0021-requirements-as-agent-constitution.md) распространяет
 этот принцип на agent topology, context и evaluation, а
 [ADR-0022](decisions/0022-mandatory-independent-strategic-explainer-for-comments.md)
-сохраняет явное требование отдельного Explainer перед каждым комментарием. Они уточняют
+сохраняет default-требование отдельного Explainer перед каждым комментарием.
+[ADR-0024](decisions/0024-adaptive-multi-agent-execution-by-default.md)
+добавляет `subagents=auto` для широкого `batch-implementation` и явный
+`subagents=off`. Они уточняют
 [ADR-0017](decisions/0017-constitution-first-runtime-contract.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
 результатов и жёстких границ. Агент свободен выбирать порядок, инструменты,
-реализацию, декомпозицию, число попыток и способ делегирования.
+реализацию, декомпозицию и число попыток; delegation следует явной политике
+ADR-0024.
 
 Неподвижны следующие требования:
 
 - пользовательский outcome важнее Goal, plans и внутренней отчётности;
+- несколько независимых safe lanes по умолчанию получают adaptive subagents и
+  одного integration owner;
+- общее «без субагентов» означает ноль субагентов, а узкий запрет относится
+  только к названной роли;
 - status Task соответствует текущим фактам;
 - обычный старт `To Do → In Progress` не создаёт комментарий;
 - существенный status transition сначала получает понятный native comment и
   comment read-back;
-- каждый создаваемый ShipTask-комментарий до публикации проходит отдельного
-  независимого Strategic Explainer;
+- каждый создаваемый ShipTask-комментарий при разрешённых субагентах до
+  публикации проходит отдельного независимого Strategic Explainer;
 - material blocker также получает comment, даже без status change;
 - native comments являются гарантированной adapter capability и всегда
   сопровождают material lifecycle reporting;
@@ -45,8 +53,10 @@ reporting contract —
 - сбой одного средства сам по себе ничего не доказывает и не обязывает чинить
   именно его;
 - acceptance не ослабляется, непроверенное не называется verified;
-- основной агент не заменяет отдельного Strategic Explainer собственной
-  редактурой и не публикует комментарий без независимого прохода;
+- явный общий user override включает `subagents=off` для всего run;
+- вне `subagents=off` основной агент не заменяет отдельного Strategic
+  Explainer собственной редактурой и не публикует комментарий без
+  независимого прохода;
 - production и другие sensitive effects сохраняют явную authority boundary.
 
 ## Запуск
@@ -67,7 +77,8 @@ projection: новые элементы остаются в `Backlog`, а unknow
 опускается без guess.
 
 - `single`: одна Task, без Goal.
-- `batch-implementation`: имплементация/rework минимум двух Tasks, с Goal.
+- `batch-implementation`: имплементация/rework минимум двух Tasks, с Goal и
+  default `subagents=auto`.
 - `release`: release уже подготовленного candidate, без Goal.
 - project memory меняется только по явной просьбе.
 
@@ -100,7 +111,8 @@ completion comment предшествует `Done`.
 Существенный status transition считается завершённым только при фактическом
 comment и read-back; технический путь к этому результату выбирает агент.
 До публикации текст готовит отдельный Strategic Explainer, а основной агент
-проверяет его фактическую точность.
+проверяет его фактическую точность. При явном `subagents=off` тот же quality
+contract применяется без отдельного субагента.
 
 ## Приёмка
 
@@ -151,6 +163,7 @@ secrets/privacy/access-policy changes, external recipients и unbounded cost
 - [Видимые приёмочные инциденты и обязательные comments](decisions/0020-visible-acceptance-incidents-and-required-comments.md)
 - [Требования как конституция для агентов](decisions/0021-requirements-as-agent-constitution.md)
 - [Независимый Strategic Explainer для каждого комментария](decisions/0022-mandatory-independent-strategic-explainer-for-comments.md)
+- [Adaptive multi-agent default и explicit opt-out](decisions/0024-adaptive-multi-agent-execution-by-default.md)
 - [Task Manager adapter contract](reference/task-manager-adapter.md)
 - [Lifecycle evaluation](reference/shiptask-review-disposition-evaluation.md)
 - [Strategic Explainer specification](specs/strategic-explainer.md)

@@ -6,7 +6,9 @@ topology, fixed context isolation, exact handoff envelope, error tokens, retry
 scheme и option quota из ADR-0012, ADR-0013 и ADR-0014. Решение отменить
 обязательного отдельного Strategic Explainer для комментариев было ошибочным и
 заменено [ADR-0022](0022-mandatory-independent-strategic-explainer-for-comments.md).
-Остальные требования-конституция сохраняются.
+Свобода выбора delegation для ShipTask частично заменена
+[ADR-0024](0024-adaptive-multi-agent-execution-by-default.md). Остальные
+требования-конституция сохраняются.
 
 ## Контекст
 
@@ -34,9 +36,10 @@ scheme и option quota из ADR-0012, ADR-0013 и ADR-0014. Решение от�
 - какие scope, truth, safety и authority boundaries нельзя нарушать.
 
 Агент самостоятельно выбирает план, декомпозицию, инструменты, порядок
-диагностики, число попыток, делегирование, форму context и текст ответа. Examples,
-reason codes и удобные структуры могут помогать, но не становятся обязательными
-только потому, что однажды сработали.
+диагностики, число попыток, форму context и текст ответа. Delegation также
+остаётся свободным выбором, кроме явных adaptive default/opt-out требований
+ShipTask из ADR-0024. Examples, reason codes и удобные структуры могут помогать,
+но не становятся обязательными только потому, что однажды сработали.
 
 ### Когда допустима точность механизма
 
@@ -51,8 +54,10 @@ reason codes и удобные структуры могут помогать, �
   продублированных effects;
 - explicit authority предшествует production и другим sensitive actions.
 
-Это границы корректности внешнего состояния, а не управление тем, сколько
+Это границы корректности внешнего состояния, а не общее управление тем, сколько
 агентов использовать, какие tools вызвать или как организовать reasoning.
+ADR-0024 задаёт отдельное пользовательское topology-требование только для
+ShipTask и не превращает остальные requirements в agent scripts.
 Технический adapter может описывать protocol, необходимый для безопасной работы
 API, но delivery policy не превращает этот protocol в универсальный agent
 script.
@@ -79,9 +84,10 @@ ShipTask обязан получить понятный problem-first comment и
 
 Current evals проверяют factual grounding, evidence, state separation,
 read-only/authority boundary, понятность, incident visibility и external
-effects. Они не оценивают agent topology, fork mode, точный prompt envelope,
-названия внутренних этапов, tool sequence, число попыток, фиксированное число
-вариантов или совпадение с эталонной формулировкой.
+effects. Они не оценивают topology, кроме observable `auto`/`off` contract
+ADR-0024; fork mode, точный prompt envelope, названия внутренних этапов, tool
+sequence, число попыток, фиксированное число вариантов или совпадение с
+эталонной формулировкой не оцениваются.
 
 ## Последствия
 

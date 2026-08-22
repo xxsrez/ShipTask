@@ -74,6 +74,10 @@ ADR = {
             "0023",
             "0023-task-composer-as-planning-sibling.md",
         ),
+        (
+            "0024",
+            "0024-adaptive-multi-agent-execution-by-default.md",
+        ),
     )
 }
 
@@ -139,6 +143,7 @@ CURRENT_CONTRACT_FILES = (
     ADR["0021"],
     ADR["0022"],
     ADR["0023"],
+    ADR["0024"],
     ADAPTER,
 )
 
@@ -291,7 +296,16 @@ def validate_ship_skill(errors: list[str]) -> None:
         "каждые 10 минут",
         "incident ledger",
         "$ship-tasks:strategic-explainer",
-        "Каждый Task Manager comment ShipTask обязательно проходит отдельного",
+        "Адаптивно используй субагентов",
+        "Default — `subagents=auto`",
+        "safe useful width несколькими субагентами",
+        "одного integration owner",
+        "`subagents=off` для всего run, включая comment Explainer",
+        "узкий запрет отключает\nтолько названную роль",
+        "ready width",
+        "фактическую peak width",
+        "При `subagents=auto` каждый Task Manager comment проходит отдельного",
+        "При общем\n`subagents=off` сам примени тот же problem-first quality contract",
         "не переписывай текст самостоятельно",
         "Обычный `To Do → In Progress` не запускает Explainer",
         "SHIPTASK RUN REPORT",
@@ -308,10 +322,15 @@ def validate_ship_skill(errors: list[str]) -> None:
         "In Review",
         "Goal создавай только для реальной implementation/rework минимум двух Tasks",
         "release-only, включая production, работают без нового Goal",
+        "Default subagents=auto",
+        "safe useful width",
+        "один integration owner",
+        "означают subagents=off и ноль subagents во всём run",
+        "узкий запрет отключает только названную роль",
         "Приёмочный incident немедленно покажи в chat",
         "Обычный To Do → In Progress не создаёт комментарий",
-        "Каждый комментарий ShipTask до публикации обязательно передай отдельному",
-        "не заменяет его собственной редактурой",
+        "При subagents=auto каждый комментарий ShipTask до публикации обязательно передай отдельному",
+        "при общем off примени quality contract напрямую без claim независимости",
         "opening comment до repair",
         "incident ledger в final report",
     )
@@ -452,7 +471,11 @@ TRIGGER_CASES = {
     ),
     "Имплементируй все незавершённые Tasks выбранного Release 0.2": (
         "да",
-        "`batch-implementation` с Goal после live inventory",
+        "`batch-implementation` с Goal и `subagents=auto` после live inventory",
+    ),
+    "Имплементируй все незавершённые Tasks выбранного Release 0.2, но без субагентов": (
+        "да",
+        "`batch-implementation` с Goal и `subagents=off`",
     ),
     "Доведи текущий Task Manager scope": (
         "да",
@@ -608,7 +631,7 @@ REVIEW_CASES = {
         "fallback в description",
         "skip обязательного comment",
     ),
-    "Отдельный Strategic Explainer недоступен или отклонил текст": (
+    "Отдельный Strategic Explainer недоступен или отклонил текст при `subagents=auto`": (
         "не публиковать непроверенный черновик",
         "не выполнять зависящий переход",
         "основной агент сам одобряет",
@@ -616,6 +639,36 @@ REVIEW_CASES = {
     "Массовая имплементация минимум двух Tasks": (
         "batch-implementation",
         "создать/продолжить Goal",
+    ),
+    "Auto batch с четырьмя independent safe lanes": (
+        "subagents=auto",
+        "несколько bounded workers",
+        "один integration owner",
+        "последовательно поглотить safe frontier",
+    ),
+    "Большой batch с одной safe write lane": (
+        "limiting factor",
+        "один writer",
+        "read-only scouts/reviewers",
+        "конфликтующие writers",
+        "fake fan-out",
+    ),
+    "Общий prompt `не используй субагентов`": (
+        "subagents=off",
+        "ноль subagents",
+        "напрямую применяет quality contract",
+        "peak width 0",
+        "comment subagent",
+    ),
+    "Prompt `без субагентов для реализации`": (
+        "role-scoped opt-out",
+        "implementation workers не запускаются",
+        "отдельный Strategic Explainer сохраняется",
+    ),
+    "Default subagent capability недоступна": (
+        "not-available",
+        "coordinator-only",
+        "отдельный Explainer остаётся required",
     ),
     "Release готового candidate по Project/Release selector": (
         "release",
@@ -651,12 +704,15 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0020",
         "ADR-0021",
         "ADR-0022",
+        "ADR-0024",
         "## 2. Конституция",
-        "явно требует\nнезависимого исполнителя",
+        "adaptive multi-agent\nисполнение нескольких независимых work packets",
+        "no-subagent opt-out",
         "comment",
         "до записи статуса",
         "всегда создаёт и перечитывает обязательный comment",
         "Каждый комментарий, который ShipTask собирается создать",
+        "исключение — явный общий `subagents=off`",
         "`To Do → In Progress` комментария не создаёт",
         "Приёмочный инцидент виден сразу",
         "примерно каждые 10 минут",
@@ -668,6 +724,10 @@ def validate_current_contract(errors: list[str]) -> None:
         "Goal создаётся только для `batch-implementation`",
         "production release уже подготовленного candidate",
         "Release-only run не создаёт",
+        "Default topology — `subagents=auto`",
+        "Один integration owner",
+        "`subagents=off` для всего текущего run",
+        "сохраняет отсутствие независимой\nпроверки",
     )
     require(
         errors,
@@ -682,11 +742,14 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0020",
         "ADR-0021",
         "ADR-0022",
+        "ADR-0024",
         "гарантированной adapter capability",
         "каждый создаваемый ShipTask-комментарий",
         "durable Task history",
         "Goal используется только для прогресса массовой имплементации",
         "production release",
+        "несколько независимых safe lanes",
+        "общее «без субагентов» означает ноль субагентов",
     )
     require(
         errors,
@@ -695,7 +758,8 @@ def validate_current_contract(errors: list[str]) -> None:
         "До связанного существенного status transition",
         "transition не завершён",
         "всегда создаёт и перечитывает обязательный comment",
-        "Каждый комментарий, который ShipTask собирается создать",
+        "При `subagents=auto` каждый комментарий, который ShipTask собирается создать",
+        "При явном общем `subagents=off`",
         "Обычный старт `To Do → In Progress` комментария не создаёт",
         "До repair немедленно сообщить incident",
         "resolution/completion comment",
@@ -725,7 +789,8 @@ def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         HANDOFF,
-        "Каждый комментарий, который создаёт ShipTask",
+        "При `subagents=auto` каждый комментарий, который создаёт ShipTask",
+        "При явном общем\n`subagents=off`",
         "отдельного субагента",
         "не переписывает текст обратно",
     )
@@ -768,17 +833,33 @@ def validate_current_contract(errors: list[str]) -> None:
         "Когда допустима точность механизма",
         "Strategic Explainer определяется результатом",
         "Evals проверяют наблюдаемое поведение",
+        "ADR-0024",
     )
     require(
         errors,
         ADR["0022"],
         "Каждый комментарий ShipTask проходит независимый Strategic Explainer",
         "Обычный переход `To Do → In Progress` не создаёт комментарий",
-        "Каждый комментарий в Task Manager",
+        "каждый комментарий в Task\n  Manager",
         "отдельный независимый субагент",
         "не переписывает одобренный текст",
         "не публикует комментарий",
         "самостоятельно выполненная основным агентом",
+        "ADR-0024",
+    )
+    require(
+        errors,
+        ADR["0024"],
+        "Адаптивное multi-agent исполнение по умолчанию",
+        "Default — `subagents=auto`",
+        "active target",
+        "conflict-free ownership/isolation",
+        "Один integration owner",
+        "Искусственные\n  subtasks ради числа агентов не создаются",
+        "`subagents=off` на весь текущий run",
+        "implementation, research, review или Strategic Explainer",
+        "Узкий запрет относится только к названной роли",
+        "peak width",
     )
     require(
         errors,
@@ -980,7 +1061,8 @@ def validate_supersession(errors: list[str]) -> None:
             "ADR-0021",
             "ADR-0022",
         ),
-        "0021": ("partially superseded", "ADR-0022"),
+        "0021": ("partially superseded", "ADR-0022", "ADR-0024"),
+        "0022": ("partially superseded", "ADR-0024"),
     }
     for number, terms in required_markers.items():
         header = "\n".join(read(ADR[number]).splitlines()[:18])
@@ -1024,8 +1106,10 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "Standalone user-level каталоги",
         "~/.codex/skills/task-composer",
         "task-manager@srez-marketplace` остаётся adapter-only",
-        "каждый комментарий ShipTask проходит\n  отдельного независимого Strategic Explainer",
+        "без общего opt-out каждый комментарий проходит\n  отдельного независимого Strategic Explainer",
         "`To Do → In Progress` комментария не создаёт",
+        "несколькими субагентами",
+        "общий явный\n  no-subagent opt-out отключает их все",
     )
     require(
         errors,
@@ -1036,8 +1120,10 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "fresh App Server catalog",
         "ship-tasks:task-composer",
         "existing-only Labels",
-        "каждый комментарий ShipTask обязательно\n  проходит отдельного независимого Explainer",
+        "При `subagents=auto` каждый комментарий ShipTask\n  обязательно проходит отдельного независимого Explainer",
         "`To Do → In Progress` не создаёт комментарий",
+        "adaptive multi-agent default",
+        "ноль subagents",
     )
 
 
@@ -1061,6 +1147,7 @@ def current_task_source_files() -> tuple[Path, ...]:
         ADR["0020"],
         ADR["0022"],
         ADR["0023"],
+        ADR["0024"],
     )
 
 

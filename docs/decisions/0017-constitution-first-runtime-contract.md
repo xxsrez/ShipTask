@@ -9,7 +9,9 @@ guarantee и cross-surface incident reporting —
 agent-independent смысл требований —
 [ADR-0021](0021-requirements-as-agent-constitution.md), а обязательная
 независимая проверка комментариев восстановлена
-[ADR-0022](0022-mandatory-independent-strategic-explainer-for-comments.md).
+[ADR-0022](0022-mandatory-independent-strategic-explainer-for-comments.md), а
+adaptive delegation policy позднее задана
+[ADR-0024](0024-adaptive-multi-agent-execution-by-default.md).
 Это решение ввело ShipTask lifecycle, обязательные комментарии и свободу исполнения.
 Оно частично заменяет ADR-0009, ADR-0010, ADR-0013, ADR-0015 и ADR-0016 там,
 где те задавали иной порядок status/comment effects, разрешали менять status с

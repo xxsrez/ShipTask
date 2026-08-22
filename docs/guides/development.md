@@ -17,7 +17,8 @@
 - Current requirements являются конституцией: фиксируйте what, why, evidence и
   authority boundary; не задавайте agent topology, форму context, число
   attempts/options или внутренний reasoning без явного пользовательского
-  требования.
+  требования. ShipTask adaptive multi-agent default и буквальный no-subagent
+  opt-out являются таким явным topology-требованием.
 - Оставляйте агенту свободу выбора инструментов, реализации и достаточной
   проверки, если safety/authority не требуют жёсткого порядка.
 - Жёсткий порядок нужен там, где effects необратимо расходятся: для
@@ -31,9 +32,10 @@
 - Не добавляйте фиксированное число попыток. Проверяйте основание для повтора и
   реальное условие остановки.
 - Strategic Explainer не получает право решать факты, статус, границы работы,
-  полномочия или действие. При этом каждый комментарий ShipTask обязательно
-  проходит отдельного независимого Explainer: это явное требование пользователя,
-  которое нельзя заменить самостоятельной редактурой основного агента.
+  полномочия или действие. При `subagents=auto` каждый комментарий ShipTask
+  обязательно проходит отдельного независимого Explainer. Явный общий
+  `subagents=off` — единственное исключение: основной агент применяет quality
+  contract напрямую и не заявляет о независимой проверке.
 - Обычный переход `To Do → In Progress` не создаёт комментарий и поэтому не
   запускает Strategic Explainer.
 - Не добавляйте fallback task provider. Task Manager остаётся единственным
@@ -60,9 +62,10 @@ git diff --check
 Repository validator проверяет current contract, trigger matrix, lifecycle
 evaluation, retired loopholes, documentation navigation и distribution
 boundaries. Проверка не должна требовать конкретных необязательных слов или
-числа tool calls вместо observable behavior. Evals проверяют отдельного
-независимого Strategic Explainer как явное требование, но не фиксируют fork
-mode, prompt envelope, retry count или число alternatives.
+числа tool calls вместо observable behavior. Evals проверяют adaptive
+`auto`/`off` contract и отдельного независимого Strategic Explainer при
+разрешённых субагентах, но не фиксируют fork mode, prompt envelope, retry count
+или число alternatives.
 
 ## Forward test
 
@@ -77,6 +80,12 @@ skill, реалистичный exact Task Manager scope и обычный proje
   сами mode не определяют; release-only, чтение нескольких Tasks и общая приёмка
   работают без Goal; audit/planning/backlog и generic code request не запускают
   ShipTask;
+- несколько independent conflict-free Tasks в `subagents=auto` одновременно
+  получают несколько bounded workers и одного integration owner;
+- shared evolving write surface ограничивает writers до одной safe lane, но не
+  запрещает полезные независимые read-only scouts/reviewers;
+- общее «не используй субагентов» даёт ноль subagents, включая Explainer, а
+  узкое «без субагентов для реализации» сохраняет independent comment pass;
 - `To Do → In Progress` проходит без comment и без Strategic Explainer;
 - готовый candidate получает независимо подготовленный Strategic Explainer
   comment и read-back до `In Review`;
