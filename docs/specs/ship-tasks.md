@@ -10,7 +10,9 @@ reporting contract уточнён
 требование независимого Strategic Explainer для каждого комментария —
 [ADR-0022](../decisions/0022-mandatory-independent-strategic-explainer-for-comments.md),
 а adaptive multi-agent default и буквальный opt-out —
-[ADR-0024](../decisions/0024-adaptive-multi-agent-execution-by-default.md).
+[ADR-0024](../decisions/0024-adaptive-multi-agent-execution-by-default.md), а
+cost-aware выбор профиля субагента и обязательная эскалация Luna —
+[ADR-0025](../decisions/0025-cost-aware-subagent-profiles.md).
 Эти решения соответственно сохраняют свободу способа, отделяют Goal от release
 и делают приёмочные инциденты видимыми во всём run.
 
@@ -83,8 +85,8 @@ Unresolved acceptance incidents из materially relevant comments называю
 организацией агента, декомпозицией, порядком инструментов, числом попыток или
 формой контекста. Явные пользовательские исключения: adaptive multi-agent
 исполнение нескольких независимых work packets по умолчанию, буквальный
-no-subagent opt-out и отдельный Strategic Explainer перед каждым комментарием,
-когда общий opt-out не действует.
+no-subagent opt-out, cost-aware profile routing для субагентов и отдельный
+Strategic Explainer перед каждым комментарием, когда общий opt-out не действует.
 
 ### 2.1 Пользовательский результат важнее внутренней процедуры
 
@@ -407,6 +409,39 @@ blocker или открытия dependencies active target пересчитыв�
 Tasks и свободных slots без такого frontier не являются основанием для fake
 fan-out.
 
+Пользовательский выбор model/effort является главным. Если пользователь не
+задал отдельный профиль субагентов, текущие model/effort основного агента
+образуют default profile. Только genuinely simple packet запускается на
+`gpt-5.6-luna` с `max`: он self-contained и bounded, имеет ясные inputs и
+acceptance, даёт объективно проверяемый результат, не требует творческого,
+продуктового или архитектурного решения и не несёт material authority/risk или
+неопределённости окружения. Остальные packets наследуют current profile; внешне
+механическая, но рискованная или связанная работа простой не считается.
+Strategic Explainer по умолчанию наследует current profile: его user-facing
+интерпретация не является механическим simple packet.
+
+Если Luna обнаружила неоднозначность, конфликт контекста или task contract,
+неожиданное поведение environment/tools, необходимость расширить scope либо не
+может доказать результат, она прекращает packet без guess и ослабления
+acceptance. Она не делает новых corrective mutations, но обязана bounded
+read-only inspection/read-back установить partial effects и unknown. Integration
+owner reconciles state и сам продолжает packet на текущих model/effort; повторно
+отправлять ту же неразрешённую проблему cheap Luna lane
+нельзя. Если пользователь явно ограничил profile субагентов, это не мешает
+основному integration owner продолжить packet на собственном current profile.
+Если current primary сама Luna, новый replacement subagent не запускается:
+основной агент принимает packet с broader context, а при сохранившейся
+неопределённости сообщает `luna-escalation=not-available` и ждёт explicit
+stronger-profile override без скрытой подмены Sol.
+
+Явно выбранный пользователем профиль субагента имеет приоритет над auto-routing.
+Coordinator выбирает self-contained bounded context, совместимый с exact
+override; его собственный выбор несовместимой формы context не делает profile
+unavailable. Genuine недоступность auto Luna Max сообщается как
+`luna-max=not-available`, после чего packet выполняется на current profile. Явно
+выбранный user profile не подменяется: `<profile>=not-available` уменьшает
+capacity соответствующей роли.
+
 Общее явное «не используй субагентов» или «без субагентов» включает
 `subagents=off` для всего текущего run: не запускаются implementation, research,
 review и comment subagents. Узкий запрет действует только для названной роли;
@@ -417,9 +452,9 @@ acceptance и authority policy от topology не меняются. Недост
 блокирует только comment-dependent lifecycle effects и не считается opt-out.
 
 Первый содержательный update после inventory сообщает topology и role overrides,
-ready independent lanes, active target и конкретный limiting factor. Final
-report кратко называет фактическую peak width либо причину coordinator-only
-исполнения.
+ready independent lanes, active target, profile allocation и конкретный limiting
+factor. Final report кратко называет фактическую peak width, использованные
+profiles и Luna-to-current escalations либо причину coordinator-only исполнения.
 
 Изолированная проблема одной Task не останавливает независимую runnable работу.
 Перед ожиданием пользователя `batch-implementation` повторно читает полный

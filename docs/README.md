@@ -14,9 +14,10 @@
   для explicit invocation и natural-language delivery с однозначным Task
   Manager anchor: single и release без Goal, Goal только для массовой
   имплементации минимум двух Tasks, `subagents=auto` для широкого batch,
-  явный `subagents=off`, constitution-first требования, обязательные comments,
-  видимые acceptance incidents, свобода выбора инструментов и фактическая
-  классификация приёмки.
+  явный `subagents=off`, Luna Max только для genuinely simple packets с
+  эскалацией на current profile, constitution-first требования, обязательные
+  comments, видимые acceptance incidents, свобода выбора инструментов и
+  фактическая классификация приёмки.
 - [Strategic Explainer](specs/strategic-explainer.md) — общий contract
   problem-first grounding, bounded read-only strategic discovery и свободного
   объяснения без mutations, status decisions, новой authority или обязательной
@@ -101,6 +102,9 @@
   — заполняет независимые safe lanes несколькими субагентами, ограничивает
   writers реальной conflict-free width и делает общий «без субагентов»
   буквальным нулевым opt-out.
+- [0025: Cost-aware профили субагентов](decisions/0025-cost-aware-subagent-profiles.md)
+  — сохраняет пользовательский model/effort, направляет только genuinely simple
+  packets на Luna Max и требует current-profile escalation без Luna retry loop.
 
 ## Reference
 

@@ -18,7 +18,8 @@
   authority boundary; не задавайте agent topology, форму context, число
   attempts/options или внутренний reasoning без явного пользовательского
   требования. ShipTask adaptive multi-agent default и буквальный no-subagent
-  opt-out являются таким явным topology-требованием.
+  opt-out, а также Luna Max routing и current-profile escalation являются такими
+  явными topology/profile-требованиями.
 - Оставляйте агенту свободу выбора инструментов, реализации и достаточной
   проверки, если safety/authority не требуют жёсткого порядка.
 - Жёсткий порядок нужен там, где effects необратимо расходятся: для
@@ -82,6 +83,12 @@ skill, реалистичный exact Task Manager scope и обычный proje
   ShipTask;
 - несколько independent conflict-free Tasks в `subagents=auto` одновременно
   получают несколько bounded workers и одного integration owner;
+- genuinely simple bounded packet без отдельного profile override получает Luna
+  Max, а ordinary/complex packet наследует current model/effort;
+- ambiguity, unexpected environment/tool state или proof gap останавливают Luna
+  packet и передают его current profile без повторного Luna loop;
+- явный user profile для subagents имеет приоритет, а выбор primary profile сам
+  по себе не отключает cheap-lane default;
 - shared evolving write surface ограничивает writers до одной safe lane, но не
   запрещает полезные независимые read-only scouts/reviewers;
 - общее «не используй субагентов» даёт ноль subagents, включая Explainer, а

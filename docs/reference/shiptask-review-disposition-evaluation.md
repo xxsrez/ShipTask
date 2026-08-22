@@ -30,6 +30,11 @@
 | Отдельный Strategic Explainer недоступен или отклонил текст при `subagents=auto` | независимая адаптация не завершена | не публиковать непроверенный черновик | не выполнять зависящий переход | сообщить gap в Codex и продолжить только независимую безопасную работу | основной агент сам одобряет или переписывает comment |
 | Массовая имплементация минимум двух Tasks | `batch-implementation` | по lifecycle каждой Task | правдивые Task statuses | создать/продолжить Goal всего implementation scope | работать без Goal либо создать отдельный Goal на каждую Task |
 | Auto batch с четырьмя independent safe lanes | `subagents=auto`; active target равен safe minimum и виден в chat | по lifecycle каждой Task через отдельного Explainer | правдивые Task statuses; writes делает основной integration owner | одновременно заполнить весь target bounded workers; меньше — только с concrete limiter | последовательно поглотить safe frontier, субъективно занизить target либо создать fixed worker quota |
+| Genuinely simple bounded packet без отдельного profile override | packet self-contained, acceptance и evidence ясны; primary profile пользователя сохраняется | зависит от lifecycle outcome | lifecycle policy не меняется | выбрать compatible bounded context и запустить configurable worker на `gpt-5.6-luna`/`max`; primary selection сам по себе не отключает cheap lane | понизить Luna effort, считать любой короткий packet простым, создать context incompatibility либо молча заменить user-selected subagent profile |
+| Короткий packet требует creative/architectural judgment или несёт material risk | simple-классификация отклонена | зависит от lifecycle outcome | lifecycle policy не меняется | передать worker current model/effort | отправить Luna из-за малого diff или числа файлов |
+| Luna встретила ambiguity, surprising environment/tool state или proof gap | packet не считается завершённым; bounded read-only read-back точно устанавливает partial effects и unknown | зависит от установленного lifecycle outcome | только по доказанным фактам | Luna прекращает corrective mutations; integration owner reconciles state и продолжает packet current profile | guess, scope expansion, ослабление acceptance, silent rollback либо повторный cheap Luna loop |
+| Пользователь явно задал profile всем или named subagents | explicit profile имеет приоритет над auto-classification | зависит от lifecycle outcome | lifecycle policy не меняется | использовать exact выбранный profile; при genuine unavailable сообщить `<profile>=not-available` и уменьшить role capacity | молча подменить профиль Luna/current эвристикой или назвать выбранный incompatible context runtime gap |
+| Current primary profile сама Luna | user choice сохраняется | зависит от lifecycle outcome | lifecycle policy не меняется | после cheap-lane uncertainty packet возвращается integration owner; если broader context не помогает, сообщить `luna-escalation=not-available` | скрыто заменить Sol либо создать replacement Luna retry loop |
 | Большой batch с одной safe write lane | `subagents=auto`; limiting factor виден в chat | по lifecycle каждой Task через отдельного Explainer | правдивые Task statuses | один writer; полезные независимые read-only scouts/reviewers допустимы | конфликтующие writers или fake fan-out из-за числа Tasks/slots |
 | Общий prompt `не используй субагентов` | `subagents=off`; запущено ноль subagents | основной агент напрямую применяет quality contract без claim независимости | lifecycle не меняется | выполнить run coordinator-only; final сообщает peak width 0 | запустить implementation, research, review или comment subagent |
 | Prompt `без субагентов для реализации` | `subagents=auto; implementation=off`; implementation workers не запускаются, прочие роли не запрещены | отдельный Strategic Explainer сохраняется | lifecycle policy не меняется | root-only implementation; независимые useful research/review и comment pass допустимы | трактовать узкий запрет как общий, скрыть hybrid topology либо запустить writer-subagent |
@@ -64,6 +69,15 @@
   его запуска?
 - Получили ли два и более independent safe packets несколько одновременно
   активных workers и одного integration owner без конфликтующих writes?
+- Получил ли только genuinely simple bounded packet Luna Max, а packet с
+  material judgment/risk — current profile независимо от внешнего размера?
+- Прекратила ли Luna packet при material uncertainty и передала ли exact handoff
+  current profile без corrective mutations, silent rollback и повторного cheap
+  Luna loop, сохранив bounded read-only reconciliation?
+- Имеет ли явный subagent profile пользователя приоритет, не отменяя cheap-lane
+  default одним лишь выбором primary profile?
+- Если current primary сама Luna, вернулся ли uncertain packet основному агенту
+  без скрытой подмены Sol и без ещё одной cheap Luna lane?
 - Совпадает ли topology с role overrides, ready width, рассчитанный active
   target/concrete limiter и final peak width с фактически использованной
   topology?

@@ -78,6 +78,10 @@ ADR = {
             "0024",
             "0024-adaptive-multi-agent-execution-by-default.md",
         ),
+        (
+            "0025",
+            "0025-cost-aware-subagent-profiles.md",
+        ),
     )
 }
 
@@ -144,6 +148,7 @@ CURRENT_CONTRACT_FILES = (
     ADR["0022"],
     ADR["0023"],
     ADR["0024"],
+    ADR["0025"],
     ADAPTER,
 )
 
@@ -243,7 +248,7 @@ def validate_frontmatter(
 
 
 def validate_ship_skill(errors: list[str]) -> None:
-    validate_frontmatter(errors, SHIP_SKILL, "ship-tasks", 220)
+    validate_frontmatter(errors, SHIP_SKILL, "ship-tasks", 235)
     text = read(SHIP_SKILL)
     description = text.split("---", 2)[1] if text.count("---") >= 2 else ""
 
@@ -299,6 +304,12 @@ def validate_ship_skill(errors: list[str]) -> None:
         "Адаптивно используй субагентов",
         "Default — `subagents=auto`",
         "safe useful width несколькими субагентами",
+        "только genuinely simple packet запускай на `gpt-5.6-luna`/`max`",
+        "Strategic Explainer наследуют current model/effort",
+        "Luna прекращает packet без\ncorrective mutations",
+        "integration\nowner на current profile без повторного cheap Luna loop",
+        "`luna-escalation=not-available` без скрытой подмены Sol",
+        "явный unavailable user profile не подменяй",
         "единственный integration owner",
         "владелец Goal и Task\nManager comments/status/version writes",
         "`subagents=off` для всего run, включая comment Explainer",
@@ -327,6 +338,11 @@ def validate_ship_skill(errors: list[str]) -> None:
         "active target равен min",
         "единственный integration owner",
         "владелец Goal и Task Manager comments/status/version writes",
+        "только genuinely simple bounded packets запускай на gpt-5.6-luna/max",
+        "остальные и Strategic Explainer наследуют current model/effort",
+        "Luna прекращает corrective mutations",
+        "exact handoff integration owner/current profile без cheap Luna retry loop",
+        "explicit unavailable profile не подменяй",
         "означают subagents=off и ноль subagents во всём run",
         "узкий запрет отключает только названную роль",
         "Приёмочный incident немедленно покажи в chat",
@@ -650,6 +666,36 @@ REVIEW_CASES = {
         "субъективно занизить target",
         "последовательно поглотить safe frontier",
     ),
+    "Genuinely simple bounded packet без отдельного profile override": (
+        "gpt-5.6-luna`/`max",
+        "primary selection сам по себе не отключает cheap lane",
+        "понизить Luna effort",
+        "user-selected subagent profile",
+    ),
+    "Короткий packet требует creative/architectural judgment или несёт material risk": (
+        "current model/effort",
+        "малого diff",
+    ),
+    "Luna встретила ambiguity, surprising environment/tool state или proof gap": (
+        "bounded read-only read-back точно устанавливает partial effects",
+        "прекращает corrective mutations",
+        "продолжает packet current profile",
+        "повторный cheap Luna loop",
+        "silent rollback",
+    ),
+    "Пользователь явно задал profile всем или named subagents": (
+        "приоритет над auto-classification",
+        "exact выбранный profile",
+        "`<profile>=not-available`",
+        "уменьшить role capacity",
+        "incompatible context",
+    ),
+        "Current primary profile сама Luna": (
+        "user choice сохраняется",
+        "возвращается integration owner",
+        "скрыто заменить Sol",
+        "replacement Luna retry loop",
+    ),
     "Большой batch с одной safe write lane": (
         "limiting factor",
         "один writer",
@@ -714,6 +760,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0021",
         "ADR-0022",
         "ADR-0024",
+        "ADR-0025",
         "## 2. Конституция",
         "adaptive multi-agent\nисполнение нескольких независимых work packets",
         "no-subagent opt-out",
@@ -734,6 +781,12 @@ def validate_current_contract(errors: list[str]) -> None:
         "production release уже подготовленного candidate",
         "Release-only run не создаёт",
         "Default topology — `subagents=auto`",
+        "Только genuinely simple packet запускается на\n`gpt-5.6-luna` с `max`",
+        "Strategic Explainer по умолчанию наследует current profile",
+        "повторно отправлять ту же неразрешённую проблему cheap Luna lane\nнельзя",
+        "его собственный выбор несовместимой формы context не делает profile\nunavailable",
+        "`<profile>=not-available` уменьшает\ncapacity соответствующей роли",
+        "Luna-to-current escalations",
         "единственный integration owner",
         "владелец Goal, Task Manager\ncomments/status/version writes",
         "`subagents=off` для всего текущего run",
@@ -753,12 +806,15 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0021",
         "ADR-0022",
         "ADR-0024",
+        "ADR-0025",
         "гарантированной adapter capability",
         "каждый создаваемый ShipTask-комментарий",
         "durable Task history",
         "Goal используется только для прогресса массовой имплементации",
         "production release",
         "несколько независимых safe lanes",
+        "genuinely\n  simple packets получают Luna Max",
+        "без повторного Luna loop",
         "общее «без субагентов» означает ноль субагентов",
     )
     require(
@@ -784,6 +840,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "acceptance incident openings",
         "compact ledger всех material acceptance incidents run",
         "found and resolved",
+        "Luna-to-current escalations",
         "не совместим с clean success",
     )
     require(
@@ -794,6 +851,11 @@ def validate_current_contract(errors: list[str]) -> None:
         "итоговый evidence",
         "выбор технического пути",
         "Task-local blocker",
+        "`gpt-5.6-luna`/`max` получает только genuinely simple packet",
+        "Luna не выполняет corrective recovery mutations",
+        "Повторный cheap Luna loop запрещён",
+        "выбранная\ncoordinator форма context не создаёт unavailability",
+        "Явный unavailable user profile не\nподменяется",
         "Production workflow требует явного approval",
     )
     require(
@@ -803,6 +865,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "При явном общем\n`subagents=off`",
         "отдельного субагента",
         "не переписывает текст обратно",
+        "user-facing judgment packet наследует current model/effort",
     )
     require(
         errors,
@@ -844,6 +907,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "Strategic Explainer определяется результатом",
         "Evals проверяют наблюдаемое поведение",
         "ADR-0024",
+        "ADR-0025",
     )
     require(
         errors,
@@ -874,6 +938,24 @@ def validate_current_contract(errors: list[str]) -> None:
         "workers=not-available",
         "comment-explainer=not-available",
         "peak width",
+        "ADR-0025",
+    )
+    require(
+        errors,
+        ADR["0025"],
+        "Cost-aware профили субагентов с эскалацией на current model",
+        "`gpt-5.6-luna` с `max`",
+        "Текущие model/effort основного агента образуют default profile",
+        "Явное указание пользователя",
+        "все условия",
+        "Strategic Explainer по умолчанию наследует current profile",
+        "Luna прекращает packet",
+        "без Luna retry loop",
+        "повторно\nотправить cheap Luna lane",
+        "собственный выбор incompatible context не делает profile unavailable",
+        "`<profile>=not-available`",
+        "`luna-escalation=not-available`",
+        "Sol Extra High или Sol Ultra как универсальный default",
     )
     require(
         errors,
@@ -1075,7 +1157,7 @@ def validate_supersession(errors: list[str]) -> None:
             "ADR-0021",
             "ADR-0022",
         ),
-        "0021": ("partially superseded", "ADR-0022", "ADR-0024"),
+        "0021": ("partially superseded", "ADR-0022", "ADR-0024", "ADR-0025"),
         "0022": ("partially superseded", "ADR-0024"),
     }
     for number, terms in required_markers.items():
@@ -1124,6 +1206,8 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "`To Do → In Progress` комментария не создаёт",
         "несколькими субагентами",
         "общий явный\n  no-subagent opt-out отключает их все",
+        "`gpt-5.6-luna`/`max`",
+        "Luna retry loop",
     )
     require(
         errors,
@@ -1138,6 +1222,8 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "`To Do → In Progress` не создаёт комментарий",
         "adaptive multi-agent default",
         "ноль subagents",
+        "Luna Max routing",
+        "current-profile escalation",
     )
 
 
@@ -1162,6 +1248,7 @@ def current_task_source_files() -> tuple[Path, ...]:
         ADR["0022"],
         ADR["0023"],
         ADR["0024"],
+        ADR["0025"],
     )
 
 

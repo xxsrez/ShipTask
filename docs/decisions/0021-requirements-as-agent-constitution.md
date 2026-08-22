@@ -7,7 +7,9 @@ scheme и option quota из ADR-0012, ADR-0013 и ADR-0014. Решение от�
 обязательного отдельного Strategic Explainer для комментариев было ошибочным и
 заменено [ADR-0022](0022-mandatory-independent-strategic-explainer-for-comments.md).
 Свобода выбора delegation для ShipTask частично заменена
-[ADR-0024](0024-adaptive-multi-agent-execution-by-default.md). Остальные
+[ADR-0024](0024-adaptive-multi-agent-execution-by-default.md), а свобода выбора
+model/effort для его субагентов —
+[ADR-0025](0025-cost-aware-subagent-profiles.md). Остальные
 требования-конституция сохраняются.
 
 ## Контекст
@@ -38,8 +40,9 @@ scheme и option quota из ADR-0012, ADR-0013 и ADR-0014. Решение от�
 Агент самостоятельно выбирает план, декомпозицию, инструменты, порядок
 диагностики, число попыток, форму context и текст ответа. Delegation также
 остаётся свободным выбором, кроме явных adaptive default/opt-out требований
-ShipTask из ADR-0024. Examples, reason codes и удобные структуры могут помогать,
-но не становятся обязательными только потому, что однажды сработали.
+ShipTask из ADR-0024 и cost-aware profile routing из ADR-0025. Examples, reason
+codes и удобные структуры могут помогать, но не становятся обязательными только
+потому, что однажды сработали.
 
 ### Когда допустима точность механизма
 
@@ -57,7 +60,8 @@ ShipTask из ADR-0024. Examples, reason codes и удобные структу�
 Это границы корректности внешнего состояния, а не общее управление тем, сколько
 агентов использовать, какие tools вызвать или как организовать reasoning.
 ADR-0024 задаёт отдельное пользовательское topology-требование только для
-ShipTask и не превращает остальные requirements в agent scripts.
+ShipTask, а ADR-0025 — узкое profile-требование; они не превращают остальные
+requirements в agent scripts.
 Технический adapter может описывать protocol, необходимый для безопасной работы
 API, но delivery policy не превращает этот protocol в универсальный agent
 script.

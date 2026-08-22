@@ -55,7 +55,10 @@
   заполняет независимые safe lanes несколькими субагентами; общий явный
   no-subagent opt-out отключает их все, включая comment Explainer, а узкий —
   только названную роль; без общего opt-out каждый комментарий проходит
-  отдельного независимого Strategic Explainer; обычный переход
+  отдельного независимого Strategic Explainer; особо простые bounded packets
+  без отдельного user override используют `gpt-5.6-luna`/`max`, остальные
+  наследуют current model/effort, а Luna при material uncertainty прекращает
+  packet и передаёт его current profile без Luna retry loop; обычный переход
   `To Do → In Progress` комментария не создаёт. Точный порядок
   оставляйте только для доказуемого инварианта целостности, безопасности или
   внешнего эффекта.

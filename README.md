@@ -18,7 +18,10 @@ rationale, observable evidence и authority/safety boundaries, но оставл
 исключение — execution topology: ShipTask по умолчанию адаптивно заполняет
 несколько независимых safe lanes субагентами, сохраняя одного integration owner.
 Общие «не используй субагентов»/«без субагентов» означают ноль субагентов во
-всём run; узкий запрет отключает только названную роль. Перед любым
+всём run; узкий запрет отключает только названную роль. Без отдельного user
+override только genuinely simple bounded packets используют Luna Max; остальные
+наследуют current model/effort, а ambiguity или unexpected environment переводят
+Luna packet integration owner на current profile без повторного Luna loop. Перед любым
 существенным status transition сначала
 публикуется и перечитывается понятный native Task comment; обычный старт
 `To Do → In Progress` комментария не создаёт. Task description и ответ в Codex

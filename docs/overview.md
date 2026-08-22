@@ -24,7 +24,10 @@ reporting contract —
 сохраняет default-требование отдельного Explainer перед каждым комментарием.
 [ADR-0024](decisions/0024-adaptive-multi-agent-execution-by-default.md)
 добавляет `subagents=auto` для широкого `batch-implementation` и явный
-`subagents=off`. Они уточняют
+`subagents=off`, а
+[ADR-0025](decisions/0025-cost-aware-subagent-profiles.md) направляет только
+genuinely simple packets на Luna Max и эскалирует material uncertainty на
+current profile. Они уточняют
 [ADR-0017](decisions/0017-constitution-first-runtime-contract.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
 результатов и жёстких границ. Агент свободен выбирать порядок, инструменты,
@@ -36,6 +39,10 @@ ADR-0024.
 - пользовательский outcome важнее Goal, plans и внутренней отчётности;
 - несколько независимых safe lanes по умолчанию получают adaptive subagents и
   одного integration owner;
+- user-selected subagent profile имеет приоритет; без него только genuinely
+  simple packets получают Luna Max, остальные наследуют current model/effort;
+- Luna не занимается recovery: ambiguity, surprising environment или proof gap
+  возвращают packet current profile без повторного Luna loop;
 - общее «без субагентов» означает ноль субагентов, а узкий запрет относится
   только к названной роли;
 - status Task соответствует текущим фактам;
@@ -164,6 +171,7 @@ secrets/privacy/access-policy changes, external recipients и unbounded cost
 - [Требования как конституция для агентов](decisions/0021-requirements-as-agent-constitution.md)
 - [Независимый Strategic Explainer для каждого комментария](decisions/0022-mandatory-independent-strategic-explainer-for-comments.md)
 - [Adaptive multi-agent default и explicit opt-out](decisions/0024-adaptive-multi-agent-execution-by-default.md)
+- [Cost-aware профили субагентов](decisions/0025-cost-aware-subagent-profiles.md)
 - [Task Manager adapter contract](reference/task-manager-adapter.md)
 - [Lifecycle evaluation](reference/shiptask-review-disposition-evaluation.md)
 - [Strategic Explainer specification](specs/strategic-explainer.md)
