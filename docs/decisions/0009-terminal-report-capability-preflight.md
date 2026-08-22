@@ -5,7 +5,9 @@
 история ошибочной гипотезы и не является текущим runtime contract. ADR-0017
 возвращает не старый безусловный fail-fast, а общий contract: необходимый
 инструмент сначала диагностируется и восстанавливается; без comment read-back
-существенный transition запрещён.
+существенный transition запрещён. Current adapter guarantee без отдельного
+comment capability preflight задан
+[ADR-0020](0020-visible-acceptance-incidents-and-required-comments.md).
 
 ## Контекст
 

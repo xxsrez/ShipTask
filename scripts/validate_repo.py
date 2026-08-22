@@ -54,6 +54,10 @@ ADR = {
         ("0017", "0017-constitution-first-runtime-contract.md"),
         ("0018", "0018-outcomes-not-tool-choreography.md"),
         ("0019", "0019-goal-only-for-multi-task-implementation.md"),
+        (
+            "0020",
+            "0020-visible-acceptance-incidents-and-required-comments.md",
+        ),
     )
 }
 
@@ -100,6 +104,8 @@ CURRENT_CONTRACT_FILES = (
     HANDOFF,
     ADR["0018"],
     ADR["0019"],
+    ADR["0020"],
+    ADAPTER,
 )
 
 LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
@@ -205,13 +211,12 @@ def validate_ship_skill(errors: list[str]) -> None:
     for term in (
         "$ship-tasks",
         "Task Manager scope",
-        "implicit invocation",
+        "неявно только",
         "TM-123",
-        "Одного delivery-глагола недостаточно",
+        "одного delivery-глагола недостаточно",
         "Create-and-deliver",
-        "Bare $ship-tasks разрешает mode по live inventory",
-        "Single и release работают без Goal",
-        "Goal нужен только для batch-implementation минимум двух Tasks",
+        "Bare invocation определяет mode по live inventory",
+        "Goal нужен только для implementation/rework минимум двух Tasks",
         "backlog capture",
     ):
         if term not in description:
@@ -221,7 +226,7 @@ def validate_ship_skill(errors: list[str]) -> None:
         "## 1. Выбери mode и exact scope",
         "## 2. Соблюдай обязательные требования",
         "## 3. Выполни и проверь result",
-        "## 4. Разбери `In Review` по текущим фактам",
+        "## 4. Разбери приёмку по текущим фактам",
         "## 5. Используй Strategic Explainer для человеческих объяснений",
         "## 6. Продолжай автономно и финализируй",
     )
@@ -244,8 +249,12 @@ def validate_ship_skill(errors: list[str]) -> None:
         "verified-failure",
         "verification-blocked",
         "In Review → In Progress",
-        "2–4 способа",
         "продолжай rework в этом же run",
+        "гарантированная часть current Task Manager adapter",
+        "Не скрывай приёмочный инцидент",
+        "немедленно сообщи в Codex chat",
+        "каждые 10 минут",
+        "incident ledger",
         "$ship-tasks:strategic-explainer",
         "способ выполнения этого требования выбирает агент",
         "SHIPTASK RUN REPORT",
@@ -262,6 +271,9 @@ def validate_ship_skill(errors: list[str]) -> None:
         "In Review",
         "Goal создавай только для реальной implementation/rework минимум двух Tasks",
         "release-only, включая production, работают без нового Goal",
+        "Приёмочный incident немедленно покажи в chat",
+        "opening comment до repair",
+        "incident ledger в final report",
     )
 
 
@@ -359,8 +371,24 @@ REVIEW_CASES = {
     ),
     "Exact candidate воспроизводимо нарушает критерий": (
         "verified-failure",
+        "immediate chat alarm",
+        "до repair",
         "In Progress",
         "продолжить rework в том же run",
+    ),
+    "Defect найден и исправлен в одном run": (
+        "found and resolved",
+        "resolution",
+        "final ledger",
+        "стереть историю",
+    ),
+    "Incident unresolved во время долгого active run": (
+        "каждые 10 минут",
+        "спамить одинаковыми Task comments",
+    ),
+    "Новый run возобновляет Task с unresolved incident": (
+        "первом содержательном chat update",
+        "material change",
     ),
     "Первый выбранный способ проверки не сработал": (
         "агент сам выбирает",
@@ -369,11 +397,17 @@ REVIEW_CASES = {
     "В current scope нет достаточного способа доказать success/failure": (
         "verification-blocked",
         "In Review",
-        "2–4 способа",
+        "strongest feasible путь",
+        "только при material выборе",
     ),
     "Batch gate упал, виновная Task не установлена": (
         "In Review",
         "separating evidence",
+    ),
+    "Release verification нашла defect в terminal Task": (
+        "verified-failure",
+        "до reopen",
+        "exact Task",
     ),
     "Полный evidence доказывает критерии": (
         "verified-success",
@@ -384,10 +418,11 @@ REVIEW_CASES = {
         "terminal reason",
         "terminal status",
     ),
-    "Обязательный comment фактически не создан или не перечитан": (
+    "Обязательный comment write/read-back дал ошибку": (
         "transition не завершён",
         "не выполнять существенный transition",
         "fallback в description",
+        "skip обязательного comment",
     ),
     "Массовая имплементация минимум двух Tasks": (
         "batch-implementation",
@@ -421,13 +456,17 @@ def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         SPEC,
-        "Статус: current contract, 2026-08-21",
+        "Статус: current contract, 2026-08-22",
         "ADR-0018",
         "ADR-0019",
+        "ADR-0020",
         "## 2. Конституция",
         "comment",
         "до status write",
-        "не является обязательным",
+        "всегда создаёт и перечитывает обязательный comment",
+        "Приёмочный инцидент виден сразу",
+        "примерно каждые 10 минут",
+        "compact ledger всех material incidents",
         "current acceptance не ослаблен",
         "не найден достаточный безопасный способ продолжить",
         "Нет фиксированного числа попыток",
@@ -446,6 +485,9 @@ def validate_current_contract(errors: list[str]) -> None:
         "не называется verified",
         "ADR-0018",
         "ADR-0019",
+        "ADR-0020",
+        "гарантированной adapter capability",
+        "durable Task history",
         "Goal используется только для прогресса массовой имплементации",
         "production release",
     )
@@ -454,10 +496,21 @@ def validate_current_contract(errors: list[str]) -> None:
         REPORT,
         "Только затем",
         "transition не завершён",
-        "не предписывает, какой tool выбрать",
+        "всегда создаёт и перечитывает обязательный comment",
+        "До repair немедленно сообщить incident",
+        "resolution/completion comment",
         "Приёмка заблокирована",
-        "2–4 различных способа",
+        "рекомендуемый feasible способ",
+        "каждые 10 минут",
         "Ответ в Codex не является durable Task comment",
+    )
+    require(
+        errors,
+        RUN_REPORT,
+        "acceptance incident openings",
+        "compact ledger всех material acceptance incidents run",
+        "found and resolved",
+        "не совместим с clean success",
     )
     require(
         errors,
@@ -494,6 +547,23 @@ def validate_current_contract(errors: list[str]) -> None:
         "Release-only не создаёт",
         "Production отличается дополнительной authority boundary",
         "Сам release новый Goal не создаёт",
+    )
+    require(
+        errors,
+        ADR["0020"],
+        "Приёмочные инциденты видимы во всём run",
+        "Comments — гарантированный adapter contract",
+        "Немедленный outcome-first update",
+        "примерно в 10 минут",
+        "Final success не стирает найденный defect",
+        "рекомендует самый сильный feasible",
+    )
+    require(
+        errors,
+        ADAPTER,
+        "повторно сверен 2026-08-22",
+        "Native comment create/list/read являются гарантированной частью adapter",
+        "reconciles через native reads до retry или status transition",
     )
 
     contradiction_patterns = {
@@ -554,6 +624,27 @@ def validate_current_contract(errors: list[str]) -> None:
             "сначала пытается его восстановить",
         )
 
+    for path in (
+        SHIP_SKILL,
+        SPEC,
+        OVERVIEW,
+        REPORT,
+        RUN_REPORT,
+        AUTONOMY,
+        HANDOFF,
+        ADAPTER,
+    ):
+        forbid(
+            errors,
+            path,
+            "2–4 способа приёмки",
+            "2–4 различных способа",
+            "comment-delivery-unavailable",
+            "terminal-report-channel-unavailable",
+            "comment channel недоступен",
+            "comment channel не работает",
+        )
+
 
 def validate_strategic_contract(errors: list[str]) -> None:
     require(
@@ -607,16 +698,17 @@ def validate_supersession(errors: list[str]) -> None:
     required_markers = {
         "0002": ("superseded", "ADR-0003"),
         "0008": ("superseded ADR-0011",),
-        "0009": ("superseded", "ADR-0010", "ADR-0017"),
+        "0003": ("ADR-0006", "ADR-0020"),
+        "0009": ("superseded", "ADR-0010", "ADR-0017", "ADR-0020"),
         "0005": ("ADR-0016", "ADR-0017"),
-        "0006": ("ADR-0016", "ADR-0017"),
+        "0006": ("ADR-0016", "ADR-0017", "ADR-0020"),
         "0010": ("ADR-0016", "ADR-0017"),
         "0012": ("ADR-0014", "no-tools"),
         "0013": ("ADR-0014", "ADR-0016", "ADR-0017"),
-        "0015": ("partially superseded", "ADR-0017"),
-        "0016": ("partially superseded", "ADR-0017"),
+        "0015": ("partially superseded", "ADR-0017", "ADR-0020"),
+        "0016": ("partially superseded", "ADR-0017", "ADR-0020"),
         "0007": ("ADR-0019",),
-        "0017": ("partially superseded", "ADR-0018", "ADR-0019"),
+        "0017": ("partially superseded", "ADR-0018", "ADR-0019", "ADR-0020"),
     }
     for number, terms in required_markers.items():
         header = "\n".join(read(ADR[number]).splitlines()[:18])
@@ -635,6 +727,7 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "Adapter не выбирает business scope",
         "current Task `version`",
         "Task Manager state доказывает только собственную projection",
+        "Native comment create/list/read являются гарантированной частью adapter",
     )
     require(
         errors,
@@ -679,6 +772,7 @@ def current_task_source_files() -> tuple[Path, ...]:
         HANDOFF,
         ADR["0018"],
         ADR["0019"],
+        ADR["0020"],
     )
 
 

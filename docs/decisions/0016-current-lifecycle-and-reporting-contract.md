@@ -3,7 +3,9 @@
 Статус: partially superseded, 2026-08-21. Нейтральный смысл `In Review`,
 task-level defect attribution и отказ от счётчика повторов сохраняются. Разрыв
 между comment и non-terminal status, `communication remainder` и procedural
-form заменены [ADR-0017](0017-constitution-first-runtime-contract.md).
+form заменены [ADR-0017](0017-constitution-first-runtime-contract.md), а
+comment-channel availability и acceptance incident reporting —
+[ADR-0020](0020-visible-acceptance-incidents-and-required-comments.md).
 Исторически уточнял ADR-0006, ADR-0010, ADR-0013 и
 ADR-0015. Отменяет оставшиеся в действующих документах формулировки о
 массовом rework без task-level доказательства, трёх повторах ради Goal

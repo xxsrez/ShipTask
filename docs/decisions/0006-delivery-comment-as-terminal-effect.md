@@ -7,6 +7,8 @@ comment channel на truthful non-terminal status и требование обя
 диаграммы заменены [ADR-0016](0016-current-lifecycle-and-reporting-contract.md).
 Current порядок comment read-back до любого существенного transition и required
 tool recovery задан [ADR-0017](0017-constitution-first-runtime-contract.md).
+Availability-ветвь и current incident persistence заменены
+[ADR-0020](0020-visible-acceptance-incidents-and-required-comments.md).
 
 ## Контекст
 

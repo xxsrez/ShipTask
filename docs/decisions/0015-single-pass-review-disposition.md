@@ -7,7 +7,9 @@ ADR-0013. Отменяет использование строгого Goal bloc
 business workflow для task-local приёмки; остальные system/tool ограничения на
 Goal остаются внешней границей. Status/comment эффекты и отмена
 оставшихся legacy формулировок собраны в
-[ADR-0016](0016-current-lifecycle-and-reporting-contract.md).
+[ADR-0016](0016-current-lifecycle-and-reporting-contract.md). Current
+cross-surface incident reporting и recommended-path blocker contract заданы
+[ADR-0020](0020-visible-acceptance-incidents-and-required-comments.md).
 
 ## Контекст
 

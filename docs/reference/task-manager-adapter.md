@@ -1,6 +1,6 @@
 # Task Manager adapter
 
-Статус: current compatibility contract, повторно сверен 2026-08-21.
+Статус: current compatibility contract, повторно сверен 2026-08-22.
 
 Документ фиксирует только техническую границу между ShipTask и Task Manager
 skill/connector. Business delivery policy, lifecycle decisions, Goal,
@@ -10,7 +10,7 @@ automatic acceptance, release authority и project memory определяютс
 ## Проверенная база
 
 Профиль повторно сверен с marketplace source и installed cache
-`task-manager@srez-marketplace` версии `0.7.5+codex.20260821121000`.
+`task-manager@srez-marketplace` версии `0.7.5+codex.20260821203934`.
 Package содержит только adapter skill `task-manager`, не содержит
 `ship-tasks`/`strategic-explainer`, а marketplace source и installed cache совпадают.
 Текущий Task Manager `SKILL.md` прямо запрещает adapter самостоятельно
@@ -22,7 +22,7 @@ capabilities и ответы connector.
 
 Task Manager skill/connector владеет:
 
-- OAuth connection и capability discovery;
+- OAuth connection и workspace access/capability reads;
 - Project, Release, Task и status lookup;
 - canonical refs, pagination и full detail retrieval;
 - ACL checks и optimistic concurrency через current Task `version`;
@@ -62,9 +62,9 @@ identifier вроде `TM-123` является selector/display identity; immut
   строить Project/Release/status refs из display names и не доверять remembered
   ref без current lookup.
 - Проверять Release membership до combined Project+Release filter.
-- Проверять connector write capability и `access.canEdit` отдельно.
-- Imported comments/attachments являются read-only provenance и не доказывают
-  native comment-write capability.
+- Проверять current workspace access и `access.canEdit` отдельно.
+- Native comment create/list/read являются гарантированной частью adapter
+  contract. ShipTask всегда использует их для обязательного reporting.
 - Goal tools не являются Task Manager tools.
 - Task Manager `Release` не является deployment environment и не доказывает
   production/non-production class.
@@ -111,8 +111,8 @@ ShipTask применяет `TASK CONTEXT ALARM`. Если gap изолиров�
 - current detail/status/version/access;
 - pagination completeness для multi-task inventory;
 - write outcome и post-write read-back;
-- native comment/report identity либо честный `not-available` /
-  `write-outcome-unknown`;
+- native comment/report identity и read-back; `write-outcome-unknown` сначала
+  reconciles через native reads до retry или status transition;
 - exact connector error без выдуманного business interpretation.
 
 Task Manager state доказывает только собственную projection. Commit, build,

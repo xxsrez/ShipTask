@@ -2,7 +2,9 @@
 
 Статус: accepted, 2026-08-16. Заменяет
 [ADR-0002](0002-managed-delivery-report-in-task.md). Capability-optional часть
-этого решения заменена [ADR-0006](0006-delivery-comment-as-terminal-effect.md).
+этого решения заменена [ADR-0006](0006-delivery-comment-as-terminal-effect.md),
+а current гарантия native comments закреплена
+[ADR-0020](0020-visible-acceptance-incidents-and-required-comments.md).
 
 ## Контекст
 

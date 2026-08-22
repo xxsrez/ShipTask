@@ -1,9 +1,12 @@
 # ShipTask: канонический контракт
 
-Статус: current contract, 2026-08-21. Основан на
+Статус: current contract, 2026-08-22. Основан на
 [ADR-0018](../decisions/0018-outcomes-not-tool-choreography.md) и
-[ADR-0019](../decisions/0019-goal-only-for-multi-task-implementation.md): первый
-уточняет constitution-first решение ADR-0017, второй отделяет Goal от release.
+[ADR-0019](../decisions/0019-goal-only-for-multi-task-implementation.md), а
+reporting contract уточнён
+[ADR-0020](../decisions/0020-visible-acceptance-incidents-and-required-comments.md).
+Эти решения соответственно сохраняют свободу способа, отделяют Goal от release
+и делают приёмочные инциденты видимыми во всём run.
 
 ## 1. Назначение и запуск
 
@@ -40,6 +43,8 @@ reconciliation нескольких Tasks не являются массовой
 Bare `$ship-tasks` берёт `current_scope` из project memory. Prompt selector имеет
 приоритет, но не переписывает memory. Task Manager всегда перечитывается: memory
 не доказывает текущий status, version, comments, relations или access.
+Unresolved acceptance incidents из materially relevant comments называются в
+первом содержательном chat update после scope resolution.
 
 ### 1.2 Проверяемая trigger matrix
 
@@ -90,7 +95,34 @@ Bare `$ship-tasks` берёт `current_scope` из project memory. Prompt select
 обязателен. Ответ только в Codex не заменяет Task comment. `description` и другие
 поля Task не используются как запасной канал.
 
-### 2.3 Доказательство важнее выбранного способа
+Current Task Manager adapter предоставляет native comment create/list/read.
+ShipTask всегда создаёт и перечитывает обязательный comment. Create reconciles
+по adapter contract; пока comment фактически не существует, связанный
+существенный transition не завершён.
+
+### 2.3 Приёмочный инцидент виден сразу и остаётся в истории
+
+`verified-failure`, `verification-blocked` и `task-contract-conflict`,
+установленные при проверке exact candidate или release scope, являются
+приёмочными инцидентами. Только `verified-failure` называется найденным bug.
+
+До repair, status write или blocking handoff агент немедленно сообщает в Codex
+chat exact Task/criterion, expected result, observed fact либо границу знания,
+impact, установленный outcome и следующий шаг. Для exact Task затем публикуется
+и перечитывается opening comment. Resolution/completion comment не стирает
+opening: он связывает тот же criterion с cause/confidence, fix/result identity,
+повторной проверкой, final state и remaining risk.
+
+Пока инцидент unresolved в active run, chat напоминает о нём при каждом material
+state change и, если таких изменений долго нет, примерно каждые 10 минут. Эти
+progress updates не дублируются в Task comments. Финальный run report сохраняет
+compact ledger всех material incidents, включая найденные и исправленные в том
+же run.
+
+Сбой отдельного инструмента, ожидаемая red/green iteration и общий batch failure
+без task-level attribution не создают инцидент конкретной Task.
+
+### 2.4 Доказательство важнее выбранного способа
 
 Агент самостоятельно выбирает инструменты, способы диагностики, реализации и
 приёмки. Ни один технический путь не является обязательным только потому, что
@@ -113,12 +145,12 @@ Native Task comment остаётся обязательным наблюдаем
 transition. Как обеспечить его создание и read-back, решает агент. Transition
 не считается завершённым, пока comment фактически не существует в Task.
 
-### 2.4 Факты определяют исход приёмки
+### 2.5 Факты определяют исход приёмки
 
 Количество прежних попыток или редакций acceptance ничего само по себе не
 доказывает. Текущий контракт Task и текущее наблюдение важнее истории.
 
-### 2.5 Безопасность и полномочия остаются жёсткими
+### 2.6 Безопасность и полномочия остаются жёсткими
 
 ShipTask не расширяет scope и не разрешает без явного согласия production,
 необратимые изменения durable data, secrets/privacy/access-policy changes,
@@ -129,8 +161,9 @@ release в dev/test/QA/UAT/staging/preview/sandbox входит в delivery auth
 ## 3. Источники истины и технический адаптер
 
 Task Manager connector является единственным task-source и отвечает за exact
-refs, pagination, detail, comments, optimistic version и read-back. ShipTask
-задаёт delivery policy, но не изобретает отсутствующие adapter capabilities.
+refs, pagination, detail, native comment create/list/read, optimistic version и
+read-back. ShipTask задаёт delivery policy, а adapter гарантирует comment
+mechanics, idempotency/reconciliation и current payload contract.
 
 Перед работой агент разрешает полный exact scope и перечитывает live Task state,
 acceptance, relations, relevant comments, dependencies и authority. Детали
@@ -183,27 +216,36 @@ Status меняется только после comment read-back; затем Ta
 перечитывает его, переводит `In Progress → In Review` и сразу проводит
 приёмку. `In Review` не является местом ожидания человека.
 
-## 5. Четыре исхода `In Review`
+## 5. Исходы приёмки
 
-Агент выбирает исход по текущим фактам, а не по желанию закрыть Goal.
+Агент выбирает исход по текущим фактам, а не по желанию закрыть Goal. Матрица
+применяется к exact candidate в `In Review` и к release verification уже
+подготовленного scope. Status effects выполняются только для точно attributed
+Tasks.
 
 ### 5.1 Противоречие в задаче (`task-contract-conflict`)
 
 Current mandatory requirements противоречат друг другу либо не определяют
-наблюдаемый результат. Если одно исправление объективно следует из accepted
-source и разрешено, агент исправляет контракт и перечитывает Task. Иначе через
-Strategic Explainer формулирует точное противоречие и нужное решение, публикует
-и перечитывает comment, оставляет Task в `In Review`.
+наблюдаемый результат. Агент немедленно называет конфликт в chat и публикует
+opening comment. Если одно исправление объективно следует из accepted source и
+разрешено, он исправляет контракт, перечитывает Task и оставляет resolution
+comment. Иначе Task остаётся `In Review` с рекомендованным решением.
 
 Длинная история изменений acceptance не является конфликтом.
 
 ### 5.2 Доказанный дефект (`verified-failure`)
 
 Exact candidate в совместимой среде прямо нарушает current acceptance. Агент
-через Strategic Explainer формулирует, что проверено, что именно не работает,
-каково влияние и почему нужен возврат. После comment read-back переводит
-`In Review → In Progress`, перечитывает Task и продолжает исправление в том же
-run. Сам переход не является завершением ShipTask.
+до repair сообщает инцидент в chat и через Strategic Explainer формулирует
+opening comment: что ожидалось, что наблюдается, каково влияние, чем это доказано
+и почему нужен возврат. После comment read-back переводит `In Review → In
+Progress`, перечитывает Task и продолжает исправление в том же run. Сам переход
+не является завершением ShipTask.
+
+После repair агент публикует material progress в chat, повторяет достаточную
+приёмку и в resolution/completion comment связывает тот же criterion с cause,
+fix/result identity и retest evidence. Найденный defect остаётся в final incident
+ledger даже при последующем `verified-success`.
 
 Падение общей batch-проверки без task-level attribution не доказывает дефект
 каждой Task. Сначала нужна диагностика, которая разделит причины.
@@ -215,13 +257,13 @@ run. Сам переход не является завершением ShipTask
 
 - что именно нельзя установить и почему;
 - что уже доказано;
-- 2–4 реально различающихся способа провести приёмку, их предпосылки,
-  доказательную силу и краткий trade-off;
-- рекомендуемый следующий вариант и наблюдаемый признак успеха.
+- рекомендуемый feasible способ получить достаточное evidence, его предпосылки
+  и наблюдаемый признак успеха;
+- альтернативы только когда реальный выбор materially меняет authority, risk,
+  cost или доказательную силу.
 
-Комментарий публикуется и перечитывается, Task остаётся `In Review`. Если сломан
-сам comment channel, статус не меняется, run сообщает инфраструктурную проблему
-прямо и не изображает блокировку документированной в Task.
+Агент немедленно сообщает, что приёмка не завершена и product bug не установлен,
+публикует и перечитывает opening/blocker comment; Task остаётся `In Review`.
 
 ### 5.4 Доказанный успех (`verified-success`)
 
@@ -229,7 +271,16 @@ Current acceptance, применимые проверки, identity интегр
 обязательные effects доказаны. Агент через Strategic Explainer формулирует
 полученный результат, его значение, ключевое evidence и реальные ограничения,
 публикует и перечитывает comment, затем переводит `In Review → Done` и
-перечитывает Task.
+перечитывает Task. Если в этом run был приёмочный инцидент, comment также
+закрывает его или прямо указывает, что он остаётся unresolved.
+
+### 5.5 Attribution за пределами одной Task
+
+Падение общего batch gate без task-level attribution создаёт scope-level chat и
+final-report finding, но не defect comments во всех Tasks. После separating
+evidence opening comment и lifecycle effects получает только exact affected
+Task. Если release verification обнаружила defect в terminal Task, opening
+comment предшествует reopen, после чего обычный rework lifecycle продолжается.
 
 ## 6. Strategic Explainer
 
@@ -319,11 +370,17 @@ Run report начинается с результата и простым язы
 
 - что получилось и в каком состоянии Task/Goal;
 - что доказано, а что не проверено;
+- какие material acceptance incidents обнаружены, включая уже исправленные;
+- для каждого incident — Task/criterion, cause/confidence, fix, retest evidence
+  и final state;
 - причину незавершённости, если она есть;
 - какие исправления уже выполнены;
 - одно точное условие или действие для продолжения.
 
-Run report не заменяет Task comments. Goal `batch-implementation` отмечается
+Unresolved incident располагается рядом с общим result и не допускает
+clean-success формулировку для affected Task. Compact incident ledger не
+является process diary и не исчезает после успешного repair. Run report не
+заменяет Task comments. Goal `batch-implementation` отмечается
 complete только после fresh full inventory без незавершённой in-scope работы.
 Release-only run не создаёт и не финализирует Goal. Нельзя объявлять skill change
 или distribution завершёнными при частичном выполнении project DoD.

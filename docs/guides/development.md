@@ -19,6 +19,9 @@
 - Жёсткий порядок нужен там, где effects необратимо расходятся: для
   существенного lifecycle transition comment и read-back предшествуют status
   write.
+- Не добавляйте отдельный capability-discovery branch для native Task comments:
+  current Task Manager adapter гарантирует create/list/read. Проверяйте
+  фактический write/read-back и reconciliation неизвестного outcome.
 - Не превращайте первый выбранный или однажды сломавшийся инструмент в общий
   обязательный путь. Проверяйте достаточность итогового evidence.
 - Не добавляйте фиксированное число попыток. Проверяйте основание для повтора и
@@ -62,16 +65,22 @@ skill, реалистичный exact Task Manager scope и обычный proje
   ShipTask;
 - `To Do → In Progress` проходит без лишнего comment;
 - готовый candidate получает comment/read-back до `In Review`;
-- proven defect получает понятный comment до `In Progress`, после чего rework
-  продолжается в том же run;
+- proven defect немедленно виден в chat, получает opening comment до repair и
+  `In Progress`, после чего rework продолжается в том же run;
+- найденный и исправленный в одном run defect сохраняется в Task resolution
+  comment и final incident ledger;
+- unresolved incident получает chat update при material state change и
+  heartbeat активного run без дублирования Task comments;
 - verification blocker означает отсутствие достаточного способа доказать
-  success/failure в current scope; comment даёт 2–4 способа приёмки и сохраняет
-  `In Review`;
+  success/failure в current scope; comment рекомендует strongest feasible путь,
+  сравнивая alternatives только при реальном выборе, и сохраняет `In Review`;
 - proven success получает completion comment/read-back до `Done`;
 - reopen, cancel и duplicate не выполняются молча;
 - существенный transition проверяется по фактическому comment/read-back, а не по
   предписанному способу работы comment tools;
 - failed batch gate без task attribution не возвращает весь batch в rework;
+- release verification exact terminal Task создаёт opening incident comment до
+  reopen, а finding без attribution остаётся scope-level;
 - Goal не вводит счётчик попыток и не заменяет Task state; production release не
   создаёт Goal, но может быть done criterion уже активного Goal массовой
   имплементации;

@@ -14,7 +14,8 @@
   для explicit invocation и natural-language delivery с однозначным Task
   Manager anchor: single и release без Goal, Goal только для массовой
   имплементации минимум двух Tasks, constitution-first требования, обязательные
-  comments, свобода выбора инструментов и фактическая классификация приёмки.
+  comments, видимые acceptance incidents, свобода выбора инструментов и
+  фактическая классификация приёмки.
 - [Strategic Explainer](specs/strategic-explainer.md) — общий contract
   обязательного problem gate, bounded read-only strategic discovery и свободного
   объяснения без mutations, status decisions и новой authority.
@@ -27,7 +28,7 @@
   — историческое решение о report block в description, заменённое ADR-0003.
 - [0003: Delivery reports только как Task comments](decisions/0003-delivery-reports-as-task-comments.md)
   — исторический comments-only contract без изменения description; его
-  capability-optional часть заменена ADR-0006.
+  capability-optional часть последовательно заменена ADR-0006 и ADR-0020.
 - [0004: Autonomous continuation и release authority](decisions/0004-autonomous-continuation-and-release-authority.md)
   — task-local defer вместо остановки run, automatic non-production releases и
   explicit-only production boundary; blocker analysis уточнён ADR-0010.
@@ -36,7 +37,8 @@
   через reopen или новую Task, без blocking human-acceptance round-trip.
 - [0006: Delivery comment как обязательный terminal effect](decisions/0006-delivery-comment-as-terminal-effect.md)
   — после появления native comment tools завершение Task требует
-  опубликованного и перечитанного `COMPLETED` report до перехода в Done.
+  опубликованного и перечитанного `COMPLETED` report до перехода в Done;
+  availability-ветвь заменена ADR-0020.
 - [0007: Delivery policy и project memory принадлежат ShipTask](decisions/0007-delivery-policy-and-project-memory.md)
   — adapter / policy / context layers, implicit routing, single/batch modes и
   граница Memories как selector/profile, а не live task state.
@@ -44,7 +46,7 @@
   — историческое решение о bundled distribution, заменённое ADR-0011.
 - [0009: Terminal-report capability как preflight barrier](decisions/0009-terminal-report-capability-preflight.md)
   — superseded incident hypothesis; сохранена как история отменённого
-  comment-channel fail-fast решения.
+  comment-channel fail-fast решения; current adapter guarantee задан ADR-0020.
 - [0010: Осмысленная финализация и глубокий компактный run report](decisions/0010-blocker-analysis-and-human-run-report.md)
   — перед любым terminal outcome агент проверяет целостный результат, устраняет
   доступные проблемы и только затем даёт человеку сжатое причинное объяснение.
@@ -77,6 +79,10 @@
 - [0019: Goal только для массовой имплементации Tasks](decisions/0019-goal-only-for-multi-task-implementation.md)
   — Project/Release являются selectors; Goal создаётся только для реализации или
   rework минимум двух Tasks, а release-only выполняется без Goal.
+- [0020: Видимые приёмочные инциденты и обязательные comments](decisions/0020-visible-acceptance-incidents-and-required-comments.md)
+  — native comments являются гарантией adapter contract; failed/blocked
+  acceptance немедленно видна в chat, сохраняется в Task history и остаётся в
+  final report после repair.
 
 ## Reference
 
@@ -87,7 +93,7 @@
   rubric и обязательные regression cases.
 - [Проверка классификации `In Review`](reference/shiptask-review-disposition-evaluation.md)
   — decision-level cases для task-contract conflict, proven failure,
-  verification blocker, comment gap и Goal behavior.
+  verification blocker, incident persistence и Goal behavior.
 - [Project memory contract](../ship-tasks/references/project-memory.md) —
   runtime-схема current scope и project profile, precedence, bootstrap,
   freshness, alarms и cross-surface ограничения.

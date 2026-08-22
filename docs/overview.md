@@ -14,8 +14,10 @@ Strategic Explainer = помощник по человеческому объя�
 ## Constitution-first подход
 
 Текущий contract задан [ADR-0018](decisions/0018-outcomes-not-tool-choreography.md)
-и [ADR-0019](decisions/0019-goal-only-for-multi-task-implementation.md), которые
-уточняют [ADR-0017](decisions/0017-constitution-first-runtime-contract.md).
+и [ADR-0019](decisions/0019-goal-only-for-multi-task-implementation.md), а
+reporting contract —
+[ADR-0020](decisions/0020-visible-acceptance-incidents-and-required-comments.md).
+Они уточняют [ADR-0017](decisions/0017-constitution-first-runtime-contract.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
 результатов и жёстких границ. Агент свободен выбирать порядок, инструменты,
 реализацию и достаточные проверки.
@@ -27,6 +29,10 @@ Strategic Explainer = помощник по человеческому объя�
 - существенный status transition сначала получает понятный native comment и
   comment read-back; исключение — обычный старт `To Do → In Progress`;
 - material blocker также получает comment, даже без status change;
+- native comments являются гарантированной adapter capability и всегда
+  сопровождают material lifecycle reporting;
+- acceptance incident немедленно виден в chat, durable Task history и final
+  run report, даже если defect исправлен в том же run;
 - агент сам выбирает и меняет инструменты, способ диагностики и приёмки;
 - сбой одного средства сам по себе ничего не доказывает и не обязывает чинить
   именно его;
@@ -89,8 +95,9 @@ Current facts дают один из четырёх исходов:
 
 При defect comment объясняет причину возврата, затем Task переходит в
 `In Progress`, и rework продолжается в том же run. При невозможности приёмки
-Task остаётся `In Review`, а comment предлагает 2–4 способа получить
-доказательство. История
+Task остаётся `In Review`, а comment рекомендует strongest feasible способ
+получить доказательство и сравнивает alternatives только при реальном выборе.
+История
 редакций acceptance и число прошлых попыток сами по себе не являются problem.
 
 ## Инструменты и остановка
@@ -123,6 +130,7 @@ secrets/privacy/access-policy changes, external recipients и unbounded cost
 - [Constitution-first ADR](decisions/0017-constitution-first-runtime-contract.md)
 - [Outcome, не tool choreography](decisions/0018-outcomes-not-tool-choreography.md)
 - [Goal только для массовой имплементации](decisions/0019-goal-only-for-multi-task-implementation.md)
+- [Видимые приёмочные инциденты и обязательные comments](decisions/0020-visible-acceptance-incidents-and-required-comments.md)
 - [Task Manager adapter contract](reference/task-manager-adapter.md)
 - [Lifecycle evaluation](reference/shiptask-review-disposition-evaluation.md)
 - [Strategic Explainer specification](specs/strategic-explainer.md)
