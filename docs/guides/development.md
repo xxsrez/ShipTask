@@ -66,7 +66,9 @@ boundaries. Проверка не должна требовать конкрет
 числа tool calls вместо observable behavior. Evals проверяют adaptive
 `auto`/`off` contract и отдельного независимого Strategic Explainer при
 разрешённых субагентах, но не фиксируют fork mode, prompt envelope, retry count
-или число alternatives.
+или число alternatives. Auto-title является отдельным явным требованием:
+проверяются доказанная first-turn eligibility, сохранение meaningful title и
+адресация только calling task.
 
 ## Forward test
 
@@ -81,6 +83,9 @@ skill, реалистичный exact Task Manager scope и обычный proje
   сами mode не определяют; release-only, чтение нескольких Tasks и общая приёмка
   работают без Goal; audit/planning/backlog и generic code request не запускают
   ShipTask;
+- первый ShipTask-вызов с catalog placeholder после live scope resolution один
+  раз получает `ShipTask · ...`; meaningful title, later turn, incomplete
+  history и ambiguous current candidate не переименовываются;
 - несколько independent conflict-free Tasks в `subagents=auto` одновременно
   получают несколько bounded workers и одного integration owner;
 - genuinely simple bounded packet без отдельного profile override получает Luna

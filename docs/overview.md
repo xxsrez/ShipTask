@@ -41,6 +41,9 @@ ADR-0024.
   одного integration owner;
 - user-selected subagent profile имеет приоритет; без него только genuinely
   simple packets получают Luna Max, остальные наследуют current model/effort;
+- доказанная первая Codex task с catalog placeholder после live scope resolution
+  один раз получает короткий `ShipTask · ...` title; meaningful title и
+  последующие turns не переименовываются;
 - Luna не занимается recovery: ambiguity, surprising environment или proof gap
   возвращают packet current profile без повторного Luna loop;
 - общее «без субагентов» означает ноль субагентов, а узкий запрет относится

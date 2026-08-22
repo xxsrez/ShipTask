@@ -58,7 +58,10 @@
   отдельного независимого Strategic Explainer; особо простые bounded packets
   без отдельного user override используют `gpt-5.6-luna`/`max`, остальные
   наследуют current model/effort, а Luna при material uncertainty прекращает
-  packet и передаёт его current profile без Luna retry loop; обычный переход
+  packet и передаёт его current profile без Luna retry loop; доказанная первая
+  Codex task с catalog placeholder после live scope resolution один раз получает
+  `ShipTask · ...`, но meaningful title, later turn или ambiguous candidate не
+  переименовываются; обычный переход
   `To Do → In Progress` комментария не создаёт. Точный порядок
   оставляйте только для доказуемого инварианта целостности, безопасности или
   внешнего эффекта.

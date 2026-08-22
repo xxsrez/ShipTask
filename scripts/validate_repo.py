@@ -35,6 +35,7 @@ RUN_REPORT = ROOT / "ship-tasks" / "references" / "run-report.md"
 AUTONOMY = ROOT / "ship-tasks" / "references" / "autonomy-and-release.md"
 MEMORY = ROOT / "ship-tasks" / "references" / "project-memory.md"
 HANDOFF = ROOT / "ship-tasks" / "references" / "strategic-explainer.md"
+THREAD_TITLE = ROOT / "ship-tasks" / "references" / "thread-title.md"
 
 ADR = {
     number: ROOT / "docs" / "decisions" / name
@@ -112,6 +113,7 @@ CORE_FILES = (
     AUTONOMY,
     MEMORY,
     HANDOFF,
+    THREAD_TITLE,
     *ADR.values(),
 )
 
@@ -141,6 +143,7 @@ CURRENT_CONTRACT_FILES = (
     AUTONOMY,
     MEMORY,
     HANDOFF,
+    THREAD_TITLE,
     ADR["0018"],
     ADR["0019"],
     ADR["0020"],
@@ -321,6 +324,28 @@ def validate_ship_skill(errors: list[str]) -> None:
         "не переписывай текст самостоятельно",
         "Обычный `To Do → In Progress` не запускает Explainer",
         "SHIPTASK RUN REPORT",
+        "[title contract](references/thread-title.md)",
+        "доказанный catalog placeholder",
+    )
+
+    require(
+        errors,
+        THREAD_TITLE,
+        "Название первой Codex task",
+        "codex_app__list_threads",
+        "codex_app__read_thread",
+        "codex_app__set_thread_title",
+        "ровно одного кандидата calling task",
+        "Не\n   выбирай просто самый свежий task",
+        "history не paginated",
+        "Meaningful title",
+        "до первой Task Manager mutation",
+        "create-and-deliver ждёт create/read-back exact\nTask",
+        "без `threadId`",
+        "не передавай discovery candidate id",
+        "task-title=renamed",
+        "task-title=preserved",
+        "task-title=not-available",
     )
 
     require(
@@ -589,6 +614,18 @@ REVIEW_CASES = {
         "Explainer не запускается",
         "In Progress",
     ),
+    "Первый ShipTask-вызов в новой Codex task с catalog placeholder": (
+        "unique app metadata",
+        "один раз задать exact `ShipTask · ...` title",
+        "до первой Task Manager mutation",
+        "соседней task",
+    ),
+    "Повторный ShipTask-вызов, meaningful title или неоднозначный current candidate": (
+        "title сохраняется без изменений",
+        "`task-title=not-available`",
+        "перезаписывать пользовательский title",
+        "retry setter",
+    ),
     "Candidate готов к review": ("read-back до transition", "In Review"),
     "Current acceptance противоречит самому себе": (
         "task-contract-conflict",
@@ -761,6 +798,11 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0022",
         "ADR-0024",
         "ADR-0025",
+        "### 1.3 Название первой Codex task",
+        "обязан один раз заменить\ncatalog placeholder",
+        "ровно одного current candidate",
+        "без `threadId` не более одного раза",
+        "task-title=not-available",
         "## 2. Конституция",
         "adaptive multi-agent\nисполнение нескольких независимых work packets",
         "no-subagent opt-out",
@@ -816,6 +858,8 @@ def validate_current_contract(errors: list[str]) -> None:
         "genuinely\n  simple packets получают Luna Max",
         "без повторного Luna loop",
         "общее «без субагентов» означает ноль субагентов",
+        "доказанная первая Codex task с catalog placeholder",
+        "последующие turns не переименовываются",
     )
     require(
         errors,
@@ -1208,6 +1252,8 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "общий явный\n  no-subagent opt-out отключает их все",
         "`gpt-5.6-luna`/`max`",
         "Luna retry loop",
+        "catalog placeholder после live scope resolution",
+        "ambiguous candidate не\n  переименовываются",
     )
     require(
         errors,
@@ -1224,6 +1270,8 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "ноль subagents",
         "Luna Max routing",
         "current-profile escalation",
+        "Auto-title является отдельным явным требованием",
+        "адресация только calling task",
     )
 
 
@@ -1242,6 +1290,7 @@ def current_task_source_files() -> tuple[Path, ...]:
         AUTONOMY,
         MEMORY,
         HANDOFF,
+        THREAD_TITLE,
         ADR["0018"],
         ADR["0019"],
         ADR["0020"],

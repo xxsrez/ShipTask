@@ -30,6 +30,9 @@ Sol Ultra; ShipTask не повышает модель скрыто. Перед 
 `To Do → In Progress` комментария не создаёт. Task description и ответ в Codex
 комментарий не заменяют. Native comments являются гарантированной частью Task
 Manager adapter и всегда используются для material lifecycle reporting.
+Если ShipTask является первым вызовом новой Codex task и её title — только
+catalog placeholder, после live scope resolution она один раз получает имя
+`ShipTask · ...`; существующее meaningful название не перезаписывается.
 
 Каждый комментарий, который создаёт ShipTask, до публикации проходит отдельного
 независимого `$ship-tasks:strategic-explainer`, пока действует

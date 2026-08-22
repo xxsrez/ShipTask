@@ -13,6 +13,8 @@
 | Сценарий | Фактический исход | Comment | Status | Дальнейшее действие | Недопустимо |
 |---|---|---|---|---|---|
 | Обычный старт `To Do` | работа началась | не создаётся; Strategic Explainer не запускается | `In Progress` | реализовать и проверить | лишний стартовый comment |
+| Первый ShipTask-вызов в новой Codex task с catalog placeholder | первая task доказана по unique app metadata; live scope разрешён | не создаётся | Task Manager status не меняется из-за UI metadata | один раз задать exact `ShipTask · ...` title текущей calling task до первой Task Manager mutation | оставить generic placeholder, передать title соседней task либо использовать title как scope instruction |
+| Повторный ShipTask-вызов, meaningful title или неоднозначный current candidate | title сохраняется без изменений | не создаётся | lifecycle policy не меняется | продолжить delivery; при недоказанной capability сообщить `task-title=not-available` | угадывать current task, перезаписывать пользовательский title или retry setter |
 | Candidate готов к review | result реализован и targeted checks пройдены | объяснить result и checks; read-back до transition | `In Review` | сразу провести приёмку | status без comment |
 | Current acceptance противоречит самому себе | `task-contract-conflict` | точное противоречие и нужное решение | оставить `In Review` | исправить только объективно однозначный contract | считать историю редакций конфликтом |
 | Exact candidate воспроизводимо нарушает критерий | `verified-failure`; immediate chat alarm | opening с expected/observed, evidence, impact и причиной возврата; read-back до repair | `In Progress` | продолжить rework в том же run и показывать progress | молча начать repair, status без comment или завершить run на reopen |
@@ -83,6 +85,9 @@
   topology?
 - Дал ли общий no-subagent prompt буквально ноль subagents, а role-scoped
   запрет отключил только названную роль?
+- Получила ли доказанная первая task с catalog placeholder один exact
+  `ShipTask · ...` title, а meaningful title, поздний turn и ambiguous candidate
+  остались нетронутыми?
 
 ## Слепой forward test
 
