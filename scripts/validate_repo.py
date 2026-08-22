@@ -11,9 +11,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SHIP_SKILL = ROOT / "ship-tasks" / "SKILL.md"
 SHIP_METADATA = ROOT / "ship-tasks" / "agents" / "openai.yaml"
+COMPOSER_SKILL = ROOT / "task-composer" / "SKILL.md"
+COMPOSER_METADATA = ROOT / "task-composer" / "agents" / "openai.yaml"
 STRATEGIC_SKILL = ROOT / "strategic-explainer" / "SKILL.md"
 STRATEGIC_METADATA = ROOT / "strategic-explainer" / "agents" / "openai.yaml"
 SPEC = ROOT / "docs" / "specs" / "ship-tasks.md"
+COMPOSER_SPEC = ROOT / "docs" / "specs" / "task-composer.md"
 STRATEGIC_SPEC = ROOT / "docs" / "specs" / "strategic-explainer.md"
 OVERVIEW = ROOT / "docs" / "overview.md"
 DOCS_INDEX = ROOT / "docs" / "README.md"
@@ -24,6 +27,7 @@ REVIEW_MATRIX = (
 STRATEGIC_EVALUATION = (
     ROOT / "docs" / "reference" / "strategic-explainer-evaluation.md"
 )
+COMPOSER_EVALUATION = ROOT / "docs" / "reference" / "task-composer-evaluation.md"
 ADAPTER = ROOT / "docs" / "reference" / "task-manager-adapter.md"
 VISION = ROOT / "docs" / "strategic-explainer.md"
 REPORT = ROOT / "ship-tasks" / "references" / "delivery-report.md"
@@ -66,6 +70,10 @@ ADR = {
             "0022",
             "0022-mandatory-independent-strategic-explainer-for-comments.md",
         ),
+        (
+            "0023",
+            "0023-task-composer-as-planning-sibling.md",
+        ),
     )
 }
 
@@ -76,14 +84,18 @@ CORE_FILES = (
     ROOT / ".gitattributes",
     SHIP_SKILL,
     SHIP_METADATA,
+    COMPOSER_SKILL,
+    COMPOSER_METADATA,
     STRATEGIC_SKILL,
     STRATEGIC_METADATA,
     SPEC,
+    COMPOSER_SPEC,
     STRATEGIC_SPEC,
     OVERVIEW,
     DOCS_INDEX,
     DEVELOPMENT,
     REVIEW_MATRIX,
+    COMPOSER_EVALUATION,
     STRATEGIC_EVALUATION,
     ADAPTER,
     VISION,
@@ -102,14 +114,18 @@ CURRENT_CONTRACT_FILES = (
     ROOT / "AGENTS.md",
     SHIP_SKILL,
     SHIP_METADATA,
+    COMPOSER_SKILL,
+    COMPOSER_METADATA,
     STRATEGIC_SKILL,
     STRATEGIC_METADATA,
     SPEC,
+    COMPOSER_SPEC,
     STRATEGIC_SPEC,
     OVERVIEW,
     DOCS_INDEX,
     DEVELOPMENT,
     REVIEW_MATRIX,
+    COMPOSER_EVALUATION,
     STRATEGIC_EVALUATION,
     VISION,
     REPORT,
@@ -122,6 +138,7 @@ CURRENT_CONTRACT_FILES = (
     ADR["0020"],
     ADR["0021"],
     ADR["0022"],
+    ADR["0023"],
     ADAPTER,
 )
 
@@ -255,6 +272,7 @@ def validate_ship_skill(errors: list[str]) -> None:
         errors,
         SHIP_SKILL,
         "полный exact scope",
+        "принадлежит Task Composer",
         "TASK CONTEXT ALARM",
         "Доказательство важнее выбранного способа",
         "Сбой одного выбранного способа",
@@ -296,6 +314,89 @@ def validate_ship_skill(errors: list[str]) -> None:
         "не заменяет его собственной редактурой",
         "opening comment до repair",
         "incident ledger в final report",
+    )
+
+
+def validate_composer_skill(errors: list[str]) -> None:
+    validate_frontmatter(errors, COMPOSER_SKILL, "task-composer", 180)
+    require(
+        errors,
+        COMPOSER_SKILL,
+        "$task-composer",
+        "planning mutations",
+        "ShipTask create-and-deliver contract",
+        "canonical status `Backlog`",
+        "current unreleased Release",
+        "bounded duplicate search",
+        "Не создавай Epic с одной формальной подзадачей",
+        "$ship-tasks:strategic-explainer",
+        "не создавай Epic; single Task",
+        "secret store",
+        "live active catalog",
+        "relation graph",
+        "искусственный umbrella Epic",
+        "Title кратко называет ожидаемый результат",
+        "Не строй последовательную цепочку по умолчанию",
+        "Unknown write outcome",
+        "остановился частично",
+        "planning projection",
+    )
+    require(
+        errors,
+        COMPOSER_METADATA,
+        'display_name: "Task Composer"',
+        'short_description: "Сформулировать и связать Task Manager задачи"',
+        "$task-composer",
+        'value: "task-manager"',
+        "live Labels",
+        "реальные relations",
+        "allow_implicit_invocation: true",
+    )
+    require(
+        errors,
+        COMPOSER_SPEC,
+        "Статус: current contract, 2026-08-22",
+        "planning mutations",
+        "Проверяемая trigger matrix",
+        "не управляет delivery lifecycle",
+        "Все новые Tasks создаются в canonical status `Backlog`",
+        "текущий unreleased Release",
+        "Exact duplicate не создаётся",
+        "искусственный umbrella Epic",
+        "Title кратко называет ожидаемый результат",
+        "самую мелкую полезную иерархию",
+        "$ship-tasks:strategic-explainer",
+        "создание Epic не начинается; single Task",
+        "не secret value",
+        "Создание нового Label не разрешено",
+        "Direction каждого `blocks`",
+        "Unknown write outcome",
+        "Task Manager read-back доказывает только planning projection",
+    )
+    require(
+        errors,
+        COMPOSER_EVALUATION,
+        "observable planning result",
+        "write происходит только по явному planning intent",
+        "Epic problem-first",
+        "независимые outcomes не сливаются",
+        "Strategic Explainer",
+        "блокирует только Epic create",
+        "Release назначен только при однозначном current",
+        "отсутствующий подходящий Label",
+        "duplicate search предшествует create",
+        "read-back подтверждает",
+        "Ошибка после создания части Epic",
+    )
+    require(
+        errors,
+        ADR["0023"],
+        "Task Composer как planning sibling-skill",
+        "ship-tasks@srez-marketplace",
+        "planning-only",
+        "$ship-tasks:strategic-explainer",
+        "current или explicit Release",
+        "Task Manager plugin остаётся adapter-only",
     )
 
 
@@ -366,8 +467,8 @@ TRIGGER_CASES = {
     "Реализуй это изменение в коде": ("нет", "обычная реализация без Task Manager scope"),
     "Покажи статус TM-123": ("нет", "read-only Task Manager adapter"),
     "Проведи аудит TM-123": ("нет", "read-only Task Manager adapter"),
-    "Создай Task в Task Manager": ("нет", "planning/write через adapter, без delivery flow"),
-    "Просто добавь это в backlog": ("нет", "backlog capture, без delivery flow"),
+    "Создай Task в Task Manager": ("нет", "Task Composer planning write, без delivery flow"),
+    "Просто добавь это в backlog": ("нет", "Task Composer backlog capture, без delivery flow"),
 }
 
 
@@ -383,6 +484,62 @@ def validate_trigger_matrix(errors: list[str]) -> None:
         actual = tuple(data[prompt])
         if actual != expected:
             fail(errors, f"trigger case {prompt!r} is {actual}, expected {expected}")
+
+
+COMPOSER_TRIGGER_CASES = {
+    "$task-composer": (
+        "да",
+        "сформировать planning model; writes только при явном intent",
+    ),
+    "Сформулируй Task Manager задачу, пока не создавай": (
+        "да",
+        "read-only draft",
+    ),
+    "Создай Task в Task Manager": (
+        "да",
+        "одна Task либо Epic с подзадачами по реальному scope",
+    ),
+    "Разбей это на Epic и подзадачи в Task Manager": (
+        "да",
+        "Epic и достаточные подзадачи",
+    ),
+    "Просто добавь это в backlog": (
+        "да",
+        "planning-only capture без implementation",
+    ),
+    "Спланируй это в текущем Task Manager Project": (
+        "да",
+        "compose и create при однозначном Project context",
+    ),
+    "Выполни TM-123": ("нет", "ShipTask delivery"),
+    "Создай одну Task и сразу выполни её": (
+        "нет",
+        "ShipTask create-and-deliver",
+    ),
+    "Покажи статус TM-123": ("нет", "read-only Task Manager adapter"),
+    "Проведи аудит TM-123": ("нет", "read-only Task Manager adapter"),
+    "Исправь код": (
+        "нет",
+        "обычная implementation без Task Manager planning anchor",
+    ),
+}
+
+
+def validate_composer_trigger_matrix(errors: list[str]) -> None:
+    rows = table_rows(read(COMPOSER_SPEC), "### 1.1 Проверяемая trigger matrix")
+    data = {cells[0].strip("`"): cells[1:] for cells in rows[1:] if len(cells) == 3}
+    if set(data) != set(COMPOSER_TRIGGER_CASES):
+        missing = sorted(set(COMPOSER_TRIGGER_CASES) - set(data))
+        extra = sorted(set(data) - set(COMPOSER_TRIGGER_CASES))
+        fail(errors, f"composer trigger matrix mismatch; missing={missing}, extra={extra}")
+        return
+    for prompt, expected in COMPOSER_TRIGGER_CASES.items():
+        actual = tuple(data[prompt])
+        if actual != expected:
+            fail(
+                errors,
+                f"composer trigger case {prompt!r} is {actual}, expected {expected}",
+            )
 
 
 REVIEW_CASES = {
@@ -838,9 +995,11 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         ADAPTER,
         "current compatibility contract",
         "adapter skill `task-manager`",
-        "не содержит\n`ship-tasks`/`strategic-explainer`",
+        "не содержит\n`ship-tasks`/`task-composer`/`strategic-explainer`",
         "Adapter не выбирает business scope",
         "current Task `version`",
+        "native Label catalogs/assignment",
+        "relation create получает стабильный idempotency key",
         "Task Manager state доказывает только собственную projection",
         "Native comment create/list/read являются гарантированной частью adapter",
     )
@@ -850,6 +1009,7 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "ship-tasks@srez-marketplace",
         "task-manager@srez-marketplace",
         "adapter skill `task-manager`",
+        "skills/task-composer",
         "skills/strategic-explainer",
         "fresh Codex session",
     )
@@ -862,6 +1022,7 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "installed cache",
         "installed/enabled",
         "Standalone user-level каталоги",
+        "~/.codex/skills/task-composer",
         "task-manager@srez-marketplace` остаётся adapter-only",
         "каждый комментарий ShipTask проходит\n  отдельного независимого Strategic Explainer",
         "`To Do → In Progress` комментария не создаёт",
@@ -873,6 +1034,8 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "update_plugin_cachebuster.py",
         "не меняйте\n   numeric version",
         "fresh App Server catalog",
+        "ship-tasks:task-composer",
+        "existing-only Labels",
         "каждый комментарий ShipTask обязательно\n  проходит отдельного независимого Explainer",
         "`To Do → In Progress` не создаёт комментарий",
     )
@@ -882,7 +1045,11 @@ def current_task_source_files() -> tuple[Path, ...]:
     return (
         SHIP_SKILL,
         SHIP_METADATA,
+        COMPOSER_SKILL,
+        COMPOSER_METADATA,
         SPEC,
+        COMPOSER_SPEC,
+        COMPOSER_EVALUATION,
         OVERVIEW,
         REPORT,
         RUN_REPORT,
@@ -893,6 +1060,7 @@ def current_task_source_files() -> tuple[Path, ...]:
         ADR["0019"],
         ADR["0020"],
         ADR["0022"],
+        ADR["0023"],
     )
 
 
@@ -914,6 +1082,7 @@ def validate_task_source_boundary(errors: list[str]) -> None:
 def markdown_files() -> list[Path]:
     files = [ROOT / "README.md", ROOT / "AGENTS.md"]
     files.extend(sorted((ROOT / "ship-tasks").rglob("*.md")))
+    files.extend(sorted((ROOT / "task-composer").rglob("*.md")))
     files.extend(sorted((ROOT / "strategic-explainer").rglob("*.md")))
     files.extend(sorted((ROOT / "docs").rglob("*.md")))
     return files
@@ -962,8 +1131,10 @@ def main() -> int:
 
     if not errors:
         validate_ship_skill(errors)
+        validate_composer_skill(errors)
         validate_strategic_skill(errors)
         validate_trigger_matrix(errors)
+        validate_composer_trigger_matrix(errors)
         validate_review_matrix(errors)
         validate_current_contract(errors)
         validate_strategic_contract(errors)

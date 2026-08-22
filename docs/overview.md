@@ -7,6 +7,7 @@ Task Manager понятным человеку образом.
 ```text
 Task Manager skill  = технический адаптер
 ShipTask skill      = требования к delivery result
+Task Composer       = постановка и planning graph в Backlog
 Project memory      = selector и project-specific context
 Strategic Explainer = помощник по человеческому объяснению
 ```
@@ -57,6 +58,13 @@ create-and-deliver.
 
 Обычная просьба исправить код без Task Manager anchor, status/audit/explanation,
 planning и backlog capture ShipTask не запускают.
+
+Planning и backlog capture с Task Manager intent принадлежат Task Composer. Он
+оставляет один independently deliverable outcome одной Task, а составной
+outcome оформляет как Epic с problem-first описанием через Strategic Explainer,
+конкретными подзадачами, live Labels и semantic relations. Это planning-only
+projection: новые элементы остаются в `Backlog`, а unknown current Release
+опускается без guess.
 
 - `single`: одна Task, без Goal.
 - `batch-implementation`: имплементация/rework минимум двух Tasks, с Goal.
@@ -146,7 +154,10 @@ secrets/privacy/access-policy changes, external recipients и unbounded cost
 - [Task Manager adapter contract](reference/task-manager-adapter.md)
 - [Lifecycle evaluation](reference/shiptask-review-disposition-evaluation.md)
 - [Strategic Explainer specification](specs/strategic-explainer.md)
+- [Task Composer specification](specs/task-composer.md)
+- [Task Composer как planning sibling-skill](decisions/0023-task-composer-as-planning-sibling.md)
 
-Runtime source — `ship-tasks/SKILL.md`. Plugin distribution и installed cache
-должны быть byte-identical repository source; standalone user-level copies не
+Runtime sources — `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и
+`strategic-explainer/SKILL.md`. Plugin distribution и installed cache должны
+быть byte-identical repository source; standalone user-level copies не
 используются.

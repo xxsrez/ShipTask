@@ -26,8 +26,8 @@ Skill запускается:
 - при явной просьбе создать ровно одну Task в Task Manager и сразу выполнить её.
 
 Обычная просьба исправить код или продукт без Task Manager anchor не запускает
-ShipTask. Чтение статуса, аудит, объяснение, планирование и backlog capture также
-не являются delivery.
+ShipTask. Чтение статуса, аудит и объяснение не являются delivery; формулировка,
+планирование и backlog capture с Task Manager intent принадлежат Task Composer.
 
 ### 1.1 Режимы
 
@@ -66,8 +66,8 @@ Unresolved acceptance incidents из materially relevant comments называю
 | `Реализуй это изменение в коде` | нет | обычная реализация без Task Manager scope |
 | `Покажи статус TM-123` | нет | read-only Task Manager adapter |
 | `Проведи аудит TM-123` | нет | read-only Task Manager adapter |
-| `Создай Task в Task Manager` | нет | planning/write через adapter, без delivery flow |
-| `Просто добавь это в backlog` | нет | backlog capture, без delivery flow |
+| `Создай Task в Task Manager` | нет | Task Composer planning write, без delivery flow |
+| `Просто добавь это в backlog` | нет | Task Composer backlog capture, без delivery flow |
 
 ## 2. Конституция
 

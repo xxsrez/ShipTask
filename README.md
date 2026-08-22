@@ -54,9 +54,16 @@ non-production releases выполняются автоматически, а pr
 его границе есть незавершённая работа; сам release не создаёт Goal. Project
 memory хранит только selectors/profile и изменяется лишь по явной просьбе.
 
+Task Composer закрывает соседний planning-only этап: формулирует одну Task либо
+Epic с problem-first описанием через Strategic Explainer, конкретными
+подзадачами, live Labels и semantic relations. Созданные элементы остаются в
+`Backlog`; неизвестный current Release не угадывается и не блокирует создание.
+
 ## Структура
 
 - [`ship-tasks/SKILL.md`](ship-tasks/SKILL.md) — исполнимый skill.
+- [`task-composer/SKILL.md`](task-composer/SKILL.md) — planning-only
+  формулировка, декомпозиция и создание Task Manager scope.
 - [`strategic-explainer/SKILL.md`](strategic-explainer/SKILL.md) — общий
   problem-first strategic discovery и communication skill для прямого или
   delegated использования без обязательной orchestration scheme.
@@ -72,16 +79,19 @@ memory хранит только selectors/profile и изменяется ли�
 ```bash
 python3 scripts/validate_repo.py
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```
 
-Единственная runtime-дистрибуция обоих sibling-skills — отдельный plugin
+Единственная runtime-дистрибуция трёх sibling-skills — отдельный plugin
 `ship-tasks@srez-marketplace`. Task Manager connector устанавливается отдельно
 как adapter-only `task-manager@srez-marketplace`; ShipTask в его package не
-входит. Standalone каталоги `~/.codex/skills/ship-tasks` и
+входит. Standalone каталоги `~/.codex/skills/ship-tasks`,
+`~/.codex/skills/task-composer` и
 `~/.codex/skills/strategic-explainer` не устанавливаются: они создают вторые
 logical skills рядом с plugin-qualified `ship-tasks:ship-tasks` и
-`ship-tasks:strategic-explainer`. Repository sources публикуются через один
-marketplace package и сверяются с installed plugin cache.
+`ship-tasks:task-composer`/`ship-tasks:strategic-explainer`. Repository sources
+публикуются через один marketplace package и сверяются с installed plugin
+cache.

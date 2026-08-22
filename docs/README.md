@@ -20,6 +20,9 @@
   problem-first grounding, bounded read-only strategic discovery и свободного
   объяснения без mutations, status decisions, новой authority или обязательной
   agent orchestration.
+- [Task Composer](specs/task-composer.md) — planning-only Task Manager workflow:
+  одна Task либо strategic Epic с конкретными подзадачами, live Labels,
+  hierarchy, semantic relations, `Backlog` и необязательным current Release.
 
 ## Decisions
 
@@ -90,6 +93,9 @@
 - [0022: Каждый комментарий ShipTask проходит независимый Strategic Explainer](decisions/0022-mandatory-independent-strategic-explainer-for-comments.md)
   — восстанавливает явное требование отдельной смысловой проверки каждого
   комментария и запрещает комментарий на обычном старте `To Do → In Progress`.
+- [0023: Task Composer как planning sibling-skill](decisions/0023-task-composer-as-planning-sibling.md)
+  — отделяет качественную постановку и backlog capture от ShipTask delivery и
+  добавляет третий runtime skill в тот же Ship Tasks plugin.
 
 ## Reference
 
@@ -98,6 +104,9 @@
 - [Strategic Explainer evaluation](reference/strategic-explainer-evaluation.md)
   — observable fidelity/authority/comprehension gates и regression cases без
   проверки внутренней orchestration или фиксированной scoring ceremony.
+- [Task Composer evaluation](reference/task-composer-evaluation.md) —
+  observable gates для decomposition, metadata, relations, duplicate safety и
+  planning-only authority.
 - [Проверка классификации `In Review`](reference/shiptask-review-disposition-evaluation.md)
   — decision-level cases для task-contract conflict, proven failure,
   verification blocker, incident persistence и Goal behavior.

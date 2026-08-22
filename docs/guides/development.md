@@ -38,6 +38,9 @@
   запускает Strategic Explainer.
 - Не добавляйте fallback task provider. Task Manager остаётся единственным
   adapter.
+- Task Composer остаётся planning-only: он формулирует и создаёт `Backlog`
+  scope, но не получает ShipTask delivery lifecycle. Missing Label не разрешает
+  taxonomy mutation; unknown current Release не разрешает guess.
 
 YAML frontmatter skill содержит только `name` и `description`. Routing signals
 должны покрывать positive Task Manager anchors и negative read/audit/planning/
@@ -48,6 +51,7 @@ backlog/generic-code cases. Один delivery verb не является trigger
 ```bash
 python3 scripts/validate_repo.py
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
@@ -102,9 +106,16 @@ skill, реалистичный exact Task Manager scope и обычный proje
 Полная матрица:
 [lifecycle evaluation](../reference/shiptask-review-disposition-evaluation.md).
 
+Для Task Composer отдельно проверьте single-vs-Epic decomposition, read-only
+draft, explicit write authority, exact `Backlog`, optional unknown Release,
+existing-only Labels, semantic relation direction, duplicate prevention и
+partial-write reconciliation. Полная матрица:
+[Task Composer evaluation](../reference/task-composer-evaluation.md).
+
 ## Runtime-дистрибуция
 
-Repository directories `ship-tasks/` и `strategic-explainer/` — source of truth.
+Repository directories `ship-tasks/`, `task-composer/` и
+`strategic-explainer/` — source of truth.
 Единственная runtime-distribution — sibling skills в plugin
 `ship-tasks@srez-marketplace`. Task Manager connector устанавливается отдельно
 как adapter-only `task-manager@srez-marketplace`.
@@ -113,7 +124,7 @@ Repository directories `ship-tasks/` и `strategic-explainer/` — source of tru
 
 1. Выполните validations, закоммитьте exact scope и отправьте в `origin/main`;
    проверьте `HEAD == origin/main`.
-2. Синхронизируйте оба marketplace skill directory и проверьте `diff -qr`.
+2. Синхронизируйте все три marketplace skill directory и проверьте `diff -qr`.
 3. Получите marketplace name через `read_marketplace_name.py` и обновите только
    cachebuster через `update_plugin_cachebuster.py`; не меняйте
    numeric version ради reinstall.
@@ -121,10 +132,12 @@ Repository directories `ship-tasks/` и `strategic-explainer/` — source of tru
    `ship-tasks@srez-marketplace` штатным plugin lifecycle.
 5. Проверьте quick validation marketplace copies, byte identity installed cache
    и состояние installed/enabled.
-6. В fresh App Server catalog подтвердите `ship-tasks:ship-tasks` и
-   `ship-tasks:strategic-explainer`, отсутствие standalone user copies и
-   отсутствие этих skills в adapter-only Task Manager plugin.
+6. В fresh App Server catalog подтвердите `ship-tasks:ship-tasks`,
+   `ship-tasks:task-composer` и `ship-tasks:strategic-explainer`, отсутствие
+   standalone user copies и отсутствие этих skills в adapter-only Task Manager
+   plugin.
 
-Не создавайте `~/.codex/skills/ship-tasks` или
+Не создавайте `~/.codex/skills/ship-tasks`,
+`~/.codex/skills/task-composer` или
 `~/.codex/skills/strategic-explainer`. Marketplace snapshot и
 installed cache не удаляются вручную.

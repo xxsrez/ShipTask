@@ -1,7 +1,8 @@
 # 0011: Separate ShipTask plugin distribution
 
 Статус: accepted. Дата: 2026-08-18. Первоначальное ограничение состава plugin
-изменено [ADR-0012](0012-strategic-explainer-as-portable-subagent-role.md).
+изменено [ADR-0012](0012-strategic-explainer-as-portable-subagent-role.md) и
+[ADR-0023](0023-task-composer-as-planning-sibling.md).
 
 Заменяет [ADR-0008](0008-plugin-only-runtime-distribution.md).
 
@@ -22,18 +23,20 @@ terminal reporting. Удаление standalone user-level дубликата н
 - `task-manager@srez-marketplace` устанавливается отдельно, владеет production
   OAuth/MCP connector и содержит только adapter skill `task-manager`.
 - В исходном решении `ship-tasks@srez-marketplace` содержал только skill
-  `ship-tasks`. ADR-0012 добавляет generic sibling-skill `strategic-explainer`;
-  plugin по-прежнему не содержит `.mcp.json`, не создаёт собственный connector
-  и использует declared MCP dependency `task-manager` из отдельно
-  установленного Task Manager plugin.
+  `ship-tasks`. ADR-0012 добавляет generic sibling-skill `strategic-explainer`,
+  а ADR-0023 — planning sibling-skill `task-composer`; plugin по-прежнему не
+  содержит `.mcp.json`, не создаёт собственный connector и использует declared
+  MCP dependency `task-manager` из отдельно установленного Task Manager plugin.
 - Marketplace source skills находятся в
-  `Srez Marketplace/plugins/ship-tasks/skills/ship-tasks` и
+  `Srez Marketplace/plugins/ship-tasks/skills/ship-tasks`,
+  `Srez Marketplace/plugins/ship-tasks/skills/task-composer` и
   `Srez Marketplace/plugins/ship-tasks/skills/strategic-explainer`; каждый
   должен быть byte-identical соответствующему source из этого репозитория.
 - Standalone user-level каталог `~/.codex/skills/ship-tasks` не
-  создаётся. Fresh catalog показывает plugin-qualified
-  `ship-tasks:ship-tasks`, а Task Manager plugin не показывает
-  `task-manager:ship-tasks`.
+  создаётся; то же относится к `task-composer` и `strategic-explainer`. Fresh
+  catalog показывает plugin-qualified `ship-tasks:ship-tasks`,
+  `ship-tasks:task-composer` и `ship-tasks:strategic-explainer`, а Task Manager
+  plugin не показывает их в собственном namespace.
 - Marketplace snapshot и installed cache каждой plugin installation являются
   внутренними lifecycle-копиями и не удаляются вручную.
 - После marketplace upgrade и раздельной установки обоих plugins проверка

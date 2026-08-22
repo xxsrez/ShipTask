@@ -4,10 +4,11 @@
 
 ## Назначение
 
-- Репозиторий является source of truth для Task Manager-only Codex skill
-  `$ship-tasks` и общего communication skill `$strategic-explainer`.
-- Исполнимые skills находятся в sibling-каталогах `ship-tasks/` и
-  `strategic-explainer/`.
+- Репозиторий является source of truth для Task Manager-only Codex skills
+  `$ship-tasks`, `$task-composer` и общего communication skill
+  `$strategic-explainer`.
+- Исполнимые skills находятся в sibling-каталогах `ship-tasks/`,
+  `task-composer/` и `strategic-explainer/`.
 - Документация проекта находится в `docs/`; `docs/README.md` — её
   канонический индекс.
 - Основной язык документации — русский. Точные protocol/state/tool names можно
@@ -18,20 +19,28 @@
 - `$ship-tasks` работает только через Task Manager connector. Не добавляйте
   fallback providers, generic task-source abstraction или альтернативный
   tracker workflow.
+- `$task-composer` остаётся Task Manager-only planning workflow: не добавляйте
+  delivery, implementation, release, Goal lifecycle, fallback provider или
+  право автоматически менять Label taxonomy.
 - `$strategic-explainer` остаётся generic: не добавляйте в его runtime contract
   ShipTask, Task Manager, конкретный tracker, project lifecycle или право
   принимать решения/выполнять mutations.
+- Requests сформулировать, создать, разложить или положить Task Manager работу
+  в backlog направляйте через `$task-composer`, когда он доступен. Это
+  planning-only mutation и не запускает ShipTask delivery. Read/status/audit
+  без постановки оставляйте техническому Task Manager adapter.
 - Project и Release refs, repository path, branch, deployment provider,
   environment, URL, команды проекта и production policy брать из текущего
   project context, а не зашивать в skill.
 - Каждая каноническая specification описывает один текущий workflow. Не
   создавайте параллельные поколения или альтернативные specifications одного
   и того же runtime skill.
-- Распространяйте оба runtime skills только через отдельный plugin
+- Распространяйте все три runtime skills только через отдельный plugin
   `ship-tasks@srez-marketplace`. Task Manager connector устанавливается
   отдельно как adapter-only `task-manager@srez-marketplace`; не помещайте
   ShipTask внутрь его package. Не создавайте и не синхронизируйте
-  standalone user-level копии `~/.codex/skills/ship-tasks` и
+  standalone user-level копии `~/.codex/skills/ship-tasks`,
+  `~/.codex/skills/task-composer` и
   `~/.codex/skills/strategic-explainer`.
 
 ## Изменения
@@ -60,7 +69,8 @@
 2. Этот commit запушен в `origin/main`, а local `HEAD` совпадает с
    `origin/main`.
 3. Отдельный Marketplace package является единственной runtime-дистрибуцией:
-   `Srez Marketplace/plugins/ship-tasks/skills/ship-tasks` и
+   `Srez Marketplace/plugins/ship-tasks/skills/ship-tasks`,
+   `Srez Marketplace/plugins/ship-tasks/skills/task-composer` и
    `Srez Marketplace/plugins/ship-tasks/skills/strategic-explainer`
    byte-identical соответствующим repository sources, а installed cache
    byte-identical marketplace source и отображается installed/enabled. Если
@@ -68,9 +78,11 @@
    соответствующий marketplace commit запушен в `origin/main`, а plugin переустановлен из
    `ship-tasks@srez-marketplace`. Отдельно установленный
    `task-manager@srez-marketplace` остаётся adapter-only и не содержит
-   `skills/ship-tasks` или `skills/strategic-explainer`.
+   `skills/ship-tasks`, `skills/task-composer` или
+   `skills/strategic-explainer`.
 
-Standalone user-level каталоги `~/.codex/skills/ship-tasks` и
+Standalone user-level каталоги `~/.codex/skills/ship-tasks`,
+`~/.codex/skills/task-composer` и
 `~/.codex/skills/strategic-explainer` должны отсутствовать, а fresh
 `skills/list` не должен возвращать отдельные user skills.
 Plugin-managed marketplace snapshot и installed cache являются внутренними
@@ -87,6 +99,7 @@ Plugin-managed marketplace snapshot и installed cache являются внут
 ```bash
 python3 scripts/validate_repo.py
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
