@@ -45,7 +45,7 @@ selector входит автоматически, включая появивш�
 Создавай Goal после подтверждения `batch-implementation` минимум двух Tasks и до
 implementation mutation. `single`/`release` работают без Goal. Release-only не
 создаёт, не переиспользует, не ретаргетит и не завершает Goal; compatible Goal
-продолжается лишь когда release был его исходным done criterion.
+продолжается лишь когда release был его исходным done criterion; сам release новый Goal не создаёт.
 Goal live selector хранит identity/predicate, не стартовые refs/count; новая matching
 Task сохраняет его active без approval. Goal не определяет Task outcome/попытки/status.
 Неразрешимый scope/shared-state/authority конфликт → `TASK CONTEXT ALARM` до writes.

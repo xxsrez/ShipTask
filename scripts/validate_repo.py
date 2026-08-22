@@ -327,6 +327,7 @@ def validate_ship_skill(errors: list[str]) -> None:
         "Browser/controller/session switch — диагностика, не repair",
         "browser logistics не stop condition",
         "fresh full inventory",
+        "сам release новый Goal не создаёт",
         "`Duplicate` отдельно не\nисполняй",
         "После смены session и до новой implementation surface найди task-owned Git state",
         "unfinished worktree/branch существует",
