@@ -27,6 +27,8 @@ wording, agent topology, tool order или число подзадач.
   отсутствие не блокирует create;
 - Labels разрешены из live catalog; отсутствующий подходящий Label даёт
   видимый gap без taxonomy mutation;
+- classification хранится в Label/hierarchy и не повторяется в title; missing
+  Label не разрешает textual type prefix;
 - hierarchy и relation type/direction соответствуют реальной семантике;
 - duplicate search предшествует create, unknown outcome reconciles до retry;
 - read-back подтверждает каждую заявленную Task Manager mutation;
@@ -45,6 +47,10 @@ wording, agent topology, tool order или число подзадач.
 | Current Release неизвестен | Tasks создаются без Release, gap сообщается |
 | Найден только released Release | Не добавлять без explicit confirmation |
 | Подходящего Label нет | Task создаётся без Label, taxonomy gap сообщается |
+| Есть live `Bug` Label | Title описывает outcome без `BUG:`/`[Bug]`, Task получает Label |
+| Создаётся Epic с live `Epic` Label | Strategic outcome title без `EPIC:`/`Epic —`, parent получает Label |
+| Legacy `BUG: Исправить X` уже существует | Clean `Исправить X` считается duplicate candidate, не создаётся вслепую |
+| Пользователь явно задал exact title `BUG: X` verbatim | Exact user title сохраняется; default normalization его не переписывает |
 | Подзадачи независимы | Не добавлять искусственные `blocks` relations |
 | B действительно требует завершения A | Создать relation, где A blocks B, и перечитать direction |
 | Exact duplicate уже существует | Не создавать вторую Task; сообщить disposition |

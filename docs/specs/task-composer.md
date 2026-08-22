@@ -106,6 +106,20 @@ Title кратко называет ожидаемый результат и о�
 отличить от соседней Task. Форма description свободна, если смысл, requirements
 и проверяемость сохраняются.
 
+Task type и другая classification metadata выражаются native Labels и
+hierarchy, а не дублируются в title. Если live catalog содержит `Bug`, `Epic`,
+`Feature`, `Improvement`, `Spike`, `Release blocker` или другой применимый
+classification Label, title не получает соответствующий префикс/суффикс:
+`BUG:`, `EPIC:`, `[Bug]`, `Epic —`, `Feature:` и локализованные эквиваленты
+запрещены. Если подходящего Label нет, textual prefix не является fallback:
+Task создаётся с чистым outcome title, а taxonomy gap сообщается отдельно.
+Исключение — только exact title, который пользователь явно потребовал сохранить
+verbatim.
+
+Duplicate search сравнивает outcome title также после удаления известных
+legacy classification prefixes. `BUG: Исправить X` и `Исправить X` являются
+одним title candidate и требуют проверки описания до любого create.
+
 ### 4.1 Одна Task
 
 Оставляй одну Task, когда работа имеет один independently deliverable outcome
@@ -179,7 +193,9 @@ Labels выбираются только из live active catalog и назна�
 её собственному смыслу. Skill не предполагает наследование label от Epic и не
 добавляет label ради того, чтобы поле было непустым. Если подходящего label
 нет, Task создаётся без label, а missing taxonomy coverage явно перечисляется
-в результате. Создание нового Label не разрешено этим workflow.
+в результате. Создание нового Label не разрешено этим workflow. Label и
+hierarchy остаются canonical classification metadata; их смысл не повторяется
+в title.
 
 Parent-child hierarchy задаётся native Task Manager relationship. Она не
 дублируется relation `related`.
@@ -217,6 +233,8 @@ cleanup без authority: skill перечисляет созданные, по�
 - Release либо честно зафиксированное отсутствие current Release;
 - parent-child hierarchy;
 - фактически назначенные labels и известные label gaps;
+- отсутствие classification prefix/suffix в title, кроме explicit verbatim
+  user title;
 - созданные relation types и direction;
 - description, сохраняющий intended strategic/technical split.
 

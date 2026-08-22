@@ -398,6 +398,8 @@ def validate_composer_skill(errors: list[str]) -> None:
         "relation graph",
         "искусственный umbrella Epic",
         "Title кратко называет ожидаемый результат",
+        "Type/classification выражай native Label",
+        "Legacy-prefixed и clean outcome title считай одним duplicate candidate",
         "Не строй последовательную цепочку по умолчанию",
         "Unknown write outcome",
         "остановился частично",
@@ -426,6 +428,11 @@ def validate_composer_skill(errors: list[str]) -> None:
         "Exact duplicate не создаётся",
         "искусственный umbrella Epic",
         "Title кратко называет ожидаемый результат",
+        "Task type и другая classification metadata",
+        "textual prefix не является fallback",
+        "legacy classification prefixes",
+        "canonical classification metadata",
+        "отсутствие classification prefix/suffix",
         "самую мелкую полезную иерархию",
         "$ship-tasks:strategic-explainer",
         "создание Epic не начинается; single Task",
@@ -446,6 +453,10 @@ def validate_composer_skill(errors: list[str]) -> None:
         "блокирует только Epic create",
         "Release назначен только при однозначном current",
         "отсутствующий подходящий Label",
+        "classification хранится в Label/hierarchy",
+        "Есть live `Bug` Label",
+        "Legacy `BUG: Исправить X` уже существует",
+        "exact title `BUG: X` verbatim",
         "duplicate search предшествует create",
         "read-back подтверждает",
         "Ошибка после создания части Epic",
@@ -860,6 +871,8 @@ def validate_current_contract(errors: list[str]) -> None:
         "общее «без субагентов» означает ноль субагентов",
         "доказанная первая Codex task с catalog placeholder",
         "последующие turns не переименовываются",
+        "Task type хранится в Label/hierarchy",
+        "не дублируется\nпрефиксом `BUG:`/`EPIC:`",
     )
     require(
         errors,
@@ -1272,6 +1285,8 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "current-profile escalation",
         "Auto-title является отдельным явным требованием",
         "адресация только calling task",
+        "Type Labels не должны дублироваться в title",
+        "legacy-prefixed title участвует в\nduplicate search",
     )
 
 

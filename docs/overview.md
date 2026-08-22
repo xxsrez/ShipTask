@@ -84,7 +84,8 @@ Planning и backlog capture с Task Manager intent принадлежат Task C
 outcome оформляет как Epic с problem-first описанием через Strategic Explainer,
 конкретными подзадачами, live Labels и semantic relations. Это planning-only
 projection: новые элементы остаются в `Backlog`, а unknown current Release
-опускается без guess.
+опускается без guess. Task type хранится в Label/hierarchy и не дублируется
+префиксом `BUG:`/`EPIC:` или эквивалентом в title.
 
 - `single`: одна Task, без Goal.
 - `batch-implementation`: имплементация/rework минимум двух Tasks, с Goal и
