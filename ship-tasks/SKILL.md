@@ -55,7 +55,7 @@ Manager comments/status/version writes. Пересекающиеся writes не
 
 Общее явное «не используй субагентов»/«без субагентов» включает
 `subagents=off` для всего run, включая comment Explainer; узкий запрет отключает
-только названную роль и сообщается как `auto; <role>=off`. Goal, lifecycle и
+только названную роль и сообщается как `subagents=auto; <role>=off`. Goal, lifecycle и
 authority от topology не меняются. После inventory сообщи topology, ready width,
 active target и concrete limiter. Различай `workers=not-available` и
 `comment-explainer=not-available`.
