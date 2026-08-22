@@ -62,6 +62,10 @@ ADR = {
             "0021",
             "0021-requirements-as-agent-constitution.md",
         ),
+        (
+            "0022",
+            "0022-mandatory-independent-strategic-explainer-for-comments.md",
+        ),
     )
 }
 
@@ -117,6 +121,7 @@ CURRENT_CONTRACT_FILES = (
     ADR["0019"],
     ADR["0020"],
     ADR["0021"],
+    ADR["0022"],
     ADAPTER,
 )
 
@@ -268,7 +273,9 @@ def validate_ship_skill(errors: list[str]) -> None:
         "каждые 10 минут",
         "incident ledger",
         "$ship-tasks:strategic-explainer",
-        "Обязателен понятный grounded result",
+        "Каждый Task Manager comment ShipTask обязательно проходит отдельного",
+        "не переписывай текст самостоятельно",
+        "Обычный `To Do → In Progress` не запускает Explainer",
         "SHIPTASK RUN REPORT",
     )
 
@@ -284,6 +291,9 @@ def validate_ship_skill(errors: list[str]) -> None:
         "Goal создавай только для реальной implementation/rework минимум двух Tasks",
         "release-only, включая production, работают без нового Goal",
         "Приёмочный incident немедленно покажи в chat",
+        "Обычный To Do → In Progress не создаёт комментарий",
+        "Каждый комментарий ShipTask до публикации обязательно передай отдельному",
+        "не заменяет его собственной редактурой",
         "opening comment до repair",
         "incident ledger в final report",
     )
@@ -304,6 +314,9 @@ def validate_strategic_skill(errors: list[str]) -> None:
         "source basis",
         "не придумывай варианты ради квоты",
         "decision-relevant факт не потерян",
+        "готовый пользовательский текст",
+        "Пиши на языке пользователя",
+        "пригодный для публикации",
         "Не выполняй writes",
     )
     text = read(STRATEGIC_SKILL)
@@ -316,6 +329,8 @@ def validate_strategic_skill(errors: list[str]) -> None:
         'display_name: "Strategic Explainer"',
         'short_description: "Связать проблему, стратегию и текущий результат"',
         "$strategic-explainer",
+        "готовое объяснение на языке пользователя",
+        "не превращай текст в смесь русского",
         "allow_implicit_invocation: true",
     )
 
@@ -371,7 +386,11 @@ def validate_trigger_matrix(errors: list[str]) -> None:
 
 
 REVIEW_CASES = {
-    "Обычный старт `To Do`": ("не требуется", "In Progress"),
+    "Обычный старт `To Do`": (
+        "не создаётся",
+        "Explainer не запускается",
+        "In Progress",
+    ),
     "Candidate готов к review": ("read-back до transition", "In Review"),
     "Current acceptance противоречит самому себе": (
         "task-contract-conflict",
@@ -432,6 +451,11 @@ REVIEW_CASES = {
         "fallback в description",
         "skip обязательного comment",
     ),
+    "Отдельный Strategic Explainer недоступен или отклонил текст": (
+        "не публиковать непроверенный черновик",
+        "не выполнять зависящий переход",
+        "основной агент сам одобряет",
+    ),
     "Массовая имплементация минимум двух Tasks": (
         "batch-implementation",
         "создать/продолжить Goal",
@@ -469,11 +493,14 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0019",
         "ADR-0020",
         "ADR-0021",
+        "ADR-0022",
         "## 2. Конституция",
-        "не управляет agent topology",
+        "явно требует\nнезависимого исполнителя",
         "comment",
-        "до status write",
+        "до записи статуса",
         "всегда создаёт и перечитывает обязательный comment",
+        "Каждый комментарий, который ShipTask собирается создать",
+        "`To Do → In Progress` комментария не создаёт",
         "Приёмочный инцидент виден сразу",
         "примерно каждые 10 минут",
         "compact ledger всех material incidents",
@@ -497,7 +524,9 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0019",
         "ADR-0020",
         "ADR-0021",
+        "ADR-0022",
         "гарантированной adapter capability",
+        "каждый создаваемый ShipTask-комментарий",
         "durable Task history",
         "Goal используется только для прогресса массовой имплементации",
         "production release",
@@ -509,6 +538,8 @@ def validate_current_contract(errors: list[str]) -> None:
         "До связанного существенного status transition",
         "transition не завершён",
         "всегда создаёт и перечитывает обязательный comment",
+        "Каждый комментарий, который ShipTask собирается создать",
+        "Обычный старт `To Do → In Progress` комментария не создаёт",
         "До repair немедленно сообщить incident",
         "resolution/completion comment",
         "Приёмка заблокирована",
@@ -537,8 +568,9 @@ def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         HANDOFF,
-        "Конституция не задаёт agent topology",
-        "Обязательный результат — понятный grounded comment",
+        "Каждый комментарий, который создаёт ShipTask",
+        "отдельного субагента",
+        "не переписывает текст обратно",
     )
     require(
         errors,
@@ -582,6 +614,17 @@ def validate_current_contract(errors: list[str]) -> None:
     )
     require(
         errors,
+        ADR["0022"],
+        "Каждый комментарий ShipTask проходит независимый Strategic Explainer",
+        "Обычный переход `To Do → In Progress` не создаёт комментарий",
+        "Каждый комментарий в Task Manager",
+        "отдельный независимый субагент",
+        "не переписывает одобренный текст",
+        "не публикует комментарий",
+        "самостоятельно выполненная основным агентом",
+    )
+    require(
+        errors,
         ADAPTER,
         "повторно сверен 2026-08-22",
         "Native comment create/list/read являются гарантированной частью adapter",
@@ -590,7 +633,7 @@ def validate_current_contract(errors: list[str]) -> None:
 
     contradiction_patterns = {
         "comment deferred after status": re.compile(
-            r"status.{0,100}(?:вс[её]\s+равно|сначала).{0,100}(?:communication remainder|комментари)",
+            r"status\s+write.{0,100}(?:вс[её]\s+равно|после|затем).{0,100}(?:communication remainder|комментари)",
             re.I | re.S,
         ),
         "unclear batch reopened into rework": re.compile(
@@ -690,9 +733,6 @@ def validate_current_contract(errors: list[str]) -> None:
             "PROBLEM_CONTEXT_ERROR",
             "2–4 реально различающихся варианта",
             "2–4 реально различающихся способа",
-            "обязателен новый субагент",
-            "обязательное требование — применить Strategic Explainer",
-            "ShipTask запускает свежий субагент",
         )
 
 
@@ -709,6 +749,9 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Exact envelope не требуется",
         "не придумывает alternatives ради количества",
         "Completion criteria",
+        "Текст пишется на языке пользователя",
+        "готовый пользовательский текст",
+        "пригоден для публикации",
     )
     require(
         errors,
@@ -728,6 +771,8 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Source state и relevance",
         "Read-only и authority boundary",
         "Human comprehension",
+        "гибридную фразу с английским смысловым ядром",
+        "пригоден для публикации",
         "Read-only boundary",
         "Реальный выбор способа проверки",
         "не оценивает agent topology",
@@ -751,13 +796,20 @@ def validate_supersession(errors: list[str]) -> None:
         "0005": ("ADR-0016", "ADR-0017"),
         "0006": ("ADR-0016", "ADR-0017", "ADR-0020"),
         "0010": ("ADR-0016", "ADR-0017"),
-        "0012": ("partially superseded", "ADR-0014", "ADR-0021", "no-tools"),
+        "0012": (
+            "partially superseded",
+            "ADR-0014",
+            "ADR-0021",
+            "ADR-0022",
+            "no-tools",
+        ),
         "0013": (
             "partially superseded",
             "ADR-0014",
             "ADR-0016",
             "ADR-0017",
             "ADR-0021",
+            "ADR-0022",
         ),
         "0014": ("partially superseded", "ADR-0021"),
         "0015": ("partially superseded", "ADR-0017", "ADR-0020"),
@@ -769,7 +821,9 @@ def validate_supersession(errors: list[str]) -> None:
             "ADR-0019",
             "ADR-0020",
             "ADR-0021",
+            "ADR-0022",
         ),
+        "0021": ("partially superseded", "ADR-0022"),
     }
     for number, terms in required_markers.items():
         header = "\n".join(read(ADR[number]).splitlines()[:18])
@@ -809,6 +863,8 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "installed/enabled",
         "Standalone user-level каталоги",
         "task-manager@srez-marketplace` остаётся adapter-only",
+        "каждый комментарий ShipTask проходит\n  отдельного независимого Strategic Explainer",
+        "`To Do → In Progress` комментария не создаёт",
     )
     require(
         errors,
@@ -817,6 +873,8 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "update_plugin_cachebuster.py",
         "не меняйте\n   numeric version",
         "fresh App Server catalog",
+        "каждый комментарий ShipTask обязательно\n  проходит отдельного независимого Explainer",
+        "`To Do → In Progress` не создаёт комментарий",
     )
 
 
@@ -834,6 +892,7 @@ def current_task_source_files() -> tuple[Path, ...]:
         ADR["0018"],
         ADR["0019"],
         ADR["0020"],
+        ADR["0022"],
     )
 
 

@@ -18,7 +18,9 @@ Strategic Explainer = помощник по человеческому объя�
 reporting contract —
 [ADR-0020](decisions/0020-visible-acceptance-incidents-and-required-comments.md).
 [ADR-0021](decisions/0021-requirements-as-agent-constitution.md) распространяет
-этот принцип на agent topology, context и evaluation. Они уточняют
+этот принцип на agent topology, context и evaluation, а
+[ADR-0022](decisions/0022-mandatory-independent-strategic-explainer-for-comments.md)
+сохраняет явное требование отдельного Explainer перед каждым комментарием. Они уточняют
 [ADR-0017](decisions/0017-constitution-first-runtime-contract.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
 результатов и жёстких границ. Агент свободен выбирать порядок, инструменты,
@@ -28,8 +30,11 @@ reporting contract —
 
 - пользовательский outcome важнее Goal, plans и внутренней отчётности;
 - status Task соответствует текущим фактам;
+- обычный старт `To Do → In Progress` не создаёт комментарий;
 - существенный status transition сначала получает понятный native comment и
-  comment read-back; исключение — обычный старт `To Do → In Progress`;
+  comment read-back;
+- каждый создаваемый ShipTask-комментарий до публикации проходит отдельного
+  независимого Strategic Explainer;
 - material blocker также получает comment, даже без status change;
 - native comments являются гарантированной adapter capability и всегда
   сопровождают material lifecycle reporting;
@@ -39,8 +44,8 @@ reporting contract —
 - сбой одного средства сам по себе ничего не доказывает и не обязывает чинить
   именно его;
 - acceptance не ослабляется, непроверенное не называется verified;
-- человеческое explanation обязательно, а отдельный вызов Strategic Explainer
-  является доступным способом, не orchestration requirement;
+- основной агент не заменяет отдельного Strategic Explainer собственной
+  редактурой и не публикует комментарий без независимого прохода;
 - production и другие sensitive effects сохраняют явную authority boundary.
 
 ## Запуск
@@ -86,6 +91,8 @@ completion comment предшествует `Done`.
 Ответ в Codex, Goal, reason code или `description` comment не заменяют.
 Существенный status transition считается завершённым только при фактическом
 comment и read-back; технический путь к этому результату выбирает агент.
+До публикации текст готовит отдельный Strategic Explainer, а основной агент
+проверяет его фактическую точность.
 
 ## Приёмка
 
@@ -135,6 +142,7 @@ secrets/privacy/access-policy changes, external recipients и unbounded cost
 - [Goal только для массовой имплементации](decisions/0019-goal-only-for-multi-task-implementation.md)
 - [Видимые приёмочные инциденты и обязательные comments](decisions/0020-visible-acceptance-incidents-and-required-comments.md)
 - [Требования как конституция для агентов](decisions/0021-requirements-as-agent-constitution.md)
+- [Независимый Strategic Explainer для каждого комментария](decisions/0022-mandatory-independent-strategic-explainer-for-comments.md)
 - [Task Manager adapter contract](reference/task-manager-adapter.md)
 - [Lifecycle evaluation](reference/shiptask-review-disposition-evaluation.md)
 - [Strategic Explainer specification](specs/strategic-explainer.md)

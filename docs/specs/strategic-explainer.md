@@ -96,6 +96,10 @@ tool calls или количество прочитанных источнико
 Техническая деталь остаётся только когда меняет causal model, outcome,
 impact/risk, action или confidence. Внутренние сущности переводятся в
 человеческие роли; полезный exact term можно сохранить после объяснения.
+Текст пишется на языке пользователя. Английский термин остаётся только когда он
+является точным названием или естественная замена потеряет смысл; русская
+грамматическая рамка с английским смысловым ядром не считается понятным
+объяснением.
 
 Если есть реальный material choice, Explainer сравнивает столько доступных
 вариантов, сколько нужно для решения: что каждый доказывает, prerequisites,
@@ -103,8 +107,9 @@ tradeoff и success signal. Он не придумывает alternatives рад
 выдаёт рекомендацию за принятое действие или новую authority.
 
 При direct invocation source refs размещаются рядом с поддерживаемыми claims.
-При delegated use parent получает достаточно короткий source basis, чтобы
-проверить meaning и provenance. Никакой фиксированный output envelope не нужен.
+При delegated use Explainer возвращает готовый пользовательский текст и
+достаточно короткий source basis, чтобы parent проверил смысл, факты и
+provenance. Никакой фиксированный output envelope не нужен.
 
 ## 6. Completion criteria
 
@@ -119,6 +124,8 @@ tradeoff и success signal. Он не придумывает alternatives рад
 - explanation не создаёт status, permission или action, которого источник не
   устанавливал;
 - пользователь понимает смысл и следующий state без process diary;
+- delegated result пригоден для публикации без стилистической переработки
+  основным агентом;
 - source basis и material uncertainty остаются проверяемыми.
 
 Regression scenarios проверяются по observable behavior в

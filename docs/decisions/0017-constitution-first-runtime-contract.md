@@ -7,7 +7,9 @@
 guarantee и cross-surface incident reporting —
 [ADR-0020](0020-visible-acceptance-incidents-and-required-comments.md), а
 agent-independent смысл требований —
-[ADR-0021](0021-requirements-as-agent-constitution.md).
+[ADR-0021](0021-requirements-as-agent-constitution.md), а обязательная
+независимая проверка комментариев восстановлена
+[ADR-0022](0022-mandatory-independent-strategic-explainer-for-comments.md).
 Это решение ввело ShipTask lifecycle, обязательные комментарии и свободу исполнения.
 Оно частично заменяет ADR-0009, ADR-0010, ADR-0013, ADR-0015 и ADR-0016 там,
 где те задавали иной порядок status/comment effects, разрешали менять status с
@@ -79,12 +81,12 @@ Task остаётся `In Review`, а comment даёт краткие вариа
 
 ### Strategic Explainer — помощник по смыслу, не управляющий слой
 
-Он помогает сформулировать каждый обязательный lifecycle/blocker comment на
-уровне проблемы, влияния, ограничения и следующего шага. ShipTask сохраняет
-ответственность за facts, status, authority, action и final wording. Bounded
-read-only discovery применяется по необходимости, а не ради полноты ритуала.
-Обязательный отдельный invocation позднее заменён ADR-0021: current requirement
-относится к качеству explanation.
+Он помогает сформулировать каждый комментарий на уровне проблемы, влияния,
+ограничения и следующего шага. ShipTask сохраняет ответственность за факты,
+статус, полномочия и действие. ADR-0021 ошибочно разрешил основному агенту
+заменять независимый проход собственной редактурой; ADR-0022 восстановил
+отдельного Strategic Explainer перед каждым комментарием. Bounded read-only
+discovery применяется по необходимости, а не ради полноты ритуала.
 
 ### Goal — только учёт batch progress
 

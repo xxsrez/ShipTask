@@ -1,9 +1,12 @@
 # 0013. Strategic Explainer для всех ShipTask report narratives
 
-Статус: partially superseded, 2026-08-22. Requirement понятного problem-first
-report сохраняется, а обязательный отдельный invocation, context pipeline и
-communication barrier заменены
-[ADR-0021](0021-requirements-as-agent-constitution.md). Расширяет
+Статус: partially superseded, 2026-08-22. Требование отдельного Strategic
+Explainer для каждого комментария восстановлено и уточнено
+[ADR-0022](0022-mandatory-independent-strategic-explainer-for-comments.md).
+Жёсткий формат передачи контекста, служебные коды и точная оркестрация заменены
+[ADR-0021](0021-requirements-as-agent-constitution.md), а текущий
+constitution-first контракт закреплён
+[ADR-0017](0017-constitution-first-runtime-contract.md). Расширяет
 [ADR-0012](0012-strategic-explainer-as-portable-subagent-role.md). No-tools
 invocation и технически центрированный brief заменены problem-first bounded
 discovery из [ADR-0014](0014-problem-first-bounded-strategic-discovery.md). Меняет
@@ -12,10 +15,7 @@ invocation policy для ShipTask. Lifecycle, comment capability и terminal-eff
 Fail-closed status-write часть для proven rework уточнена
 [ADR-0015](0015-single-pass-review-disposition.md), а единая граница между
 comment effect и status write —
-[ADR-0016](0016-current-lifecycle-and-reporting-contract.md). Current
-constitution сохраняет quality contract для обязательных lifecycle/blocker
-comments, но заменяет procedural pipeline и status/comment fallback правила через
-[ADR-0017](0017-constitution-first-runtime-contract.md).
+[ADR-0016](0016-current-lifecycle-and-reporting-contract.md).
 
 ## Контекст
 

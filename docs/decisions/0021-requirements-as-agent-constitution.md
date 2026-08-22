@@ -1,11 +1,12 @@
 # 0021. Требования являются конституцией для агентов
 
-Статус: accepted, 2026-08-22. Уточняет ADR-0017 и ADR-0018 для всех current
-requirements ShipTask и Strategic Explainer. Заменяет обязательную agent
+Статус: partially superseded, 2026-08-22. Уточняет ADR-0017 и ADR-0018 для всех
+current requirements ShipTask и Strategic Explainer. Заменяет обязательную agent
 topology, fixed context isolation, exact handoff envelope, error tokens, retry
-scheme и option quota из ADR-0012, ADR-0013 и ADR-0014. Также заменяет
-требование обязательно вызывать Strategic Explainer для каждого comment:
-обязательным остаётся качество объяснения, а не внутренний исполнитель.
+scheme и option quota из ADR-0012, ADR-0013 и ADR-0014. Решение отменить
+обязательного отдельного Strategic Explainer для комментариев было ошибочным и
+заменено [ADR-0022](0022-mandatory-independent-strategic-explainer-for-comments.md).
+Остальные требования-конституция сохраняются.
 
 ## Контекст
 

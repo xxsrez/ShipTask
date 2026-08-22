@@ -1,14 +1,15 @@
 # Проверка lifecycle и приёмки ShipTask
 
-Матрица проверяет пользовательские outcomes, а не точные внутренние шаги или
-формулировки. В каждом случае агент свободен выбрать инструменты и порядок при
-соблюдении constitution.
+Матрица проверяет пользовательские outcomes, а не формулировки. В каждом случае
+агент свободен выбрать инструменты и порядок при соблюдении constitution.
+Отдельный Strategic Explainer перед каждым создаваемым комментарием является
+явным требованием пользователя и проверяется как независимый смысловой барьер.
 
 ## Обязательная матрица
 
 | Сценарий | Фактический исход | Comment | Status | Дальнейшее действие | Недопустимо |
 |---|---|---|---|---|---|
-| Обычный старт `To Do` | работа началась | не требуется | `In Progress` | реализовать и проверить | лишний ritual comment |
+| Обычный старт `To Do` | работа началась | не создаётся; Strategic Explainer не запускается | `In Progress` | реализовать и проверить | лишний стартовый comment |
 | Candidate готов к review | result реализован и targeted checks пройдены | объяснить result и checks; read-back до transition | `In Review` | сразу провести приёмку | status без comment |
 | Current acceptance противоречит самому себе | `task-contract-conflict` | точное противоречие и нужное решение | оставить `In Review` | исправить только объективно однозначный contract | считать историю редакций конфликтом |
 | Exact candidate воспроизводимо нарушает критерий | `verified-failure`; immediate chat alarm | opening с expected/observed, evidence, impact и причиной возврата; read-back до repair | `In Progress` | продолжить rework в том же run и показывать progress | молча начать repair, status без comment или завершить run на reopen |
@@ -23,6 +24,7 @@
 | Reopen terminal Task | обнаружен новый material reason | объяснить причину reopen; read-back | правдивый working status | продолжить scoped work | молчаливый reopen |
 | Новый `Canceled` или `Duplicate` | terminal reason доказан | объяснить причину и связь с outcome; read-back | соответствующий terminal status | перечитать Task | terminal status без comment |
 | Обязательный comment write/read-back дал ошибку | lifecycle transition не завершён; comment остаётся required | reconciliate неизвестный outcome через native reads | не выполнять существенный transition | безопасно восстановить exact write/read-back и продолжить | skip обязательного comment, status без comment, fallback в description или blind retry |
+| Отдельный Strategic Explainer недоступен или отклонил текст | независимая адаптация не завершена | не публиковать непроверенный черновик | не выполнять зависящий переход | сообщить gap в Codex и продолжить только независимую безопасную работу | основной агент сам одобряет или переписывает comment |
 | Массовая имплементация минимум двух Tasks | `batch-implementation` | по lifecycle каждой Task | правдивые Task statuses | создать/продолжить Goal всего implementation scope | работать без Goal либо создать отдельный Goal на каждую Task |
 | Release готового candidate по Project/Release selector | `release` | только если lifecycle/blocker требует | statuses по фактам | commit/push/deploy/smoke по authority без нового Goal | создавать Goal из-за selector или production release |
 | Task-local blocker в `batch-implementation` | Task незавершена | понятный blocker comment с read-back | правдивый non-terminal status | продолжить независимые Tasks | завершить или искусственно блокировать Goal |
@@ -48,6 +50,8 @@
 - Может ли пользователь отличить доказанное, непроверенное и предположение без
   чтения process diary?
 - Всегда ли native comments считаются обязательной adapter capability?
+- Прошёл ли каждый созданный ShipTask-комментарий отдельного Strategic
+  Explainer, а обычный старт остался без комментария и без его запуска?
 
 ## Слепой forward test
 
@@ -55,4 +59,5 @@
 ожидаемый исход и не diagnosis предыдущего run. Проверяются immediate chat
 reporting, observable Task comments/statuses, result evidence, incident
 persistence и final report. Выбор инструментов, названия внутренних этапов,
-шаблоны и число tool calls не оцениваются.
+шаблоны и число tool calls не оцениваются. Проверяется реальная независимость
+Strategic Explainer от автора технического черновика.

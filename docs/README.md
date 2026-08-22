@@ -56,11 +56,11 @@
   Marketplace plugin; Task Manager package остаётся adapter-only; состав
   ShipTask plugin позднее расширен ADR-0012.
 - [0012: Strategic Explainer как переносимая роль свежего субагента](decisions/0012-strategic-explainer-as-portable-subagent-role.md)
-  — историческая fresh-subagent implementation; sibling-skill distribution
-  сохраняется, обязательная topology заменена ADR-0021.
+  — историческая fresh-subagent implementation; sibling-skill distribution и
+  независимая роль сохраняются, а точная topology заменена ADR-0021/ADR-0022.
 - [0013: Strategic Explainer для всех ShipTask report narratives](decisions/0013-strategic-explainer-for-shiptask-report-narratives.md)
-  — исторический invocation pipeline; problem-first quality всех material
-  comments сохраняется, отдельный вызов и barrier заменены ADR-0021.
+  — исторический invocation pipeline; отдельный Explainer для каждого
+  комментария восстановлен ADR-0022 без прежнего жёсткого формата передачи.
 - [0014: Problem-first и bounded strategic discovery](decisions/0014-problem-first-bounded-strategic-discovery.md)
   — сохраняет реальную problem framing, bounded read-only discovery и source
   basis; fixed fields/error/context mechanics заменены ADR-0021.
@@ -87,6 +87,9 @@
   — current requirements задают outcome, evidence и authority boundaries, а не
   agent topology, context envelope, retries или tool choreography; точный
   protocol сохраняется только для safety/data-integrity invariants.
+- [0022: Каждый комментарий ShipTask проходит независимый Strategic Explainer](decisions/0022-mandatory-independent-strategic-explainer-for-comments.md)
+  — восстанавливает явное требование отдельной смысловой проверки каждого
+  комментария и запрещает комментарий на обычном старте `To Do → In Progress`.
 
 ## Reference
 

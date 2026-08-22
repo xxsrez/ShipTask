@@ -16,7 +16,8 @@
 - Формулируйте observable requirement, а не универсальный порядок tool calls.
 - Current requirements являются конституцией: фиксируйте what, why, evidence и
   authority boundary; не задавайте agent topology, форму context, число
-  attempts/options или внутренний reasoning.
+  attempts/options или внутренний reasoning без явного пользовательского
+  требования.
 - Оставляйте агенту свободу выбора инструментов, реализации и достаточной
   проверки, если safety/authority не требуют жёсткого порядка.
 - Жёсткий порядок нужен там, где effects необратимо расходятся: для
@@ -29,9 +30,12 @@
   обязательный путь. Проверяйте достаточность итогового evidence.
 - Не добавляйте фиксированное число попыток. Проверяйте основание для повтора и
   реальное условие остановки.
-- Strategic Explainer задаёт quality bar человеческого объяснения и не получает
-  право решать facts, status, scope, authority или action. Не требуйте отдельный
-  invocation, если observable result уже удовлетворяет contract.
+- Strategic Explainer не получает право решать факты, статус, границы работы,
+  полномочия или действие. При этом каждый комментарий ShipTask обязательно
+  проходит отдельного независимого Explainer: это явное требование пользователя,
+  которое нельзя заменить самостоятельной редактурой основного агента.
+- Обычный переход `To Do → In Progress` не создаёт комментарий и поэтому не
+  запускает Strategic Explainer.
 - Не добавляйте fallback task provider. Task Manager остаётся единственным
   adapter.
 
@@ -52,8 +56,9 @@ git diff --check
 Repository validator проверяет current contract, trigger matrix, lifecycle
 evaluation, retired loopholes, documentation navigation и distribution
 boundaries. Проверка не должна требовать конкретных необязательных слов или
-числа tool calls вместо observable behavior. Evals не фиксируют subagent type,
-fork mode, prompt envelope, retry count или число alternatives.
+числа tool calls вместо observable behavior. Evals проверяют отдельного
+независимого Strategic Explainer как явное требование, но не фиксируют fork
+mode, prompt envelope, retry count или число alternatives.
 
 ## Forward test
 
@@ -68,8 +73,9 @@ skill, реалистичный exact Task Manager scope и обычный proje
   сами mode не определяют; release-only, чтение нескольких Tasks и общая приёмка
   работают без Goal; audit/planning/backlog и generic code request не запускают
   ShipTask;
-- `To Do → In Progress` проходит без лишнего comment;
-- готовый candidate получает comment/read-back до `In Review`;
+- `To Do → In Progress` проходит без comment и без Strategic Explainer;
+- готовый candidate получает независимо подготовленный Strategic Explainer
+  comment и read-back до `In Review`;
 - proven defect немедленно виден в chat, получает opening comment до repair и
   `In Progress`, после чего rework продолжается в том же run;
 - найденный и исправленный в одном run defect сохраняется в Task resolution
