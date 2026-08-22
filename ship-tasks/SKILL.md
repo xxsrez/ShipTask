@@ -43,8 +43,8 @@ selector входит автоматически, включая появивш�
 Если это может быть первый turn новой Codex task, прочитай [title contract](references/thread-title.md):
 доказанный catalog placeholder получает `ShipTask · ...` без риска для соседней task.
 Создавай Goal после подтверждения `batch-implementation` минимум двух Tasks и до
-implementation mutation. `single`/`release` работают без Goal. Release-only не
-создаёт, не переиспользует, не ретаргетит и не завершает Goal; compatible Goal
+implementation mutation. `single`/`release` без Goal. Release-only run Goal не создаёт,
+не переиспользует, не ретаргетит и не завершает; compatible Goal
 продолжается лишь когда release был его исходным done criterion; сам release новый Goal не создаёт.
 Goal live selector хранит identity/predicate, не стартовые refs/count; новая matching
 Task сохраняет его active без approval. Goal не определяет Task outcome/попытки/status.

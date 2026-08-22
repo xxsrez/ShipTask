@@ -328,6 +328,7 @@ def validate_ship_skill(errors: list[str]) -> None:
         "browser logistics не stop condition",
         "fresh full inventory",
         "сам release новый Goal не создаёт",
+        "Release-only run Goal не создаёт",
         "`Duplicate` отдельно не\nисполняй",
         "После смены session и до новой implementation surface найди task-owned Git state",
         "unfinished worktree/branch существует",
