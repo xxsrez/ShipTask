@@ -40,6 +40,8 @@ implementation writer, а
 genuinely simple packets на Luna Max и эскалирует material uncertainty на
 current profile. Они уточняют
 [ADR-0017](decisions/0017-constitution-first-runtime-contract.md).
+Периодические UAT releases разумными batch-группами, а не после каждой Task,
+закреплены [ADR-0026](decisions/0026-periodic-uat-batch-releases.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
 результатов и жёстких границ. Агент свободен выбирать порядок, инструменты,
 реализацию, декомпозицию и число попыток; delegation следует явной политике
@@ -82,6 +84,10 @@ ADR-0024.
 - сбой одного средства сам по себе ничего не доказывает и не обязывает чинить
   именно его;
 - acceptance не ослабляется, непроверенное не называется verified;
+- для каждой Task выполняется лёгкий targeted gate, а совместимые candidates
+  периодически проходят один thorough review-batch gate и один exact UAT deploy;
+- UAT — обычный разрешённый non-production effect после проверки target, без
+  отдельного approval; production остаётся отдельной authority boundary;
 - явный общий user override отключает всех субагентов для всего run;
 - пока effective user rule не отключает comment Explainer, основной агент не заменяет отдельного Strategic
   Explainer собственной редактурой и не публикует комментарий без
@@ -197,6 +203,11 @@ Task outcome и число попыток. Release-only run Goal не созда
 secrets/privacy/access-policy changes, external recipients и unbounded cost
 требуют явной authority.
 
+Если project context содержит UAT, не деплой каждую bug/Task отдельно по
+умолчанию. Собирай разумный integrated batch, запускай его при cadence или
+observable trigger и публикуй в UAT один exact candidate с deployment/read-back и
+smoke evidence. Отсутствующий UAT receipt — proof gap, а не verified release.
+
 ## Источники
 
 - [ShipTask Requirements](skills/ship-tasks/requirements.md)
@@ -209,6 +220,7 @@ secrets/privacy/access-policy changes, external recipients и unbounded cost
 - [Независимый Strategic Explainer для каждого комментария](decisions/0022-mandatory-independent-strategic-explainer-for-comments.md)
 - [Automatic delegation, natural-language topology rules и writer isolation](decisions/0024-adaptive-multi-agent-execution-by-default.md)
 - [Cost-aware профили субагентов](decisions/0025-cost-aware-subagent-profiles.md)
+- [Периодические UAT batch releases](decisions/0026-periodic-uat-batch-releases.md)
 - [Task Manager adapter contract](reference/task-manager-adapter.md)
 - [Lifecycle evaluation](reference/shiptask-review-disposition-evaluation.md)
 - [Strategic Explainer Requirements](skills/strategic-explainer/requirements.md)

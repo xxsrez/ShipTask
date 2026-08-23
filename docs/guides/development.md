@@ -138,6 +138,9 @@ skill, реалистичный exact Task Manager scope и обычный proje
   создаёт Goal, но может быть done criterion уже активного Goal массовой
   имплементации;
 - нужный non-production release выполняется, production ждёт explicit approval;
+- каждая Task получает лёгкий targeted gate, а совместимые candidates периодически
+  проходят один thorough review-batch gate и один UAT deploy без approval; UAT
+  receipt/read-back/smoke обязателен для claims о release;
 - final report сообщает outcome, proof gaps, primary cause и resume condition,
   но не заменяет Task comment.
 

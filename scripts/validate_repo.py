@@ -90,6 +90,10 @@ ADR = {
             "0025",
             "0025-cost-aware-subagent-profiles.md",
         ),
+        (
+            "0026",
+            "0026-periodic-uat-batch-releases.md",
+        ),
     )
 }
 
@@ -167,6 +171,7 @@ CURRENT_CONTRACT_FILES = (
     ADR["0023"],
     ADR["0024"],
     ADR["0025"],
+    ADR["0026"],
     ADAPTER,
 )
 
@@ -279,6 +284,9 @@ def validate_ship_skill(errors: list[str]) -> None:
         "Create-and-deliver",
         "Bare invocation определяет mode по live inventory",
         "Goal нужен только для implementation/rework минимум двух Tasks",
+        "per-Task gate",
+        "периодический review-batch",
+        "exact UAT release",
         "backlog capture",
     ):
         if term not in description:
@@ -362,6 +370,13 @@ def validate_ship_skill(errors: list[str]) -> None:
         "не переписывай текст самостоятельно",
         "Обычный `To Do → In Progress` не запускает Explainer",
         "SHIPTASK RUN REPORT",
+        "Периодический UAT batch release",
+        "лёгкий targeted gate",
+        "разумный exact integrated batch",
+        "один exact candidate в verified UAT",
+        "Не деплой UAT после каждой bug/Task",
+        "UAT — разрешённый non-production effect",
+        "UAT read-back/smoke",
         "[title contract](references/thread-title.md)",
         "доказанный catalog placeholder",
         "best-effort",
@@ -403,6 +418,10 @@ def validate_ship_skill(errors: list[str]) -> None:
         "отдельным feature branches и Git worktrees",
         "Не ослабляй acceptance",
         "SHIPTASK RUN REPORT",
+        "Периодический UAT batch release",
+        "один exact candidate в verified UAT",
+        "UAT — разрешённый non-production effect",
+        "UAT read-back/smoke",
     )
     metadata = read(SHIP_METADATA)
     prompt_match = re.search(r'^\s*default_prompt:\s*"(.*)"\s*$', metadata, re.MULTILINE)
@@ -769,6 +788,18 @@ REVIEW_CASES = {
         "resume condition",
         "только при material выборе",
     ),
+    "В batch scope накопились несколько совместимых ready candidates": (
+        "лёгкий targeted gate",
+        "периодический thorough review-batch gate",
+        "один exact integrated candidate в UAT",
+        "деплоить UAT после каждой bug/Task",
+    ),
+    "Достигнут UAT batch trigger (`batch_target`, review WIP, wave/frontier, общий effect, acceptance/Done, checkpoint или final flush)": (
+        "UAT receipt/read-back",
+        "один exact integrated candidate",
+        "без отдельного approval",
+        "назвать deploy verified без receipt",
+    ),
     "Batch gate упал, виновная Task не установлена": (
         "In Review",
         "separating evidence",
@@ -918,7 +949,7 @@ def validate_review_matrix(errors: list[str]) -> None:
 
 def validate_source_layers(errors: list[str]) -> None:
     packages = (
-        (SHIP_REQUIREMENTS, "ST", 23),
+        (SHIP_REQUIREMENTS, "ST", 24),
         (COMPOSER_REQUIREMENTS, "TC", 10),
         (STRATEGIC_REQUIREMENTS, "SE", 12),
     )
@@ -982,6 +1013,12 @@ def validate_source_layers(errors: list[str]) -> None:
         "двум writers одновременно менять один worktree",
         "Независимая plugin distribution",
         "должны быть byte-identical",
+        "Периодический UAT batch release",
+        "лёгкий targeted gate",
+        "разумный exact integrated batch",
+        "один exact integrated candidate",
+        "без отдельного approval",
+        "UAT deployment/read-back/smoke",
     )
     forbid(
         errors,
@@ -1113,6 +1150,11 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0022",
         "ADR-0024",
         "ADR-0025",
+        "ADR-0026",
+        "### 7.2 Per-Task gates и периодический UAT batch",
+        "один deploy того же exact candidate в verified UAT",
+        "standing authority периодического release",
+        "не нужно спрашивать approval после каждой Task",
         "### 1.3 Best-effort название текущей Codex task",
         "best-effort попытки\nзаменить placeholder",
         "ровно одного current candidate",
@@ -1188,6 +1230,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0022",
         "ADR-0024",
         "ADR-0025",
+        "ADR-0026",
         "гарантированной adapter capability",
         "каждый создаваемый ShipTask-комментарий",
         "durable Task history",
@@ -1209,6 +1252,9 @@ def validate_current_contract(errors: list[str]) -> None:
         "Browser/controller/session switch — диагностический путь",
         "product outcome идёт раньше browser/OAuth logistics",
         "identity/predicate, не стартовый список или count",
+        "лёгкий targeted gate",
+        "один exact UAT deploy",
+        "UAT — обычный разрешённый non-production effect",
         "Task type хранится в Label/hierarchy",
         "не дублируется\nпрефиксом `BUG:`/`EPIC:`",
     )
@@ -1244,6 +1290,9 @@ def validate_current_contract(errors: list[str]) -> None:
         "fresh full inventory, включая Tasks",
         "Browser/controller/OAuth/MFA logistics идут после этого",
         "identity/predicate, не стартовый список/count",
+        "periodic batch trigger",
+        "UAT receipt/read-back",
+        "proof gap, а не verified release",
     )
     require(
         errors,
@@ -1268,6 +1317,11 @@ def validate_current_contract(errors: list[str]) -> None:
         "прими exclusive ownership этого же\nworktree",
         "Не делай takeover при живом writer",
         "Production workflow требует явного approval",
+        "Периодический UAT batch",
+        "не деплоит каждую bug/Task по умолчанию",
+        "один thorough review-batch",
+        "UAT deployment после проверки target",
+        "отсутствие receipt не считается verified",
     )
     require(
         errors,
@@ -1378,6 +1432,18 @@ def validate_current_contract(errors: list[str]) -> None:
         "`<profile>=not-available`",
         "`luna-escalation=not-available`",
         "Sol Extra High или Sol Ultra как универсальный default",
+    )
+    require(
+        errors,
+        ADR["0026"],
+        "Периодические UAT releases разумными batch-группами",
+        "per-Task targeted gate",
+        "review-batch gate",
+        "один deploy exact candidate в UAT",
+        "standing delivery authority",
+        "не превращает каждую Task в singleton",
+        "UAT receipt/read-back",
+        "Production release и его authority",
     )
     for path in (
         ROOT / "AGENTS.md",
@@ -1717,6 +1783,7 @@ def current_task_source_files() -> tuple[Path, ...]:
         ADR["0023"],
         ADR["0024"],
         ADR["0025"],
+        ADR["0026"],
     )
 
 

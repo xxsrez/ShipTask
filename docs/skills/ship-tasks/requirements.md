@@ -340,6 +340,27 @@ status decision. Task остаётся в правдивом non-terminal сос
 недоступности Explainer зависящий comment/transition не считается выполненным,
 а независимая safe работа продолжается.
 
+### `ST-24` — Периодический UAT batch release
+
+Когда current project context содержит UAT surface, ShipTask не деплоит туда
+каждую отдельную bug-fix Task по умолчанию. Для каждой Task выполняется лёгкий
+targeted gate, а совместимые готовые candidates группируются в разумный exact
+integrated batch. Периодически, по project-defined cadence или при достижении
+batch target/review WIP, завершении wave/ready frontier, перед общим UAT effect,
+acceptance/Done, checkpoint или final flush, ShipTask проводит один тщательный
+review-batch gate и публикует в UAT один exact integrated candidate.
+
+Обычный UAT batch release является разрешённым non-production effect: после
+надёжной проверки target release выполняется без отдельного approval. High-risk
+или
+coupled Task, явный singleton release и final flush могут обоснованно образовать
+batch из одной Task; это исключение не превращает каждую Task в singleton.
+Batch evidence фиксирует member refs, exact source/integration identity,
+targeted и batch checks, UAT deployment/read-back/smoke и текущий результат.
+Failure локализуется по affected Task/dependency; доказательства незатронутых
+members не обнуляются. Production release и его authority остаются отдельной
+границей.
+
 ## Изменение Level 1
 
 Новый запрос меняет этот файл только если пользователь меняет обязательный

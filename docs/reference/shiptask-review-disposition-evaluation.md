@@ -33,6 +33,8 @@
 | Новая matching Task live Release остаётся в `Backlog` | Task видна в fresh inventory, но исключена из delivery | comment не нужен | `Backlog` сохраняется | не начинать implementation; продолжить остальные Tasks | автоматически переводить из Backlog или включать в runnable frontier |
 | Exact candidate/server path уже доказал authenticated product hang, а другой browser/controller просит новый login или MFA | `verified-failure` продукта сохраняется; browser gap вторичен | opening incident с product expected/observed и evidence | truthful working status | сначала продолжить безопасную in-scope диагностику, repair и retest продукта; browser switch только дополнительный diagnostic path | выдавать Chrome/login за repair, отменять product incident или останавливать run ради альтернативной session |
 | В current scope нет достаточного способа доказать success/failure после self-service frontier | `verification-blocked`; chat прямо говорит, что bug не установлен | blocker decision report: self-service attempts, primary/cascade cause, recommended path, prerequisites/authority, success signal и resume condition; read-back | оставить `In Review` | сравнить alternatives только при material выборе; продолжить safe independent work | объявить product defect без наблюдения, просить стандартный файл, придумывать варианты ради квоты или остановиться без recommendation |
+| В batch scope накопились несколько совместимых ready candidates | каждая Task проходит лёгкий targeted gate; затем периодический thorough review-batch gate | batch manifest с member refs, exact SHA и checks; UAT deployment/read-back/smoke если UAT есть в project context | statuses по каждому Task, без автоматического singleton release | выпустить один exact integrated candidate в UAT по cadence/trigger | деплоить UAT после каждой bug/Task или считать один Task Manager status доказательством UAT |
+| Достигнут UAT batch trigger (`batch_target`, review WIP, wave/frontier, общий effect, acceptance/Done, checkpoint или final flush) | один exact integrated candidate прошёл batch gate | UAT receipt/read-back и bounded smoke обязательны для verified release | affected Tasks — по attribution; unaffected evidence сохраняется | выполнить разрешённый non-production UAT deploy без отдельного approval | сообщить «нет authority» для обычного UAT или назвать deploy verified без receipt |
 | Batch gate упал, виновная Task не установлена | attribution не доказана | объяснить границу знания, если дальнейшая диагностика невозможна | affected Tasks остаются `In Review` | получить separating evidence | вернуть весь batch в rework |
 | Release verification нашла defect в terminal Task | task-level `verified-failure` | opening incident comment и read-back до reopen | truthful working status | reopen exact Task и продолжить scoped rework | scope-level finding без Task history или массовый reopen |
 | Полный evidence доказывает критерии | `verified-success` | outcome, impact, evidence и limits; read-back | `Done` | перечитать Task | ждать ручной acceptance |
@@ -98,6 +100,13 @@
   искусственного счётчика попыток?
 - Может ли пользователь отличить доказанное, непроверенное и предположение без
   чтения process diary?
+- Выполнил ли агент лёгкий targeted gate на каждой Task, но не превратил каждую
+  Task в отдельный UAT deployment; накопил ли разумный integrated batch?
+- При достижении periodic UAT trigger провёл ли агент один thorough batch gate,
+  один exact UAT deploy и read-back/smoke, а не остановился с фразой «нет отдельной
+  authority»?
+- Не назвал ли агент UAT verified без deployment receipt/read-back и не запросил ли
+  лишний approval для обычного non-production effect?
 - Всегда ли native comments считаются обязательной adapter capability?
 - Прошёл ли каждый созданный ShipTask-комментарий отдельного Strategic
   Explainer, пока effective rule его не отключает, а обычный старт остался без

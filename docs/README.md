@@ -20,7 +20,8 @@
   после interruption или смены сессии, Luna Max только для genuinely simple
   packets с эскалацией на current profile, constitution-first требования, обязательные
   comments, видимые acceptance incidents, свобода выбора инструментов и
-  фактическая классификация приёмки.
+  фактическая классификация приёмки; лёгкие per-Task gates и периодические
+  thorough UAT batch releases одним exact integrated candidate без approval.
 - `$ship-tasks:task-composer`:
   [Requirements](skills/task-composer/requirements.md) и
   [Architecture](skills/task-composer/architecture.md) — planning-only Task
@@ -119,6 +120,9 @@
 - [0025: Cost-aware профили субагентов](decisions/0025-cost-aware-subagent-profiles.md)
   — сохраняет пользовательский model/effort, направляет только genuinely simple
   packets на Luna Max и требует current-profile escalation без Luna retry loop.
+- [0026: Периодические UAT batch releases](decisions/0026-periodic-uat-batch-releases.md)
+  — отделяет лёгкую проверку каждой Task от периодического thorough gate и одного
+  UAT deploy совместимого exact batch; обычный UAT не требует approval.
 
 ## Reference
 

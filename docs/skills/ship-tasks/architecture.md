@@ -16,6 +16,8 @@ reporting contract уточнён
 [ADR-0024](../../decisions/0024-adaptive-multi-agent-execution-by-default.md), а
 cost-aware выбор профиля субагента и обязательная эскалация Luna —
 [ADR-0025](../../decisions/0025-cost-aware-subagent-profiles.md).
+Периодическая проверка и публикация совместимых изменений в non-production UAT
+уточнены [ADR-0026](../../decisions/0026-periodic-uat-batch-releases.md).
 Эти решения соответственно сохраняют свободу способа, отделяют Goal от release
 и делают приёмочные инциденты видимыми во всём run.
 
@@ -40,7 +42,9 @@ natural-language правила о числе, ролях и условиях de
 а interrupted task-owned checkpoint подхватывается следующей сессией после
 exclusive takeover; до `verification-blocked` агент проходит автономную
 self-test frontier, а каждый material blocker получает причинный decision
-report с рекомендацией и resume condition. Marketplace source и installed cache —
+report с рекомендацией и resume condition; per-Task targeted gates собираются в
+периодический review-batch gate и один exact UAT deployment с read-back/smoke,
+без деплоя после каждой Task. Marketplace source и installed cache —
 отдельный distribution step: локальная компиляция сама по себе не доказывает,
 что новый runtime уже released или загружен fresh Codex session.
 
@@ -571,6 +575,26 @@ finding: она автоматически входит в delivery и прим�
 исправляется и не превращается автоматически в новую Task. Если оно не блокирует
 текущий result, оно кратко попадает в final report.
 
+### 7.2 Per-Task gates и периодический UAT batch
+
+До review каждая Task проходит лёгкий targeted gate, который доказывает её
+acceptance и risk-relevant changed scope. Это не означает полный дорогой suite и
+не означает отдельный UAT deployment. Coordinator объединяет совместимые ready
+candidates в exact integrated review batch и периодически запускает один
+thorough batch gate. Trigger берётся из project-defined cadence или observable
+сигнала: `batch_target`/review WIP, конец wave/ready frontier, общий UAT effect,
+acceptance/Done, checkpoint или final flush. При trigger выполняется один deploy
+того же exact candidate в verified UAT, затем UAT read-back и bounded smoke.
+
+Если project context определяет UAT, этот deploy — обычный разрешённый
+non-production effect и не требует отдельного approval. High-risk/coupled Task,
+явный singleton release или final flush могут образовать batch из одного member;
+без такого основания несколько готовых candidates не дробятся на singleton
+deployments. Batch manifest сохраняет member refs, source/integration identity,
+targeted/batch checks и UAT receipt. При failure attribution сначала отделяется
+по Task/dependency: affected members получают rework, unaffected evidence не
+аннулируется без доказательства.
+
 ## 8. Массовая имплементация, multi-agent execution и Goal
 
 Goal создаётся только для `batch-implementation`: после exact scope resolution и
@@ -714,6 +738,13 @@ mutation небезопасной.
 выполнить без дополнительного вопроса после проверки target. Сюда входят
 build/publish/deploy, smoke и bounded repair/rollback затронутого
 non-production surface.
+
+Для UAT в `batch-implementation` это standing authority периодического release:
+не нужно спрашивать approval после каждой Task и не нужно деплоить каждую Task
+отдельно. Сначала проверь target, собери совместимый exact batch, проведи его
+thorough gate, задеплой один exact integrated candidate и перечитай deployment,
+access и smoke evidence. Отсутствие UAT receipt/read-back означает gap, а не
+verified release.
 
 Production требует явного approval для exact target. Такое approval не отменяет
 verification, comments и read-back. При отсутствии approval Task получает
