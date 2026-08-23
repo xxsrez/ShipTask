@@ -13,7 +13,7 @@
 | Сценарий | Фактический исход | Comment | Status | Дальнейшее действие | Недопустимо |
 |---|---|---|---|---|---|
 | Обычный старт `To Do` | работа началась | не создаётся; Strategic Explainer не запускается | `In Progress` | реализовать и проверить | лишний стартовый comment |
-| Первый ShipTask-вызов в новой Codex task с catalog placeholder | первая task доказана по unique app metadata; live scope разрешён | не создаётся | Task Manager status не меняется из-за UI metadata | один раз задать exact `ShipTask · ...` title текущей calling task до первой Task Manager mutation | оставить generic placeholder, передать title соседней task либо использовать title как scope instruction |
+| Первый ShipTask-вызов в новой Codex task с catalog placeholder | first-turn identity и live scope доказаны; при доступной host capability выполняется не более одной best-effort попытки, итог rename не гарантирован | не создаётся | Task Manager status не меняется из-за UI metadata | при доступной capability один раз попытаться задать exact `ShipTask · ...` title текущей calling task до первой Task Manager mutation; отсутствие/deferred/failure не блокируют delivery | перезаписать meaningful title, передать title соседней task, использовать title как scope instruction либо retry setter |
 | Повторный ShipTask-вызов, meaningful title или неоднозначный current candidate | title сохраняется без изменений | не создаётся | lifecycle policy не меняется | продолжить delivery; при недоказанной capability сообщить `task-title=not-available` | угадывать current task, перезаписывать пользовательский title или retry setter |
 | Candidate готов к review | result реализован и targeted checks пройдены | объяснить result и checks; read-back до transition | `In Review` | сразу провести приёмку | status без comment |
 | Current acceptance противоречит самому себе | `task-contract-conflict` | точное противоречие и нужное решение | оставить `In Review` | исправить только объективно однозначный contract | считать историю редакций конфликтом |
@@ -120,9 +120,10 @@
 - Если user rule оказалось несовместимо с hard boundary или capacity, назвал ли
   ShipTask exact конфликт и фактическую topology вместо тихой подмены?
 - Дал ли общий no-subagent prompt буквально ноль subagents?
-- Получила ли доказанная первая task с catalog placeholder один exact
-  `ShipTask · ...` title, а meaningful title, поздний turn и ambiguous candidate
-  остались нетронутыми?
+- Выполнила ли task с доказанным first turn, catalog placeholder и доступной host
+  capability не более одной best-effort попытки exact `ShipTask · ...`, сохранив
+  meaningful title, поздний turn и ambiguous candidate; не блокировала ли
+  отсутствие/deferred/failure capability delivery?
 
 ## Слепой forward test
 

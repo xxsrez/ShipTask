@@ -67,9 +67,10 @@ boundaries. Проверка не должна требовать конкрет
 сохранение natural-language exact/relative/role/conditional rules,
 writer/worktree isolation и отдельного Strategic Explainer при разрешённой роли,
 но не навязывают topology formula, fork mode, prompt envelope, retry count или
-число alternatives. Auto-title является отдельным явным требованием:
-проверяются доказанная first-turn eligibility, сохранение meaningful title и
-адресация только calling task.
+число alternatives. Auto-title является отдельным best-effort UI convenience:
+проверяются попытка только при доказанной first-turn eligibility, сохранение
+meaningful title, отсутствие fallback при недоступной capability и адресация
+только calling task.
 
 ## Forward test
 
@@ -88,9 +89,11 @@ skill, реалистичный exact Task Manager scope и обычный proje
   и `Backlog → To Do` автоматически входят без повторного approval, новая
   matching `Backlog` Task остаётся вне runnable frontier, а initial inventory не
   превращается в Goal count/list cap;
-- первый ShipTask-вызов с catalog placeholder после live scope resolution один
-  раз получает `ShipTask · ...`; meaningful title, later turn, incomplete
-  history и ambiguous current candidate не переименовываются;
+- первый ShipTask-вызов с catalog placeholder и доступной host title capability
+  после live scope resolution получает не более одной best-effort попытки
+  `ShipTask · ...`; meaningful title, later turn, incomplete history и
+  ambiguous current candidate не переименовываются, а отсутствие/failure
+  capability не блокируют run;
 - несколько independent conflict-free Tasks без user rule автоматически
   получают полезную delegation и одного integration owner; каждый
   concurrent implementation writer до первой mutation получает собственные

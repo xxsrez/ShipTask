@@ -123,17 +123,20 @@ Unresolved acceptance incidents из materially relevant comments называю
 | `Создай Task в Task Manager` | нет | Task Composer planning write, без delivery flow |
 | `Просто добавь это в backlog` | нет | Task Composer backlog capture, без delivery flow |
 
-### 1.3 Название первой Codex task
+### 1.3 Best-effort название текущей Codex task
 
 Если ShipTask является первым пользовательским вызовом действительно новой
-Codex task, после разрешения live canonical scope он обязан один раз заменить
-catalog placeholder коротким содержательным title. Это UI metadata Codex, а не
-Task Manager write, acceptance evidence, Goal effect или часть delivery result.
-Failure этой capability не блокирует delivery.
+Codex task, host явно предоставляет title capability, а live canonical scope и
+catalog placeholder доказаны, агент выполняет не более одной best-effort попытки
+заменить placeholder коротким содержательным title. Это optional UI metadata
+Codex, а не Task Manager write, acceptance evidence, Goal effect или часть
+delivery result. Отсутствие, deferred loading или failure capability не блокируют
+delivery и не требуют fallback.
 
 Eligibility должна быть доказана текущими app metadata, а не предположена из
-тона prompt. При доступных `codex_app__list_threads`,
-`codex_app__read_thread` и `codex_app__set_thread_title` агент:
+тона prompt. Если доступны `codex_app__list_threads`,
+`codex_app__read_thread` и `codex_app__set_thread_title`, агент при явном
+placeholder:
 
 1. Находит ровно одного current candidate: active Codex task с тем же host,
    project/cwd и preview/summary, согласованным с текущим первым invocation.
@@ -143,7 +146,7 @@ Eligibility должна быть доказана текущими app metadata
    предыдущего turn.
 3. Разрешает live scope. Для existing scope title устанавливается до первой
    Task Manager mutation; create-and-deliver ждёт create/read-back exact Task.
-4. Вызывает `codex_app__set_thread_title` без `threadId` не более одного раза:
+4. Делает не более одной попытки `codex_app__set_thread_title` без `threadId`:
    omission адресует calling task и не позволяет ошибке discovery переименовать
    соседнюю task. После failure retry запрещён.
 
@@ -184,7 +187,8 @@ default без topology rule, обязательное исполнение од
 пользователя о числе, ролях и условиях delegation, отдельный worktree каждого
 concurrent implementation writer, cost-aware profile routing и отдельный
 Strategic Explainer перед каждым комментарием, когда effective rule его не
-отключает, а также однократный безопасный title первой Codex task.
+отключает, а также best-effort title первой Codex task при доступной host
+capability.
 
 ### 2.1 Пользовательский результат важнее внутренней процедуры
 

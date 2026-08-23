@@ -220,12 +220,15 @@ environment, URL, команды или project-specific production policy. Та
 implicit anchor задним числом и не является approval. Prompt selector имеет
 приоритет только для current run и не переписывает memory молча.
 
-### `ST-17` — Безопасное имя новой Codex task
+### `ST-17` — Best-effort имя новой Codex task
 
-Если ShipTask доказанно является первым запросом новой Codex task с catalog
-placeholder, она получает короткое содержательное имя после live scope
-resolution. Meaningful или уже изменённое название не перезаписывается, а
-неуверенная identity не угадывается. Failure rename не блокирует delivery.
+Если host явно предоставляет текущую Codex task metadata и безопасный title
+setter, а first-turn identity и catalog placeholder доказаны, ShipTask выполняет
+не более одной best-effort попытки задать короткое содержательное имя после live
+scope resolution. Это optional UI convenience, а не обязательный delivery
+outcome: отсутствие, deferred loading или failure capability не блокируют delivery.
+Meaningful, уже изменённое или неизвестного происхождения название сохраняется,
+а неуверенная identity не угадывается.
 
 ### `ST-18` — Outcome-first handoff
 

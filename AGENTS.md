@@ -125,9 +125,10 @@ manifest/install/byte-identity правила остаются repository-level 
   без отдельного user override используют `gpt-5.6-luna`/`max`, остальные
   наследуют current model/effort, а Luna при material uncertainty прекращает
   packet и передаёт его current profile без Luna retry loop; доказанная первая
-  Codex task с catalog placeholder после live scope resolution один раз получает
-  `ShipTask · ...`, но meaningful title, later turn или ambiguous candidate не
-  переименовываются; обычный переход
+  Codex task с catalog placeholder при доступной host title capability после live
+  scope resolution получает best-effort попытку `ShipTask · ...`, но meaningful
+  title, later turn или ambiguous candidate не переименовываются, а
+  отсутствие/failure capability не блокируют delivery; обычный переход
   `To Do → In Progress` комментария не создаёт. Точный порядок
   оставляйте только для доказуемого инварианта целостности, безопасности или
   внешнего эффекта.
