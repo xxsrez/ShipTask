@@ -720,6 +720,22 @@ REVIEW_CASES = {
         "агент сам выбирает",
         "считать первый инструмент обязательным",
     ),
+    "Acceptance требует стандартный PDF/ZIP/PNG/изображение/Markdown, который агент может безопасно создать": (
+        "synthetic fixture",
+        "не считается blocker",
+        "self-service",
+    ),
+    "Первый ingress для synthetic fixture не сработал": (
+        "ingress failure",
+        "другой безопасный supported path",
+        "объявить product defect без attribution",
+    ),
+    "Acceptance требует второй principal, независимую сессию или provider-side evidence": (
+        "authority blocker",
+        "synthetic/ephemeral substitute",
+        "blocker decision report",
+        "менять ACL без authority",
+    ),
     "После стартового inventory live Release появилась новая matching Task в `To Do`": (
         "автоматически расширила delivery inventory",
         "Goal остаётся active",
@@ -742,10 +758,11 @@ REVIEW_CASES = {
         "repair и retest продукта",
         "выдавать Chrome/login за repair",
     ),
-    "В current scope нет достаточного способа доказать success/failure": (
+    "В current scope нет достаточного способа доказать success/failure после self-service frontier": (
         "verification-blocked",
         "In Review",
-        "strongest feasible путь",
+        "blocker decision report",
+        "resume condition",
         "только при material выборе",
     ),
     "Batch gate упал, виновная Task не установлена": (
@@ -897,7 +914,7 @@ def validate_review_matrix(errors: list[str]) -> None:
 
 def validate_source_layers(errors: list[str]) -> None:
     packages = (
-        (SHIP_REQUIREMENTS, "ST", 22),
+        (SHIP_REQUIREMENTS, "ST", 23),
         (COMPOSER_REQUIREMENTS, "TC", 10),
         (STRATEGIC_REQUIREMENTS, "SE", 12),
     )
@@ -912,10 +929,15 @@ def validate_source_layers(errors: list[str]) -> None:
                 f"{relative(requirements)} requirement IDs are missing, duplicated, "
                 f"or out of order: {requirement_ids}",
             )
+        status_marker = (
+            "Статус: current Level 1, 2026-08-23"
+            if requirements == SHIP_REQUIREMENTS
+            else "Статус: current Level 1, 2026-08-22"
+        )
         require(
             errors,
             requirements,
-            "Статус: current Level 1, 2026-08-22",
+            status_marker,
             "полный пользовательский исходный код только для",
             "не могут ослабить, заменить или\nмолча удалить",
             "Изменение смысла Level 1 требует явного решения пользователя",
@@ -1007,10 +1029,15 @@ def validate_source_layers(errors: list[str]) -> None:
         (COMPOSER_SPEC, "TC-*"),
         (STRATEGIC_SPEC, "SE-*"),
     ):
+        status_marker = (
+            "Статус: current Level 2 contract, 2026-08-23"
+            if architecture == SPEC
+            else "Статус: current Level 2 contract, 2026-08-22"
+        )
         require(
             errors,
             architecture,
-            "Статус: current Level 2 contract, 2026-08-22",
+            status_marker,
             f"`{prefix}` в локальных",
             "[требованиях пользователя](requirements.md)",
             "## 0. Compilation contract",
@@ -1072,7 +1099,7 @@ def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         SPEC,
-        "Статус: current Level 2 contract, 2026-08-22",
+        "Статус: current Level 2 contract, 2026-08-23",
         "`ST-*` в локальных",
         "[требованиях пользователя](requirements.md)",
         "ADR-0018",

@@ -25,11 +25,14 @@
 | Для unfinished exact Task сохранилась feature branch, но usable worktree отсутствует | branch/commits reconciled и связь с Task доказана | зависит от current lifecycle | current truthful status | безопасно восстановить checkout этой же branch и продолжить existing candidate | создавать unrelated branch, повторять готовую работу или объявлять state потерянным без inspection |
 | Existing task worktree имеет active либо unknown writer ownership | takeover не выполнен; artifact сохранён без mutations/cleanup | comment только если возник material blocker | status только по доказанным фактам | reconciliate ownership, продолжить другую independent safe работу либо сообщить exact boundary | два concurrent writers в одном worktree, присвоить неоднозначный diff, reset/cleanup или молча abandon artifact |
 | Первый выбранный способ проверки не сработал | один способ не дал evidence | зависит от итогового lifecycle outcome | определяется дальнейшим evidence | агент сам выбирает repair, замену или другой способ | считать первый инструмент обязательным либо объявить blocker автоматически |
+| Acceptance требует стандартный PDF/ZIP/PNG/изображение/Markdown, который агент может безопасно создать | агент генерирует synthetic fixture и проверяет его через поддерживаемый ingress; отсутствие пользовательского файла не считается blocker | по обычному lifecycle | продолжить до полного evidence либо зафиксировать настоящий transport/authority gap | создать representative и boundary fixtures, попробовать доступный supported path | просить пользователя прислать стандартный файл до попытки self-service |
+| Первый ingress для synthetic fixture не сработал | ingress failure отделён от отсутствия самого fixture | по итоговому evidence | попробовать другой безопасный supported path, не снижая acceptance | сохранять raw fixture и проверять именно требуемый ingress | считать первый connector/browser обязательным или объявить product defect без attribution |
+| Acceptance требует второй principal, независимую сессию или provider-side evidence | безопасный synthetic/ephemeral substitute проверен либо объяснено, почему его нет; remaining gap является authority blocker | opening blocker comment; Task остаётся `In Review` | blocker decision report с рекомендацией и exact resume condition | сравнить user-provided disposable identity, approved harness и иной feasible path | писать только «нужен principal», придумывать identity или менять ACL без authority |
 | После стартового inventory live Release появилась новая matching Task в `To Do` | current membership исходного selector автоматически расширила delivery inventory; Goal остаётся active | по lifecycle новой Task | current truthful status | включить Task в runnable frontier без повторного approval | считать стартовый список/count замороженным, просить approve или объявлять Goal blocked |
 | Matching Task live Release переведена `Backlog → To Do` во время run | Task перестала быть будущей Backlog work и автоматически стала in-scope | обычный lifecycle contract | `To Do`, затем по фактам | реализовать и проверить в том же run | требовать второй approval, называть scope expansion или игнорировать до следующего run |
 | Новая matching Task live Release остаётся в `Backlog` | Task видна в fresh inventory, но исключена из delivery | comment не нужен | `Backlog` сохраняется | не начинать implementation; продолжить остальные Tasks | автоматически переводить из Backlog или включать в runnable frontier |
 | Exact candidate/server path уже доказал authenticated product hang, а другой browser/controller просит новый login или MFA | `verified-failure` продукта сохраняется; browser gap вторичен | opening incident с product expected/observed и evidence | truthful working status | сначала продолжить безопасную in-scope диагностику, repair и retest продукта; browser switch только дополнительный diagnostic path | выдавать Chrome/login за repair, отменять product incident или останавливать run ради альтернативной session |
-| В current scope нет достаточного способа доказать success/failure | `verification-blocked`; chat прямо говорит, что bug не установлен | граница знания и strongest feasible путь с prerequisites/success signal; read-back | оставить `In Review` | сравнить alternatives только при material выборе | объявить product defect без наблюдения или придумывать варианты ради квоты |
+| В current scope нет достаточного способа доказать success/failure после self-service frontier | `verification-blocked`; chat прямо говорит, что bug не установлен | blocker decision report: self-service attempts, primary/cascade cause, recommended path, prerequisites/authority, success signal и resume condition; read-back | оставить `In Review` | сравнить alternatives только при material выборе; продолжить safe independent work | объявить product defect без наблюдения, просить стандартный файл, придумывать варианты ради квоты или остановиться без recommendation |
 | Batch gate упал, виновная Task не установлена | attribution не доказана | объяснить границу знания, если дальнейшая диагностика невозможна | affected Tasks остаются `In Review` | получить separating evidence | вернуть весь batch в rework |
 | Release verification нашла defect в terminal Task | task-level `verified-failure` | opening incident comment и read-back до reopen | truthful working status | reopen exact Task и продолжить scoped rework | scope-level finding без Task history или массовый reopen |
 | Полный evidence доказывает критерии | `verified-success` | outcome, impact, evidence и limits; read-back | `Done` | перечитать Task | ждать ручной acceptance |
@@ -78,7 +81,16 @@
 - Остался ли active/ambiguous worktree нетронутым до exclusive takeover, без
   второго writer и destructive cleanup?
 - Получил ли verification blocker один strongest feasible путь, а alternatives
-  только при реальном выборе?
+  только при реальном выборе, после доказанной self-service frontier и с exact
+  resume condition?
+- Создал ли агент сам стандартные synthetic fixtures (PDF/ZIP/PNG и т.п.),
+  вместо того чтобы объявить user-provided файл blocker-ом?
+- Разделил ли агент fixture generation от genuine authority blocker вроде
+  independent principal/второй сессии и не пытался ли он придумывать identity или
+  менять ACL без authority?
+- Получил ли каждый material blocker через Strategic Explainer grounded
+  recommendation, prerequisites, success signal и сравнение material
+  alternatives, а не голый reason code?
 - Продолжил ли агент rework после reopen вместо завершения run?
 - Создан ли Goal только для реальной имплементации/rework минимум двух Tasks, а
   не из-за Project/Release selector, общего чтения или release-only?

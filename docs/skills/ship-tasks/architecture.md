@@ -1,6 +1,6 @@
 # ShipTask: канонический контракт
 
-Статус: current Level 2 contract, 2026-08-22. Применимые Level 1 requirements —
+Статус: current Level 2 contract, 2026-08-23. Применимые Level 1 requirements —
 `ST-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Основан на
@@ -38,7 +38,9 @@ delivery, Project/Release/current scope сохраняются как live selec
 natural-language правила о числе, ролях и условиях delegation исполняются;
 каждый concurrent implementation writer получает собственные branch/worktree,
 а interrupted task-owned checkpoint подхватывается следующей сессией после
-exclusive takeover. Marketplace source и installed cache —
+exclusive takeover; до `verification-blocked` агент проходит автономную
+self-test frontier, а каждый material blocker получает причинный decision
+report с рекомендацией и resume condition. Marketplace source и installed cache —
 отдельный distribution step: локальная компиляция сама по себе не доказывает,
 что новый runtime уже released или загружен fresh Codex session.
 
@@ -257,6 +259,21 @@ compact ledger всех material incidents, включая найденные и
 - остановка означает, что в текущем scope и полномочиях не найден достаточный
   безопасный способ продолжить.
 
+До такой остановки агент проходит автономную self-test frontier. Он создаёт
+синтетические fixtures и seed data, которые нужны для acceptance (в том числе
+обычные PDF, ZIP, PNG, изображения и Markdown), и прогоняет их через доступные
+поддерживаемые ingress и проверки. Отсутствие файла от пользователя не является
+gap, если equivalent input можно безопасно сгенерировать и передать самому.
+Первый неудачный ingress не закрывает frontier: агент ищет другой безопасный
+supported path, не снижая acceptance.
+
+Эта обязанность ограничена authority: synthetic fixture не равен независимому
+principal, второй authenticated session, внешнему account или provider-side
+evidence. Для последнего coordinator сначала проверяет безопасный mock,
+ephemeral или локально управляемый substitute; если его нет, он не создаёт
+identity и не меняет ACL без authority, а переводит ситуацию в
+`verification-blocked` с decision report.
+
 Нет фиксированного числа попыток, обязательной последовательности repair или
 предпочтённого инструмента. Сбой отдельного способа сам по себе не является ни
 product defect, ни `verification-blocked`.
@@ -392,18 +409,30 @@ ledger даже при последующем `verified-success`.
 
 ### 5.3 Приёмку нельзя провести (`verification-blocked`)
 
-Выбранные агентом разумные способы не доказывают ни success, ни failure в
-текущем scope и полномочиях. Human-facing explanation сообщает:
+После автономной self-test frontier выбранные агентом разумные способы не
+доказывают ни success, ни failure в текущем scope и полномочиях. Само наличие
+необходимого стандартного файла не является основанием: такой fixture сначала
+создаётся агентом. Human-facing blocker decision report сообщает:
 
 - что именно нельзя установить и почему;
+- какие self-service способы и synthetic inputs уже проверены и почему они не
+  закрыли criterion;
 - что уже доказано;
-- рекомендуемый feasible способ получить достаточное evidence, его предпосылки
-  и наблюдаемый признак успеха;
+- рекомендуемый feasible test path, его prerequisites, authority и наблюдаемый
+  признак успеха;
+- primary cause отдельно от cascade symptoms и влияние на пользователя;
 - альтернативы только когда реальный выбор materially меняет authority, risk,
-  cost или доказательную силу.
+  cost или доказательную силу, с понятным trade-off.
 
-Агент немедленно сообщает, что приёмка не завершена и product bug не установлен,
-публикует и перечитывает opening/blocker comment; Task остаётся `In Review`.
+Report появляется в Codex chat и в native Task Manager comment до ожидания
+пользователя. Он проходит отдельного Strategic Explainer, если эта роль не
+отключена; Explainer сравнивает grounded варианты и формулирует рекомендацию,
+но не получает authority на mutation или status decision. Агент явно называет,
+какая safe работа продолжается и какое exact resume condition разблокирует
+criterion. После этого он сообщает, что приёмка не завершена и product bug не
+установлен, публикует и перечитывает opening/blocker comment; Task остаётся
+`In Review`. Для одного shared gate используется один консолидированный report,
+а не повторяющиеся comments.
 
 ### 5.4 Доказанный успех (`verified-success`)
 
@@ -432,15 +461,22 @@ Strategic Explainer. Это явное требование к независи�
 ShipTask сам отвечает за факты, статус, границы задачи, полномочия, способ
 исправления и итог. Перед комментарием он передаёт отдельному read-only
 субагенту самодостаточную постановку проблемы, текущие факты, доказательства,
-границу знания, пользовательское влияние и разрешённый следующий шаг. Журнал
-инструментов и ход реализации в этот контекст не входят.
+границу знания, пользовательское влияние и разрешённый следующий шаг. Для
+`verification-blocked` вход дополнительно содержит self-service frontier,
+проверенные synthetic fixtures, оставшийся authority gap, feasible test paths,
+их prerequisites и success signals. Журнал инструментов и ход реализации в
+этот контекст не входят.
 
 Strategic Explainer возвращает готовый текст на языке пользователя и короткое
-основание для проверки фактов. Текст связывает проблему, фактический результат,
-значение для пользователя, доказанное и неизвестное, ограничения и следующий
-шаг. Внутренние сущности сначала объясняются обычными словами; точные
-технические названия остаются только там, где помогают проверить результат или
-выполнить действие.
+основание для проверки фактов. Обычный текст связывает проблему, фактический
+результат, значение для пользователя, доказанное и неизвестное, ограничения и
+следующий шаг. Для blocker decision report он также сравнивает grounded
+варианты по prerequisites, доказательной силе, authority, risk и cost и
+рекомендует feasible test path с observable success signal. Это рекомендация
+для решения caller, а не самостоятельный status, repair или authority decision.
+Внутренние сущности сначала объясняются обычными словами; точные технические
+названия остаются только там, где помогают проверить результат или выполнить
+действие.
 
 Основной агент проверяет текст по исходным фактам. Если обнаружена ошибка или
 потерян существенный факт, он исправляет вход и повторяет независимую
@@ -457,6 +493,28 @@ effective user rule отключает Explainer, отдельный прохо�
 ## 7. Реализация и проверка
 
 Агент самостоятельно выбирает минимальный целостный способ выполнить Task.
+
+### 7.0 Автономная test frontier
+
+Перед blocker handoff coordinator перечисляет acceptance inputs и делит их на
+самогенерируемые fixtures, controllable synthetic state и внешние authority
+dependencies. Для первой группы он сам создаёт representative и boundary
+варианты, включая бинарные файлы и архивы, и проводит их через каждый
+поддерживаемый ingress, который действительно входит в criterion. Для второй
+группы он использует безопасные seed/mock/temporary mechanisms, если они
+доказывают тот же observable contract. Локальный путь, raw bytes или успешная
+генерация сами по себе не доказывают native hosted transport: проверяется именно
+тот ingress, который требует acceptance.
+
+Если criterion требует независимый principal, вторую authenticated session,
+внешний account, provider-side log или access-policy effect, coordinator сначала
+проверяет, существует ли безопасная synthetic/ephemeral замена в current scope.
+Если нет, это authority blocker, а не просьба «прислать файл» или голый
+«нужен principal». До defer coordinator фиксирует self-service attempts и
+готовит blocker decision report через Strategic Explainer: recommended path,
+material alternatives, prerequisites, success signal, safe continuation и exact
+resume condition. Это не разрешает создавать внешнюю identity, менять ACL или
+обходить privacy boundary.
 
 ### 7.1 Resume-first
 
@@ -671,6 +729,9 @@ Run report начинается с результата и простым язы
 - какие material acceptance incidents обнаружены, включая уже исправленные;
 - для каждого incident — Task/criterion, cause/confidence, fix, retest evidence
   и final state;
+- для каждого unresolved blocker — self-service frontier, primary/cascade
+  cause, recommended test path, material alternatives/trade-offs,
+  prerequisites/authority, success signal и exact resume condition;
 - причину незавершённости, если она есть;
 - какие исправления уже выполнены;
 - одно точное условие или действие для продолжения.

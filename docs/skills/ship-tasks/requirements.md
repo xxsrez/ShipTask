@@ -1,6 +1,6 @@
 # ShipTask: требования пользователя
 
-Статус: current Level 1, 2026-08-22.
+Статус: current Level 1, 2026-08-23.
 
 Этот документ — полный пользовательский исходный код только для
 `$ship-tasks`. Он не определяет требования к Task Composer или Strategic
@@ -77,6 +77,12 @@ repair продукта и не отменяет достаточное evidence
 path. Если product failure уже доказан, отсутствие альтернативного browser login
 или MFA не становится stop condition, пока существует безопасная in-scope
 диагностика, repair или проверка.
+
+Эта свобода включает обязательное самотестирование по `ST-23`: до объявления
+`verification-blocked` агент исчерпывает разумную safe frontier доступных ему
+синтетических входов, fixtures и поддерживаемых способов ingress. Первый
+неудачный инструмент или отсутствие файла, который агент может сам создать,
+не являются достаточной причиной остановки.
 
 ### `ST-06` — Правдивый lifecycle и durable comments
 
@@ -234,6 +240,13 @@ inference; reason codes, tools и process diary остаются только к
 repair или обязательное действие пользователя, пока остаётся безопасная
 in-scope работа с самим продуктом.
 
+Для `verification-blocked` handoff обязан содержать не только границу знания,
+но и результат автономного self-service поиска: какие безопасные способы
+агент уже попробовал, почему они не закрыли criterion, какой путь рекомендуется
+для следующего теста и при каком наблюдаемом сигнале его можно будет считать
+пройденным. Голое «нужен файл», «нужен principal» или `not-available` без этой
+причинной рекомендации не является достаточным outcome.
+
 ### `ST-19` — Lifecycle priority и duplicate context
 
 `Backlog`, `To Do`, `In Progress`, `In Review` и terminal statuses сохраняют
@@ -286,6 +299,43 @@ Task Manager connector — отдельным adapter-only plugin без deliver
 Checked-in runtime source, Marketplace source и installed cache после
 behavioral изменения должны быть byte-identical; standalone user-level
 duplicates не создаются, а новый snapshot проверяется в fresh Codex session.
+
+### `ST-23` — Автономное самотестирование и blocker decision report
+
+До того как назвать acceptance `verification-blocked`, ShipTask исчерпывает
+разумную безопасную frontier в текущем scope и полномочиях: сам создаёт
+synthetic fixtures (включая PDF, ZIP, PNG, изображения, Markdown и seed data),
+использует доступные mock/temporary state и проводит поддерживаемые local,
+browser, API, connector и runtime checks. Отсутствие user-provided файла не
+является blocker, если эквивалентный input можно безопасно создать и провести
+через поддерживаемый ingress. Если первый ingress не сработал, агент ищет
+другой безопасный supported path; acceptance нельзя ослаблять и нельзя без
+основания выдавать разные пути за эквивалентные.
+
+Агент отдельно различает создание test fixture и внешнюю authority boundary.
+Independent principal, вторая authenticated session, внешний account,
+provider-side evidence или изменение access policy могут остаться настоящим
+blocker, когда безопасного synthetic substitute в текущем scope нет. Агент не
+создаёт внешнюю identity и не меняет ACL без соответствующей authority.
+Фраза «нужен PDF/ZIP/PNG» или «нужен principal» сама по себе не объясняет
+blocker и не удовлетворяет этому требованию.
+
+Для каждого material blocker, который остаётся после этой frontier, до ожидания
+пользователя или terminal handoff публикуется blocker decision report. Он
+содержит: exact Task и criterion; blocker и primary/cascade causes; уже
+проведённые self-service попытки и их результат; доказанное и непроверенное;
+рекомендуемый feasible test path и почему он лучший; material alternatives с
+trade-offs, если выбор действительно существенен; prerequisites и требуемую
+authority; observable success signal; безопасную работу, которая может
+продолжаться; точное resume condition. Для одного shared gate допустим один
+консолидированный report без дублирующего comment spam.
+
+Report появляется в Codex chat и native Task Manager comment и проходит
+отдельный Strategic Explainer, если пользователь не отключил эту роль. Он
+структурирует grounded recommendation, но не получает authority на mutation или
+status decision. Task остаётся в правдивом non-terminal состоянии; при
+недоступности Explainer зависящий comment/transition не считается выполненным,
+а независимая safe работа продолжается.
 
 ## Изменение Level 1
 
