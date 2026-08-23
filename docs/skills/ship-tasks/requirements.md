@@ -79,7 +79,7 @@ path. Если product failure уже доказан, отсутствие ал�
 диагностика, repair или проверка.
 
 Эта свобода включает обязательное самотестирование по `ST-23`: до объявления
-`verification-blocked` агент исчерпывает разумную safe frontier доступных ему
+`verification-blocked` агент исчерпывает всю доступную ему safe frontier
 синтетических входов, fixtures и поддерживаемых способов ingress. Первый
 неудачный инструмент или отсутствие файла, который агент может сам создать,
 не являются достаточной причиной остановки.
@@ -303,7 +303,7 @@ duplicates не создаются, а новый snapshot проверяетс�
 ### `ST-23` — Автономное самотестирование и blocker decision report
 
 До того как назвать acceptance `verification-blocked`, ShipTask исчерпывает
-разумную безопасную frontier в текущем scope и полномочиях: сам создаёт
+всю доступную безопасную frontier в текущем scope и полномочиях: сам создаёт
 synthetic fixtures (включая PDF, ZIP, PNG, изображения, Markdown и seed data),
 использует доступные mock/temporary state и проводит поддерживаемые local,
 browser, API, connector и runtime checks. Отсутствие user-provided файла не
