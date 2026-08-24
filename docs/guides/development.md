@@ -148,8 +148,11 @@ skill, реалистичный exact Task Manager scope и обычный proje
 - каждая Task получает лёгкий targeted gate, а совместимые candidates периодически
   проходят один thorough review-batch gate и один UAT deploy без approval; UAT
   receipt/read-back/smoke обязателен для claims о release;
-- final report сообщает outcome, proof gaps, primary cause и resume condition,
-  но не заменяет Task comment.
+- final report проходит отдельный scope-level Strategic Explainer, отвечает на
+  исходную цель вместо языка последней технической подзадачи и сообщает outcome,
+  proof gaps, primary cause и resume condition, но не заменяет Task comment;
+  сложный сбой, несколько инцидентов или сводный batch дополнительно проверяет
+  независимый читатель, которому видны только исходный вопрос и готовый текст.
 
 Полная матрица:
 [lifecycle evaluation](../reference/shiptask-review-disposition-evaluation.md).

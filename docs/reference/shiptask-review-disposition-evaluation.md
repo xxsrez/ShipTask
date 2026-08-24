@@ -49,6 +49,9 @@
 | Новый `Canceled` или `Duplicate` | terminal reason доказан | объяснить причину и связь с outcome; read-back | соответствующий terminal status | перечитать Task | terminal status без comment |
 | Обязательный comment write/read-back дал ошибку | lifecycle transition не завершён; comment остаётся required | reconciliate неизвестный outcome через native reads | не выполнять существенный transition | безопасно восстановить exact write/read-back и продолжить | skip обязательного comment, status без comment, fallback в description или blind retry |
 | Отдельный Strategic Explainer недоступен или отклонил текст, когда effective rule его сохраняет | независимая адаптация не завершена | не публиковать непроверенный черновик | не выполнять зависящий переход | сообщить gap в Codex и продолжить только независимую безопасную работу | основной агент сам одобряет или переписывает comment |
+| Финальный ответ по однозначному результату | scope-level Explainer отвечает на исходную цель, а не пересказывает последнюю техническую подзадачу | существующие Task-комментарии не заменяются | статусы только по фактам | начать с понятного общего результата; точные названия дать после смыслового слоя, если они нужны | склеить комментарии, начать с идентификаторов или вернуть текст к жаргону основного агента |
+| Финальный ответ содержит сложный сбой, несколько инцидентов или сводный batch-результат | отдельный читатель без технического контекста верно пересказывает результат, причину, влияние и следующий шаг | комментарии сохраняют собственный lifecycle | статусы только по фактам | при пробеле понимания исправить фактический вход и заново провести scope-level Explainer; user topology rule сохраняет приоритет | дать читателю редактировать факты, считать наличие всех терминов доказательством понятности или выдавать прямую самопроверку за независимую |
+| Финальный Explainer или читатель недоступен, но ответ пользователю уже должен быть дан | отсутствие независимого прохода явно названо; основной агент напрямую применяет тот же стандарт | обязательные Task-комментарии всё равно остаются fail-closed | статусы только по подтверждённым переходам | сообщить состояние на уровне исходного вопроса без ложного claim независимости | скрыть результат, оставить пользователя без ответа или заявить о непроведённой проверке как о выполненной |
 | Массовая имплементация минимум двух Tasks | `batch-implementation` | по lifecycle каждой Task | правдивые Task statuses | создать/продолжить Goal всего implementation scope | работать без Goal либо создать отдельный Goal на каждую Task |
 | Scope без user topology rule содержит несколько действительно независимых полезных packets | delegation определяется автоматически | по lifecycle каждой Task через отдельного Explainer | правдивые Task statuses; writes делает основной integration owner | использовать полезных субагентов без fake fan-out | требовать предварительную scheduler-настройку либо последовательно поглотить очевидно независимую работу без причины |
 | Несколько implementation subagents пишут одновременно | каждый writer до первой mutation имеет unique feature branch, unique Git worktree и disjoint ownership | по lifecycle каждой Task | Task Manager writes делает integration owner | выполнить fan-in и проверить exact объединённый candidate | общий writable checkout, запись worker в integration target или выдача isolated check за integrated result |
@@ -129,6 +132,13 @@
 - Прошёл ли каждый созданный ShipTask-комментарий отдельного Strategic
   Explainer, пока effective rule его не отключает, а обычный старт остался без
   комментария и без его запуска?
+- Прошёл ли финальный ответ отдельный scope-level Explainer и ответил ли он на
+  исходную цель вместо склейки комментариев или языка последней подзадачи?
+- Можно ли пересказать первый смысловой слой без идентификаторов и внутренней
+  терминологии: общий результат, основную причину, влияние и следующий шаг?
+- Для сложного сбоя, нескольких инцидентов или сводного результата проверил ли
+  отдельный читатель только исходную цель и готовый текст, не меняя факты; либо
+  было ли честно соблюдено пользовательское правило, отключающее эту роль?
 - Без user rule выбрал ли агент useful delegation автоматически, не создавая
   fake fan-out?
 - Сохранил ли coordinator точный смысл natural-language topology rule, включая
@@ -154,11 +164,13 @@
 
 ## Слепой forward test
 
-Тестовому агенту передают candidate skill и реалистичный exact scope, но не
-ожидаемый исход и не diagnosis предыдущего run. Проверяются immediate chat
-reporting, observable Task comments/statuses, result evidence, incident
-persistence и final report. Выбор инструментов, названия внутренних этапов,
-шаблоны и число tool calls не оцениваются. Проверяются automatic default,
-natural-language exact/relative/role/conditional rules, literal global opt-out,
-writer/worktree isolation, cross-session resume existing checkpoint и реальная
-независимость Strategic Explainer, пока effective rule его не отключает.
+Тестовому агенту передают candidate skill, исходный вопрос пользователя и
+реалистичный exact scope, но не ожидаемый исход и не diagnosis предыдущего run.
+Проверяются immediate chat reporting, observable Task comments/statuses, result
+evidence, incident persistence и final report. Отдельный читатель получает
+только исходный вопрос и готовый финальный текст. Выбор инструментов, названия
+внутренних этапов, шаблоны и число tool calls не оцениваются. Проверяются уровень
+ответа, независимый пересказ, automatic default, natural-language
+exact/relative/role/conditional rules, literal global opt-out, writer/worktree
+isolation, cross-session resume existing checkpoint и реальная независимость
+Strategic Explainer, пока effective rule его не отключает.

@@ -32,10 +32,12 @@
   [Requirements](skills/strategic-explainer/requirements.md),
   [Architecture](skills/strategic-explainer/architecture.md) и
   [product vision](skills/strategic-explainer/product-vision.md) — общий contract
-  problem-first grounding, bounded read-only strategic discovery и свободного
-  объяснения, а по явному запросу — глубокой редакторской реконструкции без
-  потери смысла; skill не выполняет mutations, не принимает status decisions,
-  не создаёт новую authority и не требует определённой agent orchestration.
+  объяснения на уровне исходного вопроса: сначала понятная причинная история,
+  затем только необходимые точные термины; сложный результат проверяется
+  независимым пересказом. По явному запросу skill выполняет глубокую
+  редакторскую реконструкцию без потери смысла. Он ничего не изменяет, не
+  принимает решений о статусе или полномочиях и не требует единственной формы
+  организации агентов.
 
 Документация является исходным кодом. Локальный Level 1 отвечает за «что обязано
 быть истинно», локальный Level 2 — за agent-owned «как сейчас этого достигать»,
