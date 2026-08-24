@@ -1,6 +1,8 @@
 # 0005. Automatic terminal acceptance
 
-Статус: accepted, 2026-08-16. Заменяет human-acceptance часть ADR-0004.
+Статус: accepted, 2026-08-16. Заменяет human-acceptance часть ADR-0004. Полное
+objective evidence остаётся основным путём; единственный более слабый terminal
+fallback добавлен [ADR-0027](0027-critical-codebase-acceptance.md).
 Порядок обязательного delivery comment перед `Done` уточнён ADR-0006 и заменён
 constitution contract из [ADR-0017](0017-constitution-first-runtime-contract.md).
 Классификация failed/insufficient evidence заменена

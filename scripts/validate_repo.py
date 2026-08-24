@@ -43,6 +43,7 @@ AUTONOMY = ROOT / "ship-tasks" / "references" / "autonomy-and-release.md"
 MEMORY = ROOT / "ship-tasks" / "references" / "project-memory.md"
 HANDOFF = ROOT / "ship-tasks" / "references" / "strategic-explainer.md"
 THREAD_TITLE = ROOT / "ship-tasks" / "references" / "thread-title.md"
+CRITICAL_REVIEW = ROOT / "ship-tasks" / "references" / "critical-codebase-review.md"
 
 ADR = {
     number: ROOT / "docs" / "decisions" / name
@@ -94,6 +95,10 @@ ADR = {
             "0026",
             "0026-periodic-uat-batch-releases.md",
         ),
+        (
+            "0027",
+            "0027-critical-codebase-acceptance.md",
+        ),
     )
 }
 
@@ -129,6 +134,7 @@ CORE_FILES = (
     MEMORY,
     HANDOFF,
     THREAD_TITLE,
+    CRITICAL_REVIEW,
     *ADR.values(),
 )
 
@@ -172,7 +178,9 @@ CURRENT_CONTRACT_FILES = (
     ADR["0024"],
     ADR["0025"],
     ADR["0026"],
+    ADR["0027"],
     ADAPTER,
+    CRITICAL_REVIEW,
 )
 
 LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
@@ -271,7 +279,7 @@ def validate_frontmatter(
 
 
 def validate_ship_skill(errors: list[str]) -> None:
-    validate_frontmatter(errors, SHIP_SKILL, "ship-tasks", 250)
+    validate_frontmatter(errors, SHIP_SKILL, "ship-tasks", 270)
     text = read(SHIP_SKILL)
     description = text.split("---", 2)[1] if text.count("---") >= 2 else ""
 
@@ -287,6 +295,7 @@ def validate_ship_skill(errors: list[str]) -> None:
         "per-Task gate",
         "периодический review-batch",
         "exact UAT release",
+        "critical-codebase fallback",
         "backlog capture",
     ):
         if term not in description:
@@ -313,12 +322,14 @@ def validate_ship_skill(errors: list[str]) -> None:
         "Доказательство важнее выбранного способа",
         "Сбой одного выбранного способа",
         "не делает его обязательным",
-        "Нельзя снижать current acceptance",
+        "Не снижай current acceptance ради удобства",
         "как обеспечить это, решает агент",
         "task-contract-conflict",
         "verified-success",
         "verified-failure",
         "verification-blocked",
+        "critical-codebase-accepted",
+        "fork_turns=\"none\"",
         "In Review → In Progress",
         "продолжай rework в этом же run",
         "гарантированная часть current Task Manager adapter",
@@ -417,6 +428,12 @@ def validate_ship_skill(errors: list[str]) -> None:
         "без такого правила выбери полезную delegation автоматически",
         "отдельным feature branches и Git worktrees",
         "Не ослабляй acceptance",
+        "все remaining In Review verification-blocked",
+        "substantial human verifier, не bounded unlocker",
+        "Ровно один read-only critic",
+        "fork_turns=none",
+        "per-Task verdict",
+        "stale/inconclusive остаётся In Review",
         "SHIPTASK RUN REPORT",
         "Периодический UAT batch release",
         "один exact candidate в verified UAT",
@@ -795,6 +812,47 @@ REVIEW_CASES = {
         "resume condition",
         "только при material выборе",
     ),
+    "Fresh inventory ещё содержит matching `To Do` или `In Progress`, либо хотя бы одна `In Review` Task имеет доступный обычный test path": (
+        "critical fallback не eligible",
+        "обычную реализацию и честную functional verification",
+        "закрывать доступную проверку code review-ом",
+    ),
+    "Все active Tasks находятся в `In Review`, обычная frontier исчерпана и каждая требует существенного human verifier": (
+        "`To Do == 0`, `In Progress == 0`, `In Review > 0`",
+        "ровно одного read-only `critic`",
+        "`fork_turns=\"none\"`",
+        "producer rationale",
+        "bounded access unlock",
+    ),
+    "Critical reviewer доказал проблему в одной или нескольких Tasks": (
+        "task-level `verified-failure`",
+        "отдельный Strategic Explainer",
+        "affected Tasks: `In Progress`",
+        "точной attribution",
+    ),
+    "Critical reviewer grounded-одобрил exact candidate по коду, самостоятельно повторённым tests и связям": (
+        "`critical-codebase-accepted`",
+        "непроведённую functional check",
+        "critic verdict",
+        "residual risk",
+        "`Done`",
+        "называть outcome `verified-success`",
+    ),
+    "Critical reviewer не дал grounded approval или defect attribution": (
+        "отсутствие findings не является approval",
+        "оставить `In Review`",
+        "симулировать независимый verdict",
+    ),
+    "Candidate, Task contract или active inventory изменился после critical review": (
+        "disposition stale",
+        "full eligibility gate",
+        "status не меняется по stale verdict",
+    ),
+    "Effective user topology rule запрещает critic-субагента": (
+        "critical fallback недоступен",
+        "оставить affected Tasks в `In Review`",
+        "изображать fresh independent review",
+    ),
     "В batch scope накопились несколько совместимых ready candidates": (
         "лёгкий targeted gate",
         "периодический thorough review-batch gate",
@@ -956,7 +1014,7 @@ def validate_review_matrix(errors: list[str]) -> None:
 
 def validate_source_layers(errors: list[str]) -> None:
     packages = (
-        (SHIP_REQUIREMENTS, "ST", 24),
+        (SHIP_REQUIREMENTS, "ST", 25),
         (COMPOSER_REQUIREMENTS, "TC", 10),
         (STRATEGIC_REQUIREMENTS, "SE", 13),
     )
@@ -1044,6 +1102,13 @@ def validate_source_layers(errors: list[str]) -> None:
         "без отдельного подтверждения",
         "развёртывание в UAT, повторную проверку опубликованного состояния,\n"
         "`smoke test`",
+        "Критическая приёмка по кодовой базе при исчерпанном frontier",
+        "`To Do` или `In Progress`",
+        "человек должен сам стать содержательным проверяющим",
+        "ровно одного специального read-only\nсубагента в роли `critic`",
+        "`fork_turns=\"none\"`",
+        "`critical-codebase-accepted`",
+        "Task закрывается по критической проверке кодовой базы",
     )
     forbid(
         errors,
@@ -1102,7 +1167,7 @@ def validate_source_layers(errors: list[str]) -> None:
         (STRATEGIC_SPEC, "SE-*"),
     ):
         if architecture == SPEC:
-            status_marker = "Статус: current Level 2 contract, 2026-08-23"
+            status_marker = "Статус: current Level 2 contract, 2026-08-24"
         elif architecture == STRATEGIC_SPEC:
             status_marker = "Статус: current Level 2 contract, 2026-08-24"
         else:
@@ -1172,7 +1237,7 @@ def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         SPEC,
-        "Статус: current Level 2 contract, 2026-08-23",
+        "Статус: current Level 2 contract, 2026-08-24",
         "`ST-*` в локальных",
         "[требованиях пользователя](requirements.md)",
         "ADR-0018",
@@ -1183,6 +1248,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0024",
         "ADR-0025",
         "ADR-0026",
+        "ADR-0027",
         "### 7.2 Per-Task gates и периодический UAT batch",
         "один deploy того же exact candidate в verified UAT",
         "standing authority периодического release",
@@ -1246,6 +1312,12 @@ def validate_current_contract(errors: list[str]) -> None:
         "Role-scoped rule меняет только названную роль",
         "effective смысл и\nподтверждают соблюдение либо material deviation",
         "сохраняет отсутствие независимой\nпроверки",
+        "### 5.5 Критическая приёмка по кодовой базе",
+        "every remaining blocker needs a human verifier, not an unlocker",
+        "ровно одного read-only subagent role `critic`",
+        "`fork_turns=\"none\"`",
+        "`critical-codebase-accepted`",
+        "не полноценной\nфункциональной приёмкой",
     )
     require(
         errors,
@@ -1254,7 +1326,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "comment read-back",
         "агент сам выбирает и меняет инструменты",
         "не обязывает чинить именно его",
-        "не называется verified",
+        "непроведённая\n  functional check остаётся честно видна",
         "ADR-0018",
         "ADR-0019",
         "ADR-0020",
@@ -1263,6 +1335,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0024",
         "ADR-0025",
         "ADR-0026",
+        "ADR-0027",
         "гарантированной adapter capability",
         "каждый создаваемый ShipTask-комментарий",
         "durable Task history",
@@ -1287,6 +1360,8 @@ def validate_current_contract(errors: list[str]) -> None:
         "лёгкий targeted gate",
         "один exact UAT deploy",
         "UAT — обычный разрешённый non-production effect",
+        "`critical-codebase-accepted`",
+        "`fork_turns=\"none\"`",
         "Task type хранится в Label/hierarchy",
         "не дублируется\nпрефиксом `BUG:`/`EPIC:`",
     )
@@ -1306,6 +1381,8 @@ def validate_current_contract(errors: list[str]) -> None:
         "рекомендуемый feasible способ",
         "каждые 10 минут",
         "ответ в Codex не являются durable Task comment",
+        "непроведённую функциональную проверку",
+        "критической проверке кодовой базы",
     )
     require(
         errors,
@@ -1325,6 +1402,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "periodic batch trigger",
         "UAT receipt/read-back",
         "proof gap, а не verified release",
+        "Tasks закрыты через `critical-codebase-accepted`",
     )
     require(
         errors,
@@ -1354,6 +1432,10 @@ def validate_current_contract(errors: list[str]) -> None:
         "один thorough review-batch",
         "UAT deployment после проверки target",
         "отсутствие receipt не считается verified",
+        "critical-codebase acceptance",
+        "fresh full inventory без `To Do`/`In Progress`",
+        "ровно один fresh-context\ncritic",
+        "residual risk остаются видимыми",
     )
     require(
         errors,
@@ -1373,6 +1455,21 @@ def validate_current_contract(errors: list[str]) -> None:
         "отдельного субагента",
         "не переписывает текст обратно",
         "user-facing judgment packet наследует current model/effort",
+        "Для `critical-codebase-accepted`",
+        "не проводилась и Task закрывается по независимой критической проверке",
+    )
+    require(
+        errors,
+        CRITICAL_REVIEW,
+        "Eligibility gate",
+        "`To Do == 0`, `In Progress == 0`, `In Review > 0`",
+        "bounded unlocker",
+        "ровно одного read-only subagent role `critic`",
+        "`fork_turns=\"none\"`",
+        "`critical-codebase-accepted`",
+        "Mere absence of findings",
+        "отдельный Strategic Explainer",
+        "residual knowledge boundary и риск",
     )
     require(
         errors,
@@ -1476,6 +1573,20 @@ def validate_current_contract(errors: list[str]) -> None:
         "не превращает каждую Task в singleton",
         "UAT receipt/read-back",
         "Production release и его authority",
+    )
+    require(
+        errors,
+        ADR["0027"],
+        "Критическая приёмка по кодовой базе при исчерпанном frontier",
+        "`To Do == 0`, `In Progress == 0`",
+        "содержательным verifier",
+        "ровно один независимый read-only `critic`",
+        "`fork_turns=\"none\"`",
+        "`critical-codebase-accepted`",
+        "отсутствие findings не равно approval",
+        "отдельный Strategic Explainer",
+        "более слабый, но явно маркированный terminal\noutcome",
+        "не создаёт external effect",
     )
     for path in (
         ROOT / "AGENTS.md",
@@ -1605,12 +1716,13 @@ def validate_current_contract(errors: list[str]) -> None:
         forbid(
             errors,
             path,
-            'fork_turns="none"',
             "CONTEXT_INTEGRITY_ERROR",
             "PROBLEM_CONTEXT_ERROR",
             "2–4 реально различающихся варианта",
             "2–4 реально различающихся способа",
         )
+        if path not in (SHIP_SKILL, SPEC, OVERVIEW, REVIEW_MATRIX):
+            forbid(errors, path, 'fork_turns="none"')
 
 
 def validate_strategic_contract(errors: list[str]) -> None:

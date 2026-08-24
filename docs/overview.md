@@ -42,6 +42,9 @@ current profile. Они уточняют
 [ADR-0017](decisions/0017-constitution-first-runtime-contract.md).
 Периодические UAT releases разумными batch-группами, а не после каждой Task,
 закреплены [ADR-0026](decisions/0026-periodic-uat-batch-releases.md).
+Строго ограниченный weaker `Done` после независимой критической проверки exact
+кодовой базы закреплён
+[ADR-0027](decisions/0027-critical-codebase-acceptance.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
 результатов и жёстких границ. Агент свободен выбирать порядок, инструменты,
 реализацию, декомпозицию и число попыток; delegation следует явной политике
@@ -83,7 +86,9 @@ ADR-0024.
 - агент сам выбирает и меняет инструменты, способ диагностики и приёмки;
 - сбой одного средства сам по себе ничего не доказывает и не обязывает чинить
   именно его;
-- acceptance не ослабляется, непроверенное не называется verified;
+- acceptance не ослабляется ради удобства; единственное явное исключение —
+  `critical-codebase-accepted` после полного gate ADR-0027, причём непроведённая
+  functional check остаётся честно видна;
 - для каждой Task выполняется лёгкий targeted gate, а совместимые candidates
   периодически проходят один thorough review-batch gate и один exact UAT deploy;
 - UAT — обычный разрешённый non-production effect после проверки target, без
@@ -140,7 +145,8 @@ To Do → In Progress → In Review → Done
 
 `In Review` нейтрален: candidate предъявлен, но status сам не доказывает ни
 успех, ни failure. Manual acceptance не ожидается. При доказанном success
-completion comment предшествует `Done`.
+completion comment предшествует `Done`; при строгом gate ADR-0027 отдельный
+comment может завершить Task как weaker `critical-codebase-accepted`.
 
 При существенном переходе порядок effects один:
 
@@ -158,12 +164,20 @@ contract применяется без отдельного субагента.
 
 ## Приёмка
 
-Current facts дают один из четырёх исходов:
+Обычная приёмка даёт один из четырёх исходов:
 
 - требования текущей Task противоречат друг другу;
 - exact candidate доказанно нарушает acceptance;
 - доступная проверка не может доказать ни success, ни failure;
 - current acceptance и обязательные effects доказаны.
+
+Пятый conditional outcome появляется только после fresh full inventory без
+`To Do`/`In Progress`, когда все оставшиеся `In Review` исчерпали normal test
+frontier и требуют человека как verifier, а не bounded unlocker. Ровно один
+read-only critic с `fork_turns="none"` независимо проверяет exact candidate,
+current contracts, code и tests. Grounded approval даёт
+`critical-codebase-accepted`; defect возвращает exact affected Task в rework;
+inconclusive или stale review сохраняет `In Review`.
 
 При defect comment объясняет причину возврата, затем Task переходит в
 `In Progress`, и rework продолжается в том же run. При невозможности приёмки
@@ -221,6 +235,7 @@ smoke evidence. Отсутствующий UAT receipt — proof gap, а не ve
 - [Automatic delegation, natural-language topology rules и writer isolation](decisions/0024-adaptive-multi-agent-execution-by-default.md)
 - [Cost-aware профили субагентов](decisions/0025-cost-aware-subagent-profiles.md)
 - [Периодические UAT batch releases](decisions/0026-periodic-uat-batch-releases.md)
+- [Критическая приёмка по кодовой базе](decisions/0027-critical-codebase-acceptance.md)
 - [Task Manager adapter contract](reference/task-manager-adapter.md)
 - [Lifecycle evaluation](reference/shiptask-review-disposition-evaluation.md)
 - [Strategic Explainer Requirements](skills/strategic-explainer/requirements.md)

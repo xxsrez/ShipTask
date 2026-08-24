@@ -1,6 +1,6 @@
 # ShipTask: канонический контракт
 
-Статус: current Level 2 contract, 2026-08-23. Применимые Level 1 requirements —
+Статус: current Level 2 contract, 2026-08-24. Применимые Level 1 requirements —
 `ST-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Основан на
@@ -18,6 +18,9 @@ cost-aware выбор профиля субагента и обязательн�
 [ADR-0025](../../decisions/0025-cost-aware-subagent-profiles.md).
 Периодическая проверка и публикация совместимых изменений в non-production UAT
 уточнены [ADR-0026](../../decisions/0026-periodic-uat-batch-releases.md).
+Последний автономный fallback критической приёмки по кодовой базе при полностью
+исчерпанном active frontier определён
+[ADR-0027](../../decisions/0027-critical-codebase-acceptance.md).
 Эти решения соответственно сохраняют свободу способа, отделяют Goal от release
 и делают приёмочные инциденты видимыми во всём run.
 
@@ -44,7 +47,10 @@ exclusive takeover; до `verification-blocked` агент проходит ав
 self-test frontier, а каждый material blocker получает причинный decision
 report с рекомендацией и resume condition; per-Task targeted gates собираются в
 периодический review-batch gate и один exact UAT deployment с read-back/smoke,
-без деплоя после каждой Task. Marketplace source и installed cache —
+без деплоя после каждой Task; если после обычной приёмки весь active frontier
+состоит только из существенно human-blocked `In Review`, один fresh-context
+critic может дать более слабый `critical-codebase-accepted` verdict по exact
+candidate с обязательным честным comment. Marketplace source и installed cache —
 отдельный distribution step: локальная компиляция сама по себе не доказывает,
 что новый runtime уже released или загружен fresh Codex session.
 
@@ -191,8 +197,8 @@ default без topology rule, обязательное исполнение од
 пользователя о числе, ролях и условиях delegation, отдельный worktree каждого
 concurrent implementation writer, cost-aware profile routing и отдельный
 Strategic Explainer перед каждым комментарием, когда effective rule его не
-отключает, а также best-effort title первой Codex task при доступной host
-capability.
+отключает, ровно один fresh-context critic для `ST-25`, а также best-effort title
+первой Codex task при доступной host capability.
 
 ### 2.1 Пользовательский результат важнее внутренней процедуры
 
@@ -205,6 +211,9 @@ capability.
 Любой существенный переход статуса получает комментарий в Task Manager,
 который опубликован и перечитан до записи статуса. Обычный старт новой работы
 `To Do → In Progress` комментария не создаёт.
+
+Любой переход из `In Review` в другой статус является существенным и всегда
+проходит comment → comment read-back → status write → Task read-back.
 
 Комментарий обязателен, в частности, перед:
 
@@ -261,7 +270,8 @@ compact ledger всех material incidents, включая найденные и
 
 Конституция оценивает результат выбора, а не сам выбор:
 
-- current acceptance не ослаблен ради удобства;
+- current acceptance не ослаблен ради удобства; единственное явно принятое
+  ослабление — критический fallback `ST-25` после его полного eligibility gate;
 - success/failure подтверждены достаточным evidence;
 - недоступное доказательство не названо verified;
 - остановка означает, что в текущем scope и полномочиях не найден достаточный
@@ -341,11 +351,14 @@ To Do → In Progress → In Review → Done
 - `In Progress`: идёт реализация или исправление доказанного дефекта.
 - `In Review`: candidate предъявлен, но success/failure ещё не установлен либо
   приёмка объективно заблокирована.
-- `Done`: текущий контракт Task доказан и обязательные effects завершены.
+- `Done`: текущий контракт Task доказан обычной проверкой либо честно принят по
+  более слабому `critical-codebase-accepted`; обязательные external effects в
+  обоих случаях действительно завершены.
 
 `In Review` не означает ни успех, ни дефект. `Done` не ставится в ожидании
 ручного подтверждения пользователя: invocation разрешает automatic acceptance,
-когда result действительно доказан.
+когда result действительно доказан, а `ST-25` отдельно разрешает более слабое
+закрытие после независимого критического review с явной границей знания.
 
 ### 4.1 Комментарий при переходе
 
@@ -451,7 +464,67 @@ Current acceptance, применимые проверки, identity интегр
 перечитывает Task. Если в этом run был приёмочный инцидент, comment также
 закрывает его или прямо указывает, что он остаётся unresolved.
 
-### 5.5 Attribution за пределами одной Task
+### 5.5 Критическая приёмка по кодовой базе (`critical-codebase-accepted`)
+
+Этот исход рассматривается только после обычной матрицы. Coordinator повторно
+читает полный live inventory selector и строит eligibility gate:
+
+```text
+eligible = InReview > 0
+        && ToDo == 0
+        && InProgress == 0
+        && every InReview is verification-blocked
+        && every remaining blocker needs a human verifier, not an unlocker
+        && exact integrated candidate is stable
+```
+
+`Backlog` и terminal statuses в active counts не участвуют. «Human verifier»
+означает, что человеку пришлось бы самому выполнить и содержательно оценить
+сложную приёмку. Bounded approval, MFA, invite, access grant или другое действие,
+после которого агент способен сам получить evidence, оставляет Task в обычной
+test frontier и не открывает fallback. Tool inconvenience, первая неудачная
+попытка, отсутствующий стандартный fixture и неиспользованный безопасный path
+также не открывают gate.
+
+При eligible gate integration owner фиксирует exact candidate identity и
+запускает ровно одного read-only subagent role `critic` с
+`fork_turns="none"`. Reviewer не получает inherited conversation, producer
+rationale, прежнее approval или process diary. Нейтральный packet содержит
+canonical selector/Task refs, exact candidate identity и поручение независимо
+перечитать current Task contracts, код и тесты. Reviewer заново выполняет
+релевантные проверки, анализирует acceptance surfaces и project-wide связи,
+которые могут нарушить выбранные Tasks, и возвращает per-Task evidence map и
+grounded verdict. Он ничего не исправляет и не меняет Task Manager.
+
+Effective user rule, запрещающий critic-субагента, делает этот fallback
+недоступным: coordinator не симулирует независимость. Изменение candidate,
+Task contract или active inventory до lifecycle writes аннулирует disposition и
+возвращает coordinator к fresh gate.
+
+Per-Task disposition:
+
+- прямое нарушение criterion, test failure либо доказанно отсутствующая
+  реализация обрабатываются как `verified-failure` с точной attribution;
+- grounded approval из самостоятельно проверенных tests, code paths и связей
+  разрешает `critical-codebase-accepted`;
+- mere absence of findings, speculative confidence или непокрытый material
+  criterion approval не образуют; Task остаётся `In Review`.
+
+До `In Review → Done` coordinator готовит grounded fact packet отдельному
+Strategic Explainer. Completion comment не маскирует fallback и обязательно
+говорит, какая функциональная проверка не выполнена, почему для неё нужен
+существенный human verifier, какие autonomous paths исчерпаны, что доказано на
+exact candidate кодом/tests, каков verdict critic и residual risk. Текст прямо
+называет закрытие критической проверкой кодовой базы, а не полноценной
+функциональной приёмкой. После comment read-back выполняются status write и Task
+read-back.
+
+Fallback меняет доказательственную планку Task, но не факты внешнего мира и не
+authority. Неисполненный mandatory effect, production approval, durable-data,
+secrets/privacy/access-policy, external-recipient или unbounded-cost boundary
+нельзя закрыть reviewer opinion.
+
+### 5.6 Attribution за пределами одной Task
 
 Падение общего batch gate без task-level attribution создаёт scope-level chat и
 final-report finding, но не defect comments во всех Tasks. После separating
@@ -761,6 +834,8 @@ Run report начинается с результата и простым язы
 
 - что получилось и в каком состоянии Task/Goal;
 - что доказано, а что не проверено;
+- какие terminal Tasks получили более слабый `critical-codebase-accepted`, с
+  exact candidate, непроведённой функциональной проверкой и residual risk;
 - какие material acceptance incidents обнаружены, включая уже исправленные;
 - для каждого incident — Task/criterion, cause/confidence, fix, retest evidence
   и final state;

@@ -128,6 +128,13 @@ skill, реалистичный exact Task Manager scope и обычный proje
   success/failure в current scope; comment рекомендует strongest feasible путь,
   сравнивая alternatives только при реальном выборе, и сохраняет `In Review`;
 - proven success получает completion comment/read-back до `Done`;
+- critical fallback не запускается при любом `To Do`/`In Progress`, доступном
+  normal test path либо bounded approval/unlock; eligible batch получает ровно
+  одного fresh-context read-only critic по exact candidate;
+- grounded critic approval получает отдельный Strategic Explainer comment с
+  непроведённой functional check, substantial-human cause, code/tests evidence и
+  residual risk до weaker `critical-codebase-accepted` `Done`; inconclusive или
+  stale review сохраняет `In Review`;
 - reopen, cancel и duplicate не выполняются молча;
 - существенный transition проверяется по фактическому comment/read-back, а не по
   предписанному способу работы comment tools;

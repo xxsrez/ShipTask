@@ -70,9 +70,14 @@ comments. Только прямое нарушение acceptance называе
 получить evidence называется verification blocker.
 
 Агент сам выбирает инструменты, способ диагностики и
-приёмки; сбой одного средства не навязывает его repair. Ограничение относится к
-результату: acceptance нельзя ослаблять, а непроверенное нельзя называть
-verified. Browser switch допустим как диагностика, но не как repair или причина
+приёмки; сбой одного средства не навязывает его repair. Acceptance не ослабляется
+ради удобства, а непроверенное не называется verified. Единственный явный
+fallback — `critical-codebase-accepted`: после fresh inventory без `To Do` и
+`In Progress`, когда все оставшиеся `In Review` требуют существенного human
+verifier, один fresh-context critic независимо проверяет exact candidate,
+code/tests. Grounded approval разрешает weaker `Done` только с обязательным
+Strategic Explainer comment о непроведённой functional check и residual risk.
+Browser switch допустим как диагностика, но не как repair или причина
 отложить уже доказанный product failure, пока безопасная in-scope работа над
 продуктом может продолжаться.
 Перед завершением skill сверяет обещанный и фактический результат,
@@ -87,7 +92,9 @@ ShipTask проходит отдельного `$ship-tasks:strategic-explainer`
 статус, полномочия или действие и ничего не меняет; общий skill можно
 использовать отдельно от ShipTask.
 Старые memory, rollout или report записи о ручной приёмке не меняют этот
-contract: пользователь подключается только через reopen либо новую Task.
+contract: обычный terminal-ready result закрывается автоматически, а существенная
+human verification dependency проходит только строгий critical fallback либо
+остаётся честно незавершённой.
 Task-local вопросы откладывают только конкретную Task, не прерывая остальные;
 для каждой Task делается лёгкий targeted gate, а совместимые изменения
 периодически выпускаются в UAT одним exact batch без отдельного approval;

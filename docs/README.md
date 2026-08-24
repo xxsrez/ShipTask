@@ -124,6 +124,10 @@
 - [0026: Периодические UAT batch releases](decisions/0026-periodic-uat-batch-releases.md)
   — отделяет лёгкую проверку каждой Task от периодического thorough gate и одного
   UAT deploy совместимого exact batch; обычный UAT не требует approval.
+- [0027: Критическая приёмка по кодовой базе](decisions/0027-critical-codebase-acceptance.md)
+  — разрешает явно маркированный weaker `Done` только при исчерпанном active
+  frontier, substantial human verification blocker и независимом fresh-context
+  critic-review exact candidate.
 
 ## Reference
 
@@ -137,7 +141,7 @@
   planning-only authority.
 - [Проверка классификации `In Review`](reference/shiptask-review-disposition-evaluation.md)
   — decision-level cases для task-contract conflict, proven failure,
-  verification blocker, incident persistence и Goal behavior.
+  verification blocker, critical codebase fallback, incident persistence и Goal behavior.
 - [Project memory contract](../ship-tasks/references/project-memory.md) —
   runtime-схема current scope и project profile, precedence, bootstrap,
   freshness, alarms и cross-surface ограничения.
