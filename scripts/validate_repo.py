@@ -548,6 +548,10 @@ def validate_strategic_skill(errors: list[str]) -> None:
         "готовый пользовательский текст",
         "Пиши на языке пользователя",
         "пригодный для публикации",
+        "Перестрой текст, когда это явно запрошено",
+        "неизменяемое смысловое ядро",
+        "сопоставь результат с исходником в обе стороны",
+        "новое проектное решение или полномочие",
         "Не выполняй writes",
     )
     text = read(STRATEGIC_SKILL)
@@ -558,9 +562,11 @@ def validate_strategic_skill(errors: list[str]) -> None:
         errors,
         STRATEGIC_METADATA,
         'display_name: "Strategic Explainer"',
-        'short_description: "Связать проблему, стратегию и текущий результат"',
+        'short_description: "Объяснить смысл или переписать сложный текст без потерь"',
         "$strategic-explainer",
         "готовое объяснение на языке пользователя",
+        "перестрой текст настолько глубоко, насколько нужно для ясности",
+        "сохрани все факты, требования, исключения и границы",
         "не превращай текст в смесь русского",
         "allow_implicit_invocation: true",
     )
@@ -951,7 +957,7 @@ def validate_source_layers(errors: list[str]) -> None:
     packages = (
         (SHIP_REQUIREMENTS, "ST", 24),
         (COMPOSER_REQUIREMENTS, "TC", 10),
-        (STRATEGIC_REQUIREMENTS, "SE", 12),
+        (STRATEGIC_REQUIREMENTS, "SE", 13),
     )
     for requirements, prefix, count in packages:
         requirement_ids = re.findall(
@@ -976,10 +982,15 @@ def validate_source_layers(errors: list[str]) -> None:
                 "семантически эквивалентным всем требованиям `ST-*`",
             )
         else:
+            level_one_status = (
+                "Статус: current Level 1, 2026-08-24"
+                if requirements == STRATEGIC_REQUIREMENTS
+                else "Статус: current Level 1, 2026-08-22"
+            )
             require(
                 errors,
                 requirements,
-                "Статус: current Level 1, 2026-08-22",
+                level_one_status,
                 "полный пользовательский исходный код только для",
                 "не могут ослабить, заменить или\nмолча удалить",
                 "Изменение смысла Level 1 требует явного решения пользователя",
@@ -1061,6 +1072,11 @@ def validate_source_layers(errors: list[str]) -> None:
         "Publication-ready и пропорциональный result",
         "Общий переносимый communication skill",
         "остаются byte-identical",
+        "Редакторская реконструкция без потери смысла",
+        "естественную профессиональную версию",
+        "Редактура не меняет содержание",
+        "Неясность или противоречие нельзя\nскрыть уверенной формулировкой",
+        "не выдаёт редакторское решение за\nпользовательское требование",
     )
     forbid(
         errors,
@@ -1083,11 +1099,12 @@ def validate_source_layers(errors: list[str]) -> None:
         (COMPOSER_SPEC, "TC-*"),
         (STRATEGIC_SPEC, "SE-*"),
     ):
-        status_marker = (
-            "Статус: current Level 2 contract, 2026-08-23"
-            if architecture == SPEC
-            else "Статус: current Level 2 contract, 2026-08-22"
-        )
+        if architecture == SPEC:
+            status_marker = "Статус: current Level 2 contract, 2026-08-23"
+        elif architecture == STRATEGIC_SPEC:
+            status_marker = "Статус: current Level 2 contract, 2026-08-24"
+        else:
+            status_marker = "Статус: current Level 2 contract, 2026-08-22"
         require(
             errors,
             architecture,
@@ -1144,7 +1161,7 @@ def validate_source_layers(errors: list[str]) -> None:
     require(
         errors,
         VISION,
-        "Статус: current Level 2 strategic design, 2026-08-22",
+        "Статус: current Level 2 strategic design, 2026-08-24",
         "[требованиях пользователя](requirements.md)",
     )
 
@@ -1598,7 +1615,7 @@ def validate_strategic_contract(errors: list[str]) -> None:
     require(
         errors,
         STRATEGIC_SPEC,
-        "Статус: current Level 2 contract, 2026-08-22",
+        "Статус: current Level 2 contract, 2026-08-24",
         "`SE-*` в локальных",
         "[требованиях пользователя](requirements.md)",
         "общего skill `$strategic-explainer`",
@@ -1612,6 +1629,9 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Текст пишется на языке пользователя",
         "готовый пользовательский текст",
         "пригоден для публикации",
+        "Редакторская реконструкция",
+        "неизменяемое смысловое ядро",
+        "обратная проверка покрытия",
     )
     require(
         errors,
@@ -1622,6 +1642,8 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Визуализация служит пониманию",
         "Lossless by relevance",
         "Проверяемый source basis",
+        "Редакторская реконструкция без потери смысла",
+        "Свобода формы не означает свободу содержания",
     )
     require(
         errors,
@@ -1635,6 +1657,11 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "пригоден для публикации",
         "Read-only boundary",
         "Реальный выбор способа проверки",
+        "Редакторская целостность",
+        "обратное сопоставление результата с исходником",
+        "Плотный документ требований",
+        "Ясная структура с локальными языковыми дефектами",
+        "Противоречие внутри редактируемого текста",
         "не оценивает agent topology",
     )
 

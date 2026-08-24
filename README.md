@@ -108,7 +108,8 @@ Epic с problem-first описанием через Strategic Explainer, кон�
   формулировка, декомпозиция и создание Task Manager scope.
 - [`strategic-explainer/SKILL.md`](strategic-explainer/SKILL.md) — общий
   problem-first strategic discovery и communication skill для прямого или
-    delegated использования; обязательную ShipTask topology задаёт calling skill.
+  delegated использования, включая редакторскую реконструкцию сложного текста
+  без потери смысла; обязательную ShipTask topology задаёт calling skill.
 - [`docs/skills/README.md`](docs/skills/README.md) — source model и независимые
   Requirements/Architecture packages для каждого skill.
 - [`docs/skills/ship-tasks/requirements.md`](docs/skills/ship-tasks/requirements.md)
