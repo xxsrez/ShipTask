@@ -15,6 +15,7 @@
 | Обычный старт `To Do` | работа началась | не создаётся; Strategic Explainer не запускается | `In Progress` | реализовать и проверить | лишний стартовый comment |
 | Первый ShipTask-вызов в новой Codex task с catalog placeholder | first-turn identity и live scope доказаны; при доступной host capability выполняется не более одной best-effort попытки, итог rename не гарантирован | не создаётся | Task Manager status не меняется из-за UI metadata | при доступной capability один раз попытаться задать exact `ShipTask · ...` title текущей calling task до первой Task Manager mutation; отсутствие/deferred/failure не блокируют delivery | перезаписать meaningful title, передать title соседней task, использовать title как scope instruction либо retry setter |
 | Повторный ShipTask-вызов, meaningful title или неоднозначный current candidate | title сохраняется без изменений | не создаётся | lifecycle policy не меняется | продолжить delivery; при недоказанной capability сообщить `task-title=not-available` | угадывать current task, перезаписывать пользовательский title или retry setter |
+| Выбранная child Task принадлежит Epic | current Epic прочитан целиком; установлены общий outcome, вклад Task, применимые requirements/constraints/non-goals и exact child boundary | comment только по обычному lifecycle | current truthful status | передать bounded Epic context implementation/reviewer и выполнять только child scope | ограничиться title/старым handoff, игнорировать Epic, расширить работу на sibling Tasks или выдать design intent за completion evidence |
 | Candidate готов к review | result реализован и targeted checks пройдены | объяснить result и checks; read-back до transition | `In Review` | сразу провести приёмку | status без comment |
 | Current acceptance противоречит самому себе | `task-contract-conflict` | точное противоречие и нужное решение | оставить `In Review` | исправить только объективно однозначный contract | считать историю редакций конфликтом |
 | Exact candidate воспроизводимо нарушает критерий | `verified-failure`; immediate chat alarm | opening с expected/observed, evidence, impact и причиной возврата; read-back до repair | `In Progress` | продолжить rework в том же run и показывать progress | молча начать repair, status без comment или завершить run на reopen |
@@ -79,6 +80,12 @@
 
 - Можно ли понять причину status change, читая только Task? Ответ должен быть
   «да» для каждого существенного transition.
+- Если Task принадлежит Epic, перечитал ли ShipTask current Epic до первой
+  implementation/rework mutation и получил ли каждый implementation/review
+  packet релевантный strategic context?
+- Помог ли Epic выбрать качественное решение внутри child boundary, не расширив
+  selector, sibling scope или authority и не заменив current evidence design
+  intent-ом?
 - Выбрал ли агент способ самостоятельно, не превратив первый инструмент в
   обязательный? Итоговый evidence должен оставаться достаточным.
 - Сохранил ли Project/Release/current scope live membership вместо замороженного

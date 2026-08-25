@@ -221,6 +221,33 @@ Dependency readiness управляет scheduling, но не release truth. О�
 принимает blocking Task, не создаёт отсутствующий внешний effect и не завершает
 Goal/Release, пока их собственные обязательные outcomes остаются недоказанными.
 
+### 1.5 Epic context gate
+
+Если current Task входит в parent-child hierarchy, до первой implementation или
+rework mutation coordinator перечитывает authoritative Task state и current
+parent chain до ближайшего materially relevant Epic. Он читает полный Epic, а
+не ограничивается title или старым handoff, и выделяет bounded execution
+context:
+
+- problem, beneficiary и desired outcome Epic;
+- вклад exact Task в общий результат;
+- применимые parent requirements, constraints и non-goals;
+- exact child scope, acceptance и реальные dependencies;
+- стратегические качества, которые локальная оптимизация не должна нарушить.
+
+Этот context входит в self-contained implementation и review packet независимо
+от выбранной topology. Он помогает принимать design/implementation решения
+внутри Task, но не добавляет sibling Tasks в selector, не расширяет change
+boundary и не доказывает completion. Live implementation evidence остаётся
+authoritative для результата.
+
+Material конфликт Epic и child обрабатывается как `task-contract-conflict` до
+затронутой mutation. Если required parent нельзя разрешить или прочитать через
+current Task Manager adapter, coordinator выдаёт `TASK CONTEXT ALARM` и не
+начинает затронутую implementation; другая independent runnable work
+продолжается. При material изменении parent context перед новой implementation
+surface gate выполняется заново.
+
 ## 2. Конституция
 
 Подробный алгоритм не является целью. Агент свободен выбирать инструменты,

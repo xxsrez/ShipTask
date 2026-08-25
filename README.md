@@ -110,7 +110,9 @@ memory хранит только selectors/profile и изменяется ли�
 
 Task Composer закрывает соседний planning-only этап: формулирует одну Task либо
 Epic с problem-first описанием через Strategic Explainer, конкретными
-подзадачами, live Labels и semantic relations. Созданные элементы остаются в
+подзадачами, live Labels и semantic relations, сохраняя применимый strategic
+context в каждой child Task. При delivery ShipTask перечитывает current Epic,
+но его смысл не расширяет exact child scope. Созданные элементы остаются в
 `Backlog`; неизвестный current Release не угадывается и не блокирует создание.
 
 ## Структура

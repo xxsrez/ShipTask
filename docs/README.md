@@ -26,8 +26,8 @@
   [Requirements](skills/task-composer/requirements.md) и
   [Architecture](skills/task-composer/architecture.md) — planning-only Task
   Manager workflow: одна Task либо strategic Epic с конкретными подзадачами,
-  live Labels, hierarchy, semantic relations, `Backlog` и необязательным
-  current Release.
+  переносом применимого strategic context в каждую child Task, live Labels,
+  hierarchy, semantic relations, `Backlog` и необязательным current Release.
 - `$strategic-explainer`:
   [Requirements](skills/strategic-explainer/requirements.md),
   [Architecture](skills/strategic-explainer/architecture.md) и

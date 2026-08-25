@@ -170,7 +170,11 @@ draft, explicit write authority, exact `Backlog`, optional unknown Release,
 existing-only Labels, semantic relation direction, duplicate prevention и
 partial-write reconciliation. Type Labels не должны дублироваться в title:
 `BUG:`/`EPIC:` и эквиваленты отсутствуют, а legacy-prefixed title участвует в
-duplicate search как clean outcome title. Полная матрица:
+duplicate search как clean outcome title. Для каждой child Task также проверьте
+её вклад в Epic, self-contained проекцию применимых constraints/non-goals и
+сохранение exact scope. В ShipTask-проверке child Task должна загрузить current
+Epic до implementation и передать bounded context исполнителю/reviewer. Полная
+матрица:
 [Task Composer evaluation](../reference/task-composer-evaluation.md).
 
 ## Runtime-дистрибуция

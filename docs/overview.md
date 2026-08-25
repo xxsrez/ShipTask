@@ -77,6 +77,11 @@ ADR-0024.
   writer подхватывается следующей сессией и продолжается, а не дублируется;
 - `blocked by` открывает dependent implementation после fan-in нужного upstream
   contract в exact integration candidate, а не после `Done` blocking Task;
+- Task Composer переносит применимую часть стратегического смысла Epic в каждую
+  child Task, а ShipTask перед implementation перечитывает current Epic и
+  передаёт bounded context исполнителю/reviewer;
+- Epic задаёт общий outcome и quality bar, но не расширяет exact child scope,
+  selector или authority и не является completion evidence;
 - pending upstream acceptance сохраняет её non-terminal, но не удерживает
   dependent Tasks вне runnable frontier; late attributed defect инвалидирует
   только использующие нарушенный contract downstream results;
@@ -123,7 +128,10 @@ outcome оформляет как Epic с problem-first описанием че�
 конкретными подзадачами, live Labels и semantic relations. Это planning-only
 projection: новые элементы остаются в `Backlog`, а unknown current Release
 опускается без guess. Task type хранится в Label/hierarchy и не дублируется
-префиксом `BUG:`/`EPIC:` или эквивалентом в title.
+префиксом `BUG:`/`EPIC:` или эквивалентом в title. Шаги плана не становятся
+Tasks механически: decomposition следует independently verifiable outcomes, а
+каждая child Task получает компактную проекцию своего вклада и применимых
+strategic constraints/non-goals.
 
 - `single`: одна Task, без Goal.
 - `batch-implementation`: имплементация/rework минимум двух Tasks, с Goal и

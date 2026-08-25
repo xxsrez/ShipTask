@@ -323,6 +323,9 @@ def validate_ship_skill(errors: list[str]) -> None:
         SHIP_SKILL,
         "полный exact scope",
         "принадлежит Task Composer",
+        "current parent chain до ближайшего relevant Epic целиком",
+        "передай bounded context любому implementation/review packet",
+        "Epic задаёт смысл и планку качества, но не расширяет selector/scope",
         "TASK CONTEXT ALARM",
         "Доказательство важнее выбранного способа",
         "Сбой одного выбранного способа",
@@ -484,6 +487,9 @@ def validate_composer_skill(errors: list[str]) -> None:
         "live active catalog",
         "relation graph",
         "искусственный umbrella Epic",
+        "Не превращай шаги исходного плана в Tasks механически",
+        "самодостаточную проекцию",
+        "Epic context не расширяет scope child",
         "Title кратко называет ожидаемый результат",
         "Type/classification выражай native Label",
         "Legacy-prefixed и clean outcome title считай одним duplicate candidate",
@@ -506,7 +512,7 @@ def validate_composer_skill(errors: list[str]) -> None:
     require(
         errors,
         COMPOSER_SPEC,
-        "Статус: current Level 2 contract, 2026-08-22",
+        "Статус: current Level 2 contract, 2026-08-25",
         "`TC-*` в локальных",
         "[требованиях пользователя](requirements.md)",
         "planning mutations",
@@ -523,6 +529,10 @@ def validate_composer_skill(errors: list[str]) -> None:
         "canonical classification metadata",
         "отсутствие classification prefix/suffix",
         "самую мелкую полезную иерархию",
+        "outcome graph",
+        "Стратегическая преемственность",
+        "одной ссылки недостаточно",
+        "не разрешает выполнять\nсоседние подзадачи",
         "$ship-tasks:strategic-explainer",
         "создание Epic не начинается; single Task",
         "не secret value",
@@ -538,6 +548,9 @@ def validate_composer_skill(errors: list[str]) -> None:
         "write происходит только по явному planning intent",
         "Epic problem-first",
         "независимые outcomes не сливаются",
+        "activity Tasks",
+        "самодостаточную\n  проекцию применимых strategic requirements",
+        "не расширяет exact scope",
         "Strategic Explainer",
         "блокирует только Epic create",
         "Release назначен только при однозначном current",
@@ -807,6 +820,13 @@ REVIEW_CASES = {
         "реализовать и проверить в том же run",
         "требовать второй approval",
     ),
+    "Выбранная child Task принадлежит Epic": (
+        "current Epic прочитан целиком",
+        "применимые requirements/constraints/non-goals",
+        "bounded Epic context implementation/reviewer",
+        "только child scope",
+        "игнорировать Epic",
+    ),
     "Новая matching Task live Release остаётся в `Backlog`": (
         "исключена из delivery",
         "`Backlog` сохраняется",
@@ -1065,8 +1085,8 @@ def validate_review_matrix(errors: list[str]) -> None:
 
 def validate_source_layers(errors: list[str]) -> None:
     packages = (
-        (SHIP_REQUIREMENTS, "ST", 26),
-        (COMPOSER_REQUIREMENTS, "TC", 10),
+        (SHIP_REQUIREMENTS, "ST", 27),
+        (COMPOSER_REQUIREMENTS, "TC", 11),
         (STRATEGIC_REQUIREMENTS, "SE", 14),
     )
     for requirements, prefix, count in packages:
@@ -1095,7 +1115,7 @@ def validate_source_layers(errors: list[str]) -> None:
             level_one_status = (
                 "Статус: current Level 1, 2026-08-24"
                 if requirements == STRATEGIC_REQUIREMENTS
-                else "Статус: current Level 1, 2026-08-22"
+                else "Статус: current Level 1, 2026-08-25"
             )
             require(
                 errors,
@@ -1167,6 +1187,10 @@ def validate_source_layers(errors: list[str]) -> None:
         "может оставаться в `In Progress` или `In Review`",
         "не закрывают уже открытый dependency gate",
         "возвращает в rework только доказанно затронутые Tasks",
+        "Epic задаёт смысл, но не расширяет Task",
+        "перечитывает её\nтекущий parent chain до ближайшего применимого Epic",
+        "получает любой исполнитель или reviewer",
+        "не разрешает автоматически\nвыполнять sibling Tasks",
     )
     forbid(
         errors,
@@ -1183,6 +1207,10 @@ def validate_source_layers(errors: list[str]) -> None:
         "Planning-only boundary",
         "Strategic Explainer для каждого Epic",
         "Независимая planning distribution",
+        "Стратегическая преемственность от Epic к Task",
+        "компактную самодостаточную проекцию",
+        "Шаги исходного плана не превращаются в Tasks механически",
+        "не\nрасширяет exact scope",
         "искусственный umbrella Epic",
         "Unknown outcome не\nповторяется вслепую",
         "должны быть byte-identical",
@@ -1229,7 +1257,7 @@ def validate_source_layers(errors: list[str]) -> None:
         elif architecture == STRATEGIC_SPEC:
             status_marker = "Статус: current Level 2 contract, 2026-08-24"
         else:
-            status_marker = "Статус: current Level 2 contract, 2026-08-22"
+            status_marker = "Статус: current Level 2 contract, 2026-08-25"
         require(
             errors,
             architecture,
@@ -1277,6 +1305,9 @@ def validate_source_layers(errors: list[str]) -> None:
         "не как repair",
         "`blocked by` управляет доступностью реализации",
         "поздний defect\nинвалидирует только доказанно затронутые downstream results",
+        "сохраняя применимый strategic\ncontext в каждой child Task",
+        "ShipTask перечитывает current Epic",
+        "не расширяет exact child scope",
     )
     require(
         errors,
@@ -1316,6 +1347,12 @@ def validate_current_contract(errors: list[str]) -> None:
         "Relation не удаляется",
         "не возвращает независимые Tasks в rework",
         "Dependency readiness управляет scheduling, но не release truth",
+        "### 1.5 Epic context gate",
+        "читает полный Epic",
+        "self-contained implementation и review packet",
+        "не добавляет sibling Tasks в selector",
+        "task-contract-conflict` до\nзатронутой mutation",
+        "другая independent runnable work\nпродолжается",
         "### 7.2 Per-Task gates и периодический UAT batch",
         "один deploy того же exact candidate в verified UAT",
         "standing authority периодического release",

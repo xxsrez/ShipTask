@@ -1,6 +1,6 @@
 # Task Composer
 
-Статус: current Level 2 contract, 2026-08-22. Применимые Level 1 requirements —
+Статус: current Level 2 contract, 2026-08-25. Применимые Level 1 requirements —
 `TC-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Архитектурная роль
@@ -107,6 +107,12 @@ parent, children, descriptions, labels и relation graph. Модель долж�
 требования человека без придуманного scope и без технических пробелов между
 подзадачами.
 
+Исходный план является материалом для понимания цели и зависимостей, а не
+готовым списком карточек. Task Composer строит outcome graph: отделяет
+independently verifiable results от действий и промежуточных шагов, а порядок
+фиксирует relation только там, где одна часть действительно требует результат
+другой.
+
 Не объединяй независимые desired outcomes в искусственный umbrella Epic. Один
 связный outcome получает одну standalone Task или один Epic; несколько
 независимых outcomes сохраняются отдельными Tasks/Epics и связываются только
@@ -169,6 +175,7 @@ Epic не становится свалкой tactical instructions. Техни�
 Каждая подзадача содержит:
 
 - один конкретный independently deliverable result;
+- собственный вклад в desired outcome Epic;
 - точную границу изменения и materially relevant technical details;
 - применимые parent requirements и dependencies;
 - проверяемые acceptance criteria и evidence;
@@ -178,6 +185,23 @@ Epic не становится свалкой tactical instructions. Техни�
 Подзадачи совместно покрывают Epic без скрытого остатка и без дублирования
 ownership. Requirement, влияющий на несколько подзадач, остаётся видимым в
 Epic и отражается в каждой применимой подзадаче.
+
+### 4.3 Стратегическая преемственность
+
+Epic остаётся каноническим полным источником общей проблемы, desired outcome и
+cross-cutting boundaries. Native parent-child hierarchy даёт исполнителю путь к
+этому источнику, но одной ссылки недостаточно: description каждой подзадачи
+содержит короткую самодостаточную проекцию релевантного смысла. Она прямо
+объясняет вклад Task в Epic, применимые стратегические требования, ограничения и
+non-goals, а также качества, которыми нельзя пожертвовать ради локального
+упрощения. Полный текст Epic при этом не копируется в каждую карточку.
+
+До create candidate-модель проверяется с позиции нового исполнителя, который
+видит подзадачу и её parent: он должен суметь назвать общий outcome, собственный
+вклад, exact change boundary и применимую планку качества без догадки. Context
+Epic помогает выбирать решение внутри этой границы, но не разрешает выполнять
+соседние подзадачи или расширять scope. Material gap либо противоречие между
+Epic и child остаётся явным и требует исправления planning model до write.
 
 ## 5. Strategic Explainer
 

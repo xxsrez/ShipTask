@@ -1,6 +1,6 @@
 # Task Composer evaluation contract
 
-Статус: current reference, 2026-08-22.
+Статус: current reference, 2026-08-25.
 
 Проверка оценивает observable planning result `$ship-tasks:task-composer`, а не exact
 wording, agent topology, tool order или число подзадач.
@@ -16,8 +16,14 @@ wording, agent topology, tool order или число подзадач.
   результаты;
 - составной outcome получает Epic и достаточно independently deliverable
   подзадач без скрытого остатка;
+- шаги исходного плана не превращены механически в activity Tasks вместо
+  independently verifiable outcomes;
 - Epic problem-first, сохраняет human requirements и подготовлен с помощью
   Strategic Explainer;
+- каждая подзадача содержит свой вклад в Epic и компактную самодостаточную
+  проекцию применимых strategic requirements, constraints и non-goals;
+- parent context направляет решение и quality bar, но не расширяет exact scope
+  дочерней Task;
 - недоступный или ungrounded Strategic Explainer блокирует только Epic create,
   а не независимо допустимую single Task;
 - technical specifics, acceptance criteria и evidence находятся в применимых
@@ -40,6 +46,9 @@ wording, agent topology, tool order или число подзадач.
 |---|---|
 | Один небольшой independently deliverable change | Одна Task без формального Epic |
 | Outcome требует API, UI и migration с отдельной приёмкой | Один strategic Epic и independently verifiable subtasks |
+| План перечисляет исследование, реализацию и проверку одного outcome | Не создавать activity tree механически; оставить одну Task либо разделить только по самостоятельным outcomes |
+| Общий privacy/reliability invariant влияет на несколько подзадач | Сохранить invariant в Epic и отразить применимую проекцию в каждой затронутой Task |
+| Узкая child Task принадлежит широкому Epic | Description объясняет вклад и relevant boundaries; Epic не разрешает выполнить sibling scope |
 | Prompt содержит два независимых outcomes | Отдельные Tasks/Epics без искусственного общего parent |
 | Пользователь просит только draft | Текст сформулирован, Task Manager writes отсутствуют |
 | Project неизвестен | Запрос exact Project до create |
@@ -62,4 +71,6 @@ wording, agent topology, tool order или число подзадач.
 
 Blind forward test получает user requirements, live Task Manager catalog и
 candidate duplicates без intended decomposition. Проверяется сохранность
-meaning, исполнимость, graph correctness, write authority и read-back.
+meaning, исполнимость, strategic continuity, graph correctness, write authority
+и read-back. Отдельно выбранная child Task должна позволять новому исполнителю
+восстановить её вклад и применимую планку качества без scope expansion.
