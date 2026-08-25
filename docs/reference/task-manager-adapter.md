@@ -74,6 +74,9 @@ identifier вроде `TM-123` является selector/display identity; immut
   contract. ShipTask всегда использует их для обязательного reporting.
 - Label, parent Task и relation refs являются canonical opaque identifiers;
   hierarchy и relation direction подтверждаются полным Task read-back.
+- Adapter хранит `blocked by` relation и её direction, но не выводит из status
+  blocking Task business-решение о runnable frontier. ShipTask отдельно
+  подтверждает доступность нужного contract в exact integration candidate.
 - Goal tools не являются Task Manager tools.
 - Task Manager `Release` не является deployment environment и не доказывает
   production/non-production class.

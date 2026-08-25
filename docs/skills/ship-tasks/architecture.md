@@ -1,6 +1,6 @@
 # ShipTask: канонический контракт
 
-Статус: current Level 2 contract, 2026-08-24. Применимые Level 1 requirements —
+Статус: current Level 2 contract, 2026-08-25. Применимые Level 1 requirements —
 `ST-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Основан на
@@ -21,6 +21,9 @@ cost-aware выбор профиля субагента и обязательн�
 Последний автономный fallback критической приёмки по кодовой базе при полностью
 исчерпанном active frontier определён
 [ADR-0027](../../decisions/0027-critical-codebase-acceptance.md).
+Разделение structural dependency, готовности интегрированной реализации и
+terminal acceptance определено
+[ADR-0028](../../decisions/0028-integrated-implementation-satisfies-blocked-by.md).
 Эти решения соответственно сохраняют свободу способа, отделяют Goal от release
 и делают приёмочные инциденты видимыми во всём run.
 
@@ -53,6 +56,11 @@ critic может дать более слабый `critical-codebase-accepted` 
 candidate с обязательным честным comment. Marketplace source и installed cache —
 отдельный distribution step: локальная компиляция сама по себе не доказывает,
 что новый runtime уже released или загружен fresh Codex session.
+
+`blocked by` в этой компиляции открывает downstream implementation после
+подтверждённого fan-in нужного upstream contract в exact integration candidate,
+а не после terminal status upstream Task. Pending upstream acceptance остаётся
+видимой, но не сужает runnable frontier без attributed contract failure.
 
 ## 1. Назначение и запуск
 
@@ -182,6 +190,36 @@ Label нормализуется до короткого имени без statu
 доказана либо setter failed, агент продолжает delivery и кратко сообщает
 `task-title=not-available`; он не угадывает и не переименовывает существующую
 task.
+
+### 1.4 Dependency-ready frontier
+
+Relation `blocked by` сохраняет structural dependency и provenance, но не
+синхронизирует lifecycle статусы Tasks. Для пары blocking → dependent coordinator
+считает implementation gate открытым, когда одновременно доказано:
+
+- относящееся к dependency изменение blocking Task прошло fan-in в exact общий
+  integration candidate, а не осталось только в writer branch/worktree;
+- candidate предоставляет interface, data shape, migration, generated artifact
+  или другой контракт, который действительно нужен dependent Task;
+- нет свежего attributed defect, который делает этот контракт непригодным.
+
+`Done` blocking Task в этот gate не входит. Pending functional verification,
+неполученный обязательный effect или `verification-blocked` сохраняют upstream
+Task в её правдивом non-terminal status, но dependent Task становится runnable и
+проходит собственные implementation, fan-in, acceptance и lifecycle независимо.
+Relation не удаляется: в batch manifest/evidence ledger сохраняются blocking и
+dependent Task refs, identity candidate и конкретный предоставленный контракт.
+
+Изменение только в отдельном worktree, report о готовности, comment либо status
+без fan-in gate не открывают. Поздний verified failure или новая версия upstream
+закрывают только те открытые gates, чей используемый contract доказанно затронут:
+coordinator повторно проверяет attributed downstream candidates и evidence, но
+не возвращает независимые Tasks в rework из-за самого факта non-terminal upstream
+status или unattributed batch failure.
+
+Dependency readiness управляет scheduling, но не release truth. Открытый gate не
+принимает blocking Task, не создаёт отсутствующий внешний effect и не завершает
+Goal/Release, пока их собственные обязательные outcomes остаются недоказанными.
 
 ## 2. Конституция
 
@@ -731,7 +769,8 @@ constraints комбинируются; позднее более конкрет
 субагентов.
 
 Только если применимого user rule нет, delegation автоматическая: после live
-inventory агент сам выделяет полезные независимые work packets и решает,
+inventory и расчёта dependency-ready frontier из раздела 1.4 агент сам выделяет
+полезные независимые work packets и решает,
 сколько субагентов применять с учётом dependencies, ownership, доступной
 изоляции, runtime capacity и стоимости integration/verification. Exact count
 означает обязательное число subagents, а не ceiling. Relative rule вроде
@@ -765,7 +804,8 @@ comment Explainer отдельного worktree не требуют.
 owner выполняет fan-in результатов в exact integration candidate и проверяет
 его после объединения; успешная проверка отдельного worktree не доказывает
 интегрированный результат. После завершения, blocker или открытия dependencies
-агент заново оценивает полезную delegation. Большое число Tasks и свободных
+агент заново оценивает dependency-ready frontier и полезную delegation. Большое
+число Tasks и свободных
 slots без независимой работы не являются основанием для fake fan-out.
 
 Пользовательский выбор model/effort является главным. Если пользователь не
@@ -860,6 +900,9 @@ Run report сначала проходит scope-level Strategic Explainer по 
 
 - что получилось и в каком состоянии Task/Goal;
 - что доказано, а что не проверено;
+- какие material `blocked by` gates открыты или повторно закрыты, на каком exact
+  candidate/contract и как это повлияло на downstream work отдельно от
+  acceptance blocking Tasks;
 - какие terminal Tasks получили более слабый `critical-codebase-accepted`, с
   exact candidate, непроведённой функциональной проверкой и residual risk;
 - какие material acceptance incidents обнаружены, включая уже исправленные;

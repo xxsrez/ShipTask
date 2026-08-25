@@ -15,6 +15,11 @@ Exact Task/явный список refs образуют закрытый select
 current scope остаются live selectors: стартовый inventory не замораживает
 membership, поэтому новая matching non-Backlog Task автоматически входит в run
 без повторного approval, а Backlog остаётся вне delivery.
+`blocked by` управляет доступностью реализации, а не terminal lifecycle:
+dependent Task становится runnable после подтверждённого fan-in нужного upstream
+contract в exact integration candidate, даже если blocking Task ещё не `Done`
+из-за собственной проверки. Relation и attribution сохраняются; поздний defect
+инвалидирует только доказанно затронутые downstream results.
 
 Документация здесь является исходным кодом, причём source unit — отдельный
 skill. В [`docs/skills/<skill>/`](docs/skills/README.md) у каждого skill есть

@@ -45,6 +45,9 @@ current profile. Они уточняют
 Строго ограниченный weaker `Done` после независимой критической проверки exact
 кодовой базы закреплён
 [ADR-0027](decisions/0027-critical-codebase-acceptance.md).
+Разделение `blocked by`, доступности интегрированной реализации и terminal
+acceptance закреплено
+[ADR-0028](decisions/0028-integrated-implementation-satisfies-blocked-by.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
 результатов и жёстких границ. Агент свободен выбирать порядок, инструменты,
 реализацию, декомпозицию и число попыток; delegation следует явной политике
@@ -72,6 +75,11 @@ ADR-0024.
   и собственном Git worktree; writable worktree не разделяется между writers;
 - interrupted task-owned worktree/branch после доказанной остановки прежнего
   writer подхватывается следующей сессией и продолжается, а не дублируется;
+- `blocked by` открывает dependent implementation после fan-in нужного upstream
+  contract в exact integration candidate, а не после `Done` blocking Task;
+- pending upstream acceptance сохраняет её non-terminal, но не удерживает
+  dependent Tasks вне runnable frontier; late attributed defect инвалидирует
+  только использующие нарушенный contract downstream results;
 - status Task соответствует текущим фактам;
 - обычный старт `To Do → In Progress` не создаёт комментарий;
 - существенный status transition сначала получает понятный native comment и

@@ -130,6 +130,10 @@
   — разрешает явно маркированный weaker `Done` только при исчерпанном active
   frontier, substantial human verification blocker и независимом fresh-context
   critic-review exact candidate.
+- [0028: Интегрированная реализация удовлетворяет `blocked by`](decisions/0028-integrated-implementation-satisfies-blocked-by.md)
+  — открывает downstream implementation после доказанного fan-in нужного
+  upstream contract, не дожидаясь terminal acceptance blocking Task, и
+  локализует позднюю invalidation по contract attribution.
 
 ## Reference
 

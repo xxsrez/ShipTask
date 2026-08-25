@@ -32,6 +32,10 @@
   обязательный путь. Проверяйте достаточность итогового evidence.
 - Не добавляйте фиксированное число попыток. Проверяйте основание для повтора и
   реальное условие остановки.
+- Не вычисляйте dependency-ready frontier по `status == Done`. Для `blocked by`
+  проверяйте fan-in нужного upstream contract в exact integration candidate;
+  pending acceptance не блокирует dependent implementation, а late defect
+  инвалидирует только attributed downstream results.
 - Strategic Explainer не получает право решать факты, статус, границы работы,
   полномочия или действие. Каждый комментарий ShipTask обязательно проходит
   отдельного независимого Explainer, пока effective user topology rule не
@@ -89,6 +93,10 @@ skill, реалистичный exact Task Manager scope и обычный proje
   и `Backlog → To Do` автоматически входят без повторного approval, новая
   matching `Backlog` Task остаётся вне runnable frontier, а initial inventory не
   превращается в Goal count/list cap;
+- blocking Task с влитым в exact integration candidate нужным contract открывает
+  dependent implementation до собственного `Done`; isolated branch/comment/status
+  gate не открывают, а поздний attributed defect возвращает только затронутые
+  downstream Tasks к повторной проверке;
 - первый ShipTask-вызов с catalog placeholder и доступной host title capability
   после live scope resolution получает не более одной best-effort попытки
   `ShipTask · ...`; meaningful title, later turn, incomplete history и

@@ -99,6 +99,10 @@ ADR = {
             "0027",
             "0027-critical-codebase-acceptance.md",
         ),
+        (
+            "0028",
+            "0028-integrated-implementation-satisfies-blocked-by.md",
+        ),
     )
 }
 
@@ -179,6 +183,7 @@ CURRENT_CONTRACT_FILES = (
     ADR["0025"],
     ADR["0026"],
     ADR["0027"],
+    ADR["0028"],
     ADAPTER,
     CRITICAL_REVIEW,
 )
@@ -337,6 +342,7 @@ def validate_ship_skill(errors: list[str]) -> None:
         "немедленно сообщи в Codex chat",
         "каждые 10 минут",
         "краткий перечень существенных инцидентов",
+        "Материальные `blocked by` gates отчитай отдельно",
         "$ship-tasks:strategic-explainer",
         "Canonical `Backlog` не входит в delivery inventory",
         "closed selectors",
@@ -346,6 +352,11 @@ def validate_ship_skill(errors: list[str]) -> None:
         "Browser/controller/session switch — диагностика, не repair",
         "browser logistics не stop condition",
         "fresh full inventory",
+        "`blocked by` открывает dependent implementation по readiness gate",
+        "fan-in нужного blocking Task contract",
+        "`Done` не требуется",
+        "dependent Task уже runnable",
+        "не инвалидируй независимые Tasks/evidence",
         "сам release новый Goal не создаёт",
         "Release-only run Goal не создаёт",
         "`Duplicate` отдельно не\nисполняй",
@@ -391,6 +402,7 @@ def validate_ship_skill(errors: list[str]) -> None:
         "Не деплой UAT после каждой bug/Task",
         "UAT — разрешённый non-production effect",
         "UAT read-back/smoke",
+        "`blocked by` открывает dependent implementation",
         "[title contract](references/thread-title.md)",
         "доказанный catalog placeholder",
         "best-effort",
@@ -800,6 +812,25 @@ REVIEW_CASES = {
         "`Backlog` сохраняется",
         "не начинать implementation",
     ),
+    "Blocking Task реализована и влита в exact integration candidate, но её functional verification пока недоступна": (
+        "implementation gate открыт",
+        "relation и attribution сохранены",
+        "blocking Task остаётся правдиво non-terminal",
+        "включить dependent Task в runnable frontier",
+        "ждать `Done` blocking Task",
+    ),
+    "Изменение blocking Task существует только в writer branch/worktree или подтверждено лишь comment/status": (
+        "dependency gate остаётся закрытым",
+        "fan-in и общий contract не доказаны",
+        "подтвердить exact integration candidate",
+        "считать status/comment/isolated code достаточной",
+    ),
+    "После открытия dependency gate свежий attributed defect blocking Task нарушил contract dependent Task": (
+        "только доказанно затронутые gates",
+        "affected Tasks получают rework по evidence",
+        "перепроверить affected downstream candidates",
+        "массово инвалидировать batch",
+    ),
     "Exact candidate/server path уже доказал authenticated product hang, а другой browser/controller просит новый login или MFA": (
         "verified-failure",
         "browser gap вторичен",
@@ -1034,7 +1065,7 @@ def validate_review_matrix(errors: list[str]) -> None:
 
 def validate_source_layers(errors: list[str]) -> None:
     packages = (
-        (SHIP_REQUIREMENTS, "ST", 25),
+        (SHIP_REQUIREMENTS, "ST", 26),
         (COMPOSER_REQUIREMENTS, "TC", 10),
         (STRATEGIC_REQUIREMENTS, "SE", 14),
     )
@@ -1129,6 +1160,13 @@ def validate_source_layers(errors: list[str]) -> None:
         "`fork_turns=\"none\"`",
         "`critical-codebase-accepted`",
         "Task закрывается по критической проверке кодовой базы",
+        "`blocked by` ограничивает доступность реализации, а не приёмку",
+        "не требует, чтобы блокирующая Task перешла в\n`Done`",
+        "влито в точный общий интеграционный candidate",
+        "зависимая Task автоматически входит в runnable frontier",
+        "может оставаться в `In Progress` или `In Review`",
+        "не закрывают уже открытый dependency gate",
+        "возвращает в rework только доказанно затронутые Tasks",
     )
     forbid(
         errors,
@@ -1187,7 +1225,7 @@ def validate_source_layers(errors: list[str]) -> None:
         (STRATEGIC_SPEC, "SE-*"),
     ):
         if architecture == SPEC:
-            status_marker = "Статус: current Level 2 contract, 2026-08-24"
+            status_marker = "Статус: current Level 2 contract, 2026-08-25"
         elif architecture == STRATEGIC_SPEC:
             status_marker = "Статус: current Level 2 contract, 2026-08-24"
         else:
@@ -1237,6 +1275,8 @@ def validate_source_layers(errors: list[str]) -> None:
         "без повторного approval",
         "Browser switch допустим как диагностика",
         "не как repair",
+        "`blocked by` управляет доступностью реализации",
+        "поздний defect\nинвалидирует только доказанно затронутые downstream results",
     )
     require(
         errors,
@@ -1244,6 +1284,7 @@ def validate_source_layers(errors: list[str]) -> None:
         "[Source model](skills/README.md)",
         "[Requirements](skills/ship-tasks/requirements.md)",
         "[Architecture](skills/ship-tasks/architecture.md)",
+        "[0028: Интегрированная реализация удовлетворяет `blocked by`]",
     )
     require(
         errors,
@@ -1257,7 +1298,7 @@ def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         SPEC,
-        "Статус: current Level 2 contract, 2026-08-24",
+        "Статус: current Level 2 contract, 2026-08-25",
         "`ST-*` в локальных",
         "[требованиях пользователя](requirements.md)",
         "ADR-0018",
@@ -1269,6 +1310,12 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0025",
         "ADR-0026",
         "ADR-0027",
+        "ADR-0028",
+        "### 1.4 Dependency-ready frontier",
+        "`Done` blocking Task в этот gate не входит",
+        "Relation не удаляется",
+        "не возвращает независимые Tasks в rework",
+        "Dependency readiness управляет scheduling, но не release truth",
         "### 7.2 Per-Task gates и периодический UAT batch",
         "один deploy того же exact candidate в verified UAT",
         "standing authority периодического release",
@@ -1356,6 +1403,9 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0025",
         "ADR-0026",
         "ADR-0027",
+        "ADR-0028",
+        "`blocked by` открывает dependent implementation",
+        "late attributed defect инвалидирует",
         "гарантированной adapter capability",
         "каждый создаваемый ShipTask-комментарий",
         "durable Task history",
@@ -1424,6 +1474,9 @@ def validate_current_contract(errors: list[str]) -> None:
         "подтверждение\nразвёртывания с повторным чтением",
         "пробелом доказательств, а не проверенным выпуском",
         "Tasks, закрытые через `critical-codebase-accepted`",
+        "blocking/dependent Task refs",
+        "Открытый implementation gate не выдаётся за upstream acceptance",
+        "materially открытые или повторно закрытые dependency gates",
     )
     require(
         errors,
@@ -1457,6 +1510,10 @@ def validate_current_contract(errors: list[str]) -> None:
         "fresh full inventory без `To Do`/`In Progress`",
         "ровно один fresh-context\ncritic",
         "residual risk остаются видимыми",
+        "Dependency-ready работа",
+        "`blocked by` — structural relation и provenance",
+        "Pending verification/effect сохраняет blocking Task",
+        "Non-terminal upstream status",
     )
     require(
         errors,
@@ -1611,6 +1668,17 @@ def validate_current_contract(errors: list[str]) -> None:
         "отдельный Strategic Explainer",
         "более слабый, но явно маркированный terminal\noutcome",
         "не создаёт external effect",
+    )
+    require(
+        errors,
+        ADR["0028"],
+        "Интегрированная реализация удовлетворяет `blocked by`",
+        "Разделить structural relation, implementation readiness и terminal",
+        "fan-in в integration target",
+        "Не требовать terminal status blocking Task",
+        "Dependent Task может достичь `Done`",
+        "status == Done",
+        "contract attribution",
     )
     for path in (
         ROOT / "AGENTS.md",
@@ -1883,6 +1951,7 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "current Task `version`",
         "native Label catalogs/assignment",
         "relation create получает стабильный idempotency key",
+        "не выводит из status\n  blocking Task business-решение о runnable frontier",
         "Task Manager state доказывает только собственную projection",
         "Native comment create/list/read являются гарантированной частью adapter",
     )
@@ -1949,6 +2018,8 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "адресация только calling task",
         "Type Labels не должны дублироваться в title",
         "legacy-prefixed title участвует в\nduplicate search",
+        "Не вычисляйте dependency-ready frontier по `status == Done`",
+        "blocking Task с влитым в exact integration candidate нужным contract",
     )
 
 
