@@ -447,8 +447,9 @@ Explainer. Отдельное существенное событие может
 редакторская обработка принадлежит provider.
 Пока effective topology rule не отключает comment Explainer, перед публикацией
 отдельный provider получает compact task и resolvable anchors, а возвращает
-готовый text и source basis. Основной агент проверяет только material factual
-conflict и при необходимости исправляет source/anchor для нового clean
+готовый text и отдельно обозначенный source basis. Основной агент публикует
+только text, проверяет material factual conflict по basis и при необходимости
+исправляет source/anchor для нового clean
 invocation; он не читает provider method и не переписывает text. Когда rule
 отключает Explainer, основной агент публикует необходимые lifecycle facts по
 собственному contract без имитации provider. Статус меняется только после
@@ -638,8 +639,8 @@ strategic narrative за Explainer и не передаёт provider-у собс
 ответа. Exact anchors должны лишь разрешать самостоятельный read-only доступ к
 authoritative sources.
 
-Strategic Explainer возвращает готовый text и короткий source basis либо
-operational refusal. ShipTask отвечает за фактическое состояние, status, границы
+Strategic Explainer возвращает готовый text и отдельно обозначенный короткий
+source basis либо operational refusal. ShipTask отвечает за фактическое состояние, status, границы
 задачи, полномочия, способ исправления и итог, поэтому проверяет material claims
 по authoritative sources. Он не получает права оценивать либо улучшать text по
 внутреннему quality checklist provider.
@@ -663,8 +664,8 @@ authoritative state ShipTask создаёт новый clean invocation с ис�
 exact scope и source anchors всего run. Сводный ответ нельзя собирать склейкой
 готовых комментариев или передачей предыдущего draft.
 
-Основной агент публикует готовый text без самостоятельной editorial
-переработки. Полезные ссылки входят в anchors/source basis либо требуют нового
+Основной агент публикует только готовый text без source basis и самостоятельной
+editorial переработки. Полезные ссылки входят в anchors/source basis либо требуют нового
 invocation, а не дописывания narrative caller-ом. Если обязательный для
 комментария Explainer недоступен, действует fail-closed правило выше. Если
 недоступен final provider, ShipTask всё равно сообщает установленные facts и

@@ -8,6 +8,11 @@ publication-ready result. За пределами явного `fork_turns="none
 не оценивает internal headings, tool sequence, число alternatives или совпадение
 с эталонной формулировкой.
 
+Статический validator проверяет только наличие и связность contract. Он не
+доказывает, что модель действительно выделяет суть, убирает воду или пишет
+человеческим языком. Поведенческое изменение проходит реальный model-forward
+gate на свежем provider-subagent.
+
 ## Единица проверки
 
 Evaluator получает invocation metadata/visible context, одну compact task с
@@ -19,6 +24,22 @@ caller reasoning и process diary не передаются. Direct и delegated
 Evaluation разделена на два runtime слоя. Caller/router проверяется только по
 client protocol и не получает provider method. Provider quality cases запускают
 уже admitted fresh subagent, который после admission читает внутренний contract.
+
+## Model-forward gate
+
+До release изменённый provider запускается на realistic raw sources минимум для
+простого success, material failure/blocker и одного сценария, где технический
+след особенно легко перепутать с сообщением. Генерирующий subagent получает
+только compact task и raw read-only anchors: ему не показывают прошлый плохой
+output, diagnosis, intended wording, scorecard или ожидаемый ответ.
+
+Отдельный evaluator получает исходный вопрос, raw facts, готовый publication
+text и source basis. Он проверяет factual coverage и понимание раздельно,
+сравнивает текст с требованиями, а не с эталонной фразой, и сообщает точный
+lost/unsupported fact либо comprehension gap. Проверка считается пройденной
+только если publication text самодостаточен, а verification-only details не
+захватили основной рассказ. Один self-review генерирующего агента этого не
+доказывает.
 
 ## Критические требования
 
@@ -79,6 +100,8 @@ client protocol и не получает provider method. Provider quality cases
 - отсутствие дополнительного source не создаёт false blocker;
 - material conflict или missing mandatory source не сглажен уверенным текстом;
 - source basis достаточно точен для проверки claims.
+- publication text и source basis семантически разделены; caller не должен
+  публиковать доказательный след как продолжение сообщения.
 
 ### State separation
 
@@ -115,9 +138,13 @@ client protocol и не получает provider method. Provider quality cases
   основным агентом;
 - первый слой выражает одну главную причинную мысль и по возможности исчерпывает
   ответ одной фразой; второй содержит только material cause/action/success signal
-  или проверяемую опору;
+  для читателя;
 - глубина discovery не превратилась в перечень прочитанных sources;
 - внутренняя orchestration не выдаётся за пользовательский результат.
+
+Технически точный текст получает `FAIL`, если после удаления SHA, IDs, версий,
+ревизий, внутренних gates и перечня проверок в нём не остаётся понятного ответа:
+что именно получилось или остановилось, почему это важно и что будет дальше.
 
 Для сложного сбоя, нескольких сценариев или сводного отчёта независимый читатель
 видит только исходный вопрос и готовый текст. Он должен своими словами верно
@@ -161,6 +188,8 @@ client protocol и не получает provider method. Provider quality cases
 - Сохранилась ли причинная история после удаления внутренних названий и
   идентификаторов?
 - Можно ли проследить material claims до facts/sources?
+- Не попали ли verification-only details в публикацию вместо отдельного source
+  basis?
 - Не потерян ли факт, который изменил бы решение, risk или action?
 - Различимы ли failure, unknown и not-applicable?
 - Не возникла ли новая authority или просьба без evidence?
@@ -275,6 +304,26 @@ Technical step упал, но calling workflow может безопасно п�
 Problem, relevant intent и current outcome ясны. Explanation остаётся
 пропорциональным, не создаёт action и не расширяет discovery.
 
+### Production regression: завершение MD-325
+
+Генерирующий subagent получает без diagnosis и intended wording raw facts
+закрывающего комментария: загрузка двух локальных файлов разных форматов прошла
+в UAT от выбора до сохранения, скачивания и export; после повторной публикации
+оба файла и revision сохранились; локальный диск доступен только через
+установленный companion и binding; Task пока в `In Review`, comment готовится
+перед переходом в `Done`; production не затрагивался; закрытие задачи снимает
+gate с MD-324. Raw source также содержит product/companion SHA, CI run,
+Sites version, два deployment IDs, mirror SHA, package version, revision/parent,
+manifest hash и file digest suffixes.
+
+`PASS`: publication text называет готовую пользовательскую возможность и
+готовность Task к закрытию без преждевременного claim уже изменённого status,
+наблюдаемый результат повторной проверки, остающуюся границу и последствие для
+MD-324; verification-only identifiers находятся отдельно в source basis.
+`FAIL`: текст сводится к «read-back подтвердил evidence», смешивает русский с
+английским внутренним жаргоном или публикует список SHA/deployments/revisions,
+даже если все значения точны.
+
 ### Гибридный технический черновик
 
 Исходные факты сформулированы на смеси русского и английского внутреннего
@@ -362,5 +411,6 @@ Blind forward test сильнее self-review: агент получает clean
 realistic compact task и raw source anchors без diagnosis прошлого run, intended
 answer или готового factual brief. Отдельные cases передают invalid inherited
 context и ожидают отказ до discovery. Проверяются isolation, самостоятельный
-grounding, уровень ответа, одна главная причинная мысль, независимый пересказ и
-boundaries, а не конкретная tool choreography.
+grounding, уровень ответа, одна главная причинная мысль, разделение publication
+text/source basis, независимый пересказ и boundaries, а не конкретная tool
+choreography.

@@ -30,11 +30,22 @@ evaluations дают локальный design/rationale и evidence, но не 
 
 ## 1. Конституционный принцип
 
-Requirements определяют проблему, качество объяснения, source grounding,
-read-only boundary и отсутствие новой authority. `SE-10` является явным
-исключением из общей свободы orchestration: direct и delegated use проходят один
-stateless API, новый built-in `default` subagent и `fork_turns="none"`; контекст
-допускает одну compact task и resolvable anchors без inherited process state.
+Provider следует одной product instruction: глубоко разберись, но объясни только
+главное. Продукт — понимание читателя, а не отчёт об исследовании; evidence
+подтверждает сообщение, но не заменяет его. Технически правильный, но непонятный
+текст не проходит contract.
+
+В publication text остаётся только то, что меняет понимание проблемы или
+результата, решение, действие, риск либо честную уверенность читателя. Полный
+доказательный след сохраняется отдельно в source basis. Поэтому глубина
+discovery и объём публикации не связаны: сложное исследование может закончиться
+двумя ясными предложениями, а сложная причинная граница может потребовать больше.
+
+Остальные Requirements раскрывают этот принцип, source grounding, read-only
+boundary и отсутствие новой authority. `SE-10` является явным исключением из
+общей свободы orchestration: direct и delegated use проходят один stateless API,
+новый built-in `default` subagent и `fork_turns="none"`; контекст допускает одну
+compact task и resolvable anchors без inherited process state.
 
 За этой границей provider-subagent выбирает tool sequence, форму source note,
 внутренний reasoning, длину и визуальную форму. Caller не знает и не применяет
@@ -56,9 +67,11 @@ comprehension и editorial reconstruction. Так conversation isolation защ�
 не только входные turns, но и разделение знаний: coordinating caller не получает
 метод, ради независимости которого создан provider.
 
-Caller принимает готовый текст и source basis как opaque result. Он проверяет
-material facts по authoritative sources, но не читает provider contract, не
-формирует candidate, не запускает внутренний checklist и не переписывает output.
+Caller принимает publication-ready text и отдельно обозначенный source basis как
+opaque result. Он публикует только text, а basis использует для factual check; не
+смешивает эти части, не читает provider contract, не формирует candidate, не
+запускает внутренний checklist и не переписывает output. Фиксированный envelope
+не требуется, но граница двух частей должна быть однозначной.
 Factual/structural correction всегда получает новый clean invocation. При
 mandatory unavailability caller fail-closed для comment/lifecycle publication и
 честно сообщает capability failure в обязательном final без имитации provider.
@@ -144,7 +157,14 @@ tool calls или количество прочитанных источнико
 
 ## 5. Объяснение
 
-Свободная форма должна дать читателю одну согласованную модель:
+Provider сначала строит private evidence map: current facts, границы знания и
+точные основания. Из неё он отдельно строит reader model — одну причинную мысль
+на уровне исходного вопроса. Publication text создаётся из reader model, а не
+путём сокращения технического отчёта. Source basis создаётся из evidence map уже
+после текста и не возвращается внутрь публикации.
+
+Свободная форма даёт читателю одну согласованную модель. Перечень ниже — возможные
+смысловые измерения, а не обязательные поля ответа:
 
 - какую проблему и для кого решаем;
 - какой strategic intent или constraint определяет смысл;
@@ -158,12 +178,16 @@ tool calls или количество прочитанных источнико
 по возможности исчерпывает ответ одной фразой: что получилось или остановилось и
 почему. Суть обязательна; отсутствие воды, повторов и необязательных деталей —
 второй приоритет. Только после этого короткий второй слой может объяснить
-material cause, нужное действие, success signal или точную техническую опору.
-Глубина discovery не даёт деталям собственного сюжета.
+material cause, нужное действие или success signal. Глубина discovery не даёт
+деталям собственного сюжета. Если удаление фрагмента не меняет reader model,
+decision, action, risk или confidence, этот фрагмент не входит в текст.
 
-Техническая деталь остаётся только когда меняет causal model, outcome,
-impact/risk, action или confidence. Внутренние сущности переводятся в
-человеческие роли; полезный exact term можно сохранить после объяснения.
+Техническая деталь остаётся в тексте только когда меняет causal model, outcome,
+impact/risk, action или confidence читателя. Verification-only identifiers,
+версии, SHA, deployment refs, ревизии, названия внутренних gates и перечни
+проверок остаются в source basis, если читателю не нужно действовать именно с
+ними. Внутренние сущности переводятся в человеческие роли; полезный exact term
+можно сохранить после объяснения.
 Текст пишется на языке пользователя. Английский термин остаётся только когда он
 является точным названием или естественная замена потеряет смысл; русская
 грамматическая рамка с английским смысловым ядром не считается понятным
@@ -175,9 +199,11 @@ tradeoff и success signal. Он не придумывает alternatives рад
 выдаёт рекомендацию за принятое действие или новую authority.
 
 Direct и delegated caller получают один publication-ready result contract.
-Source refs размещаются рядом с claims либо возвращаются коротким source basis,
-чтобы caller мог проверить смысл, факты и provenance. Фиксированный output
-envelope не нужен.
+Готовый текст самодостаточен без source basis. Полезные direct links могут стоять
+рядом с claim, если помогают самому читателю; delegated source refs возвращаются
+после текста отдельной короткой заметкой только для проверки caller-ом.
+Фиксированный output envelope не нужен, но caller не должен принять basis за
+продолжение publication text.
 
 Один invocation обслуживает один самостоятельный user-facing result: Task
 comment/report, material decision/state explanation, blocker report или final.
@@ -205,7 +231,9 @@ subagent; старый candidate не передаётся как framing.
 либо точный пробел понимания. Читатель не исправляет текст, не добавляет факты и
 не принимает решение. При провале Explainer заново строит объяснение из
 авторитетного входа с учётом найденного пробела. Простому однозначному результату
-достаточно той же проверки внутри Explainer, если причинная модель очевидна.
+достаточно той же проверки внутри Explainer, если причинная модель очевидна;
+простота не освобождает его от model-forward regression и не делает технический
+перечень приемлемым.
 
 Фактическая полнота и понятность проверяются раздельно: хороший пересказ не
 компенсирует ошибку в фактах, а формально точный перечень не компенсирует
@@ -275,11 +303,15 @@ subagent; старый candidate не передаётся как framing.
   препятствие, влияние и следующий шаг без process diary;
 - первый слой передаёт одну главную причинную мысль без необязательной воды, а
   второй существует только при material need;
+- publication text самодостаточен, source basis отделён и не опубликован как его
+  продолжение;
 - result пригоден для публикации без стилистической переработки caller-ом;
 - при явной редактуре масштаб правки соответствует состоянию исходника, новая
   структура читается естественно, а обратная проверка подтверждает сохранность
   смыслового ядра без новых решений;
 - source basis и material uncertainty остаются проверяемыми.
 
-Regression scenarios проверяются по observable behavior в
-[evaluation contract](../../reference/strategic-explainer-evaluation.md).
+Regression scenarios проверяются реальным model-forward запуском по observable
+behavior в [evaluation contract](../../reference/strategic-explainer-evaluation.md).
+Статическая проверка текста contract подтверждает только wiring и не является
+доказательством понятности generated result.

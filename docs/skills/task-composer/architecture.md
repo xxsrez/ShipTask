@@ -218,9 +218,11 @@ provider должен анализировать или формулироват
 
 Если Explainer отклоняет invocation, Task Composer исправляет указанную причину
 и создаёт новый clean subagent; follow-up старому экземпляру не используется.
-Готовый text проверяется только на material factual conflict с authoritative
-planning sources. Factual correction также получает новый clean invocation;
-caller не читает internal quality checklist и не улучшает text самостоятельно.
+Готовый text и отдельно обозначенный source basis проверяются только на material
+factual conflict с authoritative planning sources. В Epic description попадает
+только text, а не basis. Factual correction также получает новый clean
+invocation; caller не читает internal quality checklist и не улучшает text
+самостоятельно.
 
 Основной Task Composer остаётся ответственным за factual accuracy, полноту
 coverage и соответствие подготовленной hierarchy. Если Strategic Explainer

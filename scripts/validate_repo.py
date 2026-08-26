@@ -606,6 +606,8 @@ def validate_composer_skill(errors: list[str]) -> None:
 
 
 def validate_strategic_skill(errors: list[str]) -> None:
+    # These markers prove that the constitutional/source-separation wiring is
+    # present. Readability itself requires the model-forward evaluation contract.
     validate_frontmatter(errors, STRATEGIC_SKILL, "strategic-explainer", 240)
     require(
         errors,
@@ -618,7 +620,8 @@ def validate_strategic_skill(errors: list[str]) -> None:
         "одну короткую user-facing задачу",
         "не готовь candidate",
         "требования к форме ответа",
-        "готовый пользовательский текст с кратким source basis либо\n   operational refusal",
+        "готовый пользовательский текст и отдельно обозначенный краткий\n   source basis либо operational refusal",
+        "Публикуй только текст",
         "новый provider-subagent",
         "Если вызов invalid, не читай provider contract",
         "Только после успешного admission полностью прочитай",
@@ -629,12 +632,20 @@ def validate_strategic_skill(errors: list[str]) -> None:
         STRATEGIC_PROVIDER,
         "Внутренний контракт Strategic Explainer",
         "читает только новый provider-subagent",
+        "Глубоко разберись, но объясни только главное",
+        "Твой продукт — понимание читателя",
         "Граница роли",
         "Установи исходный вопрос и факты",
+        "Наблюдаемое ограничение не называй",
+        "Одно наблюдение не обобщай",
+        "source basis их не заменяет",
         "Собери strategic context снизу вверх",
         "current/accepted от proposed и historical",
         "Первый смысловой\nслой выделяет одну главную причинную мысль",
+        "Строй публикацию из reader model",
         "Английские слова не должны нести основную мысль",
+        "Действие формулируй через наблюдаемую операцию человека",
+        "переводи внутренние компоненты в\nописании результата или границы",
         "Проверь понимание",
         "своими словами назвать",
         "Редакторская реконструкция",
@@ -642,7 +653,7 @@ def validate_strategic_skill(errors: list[str]) -> None:
         "Сопоставь новую версию с исходником в обе стороны",
         "не добавляй решение или authority",
         "Completion gate",
-        "готовый текст и короткое\nоснование отдельно",
+        "Не смешивай source basis с publication text",
     )
     text = read(STRATEGIC_SKILL)
     for coupling in ("Task Manager", "TM-123"):
@@ -1364,6 +1375,10 @@ def validate_source_layers(errors: list[str]) -> None:
     require(
         errors,
         STRATEGIC_REQUIREMENTS,
+        "## Конституционное ядро",
+        "Продукт Strategic Explainer —\nпонимание читателя",
+        "Доказательства\nподтверждают сообщение, но не заменяют его",
+        "если читатель не может\nпонять суть",
         "Никакой скрытой управляющей роли",
         "отсутствие проверки не называется\ndefect",
         "контекстный документ не является completion evidence",
@@ -1385,6 +1400,7 @@ def validate_source_layers(errors: list[str]) -> None:
         "Изоляция provider expertise от caller",
         "opaque client protocol",
         "не получает, не читает и не применяет внутренние правила",
+        "Publication text и source basis\nсемантически разделены",
     )
     forbid(
         errors,
@@ -1731,7 +1747,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "нового built-in `default` read-only subagent",
         "одну короткую user-facing задачу",
         "Не читай provider-internal reference",
-        "Готовый пользовательский текст и короткий source basis",
+        "Готовый пользовательский текст и отдельно обозначенный короткий source basis",
         "Caller не использует internal quality checklist",
         "opt-out также не переносит provider method",
         "Reflection до blocker",
@@ -2033,6 +2049,8 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "[требованиях пользователя](requirements.md)",
         "общего skill `$strategic-explainer`",
         "Конституционный принцип",
+        "Продукт — понимание читателя",
+        "publication text остаётся только то",
         "fresh stateless invocation",
         "Fresh API admission",
         "fork_turns=\"none\"",
@@ -2044,6 +2062,9 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Completion criteria",
         "Текст пишется на языке пользователя",
         "publication-ready result contract",
+        "private evidence map",
+        "reader model",
+        "публикует только text",
         "пригоден для публикации",
         "Проверка понимания",
         "первый смысловой слой именно на исходный вопрос",
@@ -2064,6 +2085,7 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Проверяемый source basis",
         "Уровень исходного вопроса",
         "обратным пересказом",
+        "Publication text и source basis — разные продукты",
         "Редакторская реконструкция без потери смысла",
         "Свобода формы не означает свободу содержания",
         "Stateless invocation и publication unit",
@@ -2078,11 +2100,15 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Source state и relevance",
         "Read-only и authority boundary",
         "Human comprehension",
+        "реальный model-forward\ngate",
+        "Один self-review генерирующего агента этого не\nдоказывает",
         "гибридную фразу с английским смысловым ядром",
         "первый смысловой слой прямо отвечает на исходный вопрос",
         "после удаления идентификаторов",
         "независимый читатель",
         "Простой вопрос, перегруженный техническим следом",
+        "Production regression: завершение MD-325",
+        "Task пока в `In Review`",
         "Исходный вопрос потерян внутри частной причины",
         "Сводный отчёт после нескольких технических инцидентов",
         "Независимый читатель не понял причинность",
