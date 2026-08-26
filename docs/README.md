@@ -28,7 +28,7 @@
   Manager workflow: одна Task либо strategic Epic с конкретными подзадачами,
   переносом применимого strategic context в каждую child Task, live Labels,
   hierarchy, semantic relations, `Backlog` и необязательным current Release.
-- `$strategic-explainer`:
+- `$strategic-explainer:strategic-explainer`:
   [Requirements](skills/strategic-explainer/requirements.md),
   [Architecture](skills/strategic-explainer/architecture.md) и
   [product vision](skills/strategic-explainer/product-vision.md) — общий contract
@@ -144,6 +144,9 @@
   — оставляет caller только clean invocation protocol, переносит provider method
   за admission gate fresh subagent и запрещает caller-authored candidate,
   internal checklist и self-fallback.
+- [0031: Strategic Explainer как самостоятельный plugin](decisions/0031-standalone-strategic-explainer-plugin.md)
+  — выносит generic Explainer из ShipTask package в отдельный installable
+  plugin и задаёт fail-closed logical dependency для ShipTask и Task Composer.
 
 ## Reference
 
@@ -170,6 +173,9 @@
 
 ## Reports
 
+- [Strategic Explainer: model-forward evaluation из 20 сценариев](reports/2026-08-26-strategic-explainer-20-case-evaluation.md)
+  — полный fresh-subagent прогон на 10 сценариях ExampleNotes и 10 сценариях Task
+  Manager, найденные дефекты первого кандидата и финальный результат 20/20.
 - [Исследование подходов для Strategic Explainer](reports/2026-08-20-strategic-explainer-research.md)
   — official agent guidance, clear-communication и handoff patterns,
   существующие skills, принятые механизмы, отклонённые альтернативы и

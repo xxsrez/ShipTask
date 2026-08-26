@@ -111,7 +111,9 @@ invocation либо source/anchor нужно исправить, Task Composer �
 
 Task Composer остаётся отдельным planning-only runtime skill внутри
 `ship-tasks@srez-marketplace` и использует отдельно установленный Task Manager
-только как adapter. Он не переносится в adapter plugin, не получает скрытый
+только как adapter. Для `TC-09` он использует отдельно установленный
+`$strategic-explainer:strategic-explainer`; копия provider-а в ShipTask package
+не встраивается. Он не переносится в adapter plugin, не получает скрытый
 delivery lifecycle и не устанавливается standalone user-level duplicate.
 Checked-in runtime source, Marketplace source и installed cache после изменения
 должны быть byte-identical, а plugin-qualified skill проверяется в fresh Codex

@@ -63,6 +63,7 @@ backlog/generic-code cases. Один delivery verb не является trigger
 
 ```bash
 python3 scripts/validate_repo.py
+python3 -B -m unittest discover -s tests -p 'test_*.py'
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
@@ -72,7 +73,11 @@ git diff --check
 
 Repository validator проверяет current contract, trigger matrix, lifecycle
 evaluation, retired loopholes, documentation navigation и distribution
-boundaries. Проверка не должна требовать конкретных необязательных слов или
+boundaries. Unit suite проверяет изоляцию model-forward fixtures: generating
+subagent получает только raw facts, а semantic rubric остаётся у evaluator-а.
+Current Strategic Explainer suite содержит 20 cases поровну из ExampleNotes и Task
+Manager; behavior change прогоняет всю матрицу, а не удобную выборку.
+Проверка не должна требовать конкретных необязательных слов или
 числа tool calls вместо observable behavior. Evals проверяют automatic default,
 сохранение natural-language exact/relative/role/conditional rules,
 writer/worktree isolation и отдельного Strategic Explainer при разрешённой роли,
@@ -191,24 +196,34 @@ Epic до implementation и передать bounded context исполните�
 
 Repository directories `ship-tasks/`, `task-composer/` и
 `strategic-explainer/` — source of truth.
-Единственная runtime-distribution — sibling skills в plugin
-`ship-tasks@srez-marketplace`. Task Manager connector устанавливается отдельно
-как adapter-only `task-manager@srez-marketplace`.
+Runtime-distribution разделена на два независимых plugin:
+`ship-tasks@srez-marketplace` содержит `ship-tasks` и `task-composer`, а
+`strategic-explainer@srez-marketplace` содержит только
+`$strategic-explainer:strategic-explainer`. Task Manager connector
+устанавливается отдельно как adapter-only `task-manager@srez-marketplace`.
+
+Manifest не поддерживает plugin-to-plugin dependency, поэтому ShipTask хранит
+logical fail-closed dependency: когда объяснение обязательно, отсутствие
+Strategic Explainer не разрешает comment/status/Epic write. Старый путь
+`plugins/ship-tasks/skills/strategic-explainer` отсутствует.
 
 При изменении runtime payload:
 
 1. Выполните validations, закоммитьте exact scope и отправьте в `origin/main`;
    проверьте `HEAD == origin/main`.
-2. Синхронизируйте все три marketplace skill directory и проверьте `diff -qr`.
+2. Синхронизируйте `ship-tasks` и `task-composer` в ShipTask plugin, а
+   `strategic-explainer` — в отдельный Strategic Explainer plugin; проверьте
+   каждую пару через `diff -qr`.
 3. Получите marketplace name через `read_marketplace_name.py` и обновите только
    cachebuster через `update_plugin_cachebuster.py`; не меняйте
    numeric version ради reinstall.
 4. Выполните marketplace/plugin tests, commit/push marketplace и переустановите
-   `ship-tasks@srez-marketplace` штатным plugin lifecycle.
+   `ship-tasks@srez-marketplace` и `strategic-explainer@srez-marketplace`
+   штатным plugin lifecycle.
 5. Проверьте quick validation marketplace copies, byte identity installed cache
    и состояние installed/enabled.
 6. В fresh App Server catalog подтвердите `ship-tasks:ship-tasks`,
-   `ship-tasks:task-composer` и `ship-tasks:strategic-explainer`, отсутствие
+   `ship-tasks:task-composer` и `strategic-explainer:strategic-explainer`, отсутствие
    standalone user copies и отсутствие этих skills в adapter-only Task Manager
    plugin.
 

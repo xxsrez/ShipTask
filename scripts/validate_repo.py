@@ -114,6 +114,10 @@ ADR = {
             "0030",
             "0030-opaque-strategic-explainer-provider-boundary.md",
         ),
+        (
+            "0031",
+            "0031-standalone-strategic-explainer-plugin.md",
+        ),
     )
 }
 
@@ -197,6 +201,7 @@ CURRENT_CONTRACT_FILES = (
     ADR["0027"],
     ADR["0028"],
     ADR["0029"],
+    ADR["0031"],
     ADAPTER,
     CRITICAL_REVIEW,
 )
@@ -359,7 +364,7 @@ def validate_ship_skill(errors: list[str]) -> None:
         "каждые 10 минут",
         "краткий перечень существенных инцидентов",
         "Материальные `blocked by` gates отчитай отдельно",
-        "$ship-tasks:strategic-explainer",
+        "$strategic-explainer:strategic-explainer",
         "Canonical `Backlog` не входит в delivery inventory",
         "closed selectors",
         "live selectors",
@@ -499,7 +504,7 @@ def validate_composer_skill(errors: list[str]) -> None:
         "current unreleased Release",
         "bounded duplicate search",
         "Не создавай Epic с одной формальной подзадачей",
-        "$ship-tasks:strategic-explainer",
+        "$strategic-explainer:strategic-explainer",
         "не создавай Epic; single Task",
         "secret store",
         "live active catalog",
@@ -556,7 +561,7 @@ def validate_composer_skill(errors: list[str]) -> None:
         "Стратегическая преемственность",
         "одной ссылки недостаточно",
         "не разрешает выполнять\nсоседние подзадачи",
-        "$ship-tasks:strategic-explainer",
+        "$strategic-explainer:strategic-explainer",
         "создание Epic не начинается; single Task",
         "не secret value",
         "Создание нового Label не разрешено",
@@ -599,7 +604,6 @@ def validate_composer_skill(errors: list[str]) -> None:
         "Task Composer как planning sibling-skill",
         "ship-tasks@srez-marketplace",
         "planning-only",
-        "$ship-tasks:strategic-explainer",
         "current или explicit Release",
         "Task Manager plugin остаётся adapter-only",
     )
@@ -672,7 +676,7 @@ def validate_strategic_skill(errors: list[str]) -> None:
         STRATEGIC_METADATA,
         'display_name: "Strategic Explainer"',
         'short_description: "Передать объяснение отдельному чистому субагенту"',
-        "$strategic-explainer",
+        "$strategic-explainer:strategic-explainer",
         "router",
         "fork_turns=none",
         "одну короткую user-facing задачу",
@@ -1486,6 +1490,7 @@ def validate_source_layers(errors: list[str]) -> None:
         "[Architecture](skills/ship-tasks/architecture.md)",
         "[0028: Интегрированная реализация удовлетворяет `blocked by`]",
         "[0029: Fresh Strategic Explainer и reflection до blocker]",
+        "[0031: Strategic Explainer как самостоятельный plugin]",
     )
     require(
         errors,
@@ -1513,7 +1518,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0027",
         "ADR-0028",
         "ADR-0029",
-        "ADR-0029",
+        "ADR-0031",
         "### 1.4 Dependency-ready frontier",
         "`Done` blocking Task в этот gate не входит",
         "Relation не удаляется",
@@ -1657,6 +1662,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "transition не завершён",
         "всегда создаёт и перечитывает обязательный comment",
         "Пока effective topology rule не отключает comment Explainer",
+        "$strategic-explainer:strategic-explainer",
         "Когда user rule отключает Explainer",
         "Обычный старт `To Do → In Progress` комментария не создаёт",
         "До repair немедленно сообщить incident",
@@ -1743,6 +1749,7 @@ def validate_current_contract(errors: list[str]) -> None:
         errors,
         HANDOFF,
         "Opaque client protocol Strategic Explainer",
+        "$strategic-explainer:strategic-explainer",
         "Внутренняя expertise принадлежит\nprovider-subagent",
         "нового built-in `default` read-only subagent",
         "одну короткую user-facing задачу",
@@ -2211,8 +2218,23 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "task-manager@srez-marketplace",
         "adapter skill `task-manager`",
         "skills/task-composer",
-        "skills/strategic-explainer",
         "fresh Codex session",
+    )
+    require(
+        errors,
+        ADR["0031"],
+        "Strategic Explainer как самостоятельный plugin",
+        "Изменяет distribution-часть",
+        "strategic-explainer@srez-marketplace",
+        "$strategic-explainer:strategic-explainer",
+        "ship-tasks@srez-marketplace` содержит только `ship-tasks` и\n  `task-composer`",
+        "provider contract в этот package не копируется",
+        "logical runtime\n  dependency",
+        "не поддерживает\nplugin-to-plugin dependency",
+        "fail-closed",
+        "repository validator запрещает `skills/strategic-explainer` внутри\n  `plugins/ship-tasks`",
+        "fresh Codex session видит `$strategic-explainer:strategic-explainer`",
+        "не\n  видит прежний `$ship-tasks:strategic-explainer`",
     )
     require(
         errors,
@@ -2224,6 +2246,11 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "installed/enabled",
         "Standalone user-level каталоги",
         "~/.codex/skills/task-composer",
+        "Два Marketplace package",
+        "Srez Marketplace/plugins/strategic-explainer/skills/strategic-explainer",
+        "Srez Marketplace/plugins/ship-tasks/skills/strategic-explainer` отсутствует",
+        "strategic-explainer@srez-marketplace",
+        "$strategic-explainer:strategic-explainer` как fail-closed logical dependency",
         "task-manager@srez-marketplace` остаётся adapter-only",
         "каждый комментарий проходит\n  отдельного независимого Strategic Explainer",
         "`To Do → In Progress` комментария не создаёт",
@@ -2239,6 +2266,111 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "catalog placeholder при доступной host title capability",
         "best-effort попытку `ShipTask · ...`",
         "ambiguous candidate не\n  переименовываются",
+    )
+    require(
+        errors,
+        ROOT / "README.md",
+        "Runtime публикуется двумя независимыми plugin",
+        "ship-tasks@srez-marketplace`\nсодержит ShipTask и Task Composer",
+        "strategic-explainer@srez-marketplace` — только общий Strategic Explainer",
+        "Codex manifest не умеет автоматически\nустанавливать plugin dependency",
+        "$strategic-explainer:strategic-explainer",
+        "Каждый repository source\nсверяется со своим Marketplace package и installed plugin cache",
+    )
+    require(
+        errors,
+        DEVELOPMENT,
+        "два независимых plugin",
+        "ship-tasks@srez-marketplace",
+        "strategic-explainer@srez-marketplace",
+        "$strategic-explainer:strategic-explainer",
+        "plugin-to-plugin dependency",
+        "fail-closed",
+        "plugins/ship-tasks/skills/strategic-explainer",
+        "отсутствует",
+    )
+    require(
+        errors,
+        SHIP_REQUIREMENTS,
+        "strategic-explainer@srez-marketplace",
+        "$strategic-explainer:strategic-explainer",
+        "ShipTask не содержит его копию",
+        "не поддерживает нативную plugin-to-plugin dependency",
+        "capability failure",
+    )
+    require(
+        errors,
+        SPEC,
+        "ShipTask package не содержит Strategic Explainer runtime",
+        "$strategic-explainer:strategic-explainer",
+        "fail-closed",
+        "не self-fallback или встроенную копию",
+    )
+    require(
+        errors,
+        COMPOSER_REQUIREMENTS,
+        "$strategic-explainer:strategic-explainer",
+        "копия provider-а в ShipTask package\nне встраивается",
+        "plugin-qualified skill проверяется в fresh Codex\nsession",
+    )
+    require(
+        errors,
+        COMPOSER_SPEC,
+        "ADR-0031",
+        "$strategic-explainer:strategic-explainer",
+        "отдельно установленного",
+    )
+    require(
+        errors,
+        STRATEGIC_REQUIREMENTS,
+        "самостоятельный plugin\n`strategic-explainer@srez-marketplace`",
+        "$strategic-explainer:strategic-explainer",
+        "не встраивается в\n`ship-tasks@srez-marketplace`",
+    )
+    require(
+        errors,
+        STRATEGIC_SPEC,
+        "ADR-0031",
+        "strategic-explainer@srez-marketplace` содержит только source\n`strategic-explainer/`",
+        "strategic-explainer:strategic-explainer",
+        "не получают provider reference в собственный plugin",
+    )
+
+    current_distribution_files = (
+        ROOT / "AGENTS.md",
+        ROOT / "README.md",
+        DEVELOPMENT,
+        SHIP_SKILL,
+        SHIP_METADATA,
+        COMPOSER_SKILL,
+        COMPOSER_METADATA,
+        STRATEGIC_SKILL,
+        STRATEGIC_METADATA,
+        SHIP_REQUIREMENTS,
+        SPEC,
+        COMPOSER_REQUIREMENTS,
+        COMPOSER_SPEC,
+        STRATEGIC_REQUIREMENTS,
+        STRATEGIC_SPEC,
+        OVERVIEW,
+        STRATEGIC_EVALUATION,
+        COMPOSER_EVALUATION,
+        REVIEW_MATRIX,
+        REPORT,
+        RUN_REPORT,
+        AUTONOMY,
+        MEMORY,
+        HANDOFF,
+        CRITICAL_REVIEW,
+    )
+    for path in current_distribution_files:
+        forbid(errors, path, "$ship-tasks:strategic-explainer")
+
+    forbid(
+        errors,
+        DEVELOPMENT,
+        "Единственная runtime-distribution — sibling skills в plugin\n`ship-tasks@srez-marketplace`",
+        "Синхронизируйте все три marketplace skill directory",
     )
     require(
         errors,
@@ -2297,6 +2429,7 @@ def current_task_source_files() -> tuple[Path, ...]:
         ADR["0025"],
         ADR["0026"],
         ADR["0030"],
+        ADR["0031"],
     )
 
 

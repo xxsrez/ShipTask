@@ -1,7 +1,9 @@
 # 0012. Strategic Explainer как переносимая роль свежего субагента
 
-Статус: partially superseded, 2026-08-26. Plugin distribution и общая read-only
-роль сохраняются. [ADR-0022](0022-mandatory-independent-strategic-explainer-for-comments.md)
+Статус: partially superseded, 2026-08-26. Общая read-only роль сохраняется, а
+прежняя совместная plugin distribution заменена
+[ADR-0031](0031-standalone-strategic-explainer-plugin.md).
+[ADR-0022](0022-mandatory-independent-strategic-explainer-for-comments.md)
 восстанавливает отдельного независимого субагента для всех комментариев
 ShipTask, а current fresh-subagent/fork/context contract заново определён
 [ADR-0029](0029-fresh-strategic-explainer-and-blocker-reflection.md). ShipTask invocation policy расширена

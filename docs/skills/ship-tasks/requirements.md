@@ -452,7 +452,17 @@ worktree, ShipTask по возможности безопасно восстан
 
 ShipTask распространяется только как отдельный `plugin`
 `ship-tasks@srez-marketplace`. Коннектор Task Manager устанавливается отдельно
-и остаётся `adapter-only plugin` без правил выполнения.
+и остаётся `adapter-only plugin` без правил выполнения. Strategic Explainer
+также устанавливается отдельным plugin
+`strategic-explainer@srez-marketplace`; ShipTask не содержит его копию и
+вызывает plugin-qualified skill `$strategic-explainer:strategic-explainer` как
+обязательную logical dependency по `ST-07`.
+
+Current Codex manifest не поддерживает нативную plugin-to-plugin dependency или
+автоматическую установку второго plugin. Поэтому отсутствие Strategic
+Explainer обрабатывается как уже определённая в `ST-07` capability failure:
+зависящие comment/lifecycle effect не выполняются и не имитируются, а
+независимая безопасная работа может продолжаться.
 
 После любого изменения поведения runtime-исходник в репозитории, исходник в
 Marketplace и установленная копия должны быть побайтно идентичны. Отдельные

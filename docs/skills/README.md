@@ -89,6 +89,6 @@ level, однако plugin packaging не объединяет source contracts 
   [Architecture](ship-tasks/architecture.md).
 - [`$ship-tasks:task-composer`](task-composer/requirements.md) —
   [Architecture](task-composer/architecture.md).
-- [`$strategic-explainer`](strategic-explainer/requirements.md) —
+- [`$strategic-explainer:strategic-explainer`](strategic-explainer/requirements.md) —
   [Architecture](strategic-explainer/architecture.md) и
   [product vision](strategic-explainer/product-vision.md).

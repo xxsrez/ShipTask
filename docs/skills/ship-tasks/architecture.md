@@ -14,6 +14,8 @@ reporting contract уточнён
 [ADR-0022](../../decisions/0022-mandatory-independent-strategic-explainer-for-comments.md),
 а clean stateless API и blocker reflection —
 [ADR-0029](../../decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md),
+а отдельная distribution и logical dependency Strategic Explainer —
+[ADR-0031](../../decisions/0031-standalone-strategic-explainer-plugin.md),
 а automatic default, natural-language topology rules и writer/worktree isolation —
 [ADR-0024](../../decisions/0024-adaptive-multi-agent-execution-by-default.md), а
 cost-aware выбор профиля субагента и обязательная эскалация Luna —
@@ -58,6 +60,12 @@ critic может дать более слабый `critical-codebase-accepted` 
 candidate с обязательным честным comment. Marketplace source и installed cache —
 отдельный distribution step: локальная компиляция сама по себе не доказывает,
 что новый runtime уже released или загружен fresh Codex session.
+
+ShipTask package не содержит Strategic Explainer runtime. Для обязательных
+publication units caller вызывает отдельно установленный qualified skill
+`$strategic-explainer:strategic-explainer`. Manifest не умеет автоматически
+устанавливать plugin dependency, поэтому отсутствие capability проходит
+существующую fail-closed ветвь `ST-07`, а не self-fallback или встроенную копию.
 
 `blocked by` в этой компиляции открывает downstream implementation после
 подтверждённого fan-in нужного upstream contract в exact integration candidate,

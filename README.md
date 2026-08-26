@@ -67,7 +67,7 @@ Manager adapter и всегда используются для material lifecyc
 capability не блокируют delivery.
 
 Каждый комментарий, который создаёт ShipTask, до публикации проходит отдельного
-независимого `$ship-tasks:strategic-explainer`, пока effective user topology rule
+независимого `$strategic-explainer:strategic-explainer`, пока effective user topology rule
 не отключило эту роль. Каждый Task/scope report, blocker explanation и final
 также является отдельным publication unit. Caller знает только opaque protocol:
 новый clean subagent, одна короткая задача, exact scope и resolvable read-only
@@ -102,7 +102,7 @@ independent reflection input и заново проверяет safe frontier. �
 самостоятельно устраняет доступные проблемы внутри выбранной работы и только
 затем передаёт final publication unit отдельному Strategic Explainer.
 Пока effective topology rule не отключает comment Explainer, каждый комментарий
-ShipTask проходит отдельного `$ship-tasks:strategic-explainer`. Основной агент
+ShipTask проходит отдельного `$strategic-explainer:strategic-explainer`. Основной агент
 знает только client protocol, проверяет material facts и не переписывает ready
 text. Если правило отключает Explainer, caller сообщает обязательные lifecycle
 facts по собственному contract без provider method. Explainer не выбирает
@@ -155,6 +155,7 @@ context в каждой child Task. При delivery ShipTask перечитыв�
 
 ```bash
 python3 scripts/validate_repo.py
+python3 -B -m unittest discover -s tests -p 'test_*.py'
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
@@ -162,13 +163,15 @@ ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```
 
-Единственная runtime-дистрибуция трёх sibling-skills — отдельный plugin
-`ship-tasks@srez-marketplace`. Task Manager connector устанавливается отдельно
-как adapter-only `task-manager@srez-marketplace`; ShipTask в его package не
-входит. Standalone каталоги `~/.codex/skills/ship-tasks`,
-`~/.codex/skills/task-composer` и
+Runtime публикуется двумя независимыми plugin: `ship-tasks@srez-marketplace`
+содержит ShipTask и Task Composer, а
+`strategic-explainer@srez-marketplace` — только общий Strategic Explainer.
+Task Manager connector устанавливается отдельно как adapter-only
+`task-manager@srez-marketplace`. Codex manifest не умеет автоматически
+устанавливать plugin dependency, поэтому ShipTask и Task Composer fail-closed
+используют отдельно установленный
+`$strategic-explainer:strategic-explainer`. Standalone каталоги
+`~/.codex/skills/ship-tasks`, `~/.codex/skills/task-composer` и
 `~/.codex/skills/strategic-explainer` не устанавливаются: они создают вторые
-logical skills рядом с plugin-qualified `ship-tasks:ship-tasks` и
-`ship-tasks:task-composer`/`ship-tasks:strategic-explainer`. Repository sources
-публикуются через один marketplace package и сверяются с installed plugin
-cache.
+logical skills рядом с plugin-qualified runtime. Каждый repository source
+сверяется со своим Marketplace package и installed plugin cache.

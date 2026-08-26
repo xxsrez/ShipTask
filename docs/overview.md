@@ -51,6 +51,9 @@ acceptance закреплено
 Fresh clean Strategic Explainer API и обязательная reflection-проверка safe
 frontier до окончательного blocker claim закреплены
 [ADR-0029](decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md).
+Самостоятельная Marketplace-поставка Strategic Explainer и logical fail-closed
+dependency ShipTask закреплены
+[ADR-0031](decisions/0031-standalone-strategic-explainer-plugin.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
 результатов и жёстких границ. Агент свободен выбирать порядок, инструменты,
 реализацию, декомпозицию и число попыток; delegation следует явной политике

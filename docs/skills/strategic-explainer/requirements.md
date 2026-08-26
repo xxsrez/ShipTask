@@ -172,12 +172,14 @@ boundary или next state.
 Strategic Explainer остаётся generic и пригодным для direct и delegated use вне
 ShipTask: он не зашивает Task Manager, tracker lifecycle, project-specific
 commands или право управлять calling workflow. В этом repository он
-распространяется как sibling `ship-tasks:strategic-explainer` внутри
-`ship-tasks@srez-marketplace`, не переносится в Task Manager adapter plugin и не
-устанавливается standalone user-level duplicate. Packaging не меняет его
-generic runtime boundary; checked-in runtime source, Marketplace source и
-installed cache после изменения остаются byte-identical и проверяются в fresh
-Codex session.
+распространяется как самостоятельный plugin
+`strategic-explainer@srez-marketplace` с plugin-qualified skill
+`$strategic-explainer:strategic-explainer`. Он не встраивается в
+`ship-tasks@srez-marketplace`, Task Manager adapter plugin или другой package и
+не устанавливается standalone user-level duplicate. Packaging не меняет его
+generic runtime boundary; checked-in runtime source, отдельный Marketplace
+source и installed cache после изменения остаются byte-identical и проверяются
+в fresh Codex session.
 
 ### `SE-13` — Редакторская реконструкция без потери смысла
 

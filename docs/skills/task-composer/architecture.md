@@ -5,7 +5,9 @@
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Архитектурная роль
 и distribution зафиксированы в
-[ADR-0023](../../decisions/0023-task-composer-as-planning-sibling.md).
+[ADR-0023](../../decisions/0023-task-composer-as-planning-sibling.md), а
+отдельная dependency Strategic Explainer — в
+[ADR-0031](../../decisions/0031-standalone-strategic-explainer-plugin.md).
 
 ## 0. Compilation contract
 
@@ -206,7 +208,8 @@ Epic и child остаётся явным и требует исправлени
 ## 5. Strategic Explainer
 
 Перед созданием каждого Epic его problem-first описание составляется с помощью
-sibling `$ship-tasks:strategic-explainer`. Каждый Epic description является
+отдельно установленного `$strategic-explainer:strategic-explainer`. Каждый Epic
+description является
 отдельным publication unit: Task Composer создаёт новый built-in `default`
 subagent с `fork_turns="none"` и передаёт одну compact task, exact planning scope
 и resolvable read-only anchors. Унаследованный диалог, tool transcript, process

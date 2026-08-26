@@ -13,6 +13,12 @@ publication-ready result. За пределами явного `fork_turns="none
 человеческим языком. Поведенческое изменение проходит реальный model-forward
 gate на свежем provider-subagent.
 
+Реалистичные blind fixtures и их отдельные semantic rubrics находятся в
+[model-forward test suite](../../tests/strategic-explainer/README.md). Generator
+читает только `facts.md`; rubric доступен лишь evaluator-у. Fixtures проверяют
+оба симметричных провала: технический trace вместо сообщения и слишком пустое
+«всё проверили, всё работает», из которого нельзя восстановить acceptance.
+
 ## Единица проверки
 
 Evaluator получает invocation metadata/visible context, одну compact task с
@@ -27,19 +33,35 @@ client protocol и не получает provider method. Provider quality cases
 
 ## Model-forward gate
 
-До release изменённый provider запускается на realistic raw sources минимум для
-простого success, material failure/blocker и одного сценария, где технический
-след особенно легко перепутать с сообщением. Генерирующий subagent получает
-только compact task и raw read-only anchors: ему не показывают прошлый плохой
-output, diagnosis, intended wording, scorecard или ожидаемый ответ.
+До release изменённый provider запускается на всей current regression suite из
+20 realistic raw-source cases: десять основаны на ExampleNotes и десять на Task
+Manager. Матрица покрывает success, expected boundary, partial result,
+material failure/blocker, permission denial, stale conflict, atomic rollback и
+сценарии, где технический след особенно легко перепутать с сообщением.
+Генерирующий subagent получает только compact task и raw read-only anchors: ему
+не показывают прошлый плохой output, diagnosis, intended wording, scorecard или
+ожидаемый ответ.
 
-Отдельный evaluator получает исходный вопрос, raw facts, готовый publication
-text и source basis. Он проверяет factual coverage и понимание раздельно,
+Отдельный fresh evaluator для каждого case получает исходный вопрос, raw facts,
+готовый publication text и source basis. Он проверяет factual coverage и понимание раздельно,
 сравнивает текст с требованиями, а не с эталонной фразой, и сообщает точный
 lost/unsupported fact либо comprehension gap. Проверка считается пройденной
 только если publication text самодостаточен, а verification-only details не
 захватили основной рассказ. Один self-review генерирующего агента этого не
 доказывает.
+
+Общий semantic gate применяется ко всем cases и отдельно получает `FAIL` за
+русский текст, в котором причинность или граница результата собраны из цепочки
+необязательных английских внутренних терминов. Точное имя, статус, формат или
+элемент интерфейса допустимы только когда они нужны читателю для навигации или
+действия; source basis этим ограничением не обрезается.
+
+Для completion/rework comment evaluator отдельно отвечает, может ли читатель
+назвать materially different пользовательские сценарии, значимый input или
+границу и наблюдаемый result каждого. Пользовательские факты приёмки не считаются
+verification-only шумом: их нельзя удалить вместе с SHA, deployments и прочим
+audit trail. Общая фраза о готовой возможности получает `FAIL`, если raw facts
+позволяли конкретно сказать, что именно проверено.
 
 ## Критические требования
 

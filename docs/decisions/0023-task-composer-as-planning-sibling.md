@@ -1,9 +1,12 @@
 # 0023. Task Composer как planning sibling-skill
 
-Статус: accepted, 2026-08-22. Расширяет состав отдельного
+Статус: accepted, 2026-08-22. Первоначально расширял состав отдельного
 `ship-tasks@srez-marketplace`, первоначально заданный
 [ADR-0011](0011-separate-shiptask-plugin-distribution.md) и
-[ADR-0012](0012-strategic-explainer-as-portable-subagent-role.md).
+[ADR-0012](0012-strategic-explainer-as-portable-subagent-role.md). Совместная
+упаковка Strategic Explainer заменена
+[ADR-0031](0031-standalone-strategic-explainer-plugin.md); Task Composer остаётся
+в ShipTask plugin.
 
 ## Контекст
 

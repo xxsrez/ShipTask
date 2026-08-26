@@ -7,7 +7,9 @@ current архитектуру достижения и не может осла�
 bounded discovery принято в
 [ADR-0014](../../decisions/0014-problem-first-bounded-strategic-discovery.md), а
 fresh stateless invocation и blocker reflection — в
-[ADR-0029](../../decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md).
+[ADR-0029](../../decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md),
+а самостоятельная plugin distribution — в
+[ADR-0031](../../decisions/0031-standalone-strategic-explainer-plugin.md).
 
 Продуктовая архитектура раскрыта в
 [стратегическом видении](product-vision.md). Эта architecture описывает
@@ -27,6 +29,12 @@ routing/admission layer `strategic-explainer/SKILL.md` и внутреннего
 эквивалентными по наблюдаемому поведению. `product-vision.md`, ADR, reports и
 evaluations дают локальный design/rationale и evidence, но не становятся
 параллельным current contract.
+
+Marketplace компилирует этот package отдельно от ShipTask:
+`strategic-explainer@srez-marketplace` содержит только source
+`strategic-explainer/` и регистрирует qualified skill
+`strategic-explainer:strategic-explainer`. ShipTask и Task Composer остаются
+внешними callers и не получают provider reference в собственный plugin.
 
 ## 1. Конституционный принцип
 
@@ -163,6 +171,21 @@ Provider сначала строит private evidence map: current facts, гра
 путём сокращения технического отчёта. Source basis создаётся из evidence map уже
 после текста и не возвращается внутрь публикации.
 
+Когда исходные основания содержат несколько materially distinct пользовательских
+сценариев, evidence map включает внутреннюю scenario coverage map. Для каждого
+такого сценария она сохраняет проверяемый input или boundary, наблюдаемый result
+и относящийся к нему state/impact. Для end-to-end acceptance scenario карта
+также сохраняет минимальную пользовательскую цепочку materially checked
+переходов или действий, образующих заявленный outcome, а не только последний
+result: позднее наблюдение не заменяет более ранний существенный шаг, если целью
+является весь путь. Audit-only шаги в эту цепочку не входят, пока не меняют
+понимание, решение, риск или уверенность читателя. При построении reader model
+сценарии можно объединить только когда эти элементы, существенная цепочка и
+вывод для читателя действительно эквивалентны; общая формулировка не должна
+поглощать отличающуюся границу, исключение, шаг или результат. Это контроль
+смыслового покрытия, а не обязательная структура, заголовки, полная process
+chronology или checklist публикации.
+
 Свободная форма даёт читателю одну согласованную модель. Перечень ниже — возможные
 смысловые измерения, а не обязательные поля ответа:
 
@@ -238,6 +261,15 @@ subagent; старый candidate не передаётся как framing.
 Фактическая полнота и понятность проверяются раздельно: хороший пересказ не
 компенсирует ошибку в фактах, а формально точный перечень не компенсирует
 непонятное объяснение.
+
+При наличии scenario coverage map Explainer перед возвратом сверяет с ней
+publication text: из естественной формулировки должны восстанавливаться input
+или boundary, наблюдаемый result и state/impact каждого materially distinct
+сценария, а для заявленного end-to-end outcome — минимальная цепочка его
+существенных пользовательских переходов или действий. Эти элементы можно
+передать одной фразой или свободной структурой, если различия и этапы результата
+не потеряны; наличие полного source basis или позднего наблюдаемого результата
+не компенсирует их исчезновение из пользовательского объяснения.
 
 ## 7. Редакторская реконструкция
 
@@ -315,3 +347,19 @@ Regression scenarios проверяются реальным model-forward за�
 behavior в [evaluation contract](../../reference/strategic-explainer-evaluation.md).
 Статическая проверка текста contract подтверждает только wiring и не является
 доказательством понятности generated result.
+
+Перед completion provider делает отдельный language-normalization pass только
+по publication body. Он оставляет латиницу лишь для точного имени, статуса,
+формата или элемента интерфейса, который читателю действительно нужно найти или
+выбрать; внутренние названия причин, границ и проверок переводятся обычными
+словами. Этот pass не задаёт шаблон, длину или список обязательных полей и не
+касается отдельно возвращаемого source basis.
+
+После нормализации языка provider делает audit-redaction pass: сравнивает
+publication body с raw facts и по умолчанию выносит служебные Task refs, SHA,
+run/deployment/request IDs, версии, ревизии, retry keys и внутренние номера в
+source basis независимо от исходного раздела fixture. Исключение остаётся только
+для точного значения, нужного самому читателю для различения materially distinct
+сценария, навигации или действия. Это сохраняет конкретные пользовательские
+размеры, имена файлов и видимые статусы, но не превращает их в техническую
+квитанцию.

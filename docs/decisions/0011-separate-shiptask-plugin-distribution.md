@@ -2,7 +2,9 @@
 
 Статус: accepted. Дата: 2026-08-18. Первоначальное ограничение состава plugin
 изменено [ADR-0012](0012-strategic-explainer-as-portable-subagent-role.md) и
-[ADR-0023](0023-task-composer-as-planning-sibling.md).
+[ADR-0023](0023-task-composer-as-planning-sibling.md), а distribution Strategic
+Explainer вынесена отдельно в
+[ADR-0031](0031-standalone-strategic-explainer-plugin.md).
 
 Заменяет [ADR-0008](0008-plugin-only-runtime-distribution.md).
 

@@ -92,10 +92,15 @@ manifest/install/byte-identity правила остаются repository-level 
 - Каждый локальный `architecture.md` описывает один current workflow. Не
   создавайте параллельные поколения или альтернативные Requirements/
   Architecture одного runtime skill.
-- Распространяйте все три runtime skills только через отдельный plugin
-  `ship-tasks@srez-marketplace`. Task Manager connector устанавливается
+- Распространяйте ShipTask и Task Composer через plugin
+  `ship-tasks@srez-marketplace`, а Strategic Explainer — только через отдельный
+  `strategic-explainer@srez-marketplace`. Task Manager connector устанавливается
   отдельно как adapter-only `task-manager@srez-marketplace`; не помещайте
-  ShipTask внутрь его package. Не создавайте и не синхронизируйте
+  ShipTask или Strategic Explainer внутрь его package и не встраивайте
+  Strategic Explainer обратно в ShipTask package. Codex manifest не поддерживает
+  plugin-to-plugin dependency: ShipTask и Task Composer используют
+  `$strategic-explainer:strategic-explainer` как fail-closed logical dependency.
+  Не создавайте и не синхронизируйте
   standalone user-level копии `~/.codex/skills/ship-tasks`,
   `~/.codex/skills/task-composer` и
   `~/.codex/skills/strategic-explainer`.
@@ -160,15 +165,18 @@ manifest/install/byte-identity правила остаются repository-level 
 1. Exact repository scope закоммичен в этом репозитории.
 2. Этот commit запушен в `origin/main`, а local `HEAD` совпадает с
    `origin/main`.
-3. Отдельный Marketplace package является единственной runtime-дистрибуцией:
+3. Два Marketplace package являются единственной runtime-дистрибуцией:
    `Srez Marketplace/plugins/ship-tasks/skills/ship-tasks`,
    `Srez Marketplace/plugins/ship-tasks/skills/task-composer` и
-   `Srez Marketplace/plugins/ship-tasks/skills/strategic-explainer`
-   byte-identical соответствующим repository sources, а installed cache
-   byte-identical marketplace source и отображается installed/enabled. Если
+   `Srez Marketplace/plugins/strategic-explainer/skills/strategic-explainer`
+   byte-identical соответствующим repository sources; каталог
+   `Srez Marketplace/plugins/ship-tasks/skills/strategic-explainer` отсутствует.
+   Installed cache каждого package byte-identical marketplace source и оба
+   plugin отображаются installed/enabled. Если
    изменился runtime payload, manifest version или cachebuster обновлён,
-   соответствующий marketplace commit запушен в `origin/main`, а plugin переустановлен из
-   `ship-tasks@srez-marketplace`. Отдельно установленный
+   соответствующий marketplace commit запушен в `origin/main`, а затронутые
+   plugin переустановлены из `ship-tasks@srez-marketplace` и/или
+   `strategic-explainer@srez-marketplace`. Отдельно установленный
    `task-manager@srez-marketplace` остаётся adapter-only и не содержит
    `skills/ship-tasks`, `skills/task-composer` или
    `skills/strategic-explainer`.
@@ -190,6 +198,7 @@ Plugin-managed marketplace snapshot и installed cache являются внут
 
 ```bash
 python3 scripts/validate_repo.py
+python3 -B -m unittest discover -s tests -p 'test_*.py'
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
