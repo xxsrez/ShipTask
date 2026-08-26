@@ -1,6 +1,6 @@
 # 0022. Каждый комментарий ShipTask проходит независимый Strategic Explainer
 
-Статус: partially superseded, 2026-08-22. Частично заменяет
+Статус: partially superseded, 2026-08-26. Частично заменяет
 [ADR-0021](0021-requirements-as-agent-constitution.md): свобода выбора способа
 работы сохраняется, но отдельная смысловая проверка каждого комментария
 ShipTask является явным пользовательским требованием, а не необязательной
@@ -9,7 +9,9 @@ ShipTask является явным пользовательским требо
 жёсткого формата передачи контекста и служебных протоколов. Применимое
 natural-language topology rule из
 [ADR-0024](0024-adaptive-multi-agent-execution-by-default.md) может явно
-отключить всех субагентов или только comment Explainer.
+отключить всех субагентов или только comment Explainer. Current clean invocation,
+publication-unit и blocker-reflection mechanics определены
+[ADR-0029](0029-fresh-strategic-explainer-and-blocker-reflection.md).
 
 ## Контекст
 

@@ -30,8 +30,11 @@ skill. В [`docs/skills/<skill>/`](docs/skills/README.md) у каждого skil
 
 Current requirements являются конституцией для агентов: они задают outcome,
 rationale, observable evidence и authority/safety boundaries, но оставляют
-агенту план, декомпозицию, инструменты, число попыток и форму context. Явное
-исключение — execution topology: без явного user rule ShipTask сам решает, где
+агенту план, декомпозицию, инструменты и внутренний reasoning. Явное исключение —
+fresh stateless invocation Strategic Explainer API. Каждый user-facing publication
+unit получает fresh built-in `default` subagent с `fork_turns="none"`, одной compact task и без
+inherited process context. Другое исключение — execution topology: без явного
+user rule ShipTask сам решает, где
 субагенты дают реальную пользу, сохраняя одного integration owner. Пользователь
 может свободным языком задать exact/relative count, role scope, общий или узкий
 запрет и условие вроде «используй субагентов только для работы дольше получаса»;
@@ -65,6 +68,9 @@ capability не блокируют delivery.
 независимого `$ship-tasks:strategic-explainer`, пока effective user topology rule
 не отключило эту роль. При таком запрете тот же quality contract основной агент
 выполняет сам и не заявляет независимую проверку там, где её не было.
+Каждый Task/scope report, blocker explanation и final также является отдельным
+publication unit. Explainer сам читает current facts и strategic context по exact
+anchors; routine chat и progress updates его не запускают.
 
 Приёмочный incident сообщается сразу в chat и сохраняется в Task history до
 начала repair. Opening comment остаётся видимым после исправления, resolution
@@ -85,6 +91,10 @@ Strategic Explainer comment о непроведённой functional check и re
 Browser switch допустим как диагностика, но не как repair или причина
 отложить уже доказанный product failure, пока безопасная in-scope работа над
 продуктом может продолжаться.
+До окончательного blocker claim ShipTask перечитывает fresh Explainer result как
+independent reflection input и заново проверяет safe frontier. Найденный путь не
+принимается на веру: он подтверждается current sources/acceptance; при достаточном
+пути stale blocker не публикуется и работа продолжается.
 Перед завершением skill сверяет обещанный и фактический результат,
 самостоятельно устраняет доступные проблемы внутри выбранной работы и только
 затем даёт компактное причинное объяснение понятным человеку языком.
@@ -121,9 +131,10 @@ context в каждой child Task. При delivery ShipTask перечитыв�
 - [`task-composer/SKILL.md`](task-composer/SKILL.md) — planning-only
   формулировка, декомпозиция и создание Task Manager scope.
 - [`strategic-explainer/SKILL.md`](strategic-explainer/SKILL.md) — общий
-  problem-first strategic discovery и communication skill для прямого или
-  delegated использования, включая редакторскую реконструкцию сложного текста
-  без потери смысла; обязательную ShipTask topology задаёт calling skill.
+  stateless problem-first discovery и communication API для direct/delegated
+  caller: fresh clean invocation, самостоятельный подъём к strategic outcome и
+  одна главная причинная мысль перед material деталями; также выполняет
+  редакторскую реконструкцию сложного текста без потери смысла.
 - [`docs/skills/README.md`](docs/skills/README.md) — source model и независимые
   Requirements/Architecture packages для каждого skill.
 - [`docs/skills/ship-tasks/requirements.md`](docs/skills/ship-tasks/requirements.md)

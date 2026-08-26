@@ -32,12 +32,13 @@
   [Requirements](skills/strategic-explainer/requirements.md),
   [Architecture](skills/strategic-explainer/architecture.md) и
   [product vision](skills/strategic-explainer/product-vision.md) — общий contract
-  объяснения на уровне исходного вопроса: сначала понятная причинная история,
-  затем только необходимые точные термины; сложный результат проверяется
+  stateless API объяснения на уровне исходного вопроса: каждый user-facing unit
+  получает clean `fork_turns="none"` invocation, Explainer сам собирает
+  strategic context, сначала формулирует одну главную причинную мысль и лишь
+  затем добавляет необходимые точные термины; сложный результат проверяется
   независимым пересказом. По явному запросу skill выполняет глубокую
-  редакторскую реконструкцию без потери смысла. Он ничего не изменяет, не
-  принимает решений о статусе или полномочиях и не требует единственной формы
-  организации агентов.
+  редакторскую реконструкцию без потери смысла. Он ничего не изменяет и не
+  принимает решений о статусе или полномочиях.
 
 Документация является исходным кодом. Локальный Level 1 отвечает за «что обязано
 быть истинно», локальный Level 2 — за agent-owned «как сейчас этого достигать»,
@@ -134,14 +135,19 @@
   — открывает downstream implementation после доказанного fan-in нужного
   upstream contract, не дожидаясь terminal acceptance blocking Task, и
   локализует позднюю invalidation по contract attribution.
+- [0029: Fresh Strategic Explainer и reflection до blocker](decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md)
+  — задаёт единый stateless API с clean `fork_turns="none"`, самостоятельным
+  strategic discovery, одним publication unit на invocation и обязательной
+  повторной проверкой safe frontier до окончательного blocker claim ShipTask.
 
 ## Reference
 
 - [Task Manager adapter](reference/task-manager-adapter.md) — точный discovery,
   identity, lifecycle, concurrency, текущие возможности и границы connector.
 - [Strategic Explainer evaluation](reference/strategic-explainer-evaluation.md)
-  — observable fidelity/authority/comprehension gates и regression cases без
-  проверки внутренней orchestration или фиксированной scoring ceremony.
+  — observable invocation-isolation, self-discovery,
+  fidelity/authority/comprehension gates и regression cases без фиксированной
+  scoring ceremony.
 - [Task Composer evaluation](reference/task-composer-evaluation.md) —
   observable gates для decomposition, metadata, relations, duplicate safety и
   planning-only authority.

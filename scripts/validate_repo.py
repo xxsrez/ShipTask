@@ -103,6 +103,10 @@ ADR = {
             "0028",
             "0028-integrated-implementation-satisfies-blocked-by.md",
         ),
+        (
+            "0029",
+            "0029-fresh-strategic-explainer-and-blocker-reflection.md",
+        ),
     )
 }
 
@@ -184,6 +188,7 @@ CURRENT_CONTRACT_FILES = (
     ADR["0026"],
     ADR["0027"],
     ADR["0028"],
+    ADR["0029"],
     ADAPTER,
     CRITICAL_REVIEW,
 )
@@ -390,14 +395,21 @@ def validate_ship_skill(errors: list[str]) -> None:
         "внутренняя target/width accounting не требуется",
         "сохраняй unrelated пользовательские изменения",
         "не используй blind rollback или destructive cleanup",
-        "Пока effective rule сохраняет Explainer, каждый Task Manager comment проходит отдельного",
-        "Если effective rule\nотключает Explainer, сам примени тот же problem-first",
-        "не переписывай текст самостоятельно",
+        "Пока effective rule сохраняет Explainer, каждый Task Manager comment, отдельный Task/scope report",
+        "при effective opt-out сам примени quality contract без claim independence",
+        "текст самостоятельно не переписывай",
         "Обычный `To Do → In Progress` не запускает Explainer",
         "SHIPTASK RUN REPORT",
-        "Финальный ответ тоже проходит отдельный scope-level Strategic Explainer",
-        "Первый смысловой слой объясняет общий результат",
+        "Финальный ответ — новый scope-level invocation",
+        "возвращает одну главную причинную мысль",
         "дай ему только исходную цель и готовый текст",
+        "каждый Task Manager comment, отдельный Task/scope report, blocker explanation и final",
+        "одну compact task, exact scope и resolvable read-only anchors",
+        "автоматически создай новый clean subagent",
+        "одну главную причинную мысль",
+        "fresh candidate explanation/source basis",
+        "достаточный путь отменяет stale blocker",
+        "unchanged blocker state получает один pass",
         "Периодический UAT batch release",
         "лёгкий targeted gate",
         "разумный exact integrated batch",
@@ -497,6 +509,9 @@ def validate_composer_skill(errors: list[str]) -> None:
         "Unknown write outcome",
         "остановился частично",
         "planning projection",
+        "fork_turns=\"none\"",
+        "одна compact task",
+        "новым clean subagent",
     )
     require(
         errors,
@@ -512,7 +527,7 @@ def validate_composer_skill(errors: list[str]) -> None:
     require(
         errors,
         COMPOSER_SPEC,
-        "Статус: current Level 2 contract, 2026-08-25",
+        "Статус: current Level 2 contract, 2026-08-26",
         "`TC-*` в локальных",
         "[требованиях пользователя](requirements.md)",
         "planning mutations",
@@ -540,6 +555,9 @@ def validate_composer_skill(errors: list[str]) -> None:
         "Direction каждого `blocks`",
         "Unknown write outcome",
         "Task Manager read-back доказывает только planning projection",
+        "fork_turns=\"none\"",
+        "одну compact task",
+        "новый clean subagent",
     )
     require(
         errors,
@@ -562,6 +580,8 @@ def validate_composer_skill(errors: list[str]) -> None:
         "duplicate search предшествует create",
         "read-back подтверждает",
         "Ошибка после создания части Epic",
+        "Первый Epic Explainer отклонил inherited/многословный context",
+        "новый clean subagent",
     )
     require(
         errors,
@@ -597,6 +617,13 @@ def validate_strategic_skill(errors: list[str]) -> None:
         "сопоставь новую версию с исходником в обе стороны",
         "не добавляй новое\nрешение или полномочие",
         "сохраняй дословно",
+        "Проверь fresh invocation",
+        "fork_turns=\"none\"",
+        "Inherited turns",
+        "один реальный user-facing result",
+        "самостоятельно поднимись через применимые relations",
+        "одну главную причинную мысль",
+        "Routine\nchat",
     )
     text = read(STRATEGIC_SKILL)
     for coupling in ("ShipTask", "Task Manager", "$ship-tasks", "TM-123"):
@@ -608,10 +635,12 @@ def validate_strategic_skill(errors: list[str]) -> None:
         'display_name: "Strategic Explainer"',
         'short_description: "Объяснить смысл или переписать сложный текст без потерь"',
         "$strategic-explainer",
-        "удерживай исходный вопрос и его уровень",
-        "сначала объясни обычными русскими словами",
-        "сможет ли читатель без внутренней предметной области пересказать суть",
-        "глубоко перестрой исходный текст без потери требований, фактов, исключений и границ",
+        "fresh stateless API",
+        "fork_turns=none",
+        "compact user-facing задачу",
+        "сам собери read-only facts и strategic meaning",
+        "одну главную причинную мысль",
+        "перестрой target text без потери требований, фактов, исключений и границ",
         "allow_implicit_invocation: true",
     )
 
@@ -857,6 +886,13 @@ REVIEW_CASES = {
         "repair и retest продукта",
         "выдавать Chrome/login за repair",
     ),
+    "Candidate blocker explanation обнаружило ранее пропущенный safe in-scope path": (
+        "blocker decision остаётся provisional",
+        "stale blocker candidate не публикуется",
+        "primary sources/acceptance",
+        "следующий user-facing result получает новый Explainer",
+        "продолжать старый Explainer",
+    ),
     "В current scope нет достаточного способа доказать success/failure после self-service frontier": (
         "verification-blocked",
         "In Review",
@@ -1085,9 +1121,9 @@ def validate_review_matrix(errors: list[str]) -> None:
 
 def validate_source_layers(errors: list[str]) -> None:
     packages = (
-        (SHIP_REQUIREMENTS, "ST", 27),
+        (SHIP_REQUIREMENTS, "ST", 28),
         (COMPOSER_REQUIREMENTS, "TC", 11),
-        (STRATEGIC_REQUIREMENTS, "SE", 14),
+        (STRATEGIC_REQUIREMENTS, "SE", 15),
     )
     for requirements, prefix, count in packages:
         requirement_ids = re.findall(
@@ -1112,11 +1148,7 @@ def validate_source_layers(errors: list[str]) -> None:
                 "семантически эквивалентным всем требованиям `ST-*`",
             )
         else:
-            level_one_status = (
-                "Статус: current Level 1, 2026-08-24"
-                if requirements == STRATEGIC_REQUIREMENTS
-                else "Статус: current Level 1, 2026-08-25"
-            )
+            level_one_status = "Статус: current Level 1, 2026-08-26"
             require(
                 errors,
                 requirements,
@@ -1191,6 +1223,11 @@ def validate_source_layers(errors: list[str]) -> None:
         "перечитывает её\nтекущий parent chain до ближайшего применимого Epic",
         "получает любой исполнитель или reviewer",
         "не разрешает автоматически\nвыполнять sibling Tasks",
+        "Strategic reflection до окончательной блокировки",
+        "не публикует terminal blocker claim",
+        "publication-ready explanation и\nего source basis",
+        "stale candidate\nне публикуется",
+        "один reflection pass",
     )
     forbid(
         errors,
@@ -1214,6 +1251,9 @@ def validate_source_layers(errors: list[str]) -> None:
         "искусственный umbrella Epic",
         "Unknown outcome не\nповторяется вслепую",
         "должны быть byte-identical",
+        "fork_turns=\"none\"",
+        "короткую задачу, exact planning scope и разрешимые source\nanchors",
+        "автоматически вызывает новый экземпляр",
     )
     require(
         errors,
@@ -1230,6 +1270,12 @@ def validate_source_layers(errors: list[str]) -> None:
         "Неясность или противоречие нельзя\nскрыть уверенной формулировкой",
         "не выдаёт редакторское решение за\nпользовательское требование",
         "переносятся\nдословно, включая написание и регистр",
+        "Единый stateless API и чистый вызов",
+        "fork_turns=\"none\"",
+        "одна короткая, ёмкая, однозначная задача",
+        "сам собирает current facts",
+        "одну главную причинную мысль",
+        "Один пользовательский результат на fresh invocation",
     )
     forbid(
         errors,
@@ -1252,12 +1298,7 @@ def validate_source_layers(errors: list[str]) -> None:
         (COMPOSER_SPEC, "TC-*"),
         (STRATEGIC_SPEC, "SE-*"),
     ):
-        if architecture == SPEC:
-            status_marker = "Статус: current Level 2 contract, 2026-08-25"
-        elif architecture == STRATEGIC_SPEC:
-            status_marker = "Статус: current Level 2 contract, 2026-08-24"
-        else:
-            status_marker = "Статус: current Level 2 contract, 2026-08-25"
+        status_marker = "Статус: current Level 2 contract, 2026-08-26"
         require(
             errors,
             architecture,
@@ -1308,6 +1349,9 @@ def validate_source_layers(errors: list[str]) -> None:
         "сохраняя применимый strategic\ncontext в каждой child Task",
         "ShipTask перечитывает current Epic",
         "не расширяет exact child scope",
+        "Каждый user-facing publication unit получает fresh",
+        "stateless invocation",
+        "fresh Explainer result как\nindependent reflection input",
     )
     require(
         errors,
@@ -1316,11 +1360,12 @@ def validate_source_layers(errors: list[str]) -> None:
         "[Requirements](skills/ship-tasks/requirements.md)",
         "[Architecture](skills/ship-tasks/architecture.md)",
         "[0028: Интегрированная реализация удовлетворяет `blocked by`]",
+        "[0029: Fresh Strategic Explainer и reflection до blocker]",
     )
     require(
         errors,
         VISION,
-        "Статус: current Level 2 strategic design, 2026-08-24",
+        "Статус: current Level 2 strategic design, 2026-08-26",
         "[требованиях пользователя](requirements.md)",
     )
 
@@ -1329,7 +1374,7 @@ def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         SPEC,
-        "Статус: current Level 2 contract, 2026-08-25",
+        "Статус: current Level 2 contract, 2026-08-26",
         "`ST-*` в локальных",
         "[требованиях пользователя](requirements.md)",
         "ADR-0018",
@@ -1342,6 +1387,8 @@ def validate_current_contract(errors: list[str]) -> None:
         "ADR-0026",
         "ADR-0027",
         "ADR-0028",
+        "ADR-0029",
+        "ADR-0029",
         "### 1.4 Dependency-ready frontier",
         "`Done` blocking Task в этот gate не входит",
         "Relation не удаляется",
@@ -1422,6 +1469,9 @@ def validate_current_contract(errors: list[str]) -> None:
         "`fork_turns=\"none\"`",
         "`critical-codebase-accepted`",
         "не полноценной\nфункциональной приёмкой",
+        "candidate report и перечитывает его explanation/source basis",
+        "candidate blocker не\nпубликуется",
+        "один\nreflection pass",
     )
     require(
         errors,
@@ -1471,6 +1521,8 @@ def validate_current_contract(errors: list[str]) -> None:
         "`fork_turns=\"none\"`",
         "Task type хранится в Label/hierarchy",
         "не дублируется\nпрефиксом `BUG:`/`EPIC:`",
+        "stateless API независимого объяснения",
+        "fresh explanation как reflection",
     )
     require(
         errors,
@@ -1717,6 +1769,20 @@ def validate_current_contract(errors: list[str]) -> None:
         "status == Done",
         "contract attribution",
     )
+    require(
+        errors,
+        ADR["0029"],
+        "Fresh Strategic Explainer и reflection до blocker",
+        "Один stateless API",
+        "fork_turns=\"none\"",
+        "Caller передаёт одну короткую однозначную задачу",
+        "Самостоятельное исследование и короткий result",
+        "одну главную причинную мысль",
+        "Blocker reflection",
+        "не является evidence",
+        "blocker не публикуется и работа продолжается",
+        "один reflection pass",
+    )
     for path in (
         ROOT / "AGENTS.md",
         ROOT / "README.md",
@@ -1850,27 +1916,26 @@ def validate_current_contract(errors: list[str]) -> None:
             "2–4 реально различающихся варианта",
             "2–4 реально различающихся способа",
         )
-        if path not in (SHIP_SKILL, SPEC, OVERVIEW, REVIEW_MATRIX):
-            forbid(errors, path, 'fork_turns="none"')
-
-
 def validate_strategic_contract(errors: list[str]) -> None:
     require(
         errors,
         STRATEGIC_SPEC,
-        "Статус: current Level 2 contract, 2026-08-24",
+        "Статус: current Level 2 contract, 2026-08-26",
         "`SE-*` в локальных",
         "[требованиях пользователя](requirements.md)",
         "общего skill `$strategic-explainer`",
         "Конституционный принцип",
-        "не задаёт внутреннюю архитектуру агента",
-        "Достаточный вход",
+        "fresh stateless invocation",
+        "Fresh API admission",
+        "fork_turns=\"none\"",
+        "compact selector",
         "Bounded strategic discovery",
-        "Exact envelope не требуется",
+        "независимо собрать current facts",
+        "один самостоятельный user-facing result",
         "не придумывает alternatives ради количества",
         "Completion criteria",
         "Текст пишется на языке пользователя",
-        "готовый пользовательский текст",
+        "publication-ready result contract",
         "пригоден для публикации",
         "Проверка понимания",
         "первый смысловой слой именно на исходный вопрос",
@@ -1893,6 +1958,9 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "обратным пересказом",
         "Редакторская реконструкция без потери смысла",
         "Свобода формы не означает свободу содержания",
+        "Stateless invocation и publication unit",
+        "fork_turns=\"none\"",
+        "одна главная причинная мысль",
     )
     require(
         errors,
@@ -1919,7 +1987,10 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Плотный документ требований",
         "Ясная структура с локальными языковыми дефектами",
         "Противоречие внутри редактируемого текста",
-        "не оценивает agent topology",
+        "Fresh invocation admission",
+        "Загрязнённый invocation",
+        "Compact selector требует самостоятельного discovery",
+        "Новый publication unit не продолжает старый candidate",
     )
 
     numbered = []
@@ -1945,6 +2016,7 @@ def validate_supersession(errors: list[str]) -> None:
             "ADR-0014",
             "ADR-0021",
             "ADR-0022",
+            "ADR-0029",
             "no-tools",
         ),
         "0013": (
@@ -1955,7 +2027,7 @@ def validate_supersession(errors: list[str]) -> None:
             "ADR-0021",
             "ADR-0022",
         ),
-        "0014": ("partially superseded", "ADR-0021"),
+        "0014": ("partially superseded", "ADR-0021", "ADR-0029"),
         "0015": ("partially superseded", "ADR-0017", "ADR-0020"),
         "0016": ("partially superseded", "ADR-0017", "ADR-0020"),
         "0007": ("ADR-0019",),
@@ -1967,8 +2039,14 @@ def validate_supersession(errors: list[str]) -> None:
             "ADR-0021",
             "ADR-0022",
         ),
-        "0021": ("partially superseded", "ADR-0022", "ADR-0024", "ADR-0025"),
-        "0022": ("partially superseded", "ADR-0024"),
+        "0021": (
+            "partially superseded",
+            "ADR-0022",
+            "ADR-0024",
+            "ADR-0025",
+            "ADR-0029",
+        ),
+        "0022": ("partially superseded", "ADR-0024", "ADR-0029"),
     }
     for number, terms in required_markers.items():
         header = "\n".join(read(ADR[number]).splitlines()[:18])

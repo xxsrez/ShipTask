@@ -1,15 +1,15 @@
 # Strategic Explainer: стратегическое видение
 
-Статус: current Level 2 strategic design, 2026-08-24. Нормативный Level 1 для
+Статус: current Level 2 strategic design, 2026-08-26. Нормативный Level 1 для
 общего skill — `SE-*` в локальных
 [требованиях пользователя](requirements.md). Этот документ раскрывает current
 product concept и может развиваться без изменения Level 1.
 
 Этот документ фиксирует устойчивую цель Strategic Explainer независимо от
-модели, способа запуска, agent topology и plugin packaging. Нормативный contract
-находится в [architecture](architecture.md), а принцип требований
-как конституции — в
-[ADR-0021](../../decisions/0021-requirements-as-agent-constitution.md).
+модели и plugin packaging. Clean stateless invocation является явным
+пользовательским invariant, а не сменной topology detail. Нормативный contract
+находится в [architecture](architecture.md), решение — в
+[ADR-0029](../../decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md).
 
 ## Проблема
 
@@ -37,12 +37,12 @@ status transitions и промежуточные ошибки. Эти детал
 
 ## Продуктовое обещание
 
-Strategic Explainer удерживает исходный вопрос и его уровень, получает или
-безопасно устанавливает достаточную постановку реальной проблемы, при
-необходимости находит ближайший relevant strategic context и превращает current
-facts в короткую, точную пользовательскую модель. Сначала он строит понятную
-причинную историю без внутренних названий, затем добавляет только необходимые
-технические опорные точки.
+Strategic Explainer получает одну compact task в чистом invocation, удерживает
+исходный вопрос и его уровень, самостоятельно устанавливает current facts и
+поднимается к relevant strategic context. Затем он превращает найденные основания
+в короткую точную пользовательскую модель: сначала одна главная причинная мысль,
+по возможности в одной фразе, затем только material уточнение или проверяемая
+техническая опора.
 По явному запросу на редактуру он также превращает сложный технический исходник
 в естественный профессиональный текст, сохраняя его смысловое ядро и границы.
 После одного чтения человек понимает:
@@ -60,25 +60,23 @@ facts в короткую, точную пользовательскую мод�
 ## Требования как конституция
 
 Устойчивые требования ниже описывают outcome, factual grounding, понятность и
-authority boundary. Они намеренно не выбирают direct или delegated invocation,
-тип/число агентов, механизм изоляции context, prompt envelope, tool sequence,
-число attempts, error tokens или длину ответа. Эти implementation details могут
-меняться без продуктового решения, если сохраняется observable quality bar.
-
-Точный механизм допустим только как локальная реализация или как доказуемый
-safety/data-integrity invariant. Он не становится общей продуктовой политикой
-из-за одного успешного или неуспешного случая.
+authority boundary. Один механизм задан явно: direct и delegated caller
+используют новый built-in `default` subagent с `fork_turns="none"`, одной compact
+task и без inherited process context. За этим admission barrier tool sequence,
+форма source note, внутренний reasoning и длина ответа остаются свободными.
 
 ## Место в системе
 
 Strategic Explainer занимает интерпретационный слой между facts и решением:
 
 ```text
-real problem + current facts + source text + relevant sources
-                            ↓
-      problem-first explanation or faithful reconstruction
-                            ↓
-             caller or user understands meaning
+compact task + exact scope/source anchors
+                    ↓
+ fresh read-only discovery from local result to strategic outcome
+                    ↓
+ one main causal thought + only material detail/source basis
+                    ↓
+          caller or user understands meaning
 ```
 
 Он не заменяет technical analysis, reviewer или управляющий workflow. Source
@@ -96,10 +94,20 @@ Beneficiary, desired observable outcome и exact scope должны быть у�
 
 ### Grounded strategic view
 
-Strategic context читается bounded и read-only только когда он materially меняет
+После admission Explainer сам читает bounded read-only sources: exact target,
+применимые Task/parent/Epic, Release, Project, product goal, vision/specification
+и accepted decisions. Он останавливается, когда higher context больше не меняет
 понимание результата. `Current/accepted`, `proposed` и `historical` sources не
 смешиваются. Live execution evidence определяет, что происходит; design
 объясняет, зачем это важно, и не переписывает наблюдаемый outcome.
+
+### Stateless invocation и publication unit
+
+Explainer до discovery отклоняет inherited conversation, tool transcript,
+process diary, caller rationale, прежний candidate и несколько смешанных задач,
+объясняя точное исправление. Каждый Task comment/report, blocker explanation,
+scope final или другой самостоятельный user-facing result получает новый clean
+invocation. Routine chat и progress update не являются единицей этого API.
 
 ### Lossless by relevance
 

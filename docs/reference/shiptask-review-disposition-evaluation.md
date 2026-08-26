@@ -4,7 +4,9 @@
 агент свободен выбрать инструменты и порядок при соблюдении constitution.
 Без применимого topology rule отдельный Strategic Explainer перед каждым
 создаваемым комментарием является явным требованием пользователя и проверяется
-как независимый смысловой барьер. Natural-language rules проверяются по смыслу:
+как fresh stateless смысловой барьер. Каждый Task/scope report, blocker
+explanation и final получает отдельный `fork_turns="none"` invocation с compact
+task/source anchors; routine chat/progress его не запускает. Natural-language rules проверяются по смыслу:
 общий no-subagent opt-out запускает ноль subagents, а role-scoped rule меняет
 только названную роль.
 
@@ -36,6 +38,7 @@
 | Изменение blocking Task существует только в writer branch/worktree или подтверждено лишь comment/status | dependency gate остаётся закрытым: fan-in и общий contract не доказаны | по текущему lifecycle blocking Task | current truthful status | закончить безопасный fan-in и подтвердить exact integration candidate до запуска dependent implementation | считать status/comment/isolated code достаточной доступностью реализации |
 | После открытия dependency gate свежий attributed defect blocking Task нарушил contract dependent Task | закрываются только доказанно затронутые gates; downstream attribution перечитана | incident comments только для affected Tasks по обычному lifecycle | affected Tasks получают rework по evidence; unrelated statuses сохраняются | перепроверить affected downstream candidates и продолжить независимые Tasks | массово инвалидировать batch из-за non-terminal upstream status, pending check или unattributed failure |
 | Exact candidate/server path уже доказал authenticated product hang, а другой browser/controller просит новый login или MFA | `verified-failure` продукта сохраняется; browser gap вторичен | opening incident с product expected/observed и evidence | truthful working status | сначала продолжить безопасную in-scope диагностику, repair и retest продукта; browser switch только дополнительный diagnostic path | выдавать Chrome/login за repair, отменять product incident или останавливать run ради альтернативной session |
+| Candidate blocker explanation обнаружило ранее пропущенный safe in-scope path | blocker decision остаётся provisional; wording не является evidence | stale blocker candidate не публикуется; proven incident при необходимости получает отдельный fresh nonterminal comment | current truthful non-blocked status | ShipTask проверяет path по primary sources/acceptance и продолжает; следующий user-facing result получает новый Explainer | публиковать terminal blocker до reflection, действовать только по убедительному wording, расширять scope/authority или продолжать старый Explainer |
 | В current scope нет достаточного способа доказать success/failure после self-service frontier | `verification-blocked`; chat прямо говорит, что bug не установлен | blocker decision report: self-service attempts, primary/cascade cause, recommended path, prerequisites/authority, success signal и resume condition; read-back | оставить `In Review` | сравнить alternatives только при material выборе; продолжить safe independent work | объявить product defect без наблюдения, просить стандартный файл, придумывать варианты ради квоты или остановиться без recommendation |
 | Fresh inventory ещё содержит matching `To Do` или `In Progress`, либо хотя бы одна `In Review` Task имеет доступный обычный test path | critical fallback не eligible | по обычному lifecycle каждой Task | current truthful status | выполнить/продолжить обычную реализацию и честную functional verification | запускать critic ради удобства или закрывать доступную проверку code review-ом |
 | Все active Tasks находятся в `In Review`, обычная frontier исчерпана и каждая требует существенного human verifier | eligibility gate доказан: `To Do == 0`, `In Progress == 0`, `In Review > 0`; exact integrated candidate стабилен | существующие blocker comments сохраняются | `In Review` до verdict | запустить ровно одного read-only `critic` с `fork_turns="none"`, нейтральными Task refs/selector и candidate identity; critic самостоятельно читает contracts/code/tests | считать approval, MFA, invite, bounded access unlock или tool inconvenience существенной человеческой приёмкой; передавать inherited dialogue, producer rationale или прежний verdict |
@@ -132,6 +135,11 @@
 - Получил ли каждый material blocker через Strategic Explainer grounded
   recommendation, prerequisites, success signal и сравнение material
   alternatives, а не голый reason code?
+- Прочитал ли ShipTask candidate blocker explanation/source basis до terminal
+  claim, заново проверил ли cause/strategic context/safe frontier и подтвердил ли
+  найденный path primary evidence вместо доверия wording?
+- Был ли stale blocker отброшен при доступном пути, а unchanged state получил
+  только один reflection pass без бесконечного цикла формулировок?
 - Продолжил ли агент rework после reopen вместо завершения run?
 - Создан ли Goal только для реальной имплементации/rework минимум двух Tasks, а
   не из-за Project/Release selector, общего чтения или release-only?
@@ -150,6 +158,9 @@
 - Прошёл ли каждый созданный ShipTask-комментарий отдельного Strategic
   Explainer, пока effective rule его не отключает, а обычный старт остался без
   комментария и без его запуска?
+- Получил ли каждый comment/Task-or-scope report/blocker/final новый clean
+  `fork_turns="none"` invocation с compact task/anchors без inherited journal, и
+  был ли invalid call автоматически исправлен новым экземпляром?
 - Прошёл ли финальный ответ отдельный scope-level Explainer и ответил ли он на
   исходную цель вместо склейки комментариев или языка последней подзадачи?
 - Можно ли пересказать первый смысловой слой без идентификаторов и внутренней

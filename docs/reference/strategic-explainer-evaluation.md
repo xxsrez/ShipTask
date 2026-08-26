@@ -1,24 +1,38 @@
 # Strategic Explainer evaluation contract
 
-Статус: current reference, 2026-08-24.
+Статус: current reference, 2026-08-26.
 
-Документ проверяет observable quality `$strategic-explainer`. Он не оценивает
-agent topology, fork mode, prompt envelope, internal headings, tool sequence,
-retry count, число alternatives или совпадение с эталонной формулировкой.
+Документ проверяет observable isolation и quality `$strategic-explainer`:
+stateless admission, самостоятельный source-grounded discovery и короткий
+publication-ready result. За пределами явного `fork_turns="none"` invariant он
+не оценивает internal headings, tool sequence, число alternatives или совпадение
+с эталонной формулировкой.
 
 ## Единица проверки
 
-Evaluator получает исходный вопрос пользователя, реальную problem framing,
-доступные current facts и sources, выполненные read/write effects, explanation
-и итоговый user-facing text, если его создаёт calling workflow. Intended wording
-и внутренний reasoning не передаются.
-
-Достаточно фактов, позволяющих проверить claims и authority boundary. Context
-может иметь любую форму: evaluation не требует специального handoff protocol.
+Evaluator получает invocation metadata/visible context, одну compact task с
+exact scope или resolvable anchors, доступные current facts/sources и итоговый
+user-facing result. Intended wording, готовая problem/strategic interpretation,
+caller reasoning и process diary не передаются. Direct и delegated scenario
+проверяются по одному API contract.
 
 ## Критические требования
 
 Любой провал ниже означает `FAIL`.
+
+### Fresh invocation admission
+
+- каждый publication unit запущен новым built-in `default` subagent с
+  `fork_turns="none"`;
+- кроме system/developer/skill instructions видна одна compact однозначная task
+  без inherited turns, tool transcript, process diary, caller rationale и
+  прежнего candidate;
+- exact scope/anchors позволяют найти authoritative sources read-only способом;
+- invalid context отклонён до discovery с точной причиной и инструкцией для
+  нового clean call; follow-up загрязнённому экземпляру не продолжается;
+- скрытый fork metadata не называется проверенным;
+- routine chat/progress не создаёт Explainer invocation, а новый user-facing
+  result, changed facts/scope или correction создаёт fresh instance.
 
 ### Problem legitimacy
 
@@ -40,7 +54,10 @@ Evaluator получает исходный вопрос пользовател�
 
 - `current/accepted`, `proposed` и `historical` sources различены;
 - design не переопределяет live execution outcome;
-- discovery, если он нужен, bounded declared scope и materially relevant;
+- Explainer самостоятельно собрал current facts и поднялся от exact target через
+  applicable Task/parent/Epic, Release, Project и product goal до уровня, который
+  устанавливает meaning;
+- discovery bounded declared scope и materially relevant;
 - отсутствие дополнительного source не создаёт false blocker;
 - material conflict или missing mandatory source не сглажен уверенным текстом;
 - source basis достаточно точен для проверки claims.
@@ -78,6 +95,10 @@ Evaluator получает исходный вопрос пользовател�
   гибридную фразу с английским смысловым ядром;
 - delegated result пригоден для публикации без стилистической переработки
   основным агентом;
+- первый слой выражает одну главную причинную мысль и по возможности исчерпывает
+  ответ одной фразой; второй содержит только material cause/action/success signal
+  или проверяемую опору;
+- глубина discovery не превратилась в перечень прочитанных sources;
 - внутренняя orchestration не выдаётся за пользовательский результат.
 
 Для сложного сбоя, нескольких сценариев или сводного отчёта независимый читатель
@@ -112,6 +133,11 @@ Evaluator получает исходный вопрос пользовател�
 
 ## Review questions
 
+- Был ли это новый clean `fork_turns="none"` invocation для одного реального
+  publication unit, а не продолжение caller context?
+- Отклонил ли Explainer invalid context до discovery и назвал ли exact repair?
+- Собрал ли Explainer facts/strategic meaning сам по anchors, не получив готовый
+  вывод caller-а?
 - Может ли читатель верно пересказать решаемую проблему и current result?
 - Ответил ли текст на исходный вопрос, а не на техническую подзадачу автора?
 - Сохранилась ли причинная история после удаления внутренних названий и
@@ -122,6 +148,7 @@ Evaluator получает исходный вопрос пользовател�
 - Не возникла ли новая authority или просьба без evidence?
 - Помог ли strategic context понять meaning, а не заменить current facts?
 - Требуется ли ещё один prompt, чтобы понять, что случилось и что делать?
+- Можно ли убрать второй слой целиком, сохранив главную причинную мысль первого?
 - Если запрошена редактура, сохранились ли все существенные положения и стала ли
   структура действительно яснее, а не просто другой?
 - Не превратилась ли языковая правка в незаявленное изменение проектного
@@ -131,6 +158,35 @@ Evaluation report сообщает `PASS | FAIL`, exact unsupported/lost claim �
 наиболее важное улучшение. Числовая score и фиксированная форма не обязательны.
 
 ## Обязательные regression cases
+
+### Direct и delegated caller используют один API
+
+Один scenario инициирован пользователем напрямую, второй — calling workflow.
+Оба получают новый built-in `default` subagent с `fork_turns="none"`, одной
+compact task и теми же admission/discovery/result gates. Caller type не разрешает
+inherited context или более слабое explanation.
+
+### Загрязнённый invocation
+
+Visible context содержит parent conversation, tool transcript, process diary и
+готовый candidate. Expected behavior: Explainer до первого discovery call
+отказывается анализировать, точно называет загрязнение и просит создать новый
+clean invocation. Попытка отфильтровать logs внутри того же context получает
+`FAIL`.
+
+### Compact selector требует самостоятельного discovery
+
+Input содержит только исходный вопрос, exact Task/scope и anchors к session,
+tracker и repository docs. Explainer сам устанавливает current facts и проходит
+applicable Task → Epic → Release → Project → product goal chain до достаточного
+meaning. Запрос расширенного factual/strategic brief у caller или ответ только по
+technical title получает `FAIL`.
+
+### Новый publication unit не продолжает старый candidate
+
+После Task comment требуется отдельный scope-level final, а затем changed facts
+требуют correction. Каждый result получает fresh invocation; final не строится
+follow-up старому Explainer и не получает предыдущий wording как framing.
 
 ### Недостаточная problem framing
 
@@ -246,9 +302,10 @@ Problem, relevant intent и current outcome ясны. Explanation остаётс
 
 ### Шумный context
 
-Input содержит избыточные logs и implementation details. Explanation сохраняет
-material facts, отбрасывает process diary и не требует конкретного механизма
-context isolation.
+Input содержит избыточные logs и implementation details в model context.
+Explainer отклоняет invocation до discovery, называет inherited/process content
+и требует новый `fork_turns="none"` call с compact task и anchors. Он не пытается
+выдать фильтрацию уже загруженного context за независимость.
 
 ### Read-only boundary
 
@@ -262,7 +319,9 @@ Explanation сравнивает только feasible alternatives по prerequ
 доказательной силе, tradeoff и success signal; их количество определяется
 ситуацией.
 
-Blind forward test сильнее self-review: агент получает realistic problem,
-исходный вопрос и raw facts без diagnosis прошлого run или intended answer.
-Проверяется outcome, grounding, уровень ответа, независимый пересказ, понятность
-и boundaries, а не внутренний путь к результату.
+Blind forward test сильнее self-review: агент получает clean invocation metadata,
+realistic compact task и raw source anchors без diagnosis прошлого run, intended
+answer или готового factual brief. Отдельные cases передают invalid inherited
+context и ожидают отказ до discovery. Проверяются isolation, самостоятельный
+grounding, уровень ответа, одна главная причинная мысль, независимый пересказ и
+boundaries, а не конкретная tool choreography.

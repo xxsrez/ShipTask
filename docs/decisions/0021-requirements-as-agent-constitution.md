@@ -1,6 +1,6 @@
 # 0021. Требования являются конституцией для агентов
 
-Статус: partially superseded, 2026-08-22. Уточняет ADR-0017 и ADR-0018 для всех
+Статус: partially superseded, 2026-08-26. Уточняет ADR-0017 и ADR-0018 для всех
 current requirements ShipTask и Strategic Explainer. Заменяет обязательную agent
 topology, fixed context isolation, exact handoff envelope, error tokens, retry
 scheme и option quota из ADR-0012, ADR-0013 и ADR-0014. Решение отменить
@@ -10,7 +10,9 @@ scheme и option quota из ADR-0012, ADR-0013 и ADR-0014. Решение от�
 [ADR-0024](0024-adaptive-multi-agent-execution-by-default.md), а свобода выбора
 model/effort для его субагентов —
 [ADR-0025](0025-cost-aware-subagent-profiles.md). Остальные
-требования-конституция сохраняются.
+требования-конституция сохраняются. Новый явно пользовательский clean
+Strategic Explainer API является точечным исключением и задан
+[ADR-0029](0029-fresh-strategic-explainer-and-blocker-reflection.md).
 
 ## Контекст
 

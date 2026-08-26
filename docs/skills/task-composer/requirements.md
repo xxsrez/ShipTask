@@ -1,6 +1,6 @@
 # Task Composer: требования пользователя
 
-Статус: current Level 1, 2026-08-25.
+Статус: current Level 1, 2026-08-26.
 
 Этот документ — полный пользовательский исходный код только для
 `$ship-tasks:task-composer`. Он не определяет требования к ShipTask или
@@ -95,6 +95,14 @@ meaning, но не выбирает decomposition, metadata, writes или autho
 Composer остаётся ответственным за factual accuracy и полное покрытие. Если
 grounded Explainer недоступен, Epic create не начинается; независимо допустимая
 single Task от этого не блокируется.
+
+Каждый Epic description является отдельным пользовательским результатом и
+получает новый clean built-in `default` subagent с `fork_turns="none"`. Task
+Composer передаёт короткую задачу, exact planning scope и разрешимые source
+anchors без предыдущего диалога, process diary, собственного strategic view или
+готового candidate. Если Explainer отклоняет invocation, Task Composer исправляет
+названную причину и автоматически вызывает новый экземпляр; старый context не
+продолжается и обязательная независимость не обходится.
 
 ### `TC-10` — Независимая planning distribution
 

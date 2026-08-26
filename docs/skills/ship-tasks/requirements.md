@@ -1,6 +1,6 @@
 # ShipTask: требования пользователя
 
-Статус: действующий Level 1. Редакция от 2026-08-25.
+Статус: действующий Level 1. Редакция от 2026-08-26.
 
 Это полный набор действующих пользовательских требований только к
 `$ship-tasks`. Требования к Task Composer и Strategic Explainer находятся в их
@@ -144,6 +144,15 @@ ShipTask сначала сверяет фактическое состояние
 Основной агент отвечает за факты и решение, но не заменяет независимый проход
 собственной редактурой.
 
+Каждый такой комментарий, отдельный отчёт по Task, blocker report и итоговый
+ответ являются самостоятельными publication units и получают новый built-in
+`default` subagent с `fork_turns="none"`. ShipTask передаёт одну короткую и
+однозначную задачу, exact scope и разрешимые read-only source anchors, а не
+предыдущий диалог, tool transcript, process diary, собственные рассуждения или
+готовый candidate. Strategic Explainer сам собирает current facts и применимый
+strategic context по своему API contract. Обычные progress updates и рабочее
+общение отдельного Explainer не запускают.
+
 Итоговый ответ Codex также проходит отдельное объяснение на уровне исходной цели
 пользователя. Он не собирается механической склейкой комментариев отдельных
 Tasks и не уходит на уровень внутренней реализации. Первый смысловой слой должен
@@ -165,6 +174,13 @@ Tasks и не уходит на уровень внутренней реализ
 тот же стандарт качества: невозможность вызвать Explainer не даёт права скрыть
 результат или оставить пользователя без ответа. Другая независимая и безопасная
 работа может продолжаться.
+
+Если Explainer отклонил загрязнённый, многословный, неоднозначный или иначе
+неправильный invocation, ShipTask исправляет названную причину и автоматически
+создаёт новый clean invocation; старый subagent не продолжается. Повторный
+структурный отказ после исправленного вызова является orchestration failure:
+ShipTask не обходит обязательный Explainer, честно сообщает capability gap и
+продолжает только независимую безопасную работу.
 
 ### `ST-08` — Инциденты приёмки всегда видимы
 
@@ -636,6 +652,35 @@ exact change boundary или полномочия дочерней Task, не р
 противоречие между Epic и Task разрешается как `task-contract-conflict` до
 затронутой implementation mutation; недоступный обязательный parent context
 создаёт `TASK CONTEXT ALARM`. Независимая runnable работа при этом продолжается.
+
+### `ST-28` — Strategic reflection до окончательной блокировки
+
+ShipTask не признаёт Task, Release или весь run окончательно заблокированными и
+не публикует terminal blocker claim, пока candidate blocker не прошёл отдельный
+fresh Strategic Explainer по `ST-07`. Получив publication-ready explanation и
+его source basis, ShipTask сам перечитывает объяснение как независимый взгляд,
+повторно проверяет primary/cascade cause, исходную цель, applicable
+Task/Epic/Release/Project context, scope/authority boundaries и всю безопасную
+in-scope diagnostic, repair, verification и reconciliation frontier.
+
+Explainer может обнаружить пропущенный путь или неверно сформулированную причину,
+но его текст не является evidence, permission или recovery decision. Каждый
+найденный путь ShipTask проверяет по первичным current sources и acceptance. Если
+доступный безопасный путь подтверждён, blocker не финализируется, stale candidate
+не публикуется и ShipTask продолжает работу. Следующий material user-facing
+результат получает новый clean Explainer invocation.
+
+Если существенный инцидент обязан стать видимым до этой повторной оценки,
+ShipTask публикует через отдельный fresh invocation только доказанный текущий
+incident и продолжающуюся проверку, не утверждая преждевременно, что весь Release
+остановлен. Окончательный blocker report формируется заново после reflection,
+когда действительно не осталось достаточного безопасного способа продолжить.
+
+Для materially неизменившегося blocker state выполняется один reflection pass.
+Новый pass допустим после changed facts, candidate, scope, evidence либо
+исправления невалидного invocation; вариативные формулировки Explainer на том же
+основании не создают бесконечный recovery loop. Reflection не расширяет selector,
+Task contract или полномочия и не останавливает независимую runnable работу.
 
 ## Изменение Level 1
 

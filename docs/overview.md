@@ -9,7 +9,7 @@ Task Manager skill  = технический адаптер
 ShipTask skill      = требования к delivery result
 Task Composer       = постановка и planning graph в Backlog
 Project memory      = selector и project-specific context
-Strategic Explainer = помощник по человеческому объяснению
+Strategic Explainer = stateless API независимого объяснения
 ```
 
 ## Documentation as source
@@ -48,6 +48,9 @@ current profile. Они уточняют
 Разделение `blocked by`, доступности интегрированной реализации и terminal
 acceptance закреплено
 [ADR-0028](decisions/0028-integrated-implementation-satisfies-blocked-by.md).
+Fresh clean Strategic Explainer API и обязательная reflection-проверка safe
+frontier до окончательного blocker claim закреплены
+[ADR-0029](decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
 результатов и жёстких границ. Агент свободен выбирать порядок, инструменты,
 реализацию, декомпозицию и число попыток; delegation следует явной политике
@@ -91,6 +94,10 @@ ADR-0024.
   comment read-back;
 - каждый создаваемый ShipTask-комментарий, пока effective rule не отключает
   Explainer, до публикации проходит отдельного независимого субагента;
+- каждый Task/scope report, blocker explanation и final получает отдельный fresh
+  `fork_turns="none"` invocation; routine chat/progress его не запускает;
+- Explainer получает compact task и exact source anchors, сам читает current
+  facts и поднимается через applicable Epic/Release/Project к исходной цели;
 - material blocker также получает comment, даже без status change;
 - native comments являются гарантированной adapter capability и всегда
   сопровождают material lifecycle reporting;
@@ -110,6 +117,9 @@ ADR-0024.
 - пока effective user rule не отключает comment Explainer, основной агент не заменяет отдельного Strategic
   Explainer собственной редактурой и не публикует комментарий без
   независимого прохода;
+- до окончательной блокировки ShipTask читает fresh explanation как reflection
+  input, заново проверяет safe frontier и продолжает при подтверждённом пути,
+  не выдавая wording Explainer за evidence или authority;
 - production и другие sensitive effects сохраняют явную authority boundary.
 
 ## Запуск

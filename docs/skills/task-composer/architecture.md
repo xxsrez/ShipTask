@@ -1,6 +1,6 @@
 # Task Composer
 
-Статус: current Level 2 contract, 2026-08-25. Применимые Level 1 requirements —
+Статус: current Level 2 contract, 2026-08-26. Применимые Level 1 requirements —
 `TC-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Архитектурная роль
@@ -206,15 +206,19 @@ Epic и child остаётся явным и требует исправлени
 ## 5. Strategic Explainer
 
 Перед созданием каждого Epic его problem-first описание составляется с помощью
-sibling `$ship-tasks:strategic-explainer`. Calling workflow передаёт
-установленные требования человека, current facts, desired outcome, scope и
-material constraints. Explainer может уточнить meaning через bounded read-only
-sources, но не выбирает Project, decomposition, status, labels, relations или
-write authority.
+sibling `$ship-tasks:strategic-explainer`. Каждый Epic description является
+отдельным publication unit: Task Composer создаёт новый built-in `default`
+subagent с `fork_turns="none"` и передаёт одну compact task, exact planning scope
+и resolvable read-only anchors. Унаследованный диалог, tool transcript, process
+diary, готовый strategic view и прежний candidate не передаются. Explainer сам
+читает current facts и applicable higher context, но не выбирает Project,
+decomposition, status, labels, relations или write authority.
 
-Точный invocation mechanism и agent topology не являются частью contract.
-Проверяется результат: Epic легко читается, сохраняет human intent, отделяет
-факт от предположения и объясняет концепцию без tactical process diary.
+Если Explainer отклоняет invocation, Task Composer исправляет указанную причину
+и создаёт новый clean subagent; follow-up старому экземпляру не используется.
+Проверяется и isolation contract, и результат: Epic легко читается, сохраняет
+human intent, отделяет факт от предположения и объясняет концепцию без tactical
+process diary.
 
 Основной Task Composer остаётся ответственным за factual accuracy, полноту
 coverage и соответствие подготовленной hierarchy. Если Strategic Explainer

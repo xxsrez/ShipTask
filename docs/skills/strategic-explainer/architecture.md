@@ -1,18 +1,19 @@
 # Strategic Explainer
 
-Статус: current Level 2 contract, 2026-08-24. Применимые Level 1 requirements —
+Статус: current Level 2 contract, 2026-08-26. Применимые Level 1 requirements —
 `SE-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Problem-first
 bounded discovery принято в
 [ADR-0014](../../decisions/0014-problem-first-bounded-strategic-discovery.md), а
-implementation-specific orchestration заменена
-[ADR-0021](../../decisions/0021-requirements-as-agent-constitution.md).
+fresh stateless invocation и blocker reflection — в
+[ADR-0029](../../decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md).
 
 Продуктовая архитектура раскрыта в
 [стратегическом видении](product-vision.md). Эта architecture описывает
-наблюдаемый результат и границы общего skill `$strategic-explainer`; она не
-задаёт внутреннюю архитектуру агента.
+наблюдаемый результат и границы общего skill `$strategic-explainer`; кроме явно
+заданного clean-invocation invariant она не предписывает внутреннюю организацию
+агента.
 
 ## 0. Compilation contract
 
@@ -27,14 +28,14 @@ evaluations дают локальный design/rationale и evidence, но не 
 ## 1. Конституционный принцип
 
 Requirements определяют проблему, качество объяснения, source grounding,
-read-only boundary и отсутствие новой authority. Они не предписывают direct или
-delegated invocation, тип или число агентов, fork mode, форму handoff, названия
-полей, error tokens, tool sequence, retry count, длину ответа или квоту
-alternatives.
+read-only boundary и отсутствие новой authority. `SE-10` является явным
+исключением из общей свободы orchestration: direct и delegated use проходят один
+stateless API, новый built-in `default` subagent и `fork_turns="none"`; контекст
+допускает одну compact task и resolvable anchors без inherited process state.
 
-Caller или сам агент выбирает организацию работы. Структуры и examples полезны,
-только если помогают передать смысл; они не являются protocol. Проверяется
-итоговое объяснение, использованные основания и соблюдение границ.
+За этой границей caller или агент выбирает tool sequence, форму source note,
+внутренний reasoning, длину и визуальную форму. Структуры и examples полезны,
+только если помогают передать смысл; они не заменяют observable result.
 
 ## 2. Результат и граница роли
 
@@ -58,49 +59,58 @@ Skill является интерпретационным слоем. Он:
 Найденные strategic sources объясняют значение результата, но не доказывают,
 что result реализован или проверен.
 
-## 3. Достаточный вход
+## 3. Fresh API admission
 
-До уверенного объяснения должны быть установлены четыре смысловых основания:
+Direct request и вызов из другого workflow адресуют один API: caller создаёт
+новый built-in `default` subagent с `fork_turns="none"`. Единственный user/task
+message является compact selector, а не brief или черновиком объяснения. Он
+называет один исходный вопрос, exact scope либо resolvable source anchors и
+назначение user-facing result. System/developer/skill instructions остаются
+нормальной частью context и не считаются загрязнением.
 
-- исходный вопрос: что именно хочет понять человек, насколько подробно он
-  спрашивает и какие понятия уже использует сам;
-- реальная проблема: beneficiary, desired observable outcome и exact scope;
-- current facts: что доказано, failed, unverified или not applicable, какое
-  evidence и confidence это поддерживает, каков фактический impact и authority;
-- доступные anchors: exact target и ближайшие relevant product, design,
-  specification или decision sources, если они нужны для понимания смысла.
+До первого discovery call Explainer проверяет доступные признаки:
 
-Эти основания могут находиться в prompt, current conversation, task context,
-документах или быть безопасно найдены read-only способом. Exact envelope не
-требуется. Identifier или технический заголовок сами по себе не определяют
-проблему.
+- виден ли ровно один compact, ёмкий и непротиворечивый task;
+- нет ли inherited conversation, tool transcript, process diary, caller
+  rationale, прежнего candidate или нескольких publication units;
+- можно ли по exact scope/anchors самостоятельно найти authoritative facts;
+- подтверждает ли доступный metadata clean fork; если metadata скрыт, проверка
+  не изображает недоступное доказательство.
 
-При delegated use предпочтителен самодостаточный чистый контекст: исходный
-вопрос, факты, доказательства, границы знания и допустимый следующий шаг. Полный
-предыдущий диалог, журнал инструментов и готовые формулировки исполнителя не
-передаются, если без них не теряется существенный факт. Это снижает риск, что
-Explainer примет лексику реализации за уровень, на котором спрашивает человек.
+Invalid invocation возвращает только короткую operational correction: какой
+признак нарушен и какой clean call нужен. Discovery и explanation не начинаются.
+Caller создаёт новый subagent с исправленной постановкой; follow-up старому
+экземпляру запрещён. Explicit editing/review task может содержать target text,
+потому что он является предметом, а не унаследованной формулировкой.
 
-Если material основания не хватает, skill ясно называет, какой факт нужен и
-почему без него нельзя честно объяснить результат. Он не угадывает цель,
-пользовательский impact или permission и не скрывает противоречие гладким
-текстом.
+После admission Explainer сам устанавливает исходный вопрос, beneficiary,
+desired observable outcome, current facts/evidence/confidence, impact,
+authority и applicable strategic anchors. Если resolvable source не содержит
+material основания, skill ясно называет недостающий факт и почему без него
+нельзя честно объяснить результат. Identifier или technical title сами по себе
+не заменяют problem framing.
 
-Для нескольких независимых сценариев сохраняются их отдельные state, evidence,
+Для нескольких независимых сценариев сохраняются отдельные state, evidence,
 impact и dependencies. Форма такого представления выбирается по ситуации.
 
 ## 4. Bounded strategic discovery
 
-Когда ближайший strategic context materially меняет смысл, Explainer может
-использовать доступные read-only sources. Поиск ограничен declared scope и
-заканчивается, когда понятны beneficiary, desired capability, ключевые
-constraints/non-goals и вклад current result.
+После admission Explainer обязательно использует доступные read-only sources,
+чтобы независимо собрать current facts и проверить strategic meaning. Поиск
+начинается с exact target/session/task и поднимается через применимые relations,
+parent/Epic, Release, Project, product goal, vision, current specification и
+accepted decisions. Не каждый уровень обязан существовать, но Explainer должен
+установить, зачем выполняется локальная работа и что current result означает для
+исходного outcome. Поиск ограничен declared scope и заканчивается, когда более
+высокий source уже не меняет problem, outcome, impact/risk, action или confidence.
 
 - `current/accepted`, `proposed` и `historical` sources различаются;
 - live execution evidence определяет current outcome, а design объясняет его
   значение;
 - отсутствие дополнительного source не создаёт выдуманный blocker;
 - material conflict или недоступное обязательное основание явно остаётся gap;
+- session history читается только bounded source retrieval, а не наследуется
+  целиком в model context;
 - unrelated logs, code и broad research не включаются без material relevance.
 
 Specification оценивает relevance и factual grounding discovery, а не порядок
@@ -118,11 +128,12 @@ tool calls или количество прочитанных источнико
   позволит продолжить.
 
 Сначала строится причинная история на уровне исходного вопроса, без внутренних
-идентификаторов и названий механизмов. Первый абзац прямо отвечает человеку: что
-получилось или остановилось, почему это имеет значение и нужен ли следующий
-шаг. Только после этого добавляются технические опорные точки, без которых
-нельзя проверить вывод, выполнить действие или честно обозначить риск. Детали
-не получают собственный сюжет и не меняют предмет разговора.
+идентификаторов и названий механизмов. Первый слой выделяет одну главную мысль и
+по возможности исчерпывает ответ одной фразой: что получилось или остановилось и
+почему. Суть обязательна; отсутствие воды, повторов и необязательных деталей —
+второй приоритет. Только после этого короткий второй слой может объяснить
+material cause, нужное действие, success signal или точную техническую опору.
+Глубина discovery не даёт деталям собственного сюжета.
 
 Техническая деталь остаётся только когда меняет causal model, outcome,
 impact/risk, action или confidence. Внутренние сущности переводятся в
@@ -137,10 +148,16 @@ impact/risk, action или confidence. Внутренние сущности п�
 tradeoff и success signal. Он не придумывает alternatives ради количества и не
 выдаёт рекомендацию за принятое действие или новую authority.
 
-При direct invocation source refs размещаются рядом с поддерживаемыми claims.
-При delegated use Explainer возвращает готовый пользовательский текст и
-достаточно короткий source basis, чтобы parent проверил смысл, факты и
-provenance. Никакой фиксированный output envelope не нужен.
+Direct и delegated caller получают один publication-ready result contract.
+Source refs размещаются рядом с claims либо возвращаются коротким source basis,
+чтобы caller мог проверить смысл, факты и provenance. Фиксированный output
+envelope не нужен.
+
+Один invocation обслуживает один самостоятельный user-facing result: Task
+comment/report, material decision/state explanation, blocker report или final.
+Routine chat, progress commentary и внутренний draft не являются publication
+unit. Новый вопрос, changed facts/scope либо correction получают новый clean
+subagent; старый candidate не передаётся как framing.
 
 ## 6. Проверка понимания
 
@@ -214,20 +231,25 @@ provenance. Никакой фиксированный output envelope не ну�
 
 Работа завершена, когда:
 
+- admission подтвердил доступные признаки одного compact task и clean context;
+- invalid invocation завершился точным отказом до discovery, а не частичным
+  explanation;
 - проблема и desired outcome не выдуманы;
 - каждое material утверждение опирается на current facts или exact source;
 - каждый decision-relevant факт сохранён либо исключён только как не влияющий
   на problem, outcome, impact/risk, action или confidence;
 - fact, interpretation, failure, unknown и not-applicable различимы;
-- discovery, если он был, остался bounded и read-only;
+- discovery самостоятельно собрал нужные facts и strategic context, остался
+  bounded и read-only;
 - explanation не создаёт status, permission или action, которого источник не
   устанавливал;
 - первый смысловой слой отвечает на исходный вопрос на его уровне абстракции и
   остаётся понятным без идентификаторов и внутренней терминологии;
 - читатель может своими словами восстановить проблему, результат или
   препятствие, влияние и следующий шаг без process diary;
-- delegated result пригоден для публикации без стилистической переработки
-  основным агентом;
+- первый слой передаёт одну главную причинную мысль без необязательной воды, а
+  второй существует только при material need;
+- result пригоден для публикации без стилистической переработки caller-ом;
 - при явной редактуре масштаб правки соответствует состоянию исходника, новая
   структура читается естественно, а обратная проверка подтверждает сохранность
   смыслового ядра без новых решений;

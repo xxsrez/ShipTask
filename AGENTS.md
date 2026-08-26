@@ -117,6 +117,14 @@ manifest/install/byte-identity правила остаются repository-level 
   приоритет и сохраняется по смыслу; root agent не входит в явно названное число
   субагентов; если effective rule не отключает comment Explainer, каждый
   комментарий проходит отдельного независимого Strategic Explainer; каждый
+  Strategic Explainer publication unit — comment, Task/scope report, blocker
+  explanation или final — получает нового built-in `default` subagent с
+  `fork_turns="none"`, одной compact task и resolvable read-only anchors без
+  inherited turns/tool transcript/process diary/caller candidate; Explainer до
+  discovery проверяет invocation, invalid call получает automatic corrected
+  fresh retry, а candidate blocker до публикации становится reflection input
+  ShipTask для повторной проверки safe frontier без расширения scope/authority;
+  каждый
   одновременно пишущий implementation
   subagent получает собственные feature branch и Git worktree, не разделяемые с
   другим writer; после interruption или смены сессии доказанно task-owned

@@ -41,6 +41,10 @@
   отдельного независимого Explainer, пока effective user topology rule не
   отключает эту роль. Тогда основной агент применяет quality contract напрямую
   и не заявляет о независимой проверке.
+- Каждый Explainer publication unit запускайте новым built-in `default`
+  subagent с `fork_turns="none"`, одной compact task и resolvable read-only
+  anchors без inherited conversation/tool transcript/process diary/candidate.
+  Invalid invocation исправляется новым clean call, а не follow-up старому.
 - Обычный переход `To Do → In Progress` не создаёт комментарий и поэтому не
   запускает Strategic Explainer.
 - Не добавляйте fallback task provider. Task Manager остаётся единственным
@@ -70,8 +74,9 @@ boundaries. Проверка не должна требовать конкрет
 числа tool calls вместо observable behavior. Evals проверяют automatic default,
 сохранение natural-language exact/relative/role/conditional rules,
 writer/worktree isolation и отдельного Strategic Explainer при разрешённой роли,
-но не навязывают topology formula, fork mode, prompt envelope, retry count или
-число alternatives. Auto-title является отдельным best-effort UI convenience:
+а для Explainer также exact clean `fork_turns="none"` admission,
+self-discovery и один publication unit на invocation; вне этого invariant они не
+навязывают topology formula, tool sequence или число alternatives. Auto-title является отдельным best-effort UI convenience:
 проверяются попытка только при доказанной first-turn eligibility, сохранение
 meaningful title, отсутствие fallback при недоступной capability и адресация
 только calling task.
@@ -123,6 +128,10 @@ skill, реалистичный exact Task Manager scope и обычный proje
 - `To Do → In Progress` проходит без comment и без Strategic Explainer;
 - готовый candidate получает независимо подготовленный Strategic Explainer
   comment и read-back до `In Review`;
+- каждый comment/Task-or-scope report/blocker/final получает отдельный clean
+  Explainer; candidate blocker перед публикацией становится reflection input,
+  после которого ShipTask заново проверяет safe frontier и продолжает при
+  подтверждённом пути;
 - proven defect немедленно виден в chat, получает opening comment до repair и
   `In Progress`, после чего rework продолжается в том же run;
 - доказанный authenticated product hang остаётся product incident при сбое

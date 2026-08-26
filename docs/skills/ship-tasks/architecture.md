@@ -1,6 +1,6 @@
 # ShipTask: канонический контракт
 
-Статус: current Level 2 contract, 2026-08-25. Применимые Level 1 requirements —
+Статус: current Level 2 contract, 2026-08-26. Применимые Level 1 requirements —
 `ST-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Основан на
@@ -12,6 +12,8 @@ reporting contract уточнён
 [ADR-0021](../../decisions/0021-requirements-as-agent-constitution.md), а явное
 требование независимого Strategic Explainer для каждого комментария —
 [ADR-0022](../../decisions/0022-mandatory-independent-strategic-explainer-for-comments.md),
+а clean stateless API и blocker reflection —
+[ADR-0029](../../decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md),
 а automatic default, natural-language topology rules и writer/worktree isolation —
 [ADR-0024](../../decisions/0024-adaptive-multi-agent-execution-by-default.md), а
 cost-aware выбор профиля субагента и обязательная эскалация Luna —
@@ -510,15 +512,31 @@ ledger даже при последующем `verified-success`.
 - альтернативы только когда реальный выбор materially меняет authority, risk,
   cost или доказательную силу, с понятным trade-off.
 
-Report появляется в Codex chat и в native Task Manager comment до ожидания
-пользователя. Он проходит отдельного Strategic Explainer, если эта роль не
-отключена; Explainer сравнивает grounded варианты и формулирует рекомендацию,
-но не получает authority на mutation или status decision. Агент явно называет,
-какая safe работа продолжается и какое exact resume condition разблокирует
-criterion. После этого он сообщает, что приёмка не завершена и product bug не
-установлен, публикует и перечитывает opening/blocker comment; Task остаётся
-`In Review`. Для одного shared gate используется один консолидированный report,
-а не повторяющиеся comments.
+До окончательного blocker claim ShipTask запускает fresh Strategic Explainer для
+candidate report и перечитывает его explanation/source basis как независимый
+reflection input. Он повторно проверяет исходную цель, primary/cascade cause,
+applicable Task/Epic/Release/Project context и всю безопасную in-scope
+diagnostic/repair/verification/reconciliation frontier. Explainer сравнивает
+grounded варианты и формулирует recommendation, но не получает authority на
+mutation, scope или status decision; найденный путь становится действием только
+после проверки ShipTask по current sources и acceptance.
+
+Если reflection открывает достаточный безопасный путь, candidate blocker не
+публикуется, status не фиксируется как blocked и работа продолжается. Любой
+следующий material user-facing result получает новый clean invocation. Если
+пути нет, ShipTask заново формирует current blocker report, публикует его в Codex
+chat и native Task Manager comment до ожидания пользователя и перечитывает
+comment; Task остаётся `In Review`. Report называет safe работу и exact resume
+condition. Для одного materially неизменившегося blocker state выполняется один
+reflection pass; повтор допустим после changed facts/candidate/scope/evidence
+либо исправления invalid invocation. Для shared gate используется один
+консолидированный report, а не повторяющиеся comments.
+
+Доказанный material incident остаётся немедленно видимым по `ST-08`: если его
+нужно сообщить до завершения reflection, отдельный fresh publication unit
+описывает только установленный incident и продолжающуюся проверку, не утверждая
+преждевременно terminal blockage всего Release. Resolution либо настоящий
+blocker затем получают собственный fresh result.
 
 ### 5.4 Доказанный успех (`verified-success`)
 
@@ -604,14 +622,22 @@ Task Manager, который создаёт ShipTask, обязательно п�
 Strategic Explainer. Это явное требование к независимой смысловой проверке, а не
 способ, который основной агент может молча заменить собственной редактурой.
 
-ShipTask сам отвечает за факты, статус, границы задачи, полномочия, способ
-исправления и итог. Перед комментарием он передаёт отдельному read-only
-субагенту самодостаточную постановку проблемы, текущие факты, доказательства,
-границу знания, пользовательское влияние и разрешённый следующий шаг. Для
-`verification-blocked` вход дополнительно содержит self-service frontier,
-проверенные synthetic fixtures, оставшийся authority gap, feasible test paths,
-их prerequisites и success signals. Журнал инструментов и ход реализации в
-этот контекст не входят.
+Каждый comment, отдельный Task/scope report, blocker report и final является
+самостоятельным publication unit. Для него ShipTask создаёт новый built-in
+`default` read-only subagent с `fork_turns="none"`; direct и delegated API не
+различаются. Invocation содержит одну compact task, exact scope и resolvable
+read-only anchors к session, Task/relations, evidence, project/repository docs и
+candidate. Previous conversation, tool transcript, process diary, ShipTask
+rationale, strategic summary и готовый candidate не передаются. Routine chat и
+progress updates этот API не запускают.
+
+ShipTask сам отвечает за фактическое состояние, status, границы задачи,
+полномочия, способ исправления и итог, но не обязан предварительно писать за
+Explainer factual/strategic narrative. После admission Explainer сам читает
+current facts и поднимается от exact Task/result через применимые Epic, Release,
+Project и product goal. Exact anchors должны позволять этот поиск; отсутствие
+разрешимого source является invocation defect или честным material gap, а не
+поводом передать весь journal.
 
 Strategic Explainer возвращает готовый текст на языке пользователя и короткое
 основание для проверки фактов. Обычный текст связывает проблему, фактический
@@ -625,22 +651,24 @@ Strategic Explainer возвращает готовый текст на язык
 действие.
 
 Основной агент проверяет текст по исходным фактам. Если обнаружена ошибка или
-потерян существенный факт, он исправляет вход и повторяет независимую
-адаптацию. Самостоятельно переписать черновик и признать его прошедшим
-Strategic Explainer нельзя. Если субагент недоступен или не дал пригодный текст,
-комментарий не публикуется, а связанный переход остаётся незавершённым. Если
-effective user rule отключает Explainer, отдельный проход не запускается:
-основной агент сам применяет этот quality contract и честно сохраняет отсутствие
-независимой проверки.
+потерян существенный факт, он исправляет source/anchor или compact task и
+создаёт новый fresh invocation. Если Explainer отклонил context как
+унаследованный, многословный, неоднозначный или иначе invalid, ShipTask
+автоматически исправляет названную причину и повторяет вызов новым subagent;
+follow-up старому запрещён. Повторный structural failure после исправления
+является orchestration failure. Самостоятельно переписать candidate и признать
+его прошедшим Explainer нельзя. Если субагент недоступен или не дал пригодный
+текст, комментарий не публикуется, а связанный transition остаётся
+незавершённым. Если effective user rule отключает Explainer, отдельный проход не
+запускается: основной агент сам применяет тот же quality contract и честно
+сохраняет отсутствие независимой проверки.
 
 Финальный ответ готовится отдельно от Task-комментариев и отвечает на исходную
-цель всего run. После перечитывания фактов ShipTask передаёт Strategic Explainer
-самодостаточный чистый пакет: исходный запрос пользователя, общий результат,
-доказанное и непроверенное, влияние, основную причину, уже выполненные
-исправления, инциденты и точное условие продолжения. Технический журнал и прежняя
-формулировка основного агента не передаются. Сводный ответ нельзя собирать
-склейкой готовых комментариев: Explainer заново строит одну причинную историю на
-уровне всего выбранного scope.
+цель всего run. После перечитывания authoritative state ShipTask создаёт новый
+clean invocation с исходным вопросом, exact scope и source anchors всего run.
+Сводный ответ нельзя собирать склейкой готовых комментариев или передачей
+предыдущего draft: Explainer сам перечитывает facts и заново строит одну
+причинную историю на уровне выбранного scope.
 
 Если итог содержит сложный сбой, несколько независимых инцидентов или сводный
 результат нескольких Tasks, отдельный read-only читатель получает только
@@ -921,6 +949,13 @@ verification, comments и read-back. При отсутствии approval Task �
 Перед финальным ответом агент перечитывает affected Tasks, comments, statuses,
 применимый Goal и обязательные external effects. Если есть безопасный in-scope
 способ устранить gap, он делает это до handoff.
+
+Каждый unresolved blocker в этом перечитывании должен иметь completed reflection
+по `ST-28` на current facts. ShipTask не использует wording Explainer как
+evidence: он независимо проверяет любую найденную alternative frontier и либо
+продолжает работу, либо подтверждает, что candidate blocker остался действующим.
+Changed facts после reflection аннулируют прежний candidate report и требуют
+нового clean publication unit.
 
 Run report сначала проходит scope-level Strategic Explainer по разделу 6 и
 начинается с прямого ответа на исходную цель. Простым языком он сообщает:

@@ -1,6 +1,6 @@
 # Strategic Explainer: требования пользователя
 
-Статус: current Level 1, 2026-08-24.
+Статус: current Level 1, 2026-08-26.
 
 Этот документ — полный пользовательский исходный код только для
 `$strategic-explainer`. Он не определяет требования к ShipTask или Task
@@ -29,13 +29,23 @@ gap называется прямо с объяснением, какой input 
 придуманным смыслом. Найденный source может уточнить meaning, но не выбрать цель
 за caller или пользователя.
 
-### `SE-02` — Grounded strategic view
+### `SE-02` — Самостоятельный grounded strategic view
 
-Current facts и materially relevant sources образуют основание объяснения.
+После приёмки вызова Explainer сам собирает current facts и materially relevant
+sources доступными read-only способами, а не получает от caller готовую
+интерпретацию или пересказ его хода работы. Поиск начинается с exact scope и
+поднимается через применимые Task, parent/Epic, Release, Project, product goal,
+vision, current specification и accepted decisions, пока не станет понятно,
+зачем выполняется локальная работа и что её результат означает для исходного
+outcome. Caller передаёт короткую задачу и разрешимые source anchors, но не
+захламляет context своими рассуждениями, process diary или готовой формулировкой.
+
 Current/accepted, proposed и historical context не смешиваются; design не
 переписывает наблюдаемый execution outcome. Discovery остаётся bounded declared
-scope и заканчивается, когда дополнительный context больше не меняет meaning;
-отсутствие необязательного strategic source не создаёт false blocker.
+scope и заканчивается, когда более высокий context уже не меняет problem,
+outcome, impact/risk, action или confidence. Отсутствие необязательного
+strategic source не создаёт false blocker, а найденная стратегия не расширяет
+scope или authority.
 
 ### `SE-03` — Lossless by relevance
 
@@ -87,13 +97,27 @@ Material claims имеют проверяемое основание. Direct res
 для проверки meaning и uncertainty. Material conflict или missing mandatory
 source не сглаживаются уверенной формулировкой.
 
-### `SE-10` — Свобода формы
+### `SE-10` — Единый stateless API и чистый вызов
 
-Direct/delegated invocation, agent topology, context envelope, tool sequence,
-retry count, длина и визуальная форма не являются требованиями сами по себе.
-Table, flow или diagram используются только когда materially улучшают понимание.
-Проверяется независимость meaning, grounding и result, а не конкретный
-`fork_turns`, поля handoff или служебные error tokens.
+Direct и delegated use являются одним API без исключений по caller: каждый
+самостоятельный invocation выполняется новым built-in `default` subagent с
+`fork_turns="none"`. В model context находятся только system/developer/skill
+instructions и одна короткая, ёмкая, однозначная задача с exact scope или
+разрешимыми source anchors. Унаследованные turns, tool transcript, process diary,
+прежний candidate, рассуждения caller и несколько смешанных задач запрещены.
+
+До discovery Explainer проверяет наблюдаемую чистоту context, компактность и
+однозначность задачи, доступный fork metadata и достаточность anchors. Если
+вызов не соответствует contract, Explainer ничего не анализирует и возвращает
+короткий отказ: что именно нарушено и как создать правильный fresh invocation.
+Caller исправляет причину и вызывает новый экземпляр; продолжать загрязнённый
+subagent или передавать ему corrective follow-up нельзя. Если platform не
+показывает fork metadata, Explainer проверяет только доступные признаки и не
+утверждает, что доказал скрытый mode.
+
+За пределами этого явного isolation invariant tool sequence, форма source note,
+внутренний reasoning, длина и визуальная форма остаются свободными. Table, flow
+или diagram используются только когда materially улучшают понимание.
 
 ### `SE-11` — Publication-ready и пропорциональный result
 
@@ -104,6 +128,14 @@ failure сохраняет необходимую причинность. Delega
 caller проверяет факты, но не переписывает одобренный текст обратно на своём
 техническом языке. При factual error или потерянном material fact исправляется
 вход и explanation строится заново.
+
+Первый слой формулирует одну главную причинную мысль и по возможности исчерпывает
+ответ одной фразой. Наличие сути имеет высший приоритет; отсутствие воды,
+повторов, служебной лексики и необязательных деталей — следующий по важности.
+Только после этого допускается короткий второй слой: почему возникла причина,
+какой material факт её подтверждает, что нужно для исправления и как выглядит
+success. Полная глубина исследования не превращается в полный отчёт о найденном
+context.
 
 ### `SE-12` — Общий переносимый communication skill
 
@@ -153,6 +185,22 @@ Explainer отвечает на исходный вопрос пользоват
 следующий шаг. Если для такого пересказа приходится знать внутреннюю предметную
 область, расшифровывать английское смысловое ядро или собирать причинность из
 технических деталей, результат не завершён.
+
+### `SE-15` — Один пользовательский результат на fresh invocation
+
+Explainer применяется к самостоятельной формулировке, которая действительно
+попадёт человеку: Task comment, отчёту по Task или scope, объяснению material
+решения/состояния, blocker report либо финальному ответу. Обычный разговор,
+рабочая переписка, промежуточный progress update и внутренний черновик не
+запускают этот API. Единицей является один целостный пользовательский результат,
+а не предложение, абзац или технический слой ответа.
+
+Каждый такой результат, новый вопрос, changed facts/scope и повтор после
+factual/comprehension error получают новый clean invocation. Старый subagent не
+продолжается и его candidate не передаётся следующему как framing. Исключение по
+содержимому входа существует только для явной задачи отредактировать или
+проверить конкретный текст: тогда этот текст является предметом fresh invocation,
+а не унаследованным process context.
 
 ## Изменение Level 1
 

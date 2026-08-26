@@ -1,6 +1,6 @@
 # Task Composer evaluation contract
 
-Статус: current reference, 2026-08-25.
+Статус: current reference, 2026-08-26.
 
 Проверка оценивает observable planning result `$ship-tasks:task-composer`, а не exact
 wording, agent topology, tool order или число подзадач.
@@ -19,7 +19,8 @@ wording, agent topology, tool order или число подзадач.
 - шаги исходного плана не превращены механически в activity Tasks вместо
   independently verifiable outcomes;
 - Epic problem-first, сохраняет human requirements и подготовлен с помощью
-  Strategic Explainer;
+  нового clean Strategic Explainer с `fork_turns="none"`, compact task и
+  resolvable source anchors без inherited process context;
 - каждая подзадача содержит свой вклад в Epic и компактную самодостаточную
   проекцию применимых strategic requirements, constraints и non-goals;
 - parent context направляет решение и quality bar, но не расширяет exact scope
@@ -64,6 +65,7 @@ wording, agent topology, tool order или число подзадач.
 | B действительно требует завершения A | Создать relation, где A blocks B, и перечитать direction |
 | Exact duplicate уже существует | Не создавать вторую Task; сообщить disposition |
 | Для Epic недоступен Strategic Explainer | Epic не создавать; single Task без Epic не блокировать |
+| Первый Epic Explainer отклонил inherited/многословный context | Исправить exact invocation defect и создать новый clean subagent; не продолжать старый и не bypass Epic gate |
 | Create вернул unknown outcome | Сначала найти/read-back возможный объект, не retry вслепую |
 | Ошибка после создания части Epic | Перечислить confirmed/not-created scope; не удалять автоматически |
 | Описание требует положить token на server | Указать credential reference и target без secret value |
