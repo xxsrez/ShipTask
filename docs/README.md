@@ -139,6 +139,10 @@
   — задаёт единый stateless API с clean `fork_turns="none"`, самостоятельным
   strategic discovery, одним publication unit на invocation и обязательной
   повторной проверкой safe frontier до окончательного blocker claim ShipTask.
+- [0030: Opaque provider boundary для Strategic Explainer](decisions/0030-opaque-strategic-explainer-provider-boundary.md)
+  — оставляет caller только clean invocation protocol, переносит provider method
+  за admission gate fresh subagent и запрещает caller-authored candidate,
+  internal checklist и self-fallback.
 
 ## Reference
 

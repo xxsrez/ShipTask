@@ -21,6 +21,9 @@ wording, agent topology, tool order или число подзадач.
 - Epic problem-first, сохраняет human requirements и подготовлен с помощью
   нового clean Strategic Explainer с `fork_turns="none"`, compact task и
   resolvable source anchors без inherited process context;
+- Task Composer знает только opaque client protocol: не читает provider-internal
+  contract, не пишет explanation candidate, не передаёт format/method rules и
+  не улучшает ready result самостоятельно;
 - каждая подзадача содержит свой вклад в Epic и компактную самодостаточную
   проекцию применимых strategic requirements, constraints и non-goals;
 - parent context направляет решение и quality bar, но не расширяет exact scope
@@ -66,6 +69,7 @@ wording, agent topology, tool order или число подзадач.
 | Exact duplicate уже существует | Не создавать вторую Task; сообщить disposition |
 | Для Epic недоступен Strategic Explainer | Epic не создавать; single Task без Epic не блокировать |
 | Первый Epic Explainer отклонил inherited/многословный context | Исправить exact invocation defect и создать новый clean subagent; не продолжать старый и не bypass Epic gate |
+| Caller пытается сам применить методику Explainer или передать готовый strategic draft | Не читать provider contract; удалить leaked framing и создать новый clean opaque invocation |
 | Create вернул unknown outcome | Сначала найти/read-back возможный объект, не retry вслепую |
 | Ошибка после создания части Epic | Перечислить confirmed/not-created scope; не удалять автоматически |
 | Описание требует положить token на server | Указать credential reference и target без secret value |

@@ -36,11 +36,13 @@
    новое требование пользователя. Дополнительные локальные design/reference/
    evaluation документы допустимы, но не создают второй current contract.
 3. **Level 3 — runtime skills.**
-   `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и
-   `strategic-explainer/SKILL.md` являются компактной исполнимой проекцией Level
-   1 и применимой части Level 2. Формулировка и структура могут отличаться от
-   документации, но агент в runtime должен получить весь применимый смысл Level
-   1 и нести его без семантических потерь.
+   `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и runtime package
+   `strategic-explainer/` являются компактной исполнимой проекцией Level 1 и
+   применимой части Level 2. У Strategic Explainer caller-visible `SKILL.md`
+   содержит только router/admission contract, а provider expertise находится в
+   reference, который читает лишь admitted fresh subagent. Формулировка и
+   структура могут отличаться от документации, но runtime package должен нести
+   весь применимый смысл Level 1 без семантических потерь.
 
 При конфликте всегда побеждает Level 1. Level 2 нельзя использовать как
 основание удалить, сузить или молча переопределить пользовательское требование.
@@ -124,6 +126,11 @@ manifest/install/byte-identity правила остаются repository-level 
   discovery проверяет invocation, invalid call получает automatic corrected
   fresh retry, а candidate blocker до публикации становится reflection input
   ShipTask для повторной проверки safe frontier без расширения scope/authority;
+  caller знает только opaque client protocol, не читает provider-internal
+  contract, не пишет candidate, не передаёт analysis/strategic summary/format
+  rules, не применяет provider method при opt-out/unavailability и не
+  переписывает ready result; только admitted fresh subagent читает внутренний
+  provider reference;
   каждый
   одновременно пишущий implementation
   subagent получает собственные feature branch и Git worktree, не разделяемые с

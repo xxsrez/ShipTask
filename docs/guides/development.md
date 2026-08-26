@@ -39,8 +39,10 @@
 - Strategic Explainer не получает право решать факты, статус, границы работы,
   полномочия или действие. Каждый комментарий ShipTask обязательно проходит
   отдельного независимого Explainer, пока effective user topology rule не
-  отключает эту роль. Тогда основной агент применяет quality contract напрямую
-  и не заявляет о независимой проверке.
+  отключает эту роль. Caller знает только opaque client protocol и не читает
+  provider-internal contract. Opt-out не переносит provider method в caller: тот
+  сообщает только обязательные facts по собственному contract без claim
+  эквивалентного качества.
 - Каждый Explainer publication unit запускайте новым built-in `default`
   subagent с `fork_turns="none"`, одной compact task и resolvable read-only
   anchors без inherited conversation/tool transcript/process diary/candidate.
@@ -165,11 +167,10 @@ skill, реалистичный exact Task Manager scope и обычный proje
 - каждая Task получает лёгкий targeted gate, а совместимые candidates периодически
   проходят один thorough review-batch gate и один UAT deploy без approval; UAT
   receipt/read-back/smoke обязателен для claims о release;
-- final report проходит отдельный scope-level Strategic Explainer, отвечает на
-  исходную цель вместо языка последней технической подзадачи и сообщает outcome,
-  proof gaps, primary cause и resume condition, но не заменяет Task comment;
-  сложный сбой, несколько инцидентов или сводный batch дополнительно проверяет
-  независимый читатель, которому видны только исходный вопрос и готовый текст.
+- final report проходит отдельный scope-level Strategic Explainer с исходным
+  вопросом и anchors всего run вместо языка последней технической подзадачи;
+  готовый provider text не заменяет Task comment, а provider method остаётся
+  скрыт от coordinator.
 
 Полная матрица:
 [lifecycle evaluation](../reference/shiptask-review-disposition-evaluation.md).

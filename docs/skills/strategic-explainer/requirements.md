@@ -15,9 +15,12 @@ scope/truth/safety/authority boundaries. Architecture и runtime могут
 остаются свободными, если точный механизм не назван здесь отдельным инвариантом.
 
 `architecture.md` хранит agent-owned current способ достижения этих требований.
-`strategic-explainer/SKILL.md` является компактной смысловой компиляцией обоих
-файлов. Если runtime удалить и пересобрать из них, новый skill должен быть
-примерно эквивалентен по всем требованиям `SE-*` и выбранной архитектуре.
+Runtime package `strategic-explainer/` является компактной смысловой компиляцией
+обоих файлов. Видимый caller-у `SKILL.md` содержит только routing/admission
+contract, а provider expertise загружается из внутреннего reference только
+после подтверждения fresh-subagent boundary. Если runtime удалить и пересобрать
+из этих документов, новый package должен быть примерно эквивалентен по всем
+требованиям `SE-*` и выбранной архитектуре.
 
 ## Требования
 
@@ -201,6 +204,35 @@ factual/comprehension error получают новый clean invocation. Ста
 содержимому входа существует только для явной задачи отредактировать или
 проверить конкретный текст: тогда этот текст является предметом fresh invocation,
 а не унаследованным process context.
+
+### `SE-16` — Изоляция provider expertise от caller
+
+Вызывающий агент знает только opaque client protocol: когда нужен Explainer,
+как создать новый built-in `default` subagent с `fork_turns="none"`, какие
+compact task/scope/read-only anchors допустимы и как обработать готовый result
+или отказ. Он не получает, не читает и не применяет внутренние правила
+strategic discovery, построения причинного объяснения, редакторской
+реконструкции или проверки понимания.
+
+Runtime использует progressive disclosure. Catalog metadata и `SKILL.md`
+остаются routing/admission layer без provider method. Полный внутренний
+provider contract читает только новый subagent после успешной проверки clean
+invocation. Direct request сначала проходит тот же router и не разрешает
+текущему conversational caller выполнить метод самостоятельно.
+
+Caller не пишет explanation candidate, не формулирует за provider strategic
+view, не передаёт требования к структуре ответа, не оценивает result внутренним
+quality checklist и не улучшает его самостоятельно. Он может проверить
+material factual conflict по authoritative sources; исправление facts/anchors
+получает новый clean invocation. Invalid call также исправляется только новым
+экземпляром.
+
+Если mandatory provider недоступен, publication-dependent comment или lifecycle
+effect остаётся незавершённым. Обязательный финальный ответ честно сообщает
+capability failure и фактическое состояние по собственному truth contract
+caller, но не имитирует Strategic Explainer, не применяет его метод и не
+заявляет эквивалентное качество. Явный user opt-out также не переносит provider
+expertise в caller.
 
 ## Изменение Level 1
 

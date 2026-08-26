@@ -16,9 +16,27 @@ user-facing result. Intended wording, готовая problem/strategic interpret
 caller reasoning и process diary не передаются. Direct и delegated scenario
 проверяются по одному API contract.
 
+Evaluation разделена на два runtime слоя. Caller/router проверяется только по
+client protocol и не получает provider method. Provider quality cases запускают
+уже admitted fresh subagent, который после admission читает внутренний contract.
+
 ## Критические требования
 
 Любой провал ниже означает `FAIL`.
+
+### Provider encapsulation
+
+- catalog description, metadata prompt и caller-visible `SKILL.md` не содержат
+  discovery/editorial/comprehension recipe;
+- caller с рабочим conversation context не читает provider contract, не пишет
+  candidate, не передаёт strategic summary/format rules и не имитирует
+  Explainer при opt-out/unavailability;
+- только fresh provider-subagent после успешного admission читает полный
+  internal contract;
+- caller принимает ready text/source basis либо refusal и проверяет только
+  material factual conflict по authoritative sources;
+- factual/structural correction получает новый clean invocation, а не caller
+  rewrite или follow-up прежнему subagent.
 
 ### Fresh invocation admission
 
@@ -158,6 +176,27 @@ Evaluation report сообщает `PASS | FAIL`, exact unsupported/lost claim �
 наиболее важное улучшение. Числовая score и фиксированная форма не обязательны.
 
 ## Обязательные regression cases
+
+### Caller видит только router
+
+ShipTask, Task Composer и direct conversational caller получают только opaque
+client protocol. Expected behavior: новый `default` subagent с
+`fork_turns="none"`; provider reference caller не читает, candidate не пишет и
+requirements к форме ответа не передаёт. Попытка применить discovery/output
+method в caller context получает `FAIL`.
+
+### Provider contract загружается после admission
+
+Fresh subagent получает одну compact task и anchors. Он сначала проверяет
+invocation и только после успешного admission читает internal provider contract.
+Invalid context отклоняется без загрузки expertise или анализа задачи.
+
+### Opt-out и недоступность не создают self-fallback
+
+При user opt-out caller сообщает только обязательные facts по собственному
+contract. При mandatory provider failure comment/lifecycle effect fail-closed, а
+final честно называет factual state и capability gap. Применение внутреннего
+quality contract caller-ом или claim эквивалентного качества получает `FAIL`.
 
 ### Direct и delegated caller используют один API
 

@@ -24,9 +24,11 @@ contract в exact integration candidate, даже если blocking Task ещё 
 Документация здесь является исходным кодом, причём source unit — отдельный
 skill. В [`docs/skills/<skill>/`](docs/skills/README.md) у каждого skill есть
 собственные `requirements.md` (Level 1) и `architecture.md` (Level 2); требования
-трёх skills не объединяются. `SKILL.md` является компактной стохастической
-компиляцией этих двух локальных документов. Удаление и повторная сборка runtime
-из source package должны давать примерно эквивалентный по смыслу skill.
+трёх skills не объединяются. Runtime является компактной стохастической
+компиляцией этих двух локальных документов. У Strategic Explainer видимый
+`SKILL.md` содержит только router/admission layer, а provider expertise находится
+в reference для admitted fresh subagent. Удаление и повторная сборка runtime из
+source package должны давать примерно эквивалентный по смыслу package.
 
 Current requirements являются конституцией для агентов: они задают outcome,
 rationale, observable evidence и authority/safety boundaries, но оставляют
@@ -66,11 +68,12 @@ capability не блокируют delivery.
 
 Каждый комментарий, который создаёт ShipTask, до публикации проходит отдельного
 независимого `$ship-tasks:strategic-explainer`, пока effective user topology rule
-не отключило эту роль. При таком запрете тот же quality contract основной агент
-выполняет сам и не заявляет независимую проверку там, где её не было.
-Каждый Task/scope report, blocker explanation и final также является отдельным
-publication unit. Explainer сам читает current facts и strategic context по exact
-anchors; routine chat и progress updates его не запускают.
+не отключило эту роль. Каждый Task/scope report, blocker explanation и final
+также является отдельным publication unit. Caller знает только opaque protocol:
+новый clean subagent, одна короткая задача, exact scope и resolvable read-only
+anchors без analysis, method rules или candidate caller-а. Ready text не
+переписывается; opt-out/unavailability не переносят provider method в основной
+агент. Routine chat и progress updates Explainer не запускают.
 
 Приёмочный incident сообщается сразу в chat и сохраняется в Task history до
 начала repair. Opening comment остаётся видимым после исправления, resolution
@@ -97,14 +100,13 @@ independent reflection input и заново проверяет safe frontier. �
 пути stale blocker не публикуется и работа продолжается.
 Перед завершением skill сверяет обещанный и фактический результат,
 самостоятельно устраняет доступные проблемы внутри выбранной работы и только
-затем даёт компактное причинное объяснение понятным человеку языком.
+затем передаёт final publication unit отдельному Strategic Explainer.
 Пока effective topology rule не отключает comment Explainer, каждый комментарий
-ShipTask проходит отдельного `$ship-tasks:strategic-explainer`. Субагент
-переводит установленные факты и технические изменения в готовый пользовательский
-текст; основной агент проверяет точность, но не переписывает текст обратно в
-журнал реализации. Если правило отключает Explainer, основной агент применяет
-тот же quality contract напрямую без claim независимости. Explainer не выбирает
-статус, полномочия или действие и ничего не меняет; общий skill можно
+ShipTask проходит отдельного `$ship-tasks:strategic-explainer`. Основной агент
+знает только client protocol, проверяет material facts и не переписывает ready
+text. Если правило отключает Explainer, caller сообщает обязательные lifecycle
+facts по собственному contract без provider method. Explainer не выбирает
+статус, полномочия или действие и ничего не меняет; общий router можно
 использовать отдельно от ShipTask.
 Старые memory, rollout или report записи о ручной приёмке не меняют этот
 contract: обычный terminal-ready result закрывается автоматически, а существенная
@@ -131,10 +133,8 @@ context в каждой child Task. При delivery ShipTask перечитыв�
 - [`task-composer/SKILL.md`](task-composer/SKILL.md) — planning-only
   формулировка, декомпозиция и создание Task Manager scope.
 - [`strategic-explainer/SKILL.md`](strategic-explainer/SKILL.md) — общий
-  stateless problem-first discovery и communication API для direct/delegated
-  caller: fresh clean invocation, самостоятельный подъём к strategic outcome и
-  одна главная причинная мысль перед material деталями; также выполняет
-  редакторскую реконструкцию сложного текста без потери смысла.
+  router/admission layer к stateless provider-subagent; внутренний provider
+  contract загружается только после clean admission.
 - [`docs/skills/README.md`](docs/skills/README.md) — source model и независимые
   Requirements/Architecture packages для каждого skill.
 - [`docs/skills/ship-tasks/requirements.md`](docs/skills/ship-tasks/requirements.md)

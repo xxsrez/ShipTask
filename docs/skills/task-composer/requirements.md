@@ -90,19 +90,22 @@ Tasks могут ссылаться на имя credential, secret store или 
 ### `TC-09` — Strategic Explainer для каждого Epic
 
 Problem-first описание каждого Epic проходит sibling Strategic Explainer,
-который сохраняет human intent и может bounded read-only способом уточнить
-meaning, но не выбирает decomposition, metadata, writes или authority. Task
-Composer остаётся ответственным за factual accuracy и полное покрытие. Если
-grounded Explainer недоступен, Epic create не начинается; независимо допустимая
-single Task от этого не блокируется.
+который является opaque provider и не выбирает decomposition, metadata, writes
+или authority. Task Composer остаётся ответственным за factual accuracy и
+полное покрытие. Если grounded provider result недоступен, Epic create не
+начинается; независимо допустимая single Task от этого не блокируется.
 
 Каждый Epic description является отдельным пользовательским результатом и
 получает новый clean built-in `default` subagent с `fork_turns="none"`. Task
 Composer передаёт короткую задачу, exact planning scope и разрешимые source
 anchors без предыдущего диалога, process diary, собственного strategic view или
-готового candidate. Если Explainer отклоняет invocation, Task Composer исправляет
-названную причину и автоматически вызывает новый экземпляр; старый context не
-продолжается и обязательная независимость не обходится.
+готового candidate. Он не читает provider-internal contract, не передаёт
+требования к форме description, не пишет explanation draft и не применяет
+методику Explainer самостоятельно. Готовый text проверяется только на material
+factual conflict с authoritative planning sources. Если Explainer отклоняет
+invocation либо source/anchor нужно исправить, Task Composer автоматически
+вызывает новый экземпляр; старый context не продолжается, result самостоятельно
+не улучшается и обязательная независимость не обходится.
 
 ### `TC-10` — Независимая planning distribution
 

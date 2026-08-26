@@ -18,8 +18,11 @@ fresh stateless invocation и blocker reflection — в
 ## 0. Compilation contract
 
 Эта architecture вместе с локальным `requirements.md` является полным current
-source package `$strategic-explainer`. Runtime `strategic-explainer/SKILL.md` —
-производная смысловая компиляция этих двух документов: его можно удалить и
+source package `$strategic-explainer`. Runtime package — производная смысловая
+компиляция требований и architecture; он состоит из публичного
+routing/admission layer `strategic-explainer/SKILL.md` и внутреннего
+`strategic-explainer/references/provider-contract.md`. Вместе они являются
+компиляцией этих двух документов: package можно удалить и
 собрать заново, сохранив все `SE-*` и выбранную здесь реализацию примерно
 эквивалентными по наблюдаемому поведению. `product-vision.md`, ADR, reports и
 evaluations дают локальный design/rationale и evidence, но не становятся
@@ -33,9 +36,32 @@ read-only boundary и отсутствие новой authority. `SE-10` явл�
 stateless API, новый built-in `default` subagent и `fork_turns="none"`; контекст
 допускает одну compact task и resolvable anchors без inherited process state.
 
-За этой границей caller или агент выбирает tool sequence, форму source note,
-внутренний reasoning, длину и визуальную форму. Структуры и examples полезны,
-только если помогают передать смысл; они не заменяют observable result.
+За этой границей provider-subagent выбирает tool sequence, форму source note,
+внутренний reasoning, длину и визуальную форму. Caller не знает и не применяет
+эту часть architecture. Структуры и examples полезны только внутри provider,
+если помогают передать смысл; они не заменяют observable result.
+
+### 1.1 Два runtime-слоя
+
+Catalog metadata и `SKILL.md` видны routing agent, поэтому они содержат только
+client protocol и admission gate. Если текущий agent уже несёт рабочий диалог,
+ход задачи или собственные рассуждения, router запрещает читать внутренний
+provider contract и требует создать новый built-in `default` subagent с
+`fork_turns="none"`.
+
+Новый subagent сначала проверяет invocation по `SE-10`. Invalid call завершается
+refusal без загрузки expertise. Только после успешного admission он читает
+`references/provider-contract.md`, где находятся discovery, explanation,
+comprehension и editorial reconstruction. Так conversation isolation защищает
+не только входные turns, но и разделение знаний: coordinating caller не получает
+метод, ради независимости которого создан provider.
+
+Caller принимает готовый текст и source basis как opaque result. Он проверяет
+material facts по authoritative sources, но не читает provider contract, не
+формирует candidate, не запускает внутренний checklist и не переписывает output.
+Factual/structural correction всегда получает новый clean invocation. При
+mandatory unavailability caller fail-closed для comment/lifecycle publication и
+честно сообщает capability failure в обязательном final без имитации provider.
 
 ## 2. Результат и граница роли
 

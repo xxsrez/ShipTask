@@ -1,6 +1,6 @@
 # Skill source packages
 
-Статус: current repository source model, 2026-08-22.
+Статус: current repository source model, 2026-08-26.
 
 Документация в этом каталоге является исходным кодом runtime skills. Единица
 исходного кода — отдельный skill, а не repository целиком. Поэтому требования и
@@ -43,7 +43,7 @@ docs/skills/<skill>/requirements.md
                      +
 docs/skills/<skill>/architecture.md
                      ↓
-       <skill>/SKILL.md + runtime metadata
+ <skill>/SKILL.md + runtime references + metadata
                      ↓
         observable behavior and evidence
 ```
@@ -55,8 +55,14 @@ docs/skills/<skill>/architecture.md
 выбранным архитектурным решениям.
 
 Level 1 отвечает на вопрос «что обязательно должно быть истинно». Level 2 —
-«как мы сейчас это обеспечиваем». Runtime обязан компактно донести агенту оба
-уровня, но при конфликте Requirements всегда сильнее Architecture и runtime.
+«как мы сейчас это обеспечиваем». Runtime package обязан компактно донести
+исполняющему агенту оба уровня, но при конфликте Requirements всегда сильнее
+Architecture и runtime.
+
+Strategic Explainer использует progressive disclosure: `SKILL.md` доносит
+caller-у только router/admission contract, а полный provider contract находится
+в runtime reference и загружается только admitted fresh subagent. Совокупность
+этих файлов, а не один caller-visible `SKILL.md`, является его Level 3.
 
 Изменение цели, инварианта или пользовательской границы сначала меняет локальный
 `requirements.md`. Изменение способа достижения при сохранённой цели меняет

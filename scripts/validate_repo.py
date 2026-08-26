@@ -15,6 +15,9 @@ COMPOSER_SKILL = ROOT / "task-composer" / "SKILL.md"
 COMPOSER_METADATA = ROOT / "task-composer" / "agents" / "openai.yaml"
 STRATEGIC_SKILL = ROOT / "strategic-explainer" / "SKILL.md"
 STRATEGIC_METADATA = ROOT / "strategic-explainer" / "agents" / "openai.yaml"
+STRATEGIC_PROVIDER = (
+    ROOT / "strategic-explainer" / "references" / "provider-contract.md"
+)
 SKILL_SOURCES = ROOT / "docs" / "skills"
 SOURCE_INDEX = SKILL_SOURCES / "README.md"
 SHIP_REQUIREMENTS = SKILL_SOURCES / "ship-tasks" / "requirements.md"
@@ -107,6 +110,10 @@ ADR = {
             "0029",
             "0029-fresh-strategic-explainer-and-blocker-reflection.md",
         ),
+        (
+            "0030",
+            "0030-opaque-strategic-explainer-provider-boundary.md",
+        ),
     )
 }
 
@@ -121,6 +128,7 @@ CORE_FILES = (
     COMPOSER_METADATA,
     STRATEGIC_SKILL,
     STRATEGIC_METADATA,
+    STRATEGIC_PROVIDER,
     SPEC,
     COMPOSER_SPEC,
     STRATEGIC_SPEC,
@@ -396,17 +404,15 @@ def validate_ship_skill(errors: list[str]) -> None:
         "сохраняй unrelated пользовательские изменения",
         "не используй blind rollback или destructive cleanup",
         "Пока effective rule сохраняет Explainer, каждый Task Manager comment, отдельный Task/scope report",
-        "при effective opt-out сам примени quality contract без claim independence",
-        "текст самостоятельно не переписывай",
+        "opaque client protocol",
+        "Не читай и не применяй\nprovider-internal contract",
+        "текст самостоятельно не улучшай",
+        "не имитируй Explainer",
         "Обычный `To Do → In Progress` не запускает Explainer",
-        "SHIPTASK RUN REPORT",
         "Финальный ответ — новый scope-level invocation",
-        "возвращает одну главную причинную мысль",
-        "дай ему только исходную цель и готовый текст",
         "каждый Task Manager comment, отдельный Task/scope report, blocker explanation и final",
-        "одну compact task, exact scope и resolvable read-only anchors",
-        "автоматически создай новый clean subagent",
-        "одну главную причинную мысль",
+        "одну compact user-facing\ntask, exact scope и resolvable read-only anchors",
+        "Invalid invocation исправь новым\nclean subagent",
         "fresh candidate explanation/source basis",
         "достаточный путь отменяет stale blocker",
         "unchanged blocker state получает один pass",
@@ -511,7 +517,9 @@ def validate_composer_skill(errors: list[str]) -> None:
         "planning projection",
         "fork_turns=\"none\"",
         "одна compact task",
-        "новым clean subagent",
+        "новому clean subagent",
+        "Не читай provider-internal contract",
+        "текст самостоятельно не улучшай",
     )
     require(
         errors,
@@ -582,6 +590,8 @@ def validate_composer_skill(errors: list[str]) -> None:
         "Ошибка после создания части Epic",
         "Первый Epic Explainer отклонил inherited/многословный context",
         "новый clean subagent",
+        "opaque client protocol",
+        "не читает provider-internal\n  contract",
     )
     require(
         errors,
@@ -600,48 +610,144 @@ def validate_strategic_skill(errors: list[str]) -> None:
     require(
         errors,
         STRATEGIC_SKILL,
-        "Удерживай исходный вопрос",
-        "Ничего не изменяй: используй только доступные источники, которые можно читать",
-        "Не подменяй исходный вопрос технической задачей",
-        "Отличай действующее от предложенного и исторического",
-        "первый смысловой слой",
-        "английские слова не должны нести основную мысль",
-        "Проверь понимание отдельно от фактов",
-        "своими словами назвать",
-        "Если для пересказа нужна внутренняя предметная область",
-        "Не придумывай варианты ради количества",
-        "все существенные факты сохранены",
-        "готовый пользовательский текст",
-        "Перестрой текст, когда это явно запрошено",
-        "неизменяемое смысловое ядро",
-        "сопоставь новую версию с исходником в обе стороны",
-        "не добавляй новое\nрешение или полномочие",
-        "сохраняй дословно",
-        "Проверь fresh invocation",
+        "routing skill к изолированному provider-subagent",
+        "Если ты caller",
+        "Не читай `references/provider-contract.md`",
+        "нового built-in `default` subagent",
         "fork_turns=\"none\"",
-        "Inherited turns",
-        "один реальный user-facing result",
-        "самостоятельно поднимись через применимые relations",
-        "одну главную причинную мысль",
-        "Routine\nchat",
+        "одну короткую user-facing задачу",
+        "не готовь candidate",
+        "требования к форме ответа",
+        "готовый пользовательский текст с кратким source basis либо\n   operational refusal",
+        "новый provider-subagent",
+        "Если вызов invalid, не читай provider contract",
+        "Только после успешного admission полностью прочитай",
+        "Routine chat",
+    )
+    require(
+        errors,
+        STRATEGIC_PROVIDER,
+        "Внутренний контракт Strategic Explainer",
+        "читает только новый provider-subagent",
+        "Граница роли",
+        "Установи исходный вопрос и факты",
+        "Собери strategic context снизу вверх",
+        "current/accepted от proposed и historical",
+        "Первый смысловой\nслой выделяет одну главную причинную мысль",
+        "Английские слова не должны нести основную мысль",
+        "Проверь понимание",
+        "своими словами назвать",
+        "Редакторская реконструкция",
+        "неизменяемое ядро",
+        "Сопоставь новую версию с исходником в обе стороны",
+        "не добавляй решение или authority",
+        "Completion gate",
+        "готовый текст и короткое\nоснование отдельно",
     )
     text = read(STRATEGIC_SKILL)
-    for coupling in ("ShipTask", "Task Manager", "$ship-tasks", "TM-123"):
+    for coupling in ("Task Manager", "TM-123"):
         if coupling in text:
             fail(errors, f"Strategic Explainer runtime is coupled to {coupling!r}")
+    forbid(
+        errors,
+        STRATEGIC_SKILL,
+        "одну главную причинную мысль",
+        "первый смысловой слой",
+        "неизменяемое смысловое ядро",
+        "самостоятельно поднимись через применимые relations",
+    )
     require(
         errors,
         STRATEGIC_METADATA,
         'display_name: "Strategic Explainer"',
-        'short_description: "Объяснить смысл или переписать сложный текст без потерь"',
+        'short_description: "Передать объяснение отдельному чистому субагенту"',
         "$strategic-explainer",
-        "fresh stateless API",
+        "router",
         "fork_turns=none",
-        "compact user-facing задачу",
-        "сам собери read-only facts и strategic meaning",
-        "одну главную причинную мысль",
-        "перестрой target text без потери требований, фактов, исключений и границ",
+        "одну короткую user-facing задачу",
+        "resolvable read-only anchors",
         "allow_implicit_invocation: true",
+    )
+    forbid(
+        errors,
+        STRATEGIC_METADATA,
+        "одну главную причинную мысль",
+        "strategic meaning",
+        "перестрой target text",
+    )
+
+
+def validate_strategic_provider_encapsulation(errors: list[str]) -> None:
+    caller_files = (
+        SHIP_SKILL,
+        COMPOSER_SKILL,
+        HANDOFF,
+        REPORT,
+        RUN_REPORT,
+        AUTONOMY,
+        CRITICAL_REVIEW,
+        SHIP_REQUIREMENTS,
+        SPEC,
+        COMPOSER_REQUIREMENTS,
+        COMPOSER_SPEC,
+        REVIEW_MATRIX,
+        COMPOSER_EVALUATION,
+    )
+    provider_markers = (
+        "одну главную причинную мысль",
+        "первый смысловой слой",
+        "второй смысловой слой",
+        "тот же quality contract",
+        "применяет quality contract напрямую",
+        "самостоятельно поднимись через",
+        "Проверь понимание",
+        "Редакторская реконструкция",
+        "неизменяемое смысловое ядро",
+        "английские слова не должны нести",
+        "своими словами назвать",
+        "Не придумывай варианты ради количества",
+    )
+    for path in caller_files:
+        forbid(
+            errors,
+            path,
+            *provider_markers,
+            "strategic-explainer/references/provider-contract.md",
+            "../strategic-explainer/references/provider-contract.md",
+        )
+
+    if len(read(HANDOFF).splitlines()) > 90:
+        fail(errors, "ship-tasks Strategic Explainer client reference is not compact")
+
+    require(
+        errors,
+        SHIP_SKILL,
+        "opaque client protocol",
+        "Не читай и не применяй\nprovider-internal contract",
+        "не имитируй Explainer",
+    )
+    require(
+        errors,
+        COMPOSER_SKILL,
+        "Не читай provider-internal contract",
+        "не составляй explanation draft",
+        "текст самостоятельно не улучшай",
+    )
+    require(
+        errors,
+        STRATEGIC_EVALUATION,
+        "Provider encapsulation",
+        "Caller видит только router",
+        "Provider contract загружается после admission",
+        "Opt-out и недоступность не создают self-fallback",
+    )
+    require(
+        errors,
+        ADR["0030"],
+        "Opaque provider boundary для Strategic Explainer",
+        "двухслойным",
+        "Только fresh subagent после успешного admission",
+        "не включают self-fallback",
     )
 
 
@@ -983,23 +1089,23 @@ REVIEW_CASES = {
         "основной агент сам одобряет",
     ),
     "Финальный ответ по однозначному результату": (
-        "исходную цель",
-        "точные названия дать после смыслового слоя",
+        "исходный вопрос и anchors всего run",
+        "готовый provider text без caller rewrite",
         "склеить комментарии",
-        "вернуть текст к жаргону",
+        "переписать ready text",
     ),
     "Финальный ответ содержит сложный сбой, несколько инцидентов или сводный batch-результат": (
-        "отдельный читатель",
-        "результат, причину, влияние и следующий шаг",
-        "исправить фактический вход",
-        "заново провести scope-level Explainer",
-        "выдавать прямую самопроверку за независимую",
+        "compact question/scope",
+        "без caller analysis",
+        "factual conflict",
+        "новый clean invocation",
+        "internal checklist caller-ом",
     ),
-    "Финальный Explainer или читатель недоступен, но ответ пользователю уже должен быть дан": (
-        "отсутствие независимого прохода явно названо",
-        "напрямую применяет тот же стандарт",
+    "Финальный Explainer недоступен, но ответ пользователю уже должен быть дан": (
+        "отсутствие provider result явно названо",
+        "factual state и capability gap",
         "оставить пользователя без ответа",
-        "непроведённой проверке как о выполненной",
+        "непроведённом provider result как о выполненном",
     ),
     "Массовая имплементация минимум двух Tasks": (
         "batch-implementation",
@@ -1057,8 +1163,8 @@ REVIEW_CASES = {
     ),
     "Общий prompt `не используй субагентов`": (
         "ноль subagents",
-        "напрямую применяет quality contract",
-        "comment subagent",
+        "не применяет provider method",
+        "имитировать Strategic Explainer",
     ),
     "Prompt `используй ровно три субагента`": (
         "ровно 3 subagents сверх root",
@@ -1123,7 +1229,7 @@ def validate_source_layers(errors: list[str]) -> None:
     packages = (
         (SHIP_REQUIREMENTS, "ST", 28),
         (COMPOSER_REQUIREMENTS, "TC", 11),
-        (STRATEGIC_REQUIREMENTS, "SE", 15),
+        (STRATEGIC_REQUIREMENTS, "SE", 16),
     )
     for requirements, prefix, count in packages:
         requirement_ids = re.findall(
@@ -1174,7 +1280,7 @@ def validate_source_layers(errors: list[str]) -> None:
         "Goal хранит его идентичность и правило отбора",
         "Доказанный сбой продукта описывается раньше проблем с браузером",
         "Пользователь может обычным языком изменить это правило",
-        "запретить всех\nсубагентов, отключить только Strategic Explainer",
+        "запретить всех\nсубагентов или отключить только Strategic Explainer",
         "Пользователь может обычным языком задать обязательное правило "
         "делегации",
         "точное или относительное число субагентов",
@@ -1276,6 +1382,9 @@ def validate_source_layers(errors: list[str]) -> None:
         "сам собирает current facts",
         "одну главную причинную мысль",
         "Один пользовательский результат на fresh invocation",
+        "Изоляция provider expertise от caller",
+        "opaque client protocol",
+        "не получает, не читает и не применяет внутренние правила",
     )
     forbid(
         errors,
@@ -1462,7 +1571,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "Только integration\nowner выполняет fan-in",
         "Role-scoped rule меняет только названную роль",
         "effective смысл и\nподтверждают соблюдение либо material deviation",
-        "сохраняет отсутствие независимой\nпроверки",
+        "не читает и не имитирует provider method",
         "### 5.5 Критическая приёмка по кодовой базе",
         "every remaining blocker needs a human verifier, not an unlocker",
         "ровно одного read-only subagent role `critic`",
@@ -1546,12 +1655,12 @@ def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         RUN_REPORT,
-        "исходную цель пользователя и чистый набор установленных",
-        "Первый смысловой слой прямо отвечает на исходный вопрос",
-        "видит только\nисходную цель и готовый ответ",
-        "возвращает свой пересказ",
-        "не редактирует текст и не меняет факты",
-        "публикует прошедший смысловой слой без возврата к\nвнутреннему жаргону",
+        "authoritative source anchors и factual inventory",
+        "opaque client protocol",
+        "требования к форме ответа",
+        "проверяется только на material factual conflict",
+        "не применяет внутреннюю методику provider",
+        "не имитируя Strategic Explainer",
         "краткий перечень существенных инцидентов, включая уже исправленные",
         "передача задачи с Luna на текущий профиль",
         "подхваченная незавершённая работа или невозможность безопасно продолжить её",
@@ -1617,16 +1726,15 @@ def validate_current_contract(errors: list[str]) -> None:
     require(
         errors,
         HANDOFF,
-        "Пока действующее правило пользователя о субагентах не отключает Explainer",
-        "Если правило отключает Explainer",
-        "отдельного субагента",
-        "не переписывает текст обратно",
-        "эта смысловая задача наследует текущую модель и глубину рассуждений",
-        "Для `critical-codebase-accepted`",
-        "не проводилась и Task закрывается по независимой критической проверке",
-        "Уровень исходного вопроса",
-        "Проверка понимания",
-        "получает\nтолько исходный вопрос и готовый текст",
+        "Opaque client protocol Strategic Explainer",
+        "Внутренняя expertise принадлежит\nprovider-subagent",
+        "нового built-in `default` read-only subagent",
+        "одну короткую user-facing задачу",
+        "Не читай provider-internal reference",
+        "Готовый пользовательский текст и короткий source basis",
+        "Caller не использует internal quality checklist",
+        "opt-out также не переносит provider method",
+        "Reflection до blocker",
     )
     require(
         errors,
@@ -2162,6 +2270,7 @@ def current_task_source_files() -> tuple[Path, ...]:
         ADR["0024"],
         ADR["0025"],
         ADR["0026"],
+        ADR["0030"],
     )
 
 
@@ -2234,6 +2343,7 @@ def main() -> int:
         validate_ship_skill(errors)
         validate_composer_skill(errors)
         validate_strategic_skill(errors)
+        validate_strategic_provider_encapsulation(errors)
         validate_trigger_matrix(errors)
         validate_composer_trigger_matrix(errors)
         validate_review_matrix(errors)

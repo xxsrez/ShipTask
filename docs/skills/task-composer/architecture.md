@@ -210,15 +210,17 @@ sibling `$ship-tasks:strategic-explainer`. Каждый Epic description явл�
 отдельным publication unit: Task Composer создаёт новый built-in `default`
 subagent с `fork_turns="none"` и передаёт одну compact task, exact planning scope
 и resolvable read-only anchors. Унаследованный диалог, tool transcript, process
-diary, готовый strategic view и прежний candidate не передаются. Explainer сам
-читает current facts и applicable higher context, но не выбирает Project,
-decomposition, status, labels, relations или write authority.
+diary, готовый strategic view и прежний candidate не передаются. Explainer
+остаётся opaque provider и не выбирает Project, decomposition, status, labels,
+relations или write authority. Task Composer не читает provider-internal
+contract, не пишет description candidate и не передаёт требования к тому, как
+provider должен анализировать или формулировать result.
 
 Если Explainer отклоняет invocation, Task Composer исправляет указанную причину
 и создаёт новый clean subagent; follow-up старому экземпляру не используется.
-Проверяется и isolation contract, и результат: Epic легко читается, сохраняет
-human intent, отделяет факт от предположения и объясняет концепцию без tactical
-process diary.
+Готовый text проверяется только на material factual conflict с authoritative
+planning sources. Factual correction также получает новый clean invocation;
+caller не читает internal quality checklist и не улучшает text самостоятельно.
 
 Основной Task Composer остаётся ответственным за factual accuracy, полноту
 coverage и соответствие подготовленной hierarchy. Если Strategic Explainer

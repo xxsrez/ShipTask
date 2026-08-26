@@ -96,8 +96,8 @@ ADR-0024.
   Explainer, до публикации проходит отдельного независимого субагента;
 - каждый Task/scope report, blocker explanation и final получает отдельный fresh
   `fork_turns="none"` invocation; routine chat/progress его не запускает;
-- Explainer получает compact task и exact source anchors, сам читает current
-  facts и поднимается через applicable Epic/Release/Project к исходной цели;
+- Caller передаёт только compact task, exact scope и resolvable source anchors,
+  не читает provider contract, не пишет candidate и не улучшает ready text;
 - material blocker также получает comment, даже без status change;
 - native comments являются гарантированной adapter capability и всегда
   сопровождают material lifecycle reporting;
@@ -184,9 +184,10 @@ comment может завершить Task как weaker `critical-codebase-acce
 Ответ в Codex, Goal, reason code или `description` comment не заменяют.
 Существенный status transition считается завершённым только при фактическом
 comment и read-back; технический путь к этому результату выбирает агент.
-До публикации текст готовит отдельный Strategic Explainer, а основной агент
-проверяет его фактическую точность. При effective запрете comment Explainer тот же quality
-contract применяется без отдельного субагента.
+До публикации text готовит отдельный Strategic Explainer, а основной агент
+проверяет только material factual conflict. При effective opt-out основной агент
+сообщает необходимые lifecycle facts по собственному truth contract без
+provider method или claim эквивалентного качества.
 
 ## Приёмка
 
@@ -258,6 +259,7 @@ smoke evidence. Отсутствующий UAT receipt — proof gap, а не ve
 - [Видимые приёмочные инциденты и обязательные comments](decisions/0020-visible-acceptance-incidents-and-required-comments.md)
 - [Требования как конституция для агентов](decisions/0021-requirements-as-agent-constitution.md)
 - [Независимый Strategic Explainer для каждого комментария](decisions/0022-mandatory-independent-strategic-explainer-for-comments.md)
+- [Opaque provider boundary Strategic Explainer](decisions/0030-opaque-strategic-explainer-provider-boundary.md)
 - [Automatic delegation, natural-language topology rules и writer isolation](decisions/0024-adaptive-multi-agent-execution-by-default.md)
 - [Cost-aware профили субагентов](decisions/0025-cost-aware-subagent-profiles.md)
 - [Периодические UAT batch releases](decisions/0026-periodic-uat-batch-releases.md)
@@ -270,7 +272,8 @@ smoke evidence. Отсутствующий UAT receipt — proof gap, а не ve
 - [Task Composer Architecture](skills/task-composer/architecture.md)
 - [Task Composer как planning sibling-skill](decisions/0023-task-composer-as-planning-sibling.md)
 
-Runtime sources — `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и
-`strategic-explainer/SKILL.md`. Plugin distribution и installed cache должны
-быть byte-identical repository source; standalone user-level copies не
-используются.
+Runtime sources — `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и package
+`strategic-explainer/`: caller-visible `SKILL.md` является router/admission
+layer, а provider expertise находится в reference, который читает только fresh
+subagent после admission. Plugin distribution и installed cache должны быть
+byte-identical repository source; standalone user-level copies не используются.
