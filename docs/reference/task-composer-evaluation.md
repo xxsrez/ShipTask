@@ -32,9 +32,9 @@ wording, agent topology, tool order или число подзадач.
   а не независимо допустимую single Task;
 - technical specifics, acceptance criteria и evidence находятся в применимых
   подзадачах, а secret values отсутствуют;
-- каждый осмысленный attachment из bug report сохранён как native attachment
-  применимой Task; screenshot с проявлением бага считается осмысленным по
-  умолчанию и не заменяется пересказом, local path или temporary URL;
+- каждый уместный attachment из bug report сохранён как native attachment
+  применимой Task; уместность screenshot и любого другого файла обоснована его
+  содержанием, связью с Task и пользой исполнителю, а не типом или форматом;
 - созданные Tasks подтверждены в `Backlog`;
 - Release назначен только при однозначном current или explicit выборе, а его
   отсутствие не блокирует create;
@@ -59,7 +59,8 @@ wording, agent topology, tool order или число подзадач.
 | Узкая child Task принадлежит широкому Epic | Description объясняет вклад и relevant boundaries; Epic не разрешает выполнить sibling scope |
 | Prompt содержит два независимых outcomes | Отдельные Tasks/Epics без искусственного общего parent |
 | Пользователь просит только draft | Текст сформулирован, Task Manager writes отсутствуют |
-| Bug report содержит screenshot с проявлением проблемы | Создать применимую Task, прикрепить screenshot как native attachment и подтвердить attachment read-back |
+| Bug report содержит screenshot интерфейса, на котором видна именно описанная проблема | Создать применимую Task, прикрепить screenshot как native attachment и подтвердить attachment read-back: решение основано на содержании и связи с проблемой, а не на типе файла |
+| Bug report содержит screenshot, не связанный с описанной проблемой | Не прикреплять screenshot и явно сообщить его disposition; тип файла не создаёт презумпцию уместности |
 | Bug report содержит релевантный log и случайный несвязанный файл | Прикрепить log к применимой Task; случайный файл не добавлять и явно сообщить disposition |
 | Составной Epic содержит screenshot, относящийся к одной child Task | Прикрепить screenshot к этой child Task, не копировать механически во все children |
 | Native transport обязательного attachment заведомо недоступен | Create не начинается; attachment не заменяется путём, URL или пересказом |
