@@ -96,7 +96,9 @@ Problem-first описание каждого Epic проходит sibling Stra
 начинается; независимо допустимая single Task от этого не блокируется.
 
 Каждый Epic description является отдельным пользовательским результатом и
-получает новый clean built-in `default` subagent с `fork_turns="none"`. Task
+получает новый clean built-in `default` subagent с `fork_turns="none"`,
+`model="gpt-5.6-luna"` и `reasoning_effort="max"`. Current model/effort не
+наследуются, а недоступный exact Luna Max profile не подменяется Sol. Task
 Composer передаёт короткую задачу, exact planning scope и разрешимые source
 anchors без предыдущего диалога, process diary, собственного strategic view или
 готового candidate. Он не читает provider-internal contract, не передаёт

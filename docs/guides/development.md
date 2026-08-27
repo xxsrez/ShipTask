@@ -40,8 +40,10 @@
   работы, полномочия или действие. ShipTask выбирает один provider по live
   catalog: ordinary при его наличии и разрешении; без provider используется
   native writing. Ordinary provider сохраняет opaque protocol:
-  новый `default` subagent с `fork_turns="none"`, compact task и resolvable
-  anchors без inherited context/candidate и с exact terminal role lock. Invalid
+  новый `default` subagent с `fork_turns="none"`, `model="gpt-5.6-luna"`,
+  `reasoning_effort="max"`, compact task и resolvable anchors без inherited
+  context/candidate и с exact terminal role lock. Current profile не наследуется,
+  а недоступность Luna Max переводит ShipTask в native без скрытой подмены Sol. Invalid
   ordinary invocation исправляется новым clean call, а не follow-up старому;
   provider failure переводит ShipTask в native без secondary provider retry.
 - Обычный переход `To Do → In Progress` не создаёт комментарий и поэтому не
@@ -79,7 +81,8 @@ Manager; behavior change прогоняет всю матрицу, а не уд�
 числа tool calls вместо observable behavior. Evals проверяют automatic default,
 сохранение natural-language exact/relative/role/conditional rules,
 writer/worktree isolation и один Strategic Explainer при разрешённой роли, а
-для ordinary Explainer также exact clean `fork_turns="none"` admission,
+  для ordinary Explainer также exact clean `fork_turns="none"` admission на
+  `gpt-5.6-luna`/`max`,
 self-discovery и один publication unit на invocation; вне этих invariants evals не
 навязывают topology formula, tool sequence или число alternatives. Auto-title является отдельным best-effort UI convenience:
 проверяются попытка только при доказанной first-turn eligibility, сохранение
@@ -119,8 +122,9 @@ skill, реалистичный exact Task Manager scope и обычный proje
 - новая session при доказанно остановленном прежнем writer подхватывает
   существующий unfinished task-owned worktree/branch и продолжает его; active
   или ambiguous ownership не захватывается и artifact не очищается;
-- genuinely simple bounded packet без отдельного profile override получает Luna
-  Max, а ordinary/complex packet наследует current model/effort;
+- genuinely simple bounded implementation/research packet без отдельного profile
+  override получает Luna Max, complex packet наследует current model/effort, а
+  ordinary Strategic Explainer всегда использует свой exact Luna Max profile;
 - ambiguity, unexpected environment/tool state или proof gap останавливают Luna
   packet и передают его current profile без повторного Luna loop;
 - явный user profile для subagents имеет приоритет, а выбор primary profile сам

@@ -33,7 +33,8 @@
   [Architecture](skills/strategic-explainer/architecture.md) и
   [product vision](skills/strategic-explainer/product-vision.md) — общий contract
   stateless API объяснения на уровне исходного вопроса: каждый user-facing unit
-  получает clean `fork_turns="none"` invocation, Explainer сам собирает
+  получает clean `fork_turns="none"` invocation на exact
+  `gpt-5.6-luna`/`max`, Explainer сам собирает
   strategic context, но продуктом считает понимание читателя, а не отчёт об
   исследовании. Publication text строится из одной главной причинной мысли,
   verification-only source basis остаётся отдельно, а поведение проверяется
@@ -149,6 +150,9 @@
 - [0033: Terminal ordinary provider и optional routing ShipTask](decisions/0033-terminal-provider-and-optional-shiptask-routing.md)
   — запрещает provider-у становиться caller или создавать agents и задаёт
   current ordinary-or-native routing без lifecycle blocker-а.
+- [0034: Luna Max для ordinary Strategic Explainer](decisions/0034-luna-max-for-ordinary-strategic-explainer.md)
+  — запускает установленный ordinary provider как clean Luna Max subagent без
+  наследования SOL/current profile; без plugin-а ShipTask пишет сам.
 
 ## Reference
 
@@ -175,6 +179,9 @@
 
 ## Reports
 
+- [Strategic Explainer: сравнение SOL и Luna](reports/2026-08-27-strategic-explainer-luna-comparison.md)
+  — paired 20-case blind evaluation, человеческий blind vote и решение
+  закрепить ordinary provider на `gpt-5.6-luna` с `max`.
 - [Terminal Strategic Explainer и ShipTask routing: evaluation](reports/2026-08-27-terminal-provider-routing-evaluation.md)
   — terminal role/off-role regression, ноль provider descendants, full 20-case
   independent evaluation и четыре install combinations ShipTask.

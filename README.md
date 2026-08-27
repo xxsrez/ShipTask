@@ -33,8 +33,9 @@ source package должны давать примерно эквивалентн
 Current requirements являются конституцией для агентов: они задают outcome,
 rationale, observable evidence и authority/safety boundaries, но оставляют
 агенту план, декомпозицию, инструменты и внутренний reasoning. Ordinary
-Strategic Explainer сохраняет fresh stateless API с новым `default` subagent и
-`fork_turns="none"`. Другое исключение — execution topology: без явного user
+Strategic Explainer сохраняет fresh stateless API с новым `default` subagent,
+`fork_turns="none"` и exact `gpt-5.6-luna`/`max` profile без наследования
+current profile или скрытой подмены Sol. Другое исключение — execution topology: без явного user
 rule ShipTask сам решает, где
 субагенты дают реальную пользу, сохраняя одного integration owner. Пользователь
 может свободным языком задать exact/relative count, role scope, общий или узкий

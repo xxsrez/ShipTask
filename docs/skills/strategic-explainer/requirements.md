@@ -128,10 +128,16 @@ source не сглаживаются уверенной формулировко
 
 Direct и delegated use являются одним API без исключений по caller: каждый
 самостоятельный invocation выполняется новым built-in `default` subagent с
-`fork_turns="none"`. В model context находятся только system/developer/skill
-instructions и одна короткая, ёмкая, однозначная задача с exact scope или
-разрешимыми source anchors. Унаследованные turns, tool transcript, process diary,
-прежний candidate, рассуждения caller и несколько смешанных задач запрещены.
+`fork_turns="none"`, моделью `gpt-5.6-luna` и `reasoning_effort="max"`.
+Профиль текущего caller-а не наследуется и не подменяет этот provider profile.
+В model context находятся только system/developer/skill instructions и одна
+короткая, ёмкая, однозначная задача с exact scope или разрешимыми source
+anchors. Унаследованные turns, tool transcript, process diary, прежний
+candidate, рассуждения caller и несколько смешанных задач запрещены.
+
+Недоступность `gpt-5.6-luna`/`max` не разрешает скрытую подмену SOL или другим
+профилем. Такой provider считается недоступным, а caller следует собственной
+явной fallback policy по `SE-16` без имитации Strategic Explainer.
 
 Fresh invocation однозначно и явно назначает subagent терминальную роль
 Strategic Explainer provider по `SE-17`; роль не выводится из наличия диалога,
@@ -241,9 +247,10 @@ factual/comprehension error получают новый clean invocation. Ста
 ### `SE-16` — Изоляция provider expertise от caller
 
 Вызывающий агент знает только opaque client protocol: когда нужен Explainer,
-как создать новый built-in `default` subagent с `fork_turns="none"`, какие
-compact task/scope/read-only anchors допустимы и как обработать готовый result
-или отказ. Он не получает, не читает и не применяет внутренние правила
+как создать новый built-in `default` subagent с `fork_turns="none"`,
+`model="gpt-5.6-luna"` и `reasoning_effort="max"`, какие compact
+task/scope/read-only anchors допустимы и как обработать готовый result или
+отказ. Он не получает, не читает и не применяет внутренние правила
 strategic discovery, построения причинного объяснения, редакторской
 реконструкции или проверки понимания.
 
@@ -296,9 +303,10 @@ decision, broad research без конкретной publication unit, orchestra
 `STRATEGIC_EXPLAINER_INVOCATION_ERROR`, кратко называет точное нарушение,
 объясняет своё единственное назначение и даёт caller-у исправимую инструкцию:
 создать новый clean built-in `default` subagent с `fork_turns="none"`, явным
-provider role lock, одной user-facing formulation task, exact scope и
-resolvable read-only anchors. После отказа этот экземпляр останавливается; он
-не исправляет собственный вызов и не запускает замену самостоятельно.
+`model="gpt-5.6-luna"`, `reasoning_effort="max"`, provider role lock, одной
+user-facing formulation task, exact scope и resolvable read-only anchors.
+После отказа этот экземпляр останавливается; он не исправляет собственный вызов
+и не запускает замену самостоятельно.
 
 ## Изменение Level 1
 

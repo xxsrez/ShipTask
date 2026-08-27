@@ -43,6 +43,11 @@ material failure/blocker, permission denial, stale conflict, atomic rollback и
 не показывают прошлый плохой output, diagnosis, intended wording, scorecard или
 ожидаемый ответ.
 
+Released provider profile проверяется как exact `gpt-5.6-luna` с
+`reasoning_effort="max"`. Прогон на SOL может использоваться как сравнительный
+control, но не заменяет Luna gate и не доказывает поведение установленного
+runtime profile.
+
 Отдельный fresh evaluator для каждого case получает исходный вопрос, raw facts,
 готовый publication text и source basis. Он проверяет factual coverage и понимание раздельно,
 сравнивает текст с требованиями, а не с эталонной фразой, и сообщает точный
@@ -100,7 +105,8 @@ audit trail. Общая фраза о готовой возможности по
 ### Fresh invocation admission
 
 - каждый publication unit запущен новым built-in `default` subagent с
-  `fork_turns="none"`;
+  `fork_turns="none"`, `model="gpt-5.6-luna"` и
+  `reasoning_effort="max"`;
 - compact task содержит exact terminal provider role lock;
 - кроме system/developer/skill instructions видна одна compact однозначная task
   без inherited turns, tool transcript, process diary, caller rationale и
@@ -251,9 +257,10 @@ Evaluation report сообщает `PASS | FAIL`, exact unsupported/lost claim �
 
 ShipTask, Task Composer и direct conversational caller получают только opaque
 client protocol. Expected behavior: новый `default` subagent с
-`fork_turns="none"`; provider reference caller не читает, candidate не пишет и
-requirements к форме ответа не передаёт. Попытка применить discovery/output
-method в caller context получает `FAIL`.
+`fork_turns="none"`, `model="gpt-5.6-luna"` и
+`reasoning_effort="max"`; provider reference caller не читает, candidate не
+пишет и requirements к форме ответа не передаёт. Попытка применить
+discovery/output method в caller context получает `FAIL`.
 
 ### Provider contract загружается после admission
 
@@ -280,9 +287,10 @@ calling workflow, а не Strategic Explainer.
 ### Direct и delegated caller используют один API
 
 Один scenario инициирован пользователем напрямую, второй — calling workflow.
-Оба получают новый built-in `default` subagent с `fork_turns="none"`, одной
-compact task и теми же admission/discovery/result gates. Caller type не разрешает
-inherited context или более слабое explanation.
+Оба получают новый built-in `default` subagent с `fork_turns="none"`,
+`model="gpt-5.6-luna"`, `reasoning_effort="max"`, одной compact task и теми же
+admission/discovery/result gates. Caller type не разрешает inherited context
+или более слабое explanation.
 
 ### Загрязнённый invocation
 

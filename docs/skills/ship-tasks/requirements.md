@@ -166,8 +166,11 @@ authoritative sources; изменившиеся facts, scope или anchors тр
 читает и не применяет его provider-internal contract, не пишет explanation
 candidate, не передаёт strategic summary, требования к структуре или стилю и не
 оценивает result внутренним quality checklist. Каждый pass получает новый
-built-in `default` subagent с `fork_turns="none"`, exact provider role lock, одной
-publication unit и resolvable anchors. Invalid invocation получает один
+built-in `default` subagent с `fork_turns="none"`, `model="gpt-5.6-luna"` и
+`reasoning_effort="max"`, exact provider role lock, одной publication unit и
+resolvable anchors. Current model/effort не наследуются. Недоступный exact Luna
+Max profile не заменяется скрыто на Sol или другой профиль: это provider failure,
+после которого ShipTask переходит в native mode. Invalid invocation получает один
 автоматически исправленный новый clean subagent; повторный structural refusal
 или другой provider failure переводит communication mode в native.
 
@@ -300,11 +303,13 @@ worktree с правом записи принадлежит ровно одно
 профиль — строго `gpt-5.6-luna` с `effort: max`, а не другая модель с пониженным
 `effort`.
 
-Большинство рабочих пакетов и Strategic Explainer наследуют текущий профиль.
-ShipTask не повышает профиль скрытно до Sol и не заменяет недоступный точный
-выбор пользователя приблизительным вариантом. Распределение профилей и переход
-с Luna на текущий профиль должны оставаться наблюдаемыми, но не считаются
-доказательством результата.
+Большинство рабочих пакетов наследуют текущий профиль. Ordinary Strategic
+Explainer является явным исключением по `ST-07`: каждый его fresh provider
+работает строго на `gpt-5.6-luna` с `reasoning_effort="max"` и не эскалируется
+на current profile. ShipTask не повышает профиль скрытно до Sol и не заменяет
+недоступный точный выбор пользователя приблизительным вариантом. Распределение
+профилей и переход рабочего packet с Luna на текущий профиль должны оставаться
+наблюдаемыми, но не считаются доказательством результата.
 
 ### `ST-14` — Goal только для реализации нескольких Tasks
 

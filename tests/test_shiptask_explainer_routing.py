@@ -61,6 +61,10 @@ class ShipTaskExplainerRoutingTest(unittest.TestCase):
         ordinary = text[text.index("## Ordinary path") : text.index("## Native path")]
         self.assertIn("STRATEGIC_EXPLAINER_PROVIDER_V1", ordinary)
         self.assertIn("fork_turns=\"none\"", ordinary)
+        self.assertIn("model=\"gpt-5.6-luna\"", ordinary)
+        self.assertIn("reasoning_effort=\"max\"", ordinary)
+        self.assertIn("Не наследуй current model/effort", ordinary)
+        self.assertIn("не заменяй его скрыто на Sol", ordinary)
         self.assertIn("одну короткую user-facing formulation task", ordinary)
         self.assertIn("Не\nчитай ordinary provider-only entrypoint", ordinary)
 

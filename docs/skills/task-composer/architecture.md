@@ -234,8 +234,10 @@ transport, известный до create scope не создаётся част
 отдельно установленного `$strategic-explainer:strategic-explainer`. Каждый Epic
 description является
 отдельным publication unit: Task Composer создаёт новый built-in `default`
-subagent с `fork_turns="none"` и передаёт одну compact task, exact planning scope
-и resolvable read-only anchors. Унаследованный диалог, tool transcript, process
+subagent с `fork_turns="none"`, `model="gpt-5.6-luna"` и
+`reasoning_effort="max"` и передаёт одну compact task, exact planning scope и
+resolvable read-only anchors. Current caller profile не наследуется и не
+подменяет недоступную Luna на Sol. Унаследованный диалог, tool transcript, process
 diary, готовый strategic view и прежний candidate не передаются. Explainer
 остаётся opaque provider и не выбирает Project, decomposition, status, labels,
 relations или write authority. Task Composer не читает provider-internal

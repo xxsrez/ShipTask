@@ -129,10 +129,11 @@ manifest/install/byte-identity правила остаются repository-level 
   субагентов; в начале run ShipTask выбирает ordinary при его наличии и
   разрешении, иначе native; failure provider-а переводит run прямо в native;
   ordinary publication unit получает нового built-in
-  `default` subagent с `fork_turns="none"`, exact terminal provider role lock,
-  одной compact task и resolvable read-only anchors, а caller знает только его
-  opaque protocol; invalid ordinary call получает automatic corrected fresh
-  retry; native mode следует только ShipTask truth/lifecycle/reporting contract,
+  `default` subagent с `fork_turns="none"`, `model="gpt-5.6-luna"`,
+  `reasoning_effort="max"`, exact terminal provider role lock, одной compact
+  task и resolvable read-only anchors, а caller знает только его opaque
+  protocol; недоступная Luna не подменяется SOL, invalid ordinary call получает
+  automatic corrected fresh retry; native mode следует только ShipTask truth/lifecycle/reporting contract,
   не имитирует provider и не блокирует comment/status; candidate blocker до
   публикации становится reflection input ShipTask для повторной проверки safe
   frontier без расширения scope/authority; ready result не переписывается;
@@ -143,7 +144,8 @@ manifest/install/byte-identity правила остаются repository-level 
   unfinished worktree/branch подхватывается тем же coordinator или новым
   exclusive writer после проверки quiescence, а не дублируется; особо простые bounded packets
   без отдельного user override используют `gpt-5.6-luna`/`max`, остальные
-  наследуют current model/effort, а Luna при material uncertainty прекращает
+  рабочие packets наследуют current model/effort, ordinary Strategic Explainer
+  всегда использует fresh `gpt-5.6-luna`/`max`, а Luna при material uncertainty прекращает
   packet и передаёт его current profile без Luna retry loop; доказанная первая
   Codex task с catalog placeholder при доступной host title capability после live
   scope resolution получает best-effort попытку `ShipTask · ...`, но meaningful

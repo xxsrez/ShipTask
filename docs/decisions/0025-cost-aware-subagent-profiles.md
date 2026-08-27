@@ -1,6 +1,7 @@
 # 0025. Cost-aware профили субагентов с эскалацией на current model
 
-Статус: accepted, 2026-08-22. Расширяет
+Статус: accepted, 2026-08-22; profile routing ordinary Strategic Explainer
+частично заменено ADR-0034. Расширяет
 [ADR-0024](0024-adaptive-multi-agent-execution-by-default.md) выбором execution
 profile для каждого полезного packet и частично заменяет свободу model/effort
 из [ADR-0021](0021-requirements-as-agent-constitution.md), потому что

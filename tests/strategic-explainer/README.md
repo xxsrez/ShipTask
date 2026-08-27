@@ -15,8 +15,9 @@
 
 Generating subagent не получает rubric, diagnosis, intended wording, прежний
 плохой комментарий или candidate другого trial. Он запускается новым built-in
-`default` subagent с `fork_turns="none"`; compact task содержит отдельную точную
-строку `STRATEGIC_EXPLAINER_PROVIDER_V1`, одну publication task и anchor на один
+`default` subagent с `fork_turns="none"`, `model="gpt-5.6-luna"` и
+`reasoning_effort="max"`; compact task содержит отдельную точную строку
+`STRATEGIC_EXPLAINER_PROVIDER_V1`, одну publication task и anchor на один
 `facts.md`. Router выбирает terminal provider path, provider-only entrypoint
 выполняет admission, после чего subagent возвращает publication text и отдельно
 обозначенный source basis.

@@ -70,8 +70,10 @@ ADR-0024.
 - explicit user topology rule свободным языком имеет приоритет: можно задать
   exact/relative count, role scope, общий или узкий opt-out и condition; root
   agent не считается названным субагентом;
-- user-selected subagent profile имеет приоритет; без него только genuinely
-  simple packets получают Luna Max, остальные наследуют current model/effort;
+- user-selected subagent profile имеет приоритет; без него genuinely simple
+  implementation/research packets получают Luna Max, остальные рабочие packets
+  наследуют current model/effort, а ordinary Strategic Explainer всегда
+  запускается на exact Luna Max;
 - при доступной host title capability доказанная первая Codex task с catalog
   placeholder после live scope resolution получает не более одной best-effort
   попытки короткого `ShipTask · ...` title; meaningful title и последующие turns

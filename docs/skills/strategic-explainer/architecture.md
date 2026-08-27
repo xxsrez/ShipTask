@@ -60,6 +60,11 @@ compact task несёт exact role lock, одну publication unit и resolvable
 без inherited process state. Provider после role resolution не оркестрирует
 agents и не вызывает Strategic Explainer повторно.
 
+Provider profile является ещё одним routing invariant: caller создаёт subagent
+на `gpt-5.6-luna` с `reasoning_effort="max"` и не наследует current
+model/effort. Если exact profile недоступен, invocation не подменяется SOL или
+другой моделью и переходит в обычную provider-unavailability policy caller-а.
+
 За этой границей provider-subagent выбирает tool sequence, форму source note,
 внутренний reasoning, длину и визуальную форму. Caller не знает и не применяет
 эту часть architecture. Структуры и examples полезны только внутри provider,
@@ -69,10 +74,11 @@ agents и не вызывает Strategic Explainer повторно.
 
 Catalog metadata и `SKILL.md` видны routing agent, поэтому они содержат только
 детерминированный role resolver и opaque client protocol. Caller создаёт новый
-built-in `default` subagent с `fork_turns="none"` и передаёт отдельной точной
-строкой `STRATEGIC_EXPLAINER_PROVIDER_V1`. Отсутствие marker означает caller
-mode; наличие marker в compact task означает terminal provider mode. История,
-tool calls, parent metadata или имя агента не участвуют в классификации.
+built-in `default` subagent с `fork_turns="none"`, `model="gpt-5.6-luna"` и
+`reasoning_effort="max"`, затем передаёт отдельной точной строкой
+`STRATEGIC_EXPLAINER_PROVIDER_V1`. Отсутствие marker означает caller mode;
+наличие marker в compact task означает terminal provider mode. История, tool
+calls, parent metadata или имя агента не участвуют в классификации.
 
 Provider никогда не исполняет client protocol и сразу читает только
 `references/provider-entrypoint.md`. Этот слой проверяет роль и invocation по
@@ -119,7 +125,8 @@ Skill является интерпретационным слоем. Он:
 ## 3. Fresh API admission
 
 Direct request и вызов из другого workflow адресуют один API: caller создаёт
-новый built-in `default` subagent с `fork_turns="none"`. Единственный user/task
+новый built-in `default` subagent с `fork_turns="none"`,
+`model="gpt-5.6-luna"` и `reasoning_effort="max"`. Единственный user/task
 message содержит точный role lock `STRATEGIC_EXPLAINER_PROVIDER_V1` и является
 compact selector, а не brief или черновиком объяснения. Он называет один
 исходный вопрос, exact scope либо resolvable source anchors и назначение

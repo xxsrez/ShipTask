@@ -54,6 +54,10 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
         self.assertIn("Не готовь explanation candidate", caller)
         self.assertIn("Не передавай inherited turns", caller)
         self.assertIn("не переписывай provider result", caller)
+        self.assertIn('model="gpt-5.6-luna"', caller)
+        self.assertIn('reasoning_effort="max"', caller)
+        self.assertIn("Не наследуй current model/effort", caller)
+        self.assertIn("не подменяй недоступную Luna на SOL", caller)
         for provider_recipe in (
             "одну главную причинную мысль",
             "первый смысловой слой",
@@ -61,6 +65,14 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
             "audit-redaction pass",
         ):
             self.assertNotIn(provider_recipe, text)
+
+    def test_clean_call_recipe_uses_luna_max(self) -> None:
+        for path in (SKILL, ENTRYPOINT):
+            with self.subTest(path=path.name):
+                text = path.read_text()
+                self.assertIn('fork_turns="none"', text)
+                self.assertIn('model="gpt-5.6-luna"', text)
+                self.assertIn('reasoning_effort="max"', text)
 
 
 if __name__ == "__main__":
