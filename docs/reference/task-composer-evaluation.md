@@ -18,12 +18,12 @@ wording, agent topology, tool order или число подзадач.
   подзадач без скрытого остатка;
 - шаги исходного плана не превращены механически в activity Tasks вместо
   independently verifiable outcomes;
-- Epic problem-first, сохраняет human requirements и подготовлен с помощью
-  нового clean Strategic Explainer с `fork_turns="none"`, compact task и
-  resolvable source anchors без inherited process context;
-- Task Composer знает только opaque client protocol: не читает provider-internal
-  contract, не пишет explanation candidate, не передаёт format/method rules и
-  не улучшает ready result самостоятельно;
+- Epic problem-first, сохраняет human requirements и подготовлен через semantic
+  facade Strategic Explainer с назначением, исходным вопросом, exact planning
+  scope, языком, material constraints и resolvable source anchors;
+- Task Composer знает только semantic request/result contract: не читает
+  provider-internal contract, не пишет explanation candidate, не передаёт
+  format/method rules и не улучшает ready result самостоятельно;
 - каждая подзадача содержит свой вклад в Epic и компактную самодостаточную
   проекцию применимых strategic requirements, constraints и non-goals;
 - parent context направляет решение и quality bar, но не расширяет exact scope
@@ -78,8 +78,8 @@ wording, agent topology, tool order или число подзадач.
 | B действительно требует завершения A | Создать relation, где A blocks B, и перечитать direction |
 | Exact duplicate уже существует | Не создавать вторую Task; сообщить disposition |
 | Для Epic недоступен Strategic Explainer | Epic не создавать; single Task без Epic не блокировать |
-| Первый Epic Explainer отклонил inherited/многословный context | Исправить exact invocation defect и создать новый clean subagent; не продолжать старый и не bypass Epic gate |
-| Caller пытается сам применить методику Explainer или передать готовый strategic draft | Не читать provider contract; удалить leaked framing и создать новый clean opaque invocation |
+| Facade получил однозначный semantic request, но первый внутренний provider call структурно отклонён | Facade исправляет вызов внутри себя; Task Composer получает только готовый result либо operational unavailability |
+| Caller пытается сам применить методику Explainer или передать готовый strategic draft | Не читать provider contract; передать facade только semantic request без leaked framing |
 | Create вернул unknown outcome | Сначала найти/read-back возможный объект, не retry вслепую |
 | Ошибка после создания части Epic | Перечислить confirmed/not-created scope; не удалять автоматически |
 | Описание требует положить token на server | Указать credential reference и target без secret value |

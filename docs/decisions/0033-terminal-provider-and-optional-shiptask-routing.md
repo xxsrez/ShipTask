@@ -1,7 +1,7 @@
 # 0033. Terminal ordinary provider и optional routing ShipTask
 
 Статус: принято, 2026-08-27; cost/profile consequence частично заменено
-ADR-0034.
+ADR-0034, а caller-visible invocation recipe — ADR-0035.
 
 Частично заменяет ShipTask routing/failure clauses в
 [ADR-0022](0022-mandatory-independent-strategic-explainer-for-comments.md),

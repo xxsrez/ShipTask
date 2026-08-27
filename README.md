@@ -25,17 +25,18 @@ contract в exact integration candidate, даже если blocking Task ещё 
 skill. В [`docs/skills/<skill>/`](docs/skills/README.md) у каждого skill есть
 собственные `requirements.md` (Level 1) и `architecture.md` (Level 2); требования
 трёх skills не объединяются. Runtime является компактной стохастической
-компиляцией этих двух локальных документов. У Strategic Explainer видимый
-`SKILL.md` содержит только router/admission layer, а provider expertise находится
-в reference для admitted fresh subagent. Удаление и повторная сборка runtime из
-source package должны давать примерно эквивалентный по смыслу package.
+компиляцией этих двух локальных документов. Strategic Explainer предоставляет
+semantic facade: callers передают только назначение, scope и source anchors,
+facade владеет invocation/admission, а provider expertise находится в reference,
+который читает только admitted fresh subagent. Удаление и повторная сборка
+runtime из source package должны давать примерно эквивалентный по смыслу package.
 
 Current requirements являются конституцией для агентов: они задают outcome,
 rationale, observable evidence и authority/safety boundaries, но оставляют
 агенту план, декомпозицию, инструменты и внутренний reasoning. Ordinary
-Strategic Explainer сохраняет fresh stateless API с новым `default` subagent,
-`fork_turns="none"` и exact `gpt-5.6-luna`/`max` profile без наследования
-current profile или скрытой подмены Sol. Другое исключение — execution topology: без явного user
+Strategic Explainer сохраняет fresh stateless API, но callers видят только
+semantic request/result contract; всё внутреннее исполнение принадлежит facade
+и не повторяется в вызывающих skills. Другое исключение — execution topology: без явного user
 rule ShipTask сам решает, где
 субагенты дают реальную пользу, сохраняя одного integration owner. Пользователь
 может свободным языком задать exact/relative count, role scope, общий или узкий
@@ -70,8 +71,11 @@ capability не блокируют delivery.
 использует один communication mode. Live catalog выбирает ordinary
 `$strategic-explainer:strategic-explainer`, если он доступен и разрешён, иначе
 native ShipTask writing. Ordinary получает terminal clean provider-subagent.
-Provider failure переводит run в native. Native не имитирует provider method и не блокирует
-comment/status. Routine chat и progress updates publication unit не создают.
+Callers знают только semantic request/result contract и не получают ни recipe
+запуска, ни методику улучшения текста; её читает только provider-subagent.
+Provider failure переводит run в native. Native не имитирует provider method и
+не блокирует comment/status. Routine chat и progress updates publication unit
+не создают.
 
 Приёмочный incident сообщается сразу в chat и сохраняется в Task history до
 начала repair. Opening comment остаётся видимым после исправления, resolution
@@ -129,9 +133,9 @@ context в каждой child Task. При delivery ShipTask перечитыв�
 - [`task-composer/SKILL.md`](task-composer/SKILL.md) — planning-only
   формулировка, декомпозиция и создание Task Manager scope.
 - [`strategic-explainer/SKILL.md`](strategic-explainer/SKILL.md) — общий
-  deterministic role resolver и opaque client protocol; terminal provider
-  проходит отдельный provider-only admission и только затем загружает внутренний
-  contract.
+  semantic facade и deterministic role resolver; terminal provider проходит
+  отдельный provider-only admission и только затем загружает внутренний
+  text-improvement contract.
 - [`docs/skills/README.md`](docs/skills/README.md) — source model и независимые
   Requirements/Architecture packages для каждого skill.
 - [`docs/skills/ship-tasks/requirements.md`](docs/skills/ship-tasks/requirements.md)

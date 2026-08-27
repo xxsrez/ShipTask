@@ -96,18 +96,17 @@ Problem-first описание каждого Epic проходит sibling Stra
 начинается; независимо допустимая single Task от этого не блокируется.
 
 Каждый Epic description является отдельным пользовательским результатом и
-получает новый clean built-in `default` subagent с `fork_turns="none"`,
-`model="gpt-5.6-luna"` и `reasoning_effort="max"`. Current model/effort не
-наследуются, а недоступный exact Luna Max profile не подменяется Sol. Task
-Composer передаёт короткую задачу, exact planning scope и разрешимые source
-anchors без предыдущего диалога, process diary, собственного strategic view или
-готового candidate. Он не читает provider-internal contract, не передаёт
-требования к форме description, не пишет explanation draft и не применяет
-методику Explainer самостоятельно. Готовый text проверяется только на material
-factual conflict с authoritative planning sources. Если Explainer отклоняет
-invocation либо source/anchor нужно исправить, Task Composer автоматически
-вызывает новый экземпляр; старый context не продолжается, result самостоятельно
-не улучшается и обязательная независимость не обходится.
+получает один semantic call `$strategic-explainer:strategic-explainer`. Task
+Composer передаёт только назначение description, исходный вопрос, exact planning
+scope, язык, material constraints и разрешимые read-only source anchors. Никакие
+другие invocation parameters или provider instructions в Task Composer не
+передаются и не описываются: внутренним исполнением владеет facade Explainer.
+Task Composer не читает provider-internal contract, не передаёт требования к
+форме description, не пишет explanation draft и не применяет методику Explainer
+самостоятельно. Готовый text проверяется только на material factual conflict с
+authoritative planning sources. Исправленный source/anchor получает новый
+semantic call; старый result самостоятельно не улучшается и обязательная
+независимость не обходится.
 
 ### `TC-10` — Независимая planning distribution
 

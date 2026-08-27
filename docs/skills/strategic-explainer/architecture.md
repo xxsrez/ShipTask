@@ -23,8 +23,8 @@ fresh stateless invocation и blocker reflection — в
 
 Эта architecture вместе с локальным `requirements.md` является полным current
 source package `$strategic-explainer`. Runtime package — производная смысловая
-компиляция требований и architecture; он состоит из публичного role
-resolver/client protocol `strategic-explainer/SKILL.md`, provider-only admission
+компиляция требований и architecture; он состоит из публичного semantic
+facade и role resolver в `strategic-explainer/SKILL.md`, provider-only admission
 `strategic-explainer/references/provider-entrypoint.md` и внутреннего
 `strategic-explainer/references/provider-contract.md`. Вместе они являются
 компиляцией этих двух документов: package можно удалить и
@@ -54,16 +54,18 @@ discovery и объём публикации не связаны: сложное
 
 Остальные Requirements раскрывают этот принцип, source grounding, read-only
 boundary и отсутствие новой authority. `SE-10` и `SE-17` являются явными
-исключениями из общей свободы orchestration: direct и delegated use проходят
-один stateless API, новый built-in `default` subagent и `fork_turns="none"`;
-compact task несёт exact role lock, одну publication unit и resolvable anchors
-без inherited process state. Provider после role resolution не оркестрирует
-agents и не вызывает Strategic Explainer повторно.
+исключениями из общей свободы orchestration: direct и delegated client
+обращаются к одному semantic facade, а уже facade router создаёт новый built-in
+`default` subagent с `fork_turns="none"`; compact task несёт exact role lock,
+одну publication unit и resolvable anchors без inherited process state.
+Provider после role resolution не оркестрирует agents и не вызывает Strategic
+Explainer повторно.
 
-Provider profile является ещё одним routing invariant: caller создаёт subagent
-на `gpt-5.6-luna` с `reasoning_effort="max"` и не наследует current
-model/effort. Если exact profile недоступен, invocation не подменяется SOL или
-другой моделью и переходит в обычную provider-unavailability policy caller-а.
+Provider profile является ещё одним внутренним routing invariant: facade router
+создаёт subagent на `gpt-5.6-luna` с `reasoning_effort="max"` и не наследует
+current model/effort. Если exact profile недоступен, invocation не подменяется
+SOL или другой моделью; facade возвращает provider unavailability, после чего
+внешний client следует собственной policy.
 
 За этой границей provider-subagent выбирает tool sequence, форму source note,
 внутренний reasoning, длину и визуальную форму. Caller не знает и не применяет
@@ -72,15 +74,22 @@ model/effort. Если exact profile недоступен, invocation не по�
 
 ### 1.1 Три runtime-слоя и однозначная роль
 
-Catalog metadata и `SKILL.md` видны routing agent, поэтому они содержат только
-детерминированный role resolver и opaque client protocol. Caller создаёт новый
-built-in `default` subagent с `fork_turns="none"`, `model="gpt-5.6-luna"` и
+Внешний client contract живёт только в вызывающем workflow: вызвать qualified
+skill с одной semantic formulation/editing task, её целью, exact scope, языком,
+material constraints и resolvable read-only anchors, затем принять готовый text
+и отдельно обозначенный source basis либо operational unavailability. Agent
+topology, fork, profile, role lock, entrypoint и retry в этот contract не входят.
+
+Catalog metadata и `SKILL.md` образуют второй слой — facade router и
+детерминированный role resolver. Этот слой знает только invocation/admission
+mechanics и не содержит provider method. Facade создаёт новый built-in `default`
+subagent с `fork_turns="none"`, `model="gpt-5.6-luna"` и
 `reasoning_effort="max"`, затем передаёт отдельной точной строкой
-`STRATEGIC_EXPLAINER_PROVIDER_V1`. Отсутствие marker означает caller mode;
+`STRATEGIC_EXPLAINER_PROVIDER_V1`. Отсутствие marker означает facade mode;
 наличие marker в compact task означает terminal provider mode. История, tool
 calls, parent metadata или имя агента не участвуют в классификации.
 
-Provider никогда не исполняет client protocol и сразу читает только
+Provider никогда не исполняет facade protocol и сразу читает только
 `references/provider-entrypoint.md`. Этот слой проверяет роль и invocation по
 `SE-10`/`SE-17`; invalid call завершается
 `STRATEGIC_EXPLAINER_INVOCATION_ERROR` без domain discovery, source reads или
@@ -91,14 +100,19 @@ isolation защищает не только входные turns, но и ра�
 coordinating caller не получает метод, ради независимости которого создан
 provider.
 
-Caller принимает publication-ready text и отдельно обозначенный source basis как
-opaque result. Он публикует только text, а basis использует для factual check; не
-смешивает эти части, не читает provider contract, не формирует candidate, не
-запускает внутренний checklist и не переписывает output. Фиксированный envelope
-не требуется, но граница двух частей должна быть однозначной.
-Factual/structural correction всегда получает новый clean invocation. Поведение
-при opt-out или недоступности задаёт contract конкретного caller-а: он не читает
-и не имитирует provider method и не заявляет эквивалентное качество.
+Третий слой — admitted provider, и только он читает
+`references/provider-contract.md` с правилами discovery, причинного объяснения,
+редакторской реконструкции, языковой очистки и comprehension check. Ни внешний
+client, ни facade router не получают эту методику и не улучшают текст сами.
+
+Facade возвращает publication-ready text и отдельно обозначенный source basis
+как opaque result. Внешний client публикует только text, а basis использует для
+factual check; не смешивает эти части, не читает provider contract, не формирует
+candidate, не запускает внутренний checklist и не переписывает output.
+Factual correction приходит новым semantic request. Structural correction и
+единственный clean retry выполняются внутри facade. Поведение при opt-out или
+недоступности задаёт contract конкретного client-а: он не читает и не имитирует
+provider method и не заявляет эквивалентное качество.
 
 ## 2. Результат и граница роли
 
@@ -124,14 +138,15 @@ Skill является интерпретационным слоем. Он:
 
 ## 3. Fresh API admission
 
-Direct request и вызов из другого workflow адресуют один API: caller создаёт
-новый built-in `default` subagent с `fork_turns="none"`,
-`model="gpt-5.6-luna"` и `reasoning_effort="max"`. Единственный user/task
-message содержит точный role lock `STRATEGIC_EXPLAINER_PROVIDER_V1` и является
-compact selector, а не brief или черновиком объяснения. Он называет один
-исходный вопрос, exact scope либо resolvable source anchors и назначение
-user-facing result. System/developer/skill instructions остаются нормальной
-частью context и не считаются загрязнением.
+Direct request и вызов из другого workflow адресуют один semantic API. Client
+применяет `$strategic-explainer:strategic-explainer` к одной publication task с
+назначением, exact scope, языком, material constraints и resolvable read-only
+anchors. После загрузки skill facade router создаёт новый built-in `default`
+subagent с `fork_turns="none"`, `model="gpt-5.6-luna"` и
+`reasoning_effort="max"`. Единственный provider task содержит внутренний role
+lock `STRATEGIC_EXPLAINER_PROVIDER_V1` и является compact selector, а не brief
+или черновиком объяснения. System/developer/skill instructions остаются
+нормальной частью context и не считаются загрязнением.
 
 До первого discovery call Explainer проверяет доступные признаки:
 
@@ -142,15 +157,16 @@ user-facing result. System/developer/skill instructions остаются нор�
 - подтверждает ли доступный metadata clean fork; если metadata скрыт, проверка
   не изображает недоступное доказательство.
 
-Invalid invocation возвращает `STRATEGIC_EXPLAINER_INVOCATION_ERROR`, точный
-defect, единственное назначение provider-а и исправимый clean-call recipe.
-Discovery и explanation не начинаются. Planning, decomposition, implementation,
-mutation, lifecycle/status/authority decision, broad research без publication
-unit и orchestration отклоняются тем же способом. Caller создаёт новый subagent
-с исправленной постановкой; follow-up старому экземпляру запрещён, а provider не
-создаёт замену самостоятельно. Explicit editing/review task может содержать
-target text, потому что он является предметом, а не унаследованной
-формулировкой.
+Invalid invocation возвращает facade-у `STRATEGIC_EXPLAINER_INVOCATION_ERROR`,
+точный defect, единственное назначение provider-а и исправимый clean-call
+recipe. Discovery и explanation не начинаются. Planning, decomposition,
+implementation, mutation, lifecycle/status/authority decision, broad research
+без publication unit и orchestration отклоняются тем же способом. Facade
+создаёт один новый subagent с исправленной постановкой; внешний client не знает
+recipe и не получает промежуточный refusal. Follow-up старому экземпляру
+запрещён, а provider не создаёт замену самостоятельно. Explicit editing/review
+task может содержать target text, потому что он является предметом, а не
+унаследованной формулировкой.
 
 После admission Explainer сам устанавливает исходный вопрос, beneficiary,
 desired observable outcome, current facts/evidence/confidence, impact,

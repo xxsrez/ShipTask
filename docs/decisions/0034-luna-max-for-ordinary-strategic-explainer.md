@@ -1,6 +1,6 @@
 # 0034. Luna Max для ordinary Strategic Explainer
 
-Статус: принято, 2026-08-27.
+Статус: принято, 2026-08-27; caller wiring частично заменено ADR-0035.
 
 Частично заменяет profile routing в
 [ADR-0025](0025-cost-aware-subagent-profiles.md) и cost consequence в

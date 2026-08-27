@@ -126,30 +126,38 @@ source не сглаживаются уверенной формулировко
 
 ### `SE-10` — Единый stateless API и чистый вызов
 
-Direct и delegated use являются одним API без исключений по caller: каждый
-самостоятельный invocation выполняется новым built-in `default` subagent с
-`fork_turns="none"`, моделью `gpt-5.6-luna` и `reasoning_effort="max"`.
-Профиль текущего caller-а не наследуется и не подменяет этот provider profile.
-В model context находятся только system/developer/skill instructions и одна
-короткая, ёмкая, однозначная задача с exact scope или разрешимыми source
-anchors. Унаследованные turns, tool transcript, process diary, прежний
-candidate, рассуждения caller и несколько смешанных задач запрещены.
+Direct и delegated use являются одним публичным семантическим API без
+исключений по client-у. Внешний client передаёт только одну предназначенную
+человеку formulation/editing task, её назначение, exact scope, язык и
+разрешимые read-only source anchors; он не выбирает agent role, fork mode,
+модель, reasoning effort, role lock, форму clean envelope или retry.
+
+После применения `$strategic-explainer:strategic-explainer` внутренний facade
+router самостоятельно выполняет каждый invocation новым built-in `default`
+subagent с `fork_turns="none"`, моделью `gpt-5.6-luna` и
+`reasoning_effort="max"`. Профиль текущего client-а не наследуется и не
+подменяет этот provider profile. В model context provider-а находятся только
+system/developer/skill instructions и одна короткая, ёмкая, однозначная задача
+с exact scope или разрешимыми source anchors. Унаследованные turns, tool
+transcript, process diary, прежний candidate, рассуждения client-а и несколько
+смешанных задач запрещены.
 
 Недоступность `gpt-5.6-luna`/`max` не разрешает скрытую подмену SOL или другим
-профилем. Такой provider считается недоступным, а caller следует собственной
-явной fallback policy по `SE-16` без имитации Strategic Explainer.
+профилем. Такой provider считается недоступным, facade возвращает operational
+unavailability, а client следует собственной явной fallback policy по `SE-16`
+без имитации Strategic Explainer.
 
-Fresh invocation однозначно и явно назначает subagent терминальную роль
-Strategic Explainer provider по `SE-17`; роль не выводится из наличия диалога,
-tool history, имени агента, уже выполненных действий или догадки самого
-subagent. До discovery provider проверяет role lock, наблюдаемую чистоту
-context, компактность и однозначность задачи, доступный fork metadata и
-достаточность anchors. Если вызов не соответствует contract, provider ничего
-не анализирует и возвращает короткий operational refusal по `SE-17`. Caller
-исправляет причину и вызывает новый экземпляр; продолжать загрязнённый subagent
-или передавать ему corrective follow-up нельзя. Если platform не показывает
-fork metadata, provider проверяет только доступные признаки и не утверждает,
-что доказал скрытый mode.
+Facade router однозначно назначает fresh subagent терминальную роль Strategic
+Explainer provider по `SE-17`; роль не выводится из наличия диалога, tool
+history, имени агента, уже выполненных действий или догадки самого subagent. До
+discovery provider проверяет role lock, наблюдаемую чистоту context,
+компактность и однозначность задачи, доступный fork metadata и достаточность
+anchors. Если вызов не соответствует contract, provider ничего не анализирует
+и возвращает короткий operational refusal по `SE-17`. Facade исправляет
+структурную причину и создаёт один новый экземпляр; внешний client не получает
+clean-call recipe, не исправляет invocation сам и не продолжает загрязнённый
+subagent. Если platform не показывает fork metadata, provider проверяет только
+доступные признаки и не утверждает, что доказал скрытый mode.
 
 За пределами этого явного isolation invariant tool sequence, форма source note,
 внутренний reasoning, длина и визуальная форма остаются свободными. Table, flow
@@ -244,36 +252,40 @@ factual/comprehension error получают новый clean invocation. Ста
 проверить конкретный текст: тогда этот текст является предметом fresh invocation,
 а не унаследованным process context.
 
-### `SE-16` — Изоляция provider expertise от caller
+### `SE-16` — Семантический facade и изоляция provider expertise
 
-Вызывающий агент знает только opaque client protocol: когда нужен Explainer,
-как создать новый built-in `default` subagent с `fork_turns="none"`,
-`model="gpt-5.6-luna"` и `reasoning_effort="max"`, какие compact
-task/scope/read-only anchors допустимы и как обработать готовый result или
-отказ. Он не получает, не читает и не применяет внутренние правила
-strategic discovery, построения причинного объяснения, редакторской
-реконструкции или проверки понимания.
+Внешний вызывающий агент знает только публичный semantic contract: когда нужен
+Explainer, какую одну formulation/editing task, цель, exact scope, язык,
+material constraints и resolvable read-only anchors передать, а также что в
+ответ приходит готовый publication text с отдельно обозначенным source basis
+либо operational unavailability. В caller package, его Requirements,
+Architecture, runtime instructions и metadata не попадают agent topology,
+fork mode, model/effort, role lock, provider entrypoint, clean-call recipe или
+retry mechanics.
 
-Runtime использует progressive disclosure. Catalog metadata и caller-visible
-routing contract не раскрывают provider method. Полный внутренний provider
-contract читает только новый subagent после успешной проверки clean invocation
-и явного role lock по `SE-17`. Direct request сначала проходит тот же opaque
-caller protocol и не разрешает текущему conversational caller выполнить метод
+Runtime использует progressive disclosure из трёх слоёв. Внешний client только
+вызывает qualified skill с semantic request. Загруженный facade router знает
+внутренний invocation/admission protocol, но не получает, не читает и не
+применяет правила strategic discovery, построения причинного объяснения,
+редакторской реконструкции, языковой очистки или проверки понимания. Полный
+provider contract читает только новый subagent после успешной проверки clean
+invocation и явного role lock по `SE-17`. Direct request проходит тот же facade
+и не разрешает текущему conversational agent выполнить provider method
 самостоятельно. Routing всегда заканчивается на границе fresh invocation:
-provider-subagent не исполняет caller protocol, не маршрутизирует следующий
+provider-subagent не исполняет facade protocol, не маршрутизирует следующий
 вызов и не вызывает Strategic Explainer повторно.
 
-Caller не пишет explanation candidate, не формулирует за provider strategic
-view, не передаёт требования к структуре ответа, не оценивает result внутренним
-quality checklist и не улучшает его самостоятельно. Он может проверить
-material factual conflict по authoritative sources; исправление facts/anchors
-получает новый clean invocation. Invalid call также исправляется только новым
-экземпляром.
+Ни внешний client, ни facade router не пишут explanation candidate, не
+формулируют за provider strategic view, не передают требования к структуре
+ответа, не оценивают result внутренним quality checklist и не улучшают его
+самостоятельно. Client может проверить material factual conflict по
+authoritative sources; исправленные facts/anchors образуют новый semantic call,
+а весь clean invocation и structural retry снова остаются внутри facade.
 
-Если provider недоступен или отключён, конкретный caller следует собственному
+Если provider недоступен или отключён, конкретный client следует собственному
 truth/lifecycle contract и выбранной им fallback policy. Он не имитирует
 Strategic Explainer, не применяет его метод и не заявляет эквивалентное качество.
-Явный user opt-out также не переносит provider expertise в caller.
+Явный user opt-out также не переносит provider expertise в client.
 
 ### `SE-17` — Единственная и терминальная provider-роль
 
@@ -286,8 +298,8 @@ admission, ни после него. Provider не вызывает Strategic Ex
 и не продолжает других agents, не делегирует им discovery или проверку
 понимания и не просит другого агента закончить его publication unit.
 
-Caller до spawn явно помещает в compact task однозначный provider role lock,
-одну publication unit, exact scope и resolvable read-only anchors. Role lock
+Facade router до spawn явно помещает в compact task однозначный provider role
+lock, одну publication unit, exact scope и resolvable read-only anchors. Role lock
 имеет терминальный смысл: получивший его subagent не решает заново, является ли
 он caller, и не применяет caller branch даже если видит team tools, parent
 metadata, собственные tool calls или неоднозначные признаки чистоты context.
@@ -301,7 +313,7 @@ decision, broad research без конкретной publication unit, orchestra
 маршрутизация, управление agents и просьба выполнить чужой workflow выходят за
 роль. Получив такую задачу, provider до discovery и любых task/source tool calls возвращает
 `STRATEGIC_EXPLAINER_INVOCATION_ERROR`, кратко называет точное нарушение,
-объясняет своё единственное назначение и даёт caller-у исправимую инструкцию:
+объясняет своё единственное назначение и даёт facade router исправимую инструкцию:
 создать новый clean built-in `default` subagent с `fork_turns="none"`, явным
 `model="gpt-5.6-luna"`, `reasoning_effort="max"`, provider role lock, одной
 user-facing formulation task, exact scope и resolvable read-only anchors.

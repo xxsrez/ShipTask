@@ -165,14 +165,13 @@ authoritative sources; изменившиеся facts, scope или anchors тр
 Обычный Strategic Explainer остаётся opaque terminal provider. ShipTask не
 читает и не применяет его provider-internal contract, не пишет explanation
 candidate, не передаёт strategic summary, требования к структуре или стилю и не
-оценивает result внутренним quality checklist. Каждый pass получает новый
-built-in `default` subagent с `fork_turns="none"`, `model="gpt-5.6-luna"` и
-`reasoning_effort="max"`, exact provider role lock, одной publication unit и
-resolvable anchors. Current model/effort не наследуются. Недоступный exact Luna
-Max profile не заменяется скрыто на Sol или другой профиль: это provider failure,
-после которого ShipTask переходит в native mode. Invalid invocation получает один
-автоматически исправленный новый clean subagent; повторный structural refusal
-или другой provider failure переводит communication mode в native.
+оценивает result внутренним quality checklist. Для каждой publication unit он
+делает один semantic call qualified skill-а, передавая только назначение,
+исходный вопрос, exact scope, язык, material constraints и resolvable read-only
+anchors. Никакие другие invocation parameters или provider instructions в
+ShipTask не передаются и не описываются: внутренним исполнением полностью
+владеет facade Strategic Explainer. Operational unavailability или другой
+финальный failure facade переводит communication mode в native.
 
 В native mode ShipTask сразу формулирует publication unit по собственным
 truth/lifecycle/reporting requirements, публикует обязательный комментарий,
@@ -303,12 +302,11 @@ worktree с правом записи принадлежит ровно одно
 профиль — строго `gpt-5.6-luna` с `effort: max`, а не другая модель с пониженным
 `effort`.
 
-Большинство рабочих пакетов наследуют текущий профиль. Ordinary Strategic
-Explainer является явным исключением по `ST-07`: каждый его fresh provider
-работает строго на `gpt-5.6-luna` с `reasoning_effort="max"` и не эскалируется
-на current profile. ShipTask не повышает профиль скрытно до Sol и не заменяет
-недоступный точный выбор пользователя приблизительным вариантом. Распределение
-профилей и переход рабочего packet с Luna на текущий профиль должны оставаться
+Большинство рабочих пакетов наследуют текущий профиль. Strategic Explainer не
+относится к ShipTask profile routing: его semantic facade полностью владеет
+provider profile и обработкой его недоступности по `ST-07`, а ShipTask не
+передаёт и не переопределяет эти параметры. Распределение профилей рабочих
+packets и переход рабочего packet с Luna на текущий профиль должны оставаться
 наблюдаемыми, но не считаются доказательством результата.
 
 ### `ST-14` — Goal только для реализации нескольких Tasks

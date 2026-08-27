@@ -9,18 +9,18 @@ CONTRACT = ROOT / "strategic-explainer" / "references" / "provider-contract.md"
 
 
 class StrategicExplainerRuntimeTest(unittest.TestCase):
-    def test_terminal_role_is_resolved_before_caller_protocol(self) -> None:
+    def test_terminal_role_is_resolved_before_facade_protocol(self) -> None:
         text = SKILL.read_text()
         self.assertLess(
             text.index("## Сначала разреши роль"),
-            text.index("## Opaque client protocol"),
+            text.index("## Публичный semantic contract"),
         )
         provider_branch = text[
-            text.index("## Сначала разреши роль") : text.index("## Opaque client protocol")
+            text.index("## Сначала разреши роль") : text.index("## Публичный semantic contract")
         ]
         self.assertIn("STRATEGIC_EXPLAINER_PROVIDER_V1", provider_branch)
         self.assertIn("это терминальный provider", provider_branch)
-        self.assertIn("Не исполняй\n  caller protocol", provider_branch)
+        self.assertIn("Не исполняй\n  facade protocol", provider_branch)
         self.assertIn("references/provider-entrypoint.md", provider_branch)
         self.assertIn("никогда не переклассифицирует себя в caller", provider_branch)
 
@@ -48,23 +48,42 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
         self.assertIn("comprehension check без другого агента", contract)
         self.assertIn("внешним model-forward\nevaluation harness", contract)
 
-    def test_caller_cannot_read_provider_expertise(self) -> None:
+    def test_facade_owns_invocation_but_not_provider_expertise(self) -> None:
         text = SKILL.read_text()
-        caller = text[text.index("## Opaque client protocol") :]
-        self.assertIn("Не готовь explanation candidate", caller)
-        self.assertIn("Не передавай inherited turns", caller)
-        self.assertIn("не переписывай provider result", caller)
-        self.assertIn('model="gpt-5.6-luna"', caller)
-        self.assertIn('reasoning_effort="max"', caller)
-        self.assertIn("Не наследуй current model/effort", caller)
-        self.assertIn("не подменяй недоступную Luna на SOL", caller)
+        public = text[
+            text.index("## Публичный semantic contract") :
+            text.index("## Внутреннее исполнение facade")
+        ]
+        internal = text[text.index("## Внутреннее исполнение facade") :]
+        self.assertIn("одна реальная user-facing formulation", public)
+        self.assertIn("resolvable read-only source anchors", public)
+        self.assertIn("Не требуй от внешнего workflow", public)
+        self.assertIn("нового built-in `default` subagent", internal)
+        self.assertIn('model="gpt-5.6-luna"', internal)
+        self.assertIn('reasoning_effort="max"', internal)
+        self.assertIn("Не передавай inherited turns", internal)
+        self.assertIn("facade исправляет", internal)
         for provider_recipe in (
             "одну главную причинную мысль",
             "первый смысловой слой",
             "scenario coverage map",
             "audit-redaction pass",
+            "языковой очистки",
+            "comprehension check",
         ):
             self.assertNotIn(provider_recipe, text)
+
+    def test_metadata_exposes_semantics_not_invocation_recipe(self) -> None:
+        metadata = (ROOT / "strategic-explainer" / "agents" / "openai.yaml").read_text()
+        self.assertIn("понятный пользовательский текст", metadata)
+        self.assertIn("source basis", metadata)
+        for marker in (
+            "STRATEGIC_EXPLAINER_PROVIDER_V1",
+            "fork_turns",
+            "gpt-5.6-luna",
+            "reasoning_effort",
+        ):
+            self.assertNotIn(marker, metadata)
 
     def test_clean_call_recipe_uses_luna_max(self) -> None:
         for path in (SKILL, ENTRYPOINT):

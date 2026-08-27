@@ -32,10 +32,11 @@
   [Requirements](skills/strategic-explainer/requirements.md),
   [Architecture](skills/strategic-explainer/architecture.md) и
   [product vision](skills/strategic-explainer/product-vision.md) — общий contract
-  stateless API объяснения на уровне исходного вопроса: каждый user-facing unit
-  получает clean `fork_turns="none"` invocation на exact
-  `gpt-5.6-luna`/`max`, Explainer сам собирает
-  strategic context, но продуктом считает понимание читателя, а не отчёт об
+  stateless semantic API объяснения на уровне исходного вопроса: caller
+  передаёт только назначение, scope и source anchors, facade полностью владеет
+  clean invocation, а методику анализа и улучшения читает только terminal
+  provider. Explainer сам собирает strategic context, но продуктом считает
+  понимание читателя, а не отчёт об
   исследовании. Publication text строится из одной главной причинной мысли,
   verification-only source basis остаётся отдельно, а поведение проверяется
   model-forward regression и независимым пересказом. По явному запросу skill выполняет глубокую
@@ -153,6 +154,10 @@
 - [0034: Luna Max для ordinary Strategic Explainer](decisions/0034-luna-max-for-ordinary-strategic-explainer.md)
   — запускает установленный ordinary provider как clean Luna Max subagent без
   наследования SOL/current profile; без plugin-а ShipTask пишет сам.
+- [0035: Semantic facade владеет invocation Strategic Explainer](decisions/0035-strategic-explainer-semantic-facade.md)
+  — оставляет callers только semantic request/result contract, переносит весь
+  invocation recipe в facade и сохраняет методику улучшения только terminal
+  provider-subagent.
 
 ## Reference
 

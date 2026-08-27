@@ -232,24 +232,23 @@ transport, известный до create scope не создаётся част
 
 Перед созданием каждого Epic его problem-first описание составляется с помощью
 отдельно установленного `$strategic-explainer:strategic-explainer`. Каждый Epic
-description является
-отдельным publication unit: Task Composer создаёт новый built-in `default`
-subagent с `fork_turns="none"`, `model="gpt-5.6-luna"` и
-`reasoning_effort="max"` и передаёт одну compact task, exact planning scope и
-resolvable read-only anchors. Current caller profile не наследуется и не
-подменяет недоступную Luna на Sol. Унаследованный диалог, tool transcript, process
-diary, готовый strategic view и прежний candidate не передаются. Explainer
-остаётся opaque provider и не выбирает Project, decomposition, status, labels,
-relations или write authority. Task Composer не читает provider-internal
-contract, не пишет description candidate и не передаёт требования к тому, как
+description является отдельным publication unit: Task Composer делает один
+semantic call qualified skill-а и передаёт только назначение description,
+исходный вопрос, exact planning scope, язык, material constraints и resolvable
+read-only anchors. Никакие другие invocation parameters или provider
+instructions в Task Composer contract не входят. Готовый strategic view,
+прежний candidate и требования
+к форме не передаются. Explainer не выбирает Project, decomposition, status,
+labels, relations или write authority. Task Composer не читает
+provider-internal contract, не пишет description candidate и не знает, как
 provider должен анализировать или формулировать result.
 
-Если Explainer отклоняет invocation, Task Composer исправляет указанную причину
-и создаёт новый clean subagent; follow-up старому экземпляру не используется.
+Operational unavailability возвращается Task Composer как финальный failure
+semantic facade; внутренняя обработка caller-у не раскрывается.
 Готовый text и отдельно обозначенный source basis проверяются только на material
 factual conflict с authoritative planning sources. В Epic description попадает
 только text, а не basis. Factual correction также получает новый clean
-invocation; caller не читает internal quality checklist и не улучшает text
+semantic call; caller не читает internal quality checklist и не улучшает text
 самостоятельно.
 
 Основной Task Composer остаётся ответственным за factual accuracy, полноту

@@ -253,14 +253,17 @@ Evaluation report сообщает `PASS | FAIL`, exact unsupported/lost claim �
 
 ## Обязательные regression cases
 
-### Caller видит только router
+### Client видит только semantic facade
 
-ShipTask, Task Composer и direct conversational caller получают только opaque
-client protocol. Expected behavior: новый `default` subagent с
-`fork_turns="none"`, `model="gpt-5.6-luna"` и
-`reasoning_effort="max"`; provider reference caller не читает, candidate не
-пишет и requirements к форме ответа не передаёт. Попытка применить
-discovery/output method в caller context получает `FAIL`.
+ShipTask, Task Composer и direct conversational client передают только
+назначение, исходный вопрос, exact scope, язык, material constraints и
+resolvable read-only anchors. Их Requirements, Architecture, runtime skills и
+metadata не содержат agent topology, fork mode, model/effort, role lock,
+provider entrypoint, clean-call recipe или retry mechanics. Expected behavior:
+qualified skill сам создаёт требуемый fresh provider и возвращает готовый
+result. Provider reference не читает ни client, ни facade router; они не пишут
+candidate, не передают requirements к форме ответа и не применяют
+discovery/output method. Любая такая утечка получает `FAIL`.
 
 ### Provider contract загружается после admission
 
@@ -287,10 +290,10 @@ calling workflow, а не Strategic Explainer.
 ### Direct и delegated caller используют один API
 
 Один scenario инициирован пользователем напрямую, второй — calling workflow.
-Оба получают новый built-in `default` subagent с `fork_turns="none"`,
-`model="gpt-5.6-luna"`, `reasoning_effort="max"`, одной compact task и теми же
-admission/discovery/result gates. Caller type не разрешает inherited context
-или более слабое explanation.
+Оба делают одинаковый semantic call без invocation parameters. White-box
+observation подтверждает, что facade в обоих случаях создаёт требуемый fresh
+provider с одной compact task и теми же admission/discovery/result gates.
+Client type не разрешает inherited context или более слабое explanation.
 
 ### Загрязнённый invocation
 

@@ -38,9 +38,10 @@
 3. **Level 3 — runtime skills.**
    `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и runtime packages
    `strategic-explainer/` являются компактной исполнимой проекцией Level 1 и
-   применимой части Level 2. У Strategic Explainer caller-visible `SKILL.md`
-   содержит только router/admission contract, а provider expertise находится в
-   reference, который читает лишь admitted fresh subagent. Формулировка и
+   применимой части Level 2. У Strategic Explainer `SKILL.md` является
+   semantic facade и содержит только routing/admission contract, а provider
+   expertise находится в reference, который читает лишь admitted fresh
+   subagent. Формулировка и
    структура могут отличаться от документации, но runtime package должен нести
    весь применимый смысл Level 1 без семантических потерь.
 
@@ -81,10 +82,10 @@ manifest/install/byte-identity правила остаются repository-level 
   право автоматически менять Label taxonomy.
 - `$strategic-explainer` остаётся generic: не добавляйте в его runtime contract
   ShipTask, Task Manager, конкретный tracker, project lifecycle или право
-  принимать решения/выполнять mutations. Provider-subagent имеет одну terminal
-  роль, заданную exact role lock: он не становится caller/router/coordinator/
-  evaluator, не вызывает Strategic Explainer и не создаёт других agents;
-  off-role invocation получает operational error до domain discovery.
+  принимать решения/выполнять mutations. Внутренний provider-subagent имеет одну
+  terminal роль: он не становится caller/router/coordinator/evaluator, не
+  вызывает Strategic Explainer и не создаёт других agents; off-role invocation
+  получает operational error до domain discovery.
 - Requests сформулировать, создать, разложить или положить Task Manager работу
   в backlog направляйте через `$ship-tasks:task-composer`, когда он доступен. Это
   planning-only mutation и не запускает ShipTask delivery. Read/status/audit
@@ -128,12 +129,12 @@ manifest/install/byte-identity правила остаются repository-level 
   приоритет и сохраняется по смыслу; root agent не входит в явно названное число
   субагентов; в начале run ShipTask выбирает ordinary при его наличии и
   разрешении, иначе native; failure provider-а переводит run прямо в native;
-  ordinary publication unit получает нового built-in
-  `default` subagent с `fork_turns="none"`, `model="gpt-5.6-luna"`,
-  `reasoning_effort="max"`, exact terminal provider role lock, одной compact
-  task и resolvable read-only anchors, а caller знает только его opaque
-  protocol; недоступная Luna не подменяется SOL, invalid ordinary call получает
-  automatic corrected fresh retry; native mode следует только ShipTask truth/lifecycle/reporting contract,
+  ordinary publication unit вызывает semantic facade
+  `$strategic-explainer:strategic-explainer` только с назначением, исходным
+  вопросом, exact scope, языком, material constraints и resolvable read-only
+  anchors; никакие другие invocation parameters или provider instructions в
+  caller contract не входят, а provider expertise читает только terminal
+  subagent; native mode следует только ShipTask truth/lifecycle/reporting contract,
   не имитирует provider и не блокирует comment/status; candidate blocker до
   публикации становится reflection input ShipTask для повторной проверки safe
   frontier без расширения scope/authority; ready result не переписывается;
@@ -144,9 +145,10 @@ manifest/install/byte-identity правила остаются repository-level 
   unfinished worktree/branch подхватывается тем же coordinator или новым
   exclusive writer после проверки quiescence, а не дублируется; особо простые bounded packets
   без отдельного user override используют `gpt-5.6-luna`/`max`, остальные
-  рабочие packets наследуют current model/effort, ordinary Strategic Explainer
-  всегда использует fresh `gpt-5.6-luna`/`max`, а Luna при material uncertainty прекращает
-  packet и передаёт его current profile без Luna retry loop; доказанная первая
+  рабочие packets наследуют current model/effort, Strategic Explainer не входит
+  в caller profile routing, а Luna implementation
+  packet при material uncertainty прекращает packet и передаёт его current
+  profile без Luna retry loop; доказанная первая
   Codex task с catalog placeholder при доступной host title capability после live
   scope resolution получает best-effort попытку `ShipTask · ...`, но meaningful
   title, later turn или ambiguous candidate не переименовываются, а

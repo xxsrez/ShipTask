@@ -1,7 +1,8 @@
 # 0029. Fresh Strategic Explainer и reflection до blocker
 
-Статус: accepted, 2026-08-26. Уточняет ADR-0012, ADR-0014, ADR-0021 и
-ADR-0022. Канонические current requirements остаются в локальных source packages
+Статус: accepted, 2026-08-26; caller-visible invocation recipe частично
+заменён ADR-0035. Уточняет ADR-0012, ADR-0014, ADR-0021 и ADR-0022.
+Канонические current requirements остаются в локальных source packages
 [Strategic Explainer](../skills/strategic-explainer/requirements.md),
 [ShipTask](../skills/ship-tasks/requirements.md) и
 [Task Composer](../skills/task-composer/requirements.md).

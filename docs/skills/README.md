@@ -59,10 +59,10 @@ Level 1 отвечает на вопрос «что обязательно до�
 исполняющему агенту оба уровня, но при конфликте Requirements всегда сильнее
 Architecture и runtime.
 
-Strategic Explainer использует progressive disclosure: `SKILL.md` доносит
-caller-у только router/admission contract, а полный provider contract находится
-в runtime reference и загружается только admitted fresh subagent. Совокупность
-этих файлов, а не один caller-visible `SKILL.md`, является его Level 3.
+Strategic Explainer использует progressive disclosure: внешний client передаёт
+только semantic request, `SKILL.md` реализует facade/admission, а полный provider
+contract находится в runtime reference и загружается только admitted fresh
+subagent. Совокупность этих файлов, а не один `SKILL.md`, является его Level 3.
 
 Изменение цели, инварианта или пользовательской границы сначала меняет локальный
 `requirements.md`. Изменение способа достижения при сохранённой цели меняет

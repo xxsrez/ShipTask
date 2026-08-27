@@ -635,19 +635,17 @@ ordinary `$strategic-explainer:strategic-explainer`, если он доступ�
 иначе native. Выбор сохраняется до explicit rule change или failure выбранного
 provider-а.
 
-Ordinary path сохраняет opaque protocol: новый built-in `default` read-only
-subagent с `fork_turns="none"`, `model="gpt-5.6-luna"` и
-`reasoning_effort="max"` получает exact terminal role lock, одну compact task,
-exact scope и resolvable anchors без inherited turns, tool transcript, process
-diary, ShipTask analysis/strategic summary, format rules или candidate. Current
-profile не наследуется. Caller не читает ordinary provider-only/internal
-references. Invalid invocation автоматически исправляется одним новым clean
-subagent; follow-up запрещён.
+Ordinary path является одним вызовом semantic facade
+`$strategic-explainer:strategic-explainer`. ShipTask передаёт только назначение
+publication unit, исходный вопрос, exact scope, язык, material constraints и
+resolvable read-only anchors. Никакие другие invocation parameters или provider
+instructions в ShipTask contract не входят. Facade возвращает готовый text с
+отдельно обозначенным source basis либо operational unavailability. ShipTask не
+читает ordinary provider-only/internal references.
 
-Material factual conflict исправляется current sources/anchors и новым pass того
-же provider. Недоступность exact Luna Max, повторный ordinary refusal или другая
-ошибка выбранного provider-а переводит mode в native без скрытой подмены Sol или
-другим профилем. Availability fallback
+Material factual conflict исправляется current sources/anchors и новым semantic
+call того же provider. Operational unavailability или другая финальная ошибка
+facade переводит mode в native. Availability fallback
 работает только при начальном выборе, поэтому одна unit получает не более одного
 provider.
 
@@ -852,9 +850,9 @@ acceptance, даёт объективно проверяемый результ�
 продуктового или архитектурного решения и не несёт material authority/risk или
 неопределённости окружения. Остальные implementation/research packets наследуют
 current profile; внешне механическая, но рискованная или связанная работа простой
-не считается. Ordinary Strategic Explainer не относится к этой классификации:
-по разделу 6 он всегда получает exact Luna Max profile и при его недоступности
-переходит в native writing без profile escalation.
+не считается. Strategic Explainer не относится к этой классификации: по разделу
+6 ShipTask вызывает только его semantic facade; operational unavailability
+переводит communication mode в native writing.
 
 Если Luna обнаружила неоднозначность, конфликт контекста или task contract,
 неожиданное поведение environment/tools, необходимость расширить scope либо не

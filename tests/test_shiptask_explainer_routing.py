@@ -9,6 +9,13 @@ DELIVERY = ROOT / "ship-tasks" / "references" / "delivery-report.md"
 RUN_REPORT = ROOT / "ship-tasks" / "references" / "run-report.md"
 REQUIREMENTS = ROOT / "docs" / "skills" / "ship-tasks" / "requirements.md"
 ARCHITECTURE = ROOT / "docs" / "skills" / "ship-tasks" / "architecture.md"
+COMPOSER = ROOT / "task-composer" / "SKILL.md"
+COMPOSER_REQUIREMENTS = ROOT / "docs" / "skills" / "task-composer" / "requirements.md"
+COMPOSER_ARCHITECTURE = ROOT / "docs" / "skills" / "task-composer" / "architecture.md"
+
+
+def between(text: str, start: str, end: str) -> str:
+    return text[text.index(start) : text.index(end)]
 
 
 class ShipTaskExplainerRoutingTest(unittest.TestCase):
@@ -32,8 +39,8 @@ class ShipTaskExplainerRoutingTest(unittest.TestCase):
         text = PROTOCOL.read_text()
         self.assertIn("Ошибка уже выбранного ordinary переводит\nrun в native mode", text)
         self.assertIn(
-            "Invalid invocation получает один\nавтоматически исправленный новый clean subagent",
-            REQUIREMENTS.read_text(),
+            "Operational unavailability или другой финальный failure facade переводит communication mode в native",
+            " ".join(REQUIREMENTS.read_text().split()),
         )
 
     def test_native_mode_does_not_block_comment_or_status(self) -> None:
@@ -56,17 +63,66 @@ class ShipTaskExplainerRoutingTest(unittest.TestCase):
         self.assertIn("Общий запрет создавать subagents также исключает ordinary", text)
         self.assertIn("выбирает native", text)
 
-    def test_ordinary_invocation_contains_terminal_role_lock(self) -> None:
-        text = PROTOCOL.read_text()
-        ordinary = text[text.index("## Ordinary path") : text.index("## Native path")]
-        self.assertIn("STRATEGIC_EXPLAINER_PROVIDER_V1", ordinary)
-        self.assertIn("fork_turns=\"none\"", ordinary)
-        self.assertIn("model=\"gpt-5.6-luna\"", ordinary)
-        self.assertIn("reasoning_effort=\"max\"", ordinary)
-        self.assertIn("Не наследуй current model/effort", ordinary)
-        self.assertIn("не заменяй его скрыто на Sol", ordinary)
-        self.assertIn("одну короткую user-facing formulation task", ordinary)
-        self.assertIn("Не\nчитай ordinary provider-only entrypoint", ordinary)
+    def test_callers_use_only_semantic_facade(self) -> None:
+        surfaces = {
+            "ship runtime": between(
+                SKILL.read_text(),
+                "## 5. Обеспечь человеческое объяснение",
+                "## 6. Продолжай автономно и финализируй",
+            ),
+            "ship protocol": PROTOCOL.read_text(),
+            "ship requirements": between(
+                REQUIREMENTS.read_text(),
+                "### `ST-07`",
+                "### `ST-08`",
+            ),
+            "ship architecture": between(
+                ARCHITECTURE.read_text(),
+                "## 6. Человеческое объяснение",
+                "## 7. Реализация и проверка",
+            ),
+            "composer runtime": COMPOSER.read_text(),
+            "composer requirements": between(
+                COMPOSER_REQUIREMENTS.read_text(),
+                "### `TC-09`",
+                "### `TC-10`",
+            ),
+            "composer architecture": between(
+                COMPOSER_ARCHITECTURE.read_text(),
+                "## 5. Strategic Explainer",
+                "## 6. Labels, hierarchy и relations",
+            ),
+        }
+        semantic_markers = (
+            "$strategic-explainer:strategic-explainer",
+            "вопрос",
+            "scope",
+            "язык",
+            "material constraints",
+            "anchors",
+        )
+        implementation_markers = (
+            "STRATEGIC_EXPLAINER_PROVIDER_V1",
+            'fork_turns="none"',
+            'model="gpt-5.6-luna"',
+            'reasoning_effort="max"',
+            "provider-entrypoint",
+            "provider-contract.md",
+            "built-in `default`",
+        )
+        method_markers = (
+            "одну главную причинную мысль",
+            "первый смысловой слой",
+            "scenario coverage map",
+            "audit-redaction pass",
+        )
+        for name, surface in surfaces.items():
+            with self.subTest(surface=name):
+                surface = " ".join(surface.split())
+                for marker in semantic_markers:
+                    self.assertIn(marker, surface)
+                for marker in implementation_markers + method_markers:
+                    self.assertNotIn(marker, surface)
 
 
 if __name__ == "__main__":

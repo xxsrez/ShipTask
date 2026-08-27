@@ -72,8 +72,8 @@ ADR-0024.
   agent не считается названным субагентом;
 - user-selected subagent profile имеет приоритет; без него genuinely simple
   implementation/research packets получают Luna Max, остальные рабочие packets
-  наследуют current model/effort, а ordinary Strategic Explainer всегда
-  запускается на exact Luna Max;
+  наследуют current model/effort, а Strategic Explainer не входит в caller
+  profile routing и вызывается только через собственный semantic facade;
 - при доступной host title capability доказанная первая Codex task с catalog
   placeholder после live scope resolution получает не более одной best-effort
   попытки короткого `ShipTask · ...` title; meaningful title и последующие turns
@@ -101,11 +101,12 @@ ADR-0024.
 - существенный status transition сначала получает понятный native comment и
   comment read-back;
 - каждый создаваемый ShipTask-комментарий, пока effective rule не отключает
-  Explainer, до публикации проходит отдельного независимого субагента;
-- каждый Task/scope report, blocker explanation и final получает отдельный fresh
-  `fork_turns="none"` invocation; routine chat/progress его не запускает;
-- Caller передаёт только compact task, exact scope и resolvable source anchors,
-  не читает provider contract, не пишет candidate и не улучшает ready text;
+  Explainer, до публикации проходит его semantic facade;
+- каждый Task/scope report, blocker explanation и final получает отдельный
+  semantic call; routine chat/progress его не запускает;
+- client передаёт только назначение, исходный вопрос, exact scope, язык,
+  material constraints и resolvable source anchors, не читает provider
+  contract, не пишет candidate и не улучшает ready text;
 - material blocker также получает comment, даже без status change;
 - native comments являются гарантированной adapter capability и всегда
   сопровождают material lifecycle reporting;
@@ -283,6 +284,7 @@ smoke evidence. Отсутствующий UAT receipt — proof gap, а не ve
 - [Task Composer как planning sibling-skill](decisions/0023-task-composer-as-planning-sibling.md)
 
 Runtime sources — `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и package
-`strategic-explainer/`. Ordinary caller-visible `SKILL.md` является
-router/admission layer к fresh provider. Plugin distribution и installed cache должны быть
+`strategic-explainer/`. `SKILL.md` Explainer является semantic facade и
+admission layer к fresh provider, а text-improvement contract загружается только
+terminal subagent. Plugin distribution и installed cache должны быть
 byte-identical repository source; standalone user-level copies не используются.

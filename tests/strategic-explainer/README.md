@@ -22,6 +22,11 @@ Generating subagent не получает rubric, diagnosis, intended wording, �
 выполняет admission, после чего subagent возвращает publication text и отдельно
 обозначенный source basis.
 
+Это white-box evaluation harness: он намеренно знает внутренний invocation
+recipe, чтобы проверить released implementation. ShipTask, Task Composer и
+обычный direct client этих параметров не получают и вызывают только semantic
+facade.
+
 Evaluator получает исходный `facts.md`, соответствующий `rubric.md`, publication
 text, source basis и общий [semantic gate](common-rubric.md). Он отдельно проверяет factual coverage и человеческое
 понимание. Формулировка может отличаться между trials; `PASS` требует, чтобы
