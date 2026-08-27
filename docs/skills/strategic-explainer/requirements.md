@@ -1,6 +1,6 @@
 # Strategic Explainer: требования пользователя
 
-Статус: current Level 1, 2026-08-26.
+Статус: current Level 1, 2026-08-27.
 
 Этот документ — полный пользовательский исходный код только для
 `$strategic-explainer`. Он не определяет требования к ShipTask или Task
@@ -133,14 +133,17 @@ instructions и одна короткая, ёмкая, однозначная з
 разрешимыми source anchors. Унаследованные turns, tool transcript, process diary,
 прежний candidate, рассуждения caller и несколько смешанных задач запрещены.
 
-До discovery Explainer проверяет наблюдаемую чистоту context, компактность и
-однозначность задачи, доступный fork metadata и достаточность anchors. Если
-вызов не соответствует contract, Explainer ничего не анализирует и возвращает
-короткий отказ: что именно нарушено и как создать правильный fresh invocation.
-Caller исправляет причину и вызывает новый экземпляр; продолжать загрязнённый
-subagent или передавать ему corrective follow-up нельзя. Если platform не
-показывает fork metadata, Explainer проверяет только доступные признаки и не
-утверждает, что доказал скрытый mode.
+Fresh invocation однозначно и явно назначает subagent терминальную роль
+Strategic Explainer provider по `SE-17`; роль не выводится из наличия диалога,
+tool history, имени агента, уже выполненных действий или догадки самого
+subagent. До discovery provider проверяет role lock, наблюдаемую чистоту
+context, компактность и однозначность задачи, доступный fork metadata и
+достаточность anchors. Если вызов не соответствует contract, provider ничего
+не анализирует и возвращает короткий operational refusal по `SE-17`. Caller
+исправляет причину и вызывает новый экземпляр; продолжать загрязнённый subagent
+или передавать ему corrective follow-up нельзя. Если platform не показывает
+fork metadata, provider проверяет только доступные признаки и не утверждает,
+что доказал скрытый mode.
 
 За пределами этого явного isolation invariant tool sequence, форма source note,
 внутренний reasoning, длина и визуальная форма остаются свободными. Table, flow
@@ -244,11 +247,14 @@ compact task/scope/read-only anchors допустимы и как обработ
 strategic discovery, построения причинного объяснения, редакторской
 реконструкции или проверки понимания.
 
-Runtime использует progressive disclosure. Catalog metadata и `SKILL.md`
-остаются routing/admission layer без provider method. Полный внутренний
-provider contract читает только новый subagent после успешной проверки clean
-invocation. Direct request сначала проходит тот же router и не разрешает
-текущему conversational caller выполнить метод самостоятельно.
+Runtime использует progressive disclosure. Catalog metadata и caller-visible
+routing contract не раскрывают provider method. Полный внутренний provider
+contract читает только новый subagent после успешной проверки clean invocation
+и явного role lock по `SE-17`. Direct request сначала проходит тот же opaque
+caller protocol и не разрешает текущему conversational caller выполнить метод
+самостоятельно. Routing всегда заканчивается на границе fresh invocation:
+provider-subagent не исполняет caller protocol, не маршрутизирует следующий
+вызов и не вызывает Strategic Explainer повторно.
 
 Caller не пишет explanation candidate, не формулирует за provider strategic
 view, не передаёт требования к структуре ответа, не оценивает result внутренним
@@ -257,12 +263,42 @@ material factual conflict по authoritative sources; исправление fac
 получает новый clean invocation. Invalid call также исправляется только новым
 экземпляром.
 
-Если mandatory provider недоступен, publication-dependent comment или lifecycle
-effect остаётся незавершённым. Обязательный финальный ответ честно сообщает
-capability failure и фактическое состояние по собственному truth contract
-caller, но не имитирует Strategic Explainer, не применяет его метод и не
-заявляет эквивалентное качество. Явный user opt-out также не переносит provider
-expertise в caller.
+Если provider недоступен или отключён, конкретный caller следует собственному
+truth/lifecycle contract и выбранной им fallback policy. Он не имитирует
+Strategic Explainer, не применяет его метод и не заявляет эквивалентное качество.
+Явный user opt-out также не переносит provider expertise в caller.
+
+### `SE-17` — Единственная и терминальная provider-роль
+
+Каждый subagent, созданный для выполнения обычного Strategic Explainer, с
+первой инструкции и до завершения имеет ровно одну роль: read-only provider,
+который возвращает одну понятную user-facing формулировку названной caller-ом
+проблемы, результата, препятствия, состояния или явно переданного target text.
+Он никогда не становится caller, router, coordinator или evaluator — ни до
+admission, ни после него. Provider не вызывает Strategic Explainer, не создаёт
+и не продолжает других agents, не делегирует им discovery или проверку
+понимания и не просит другого агента закончить его publication unit.
+
+Caller до spawn явно помещает в compact task однозначный provider role lock,
+одну publication unit, exact scope и resolvable read-only anchors. Role lock
+имеет терминальный смысл: получивший его subagent не решает заново, является ли
+он caller, и не применяет caller branch даже если видит team tools, parent
+metadata, собственные tool calls или неоднозначные признаки чистоты context.
+Отсутствующий, конфликтующий или смешанный role lock является invalid
+invocation, а не основанием породить ещё один subagent.
+
+Допустимая задача provider-а ограничена созданием или явной редактурой одного
+реального предназначенного человеку explanation result в границах `SE-15`.
+Planning, decomposition, implementation, mutation, lifecycle/status/authority
+decision, broad research без конкретной publication unit, orchestration,
+маршрутизация, управление agents и просьба выполнить чужой workflow выходят за
+роль. Получив такую задачу, provider до discovery и любых task/source tool calls возвращает
+`STRATEGIC_EXPLAINER_INVOCATION_ERROR`, кратко называет точное нарушение,
+объясняет своё единственное назначение и даёт caller-у исправимую инструкцию:
+создать новый clean built-in `default` subagent с `fork_turns="none"`, явным
+provider role lock, одной user-facing formulation task, exact scope и
+resolvable read-only anchors. После отказа этот экземпляр останавливается; он
+не исправляет собственный вызов и не запускает замену самостоятельно.
 
 ## Изменение Level 1
 

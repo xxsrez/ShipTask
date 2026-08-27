@@ -52,11 +52,14 @@ acceptance закреплено
 Fresh clean Strategic Explainer API и обязательная reflection-проверка safe
 frontier до окончательного blocker claim закреплены
 [ADR-0029](decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md).
-Самостоятельная Marketplace-поставка Strategic Explainer и logical fail-closed
-dependency ShipTask закреплены
+Самостоятельная Marketplace-поставка Strategic Explainer и первоначальная
+logical dependency закреплены
 [ADR-0031](decisions/0031-standalone-strategic-explainer-plugin.md).
-Отдельный Fast plugin и Fast-first/ordinary-fallback routing закреплены
+Отдельный Fast plugin и первоначальный Fast-first routing закреплены
 [ADR-0032](decisions/0032-strategic-explainer-fast-plugin.md).
+Terminal ordinary provider и current ordinary-first → Fast → native routing
+ShipTask закреплены
+[ADR-0033](decisions/0033-terminal-provider-and-optional-shiptask-routing.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
 результатов и жёстких границ. Агент свободен выбирать порядок, инструменты,
 реализацию, декомпозицию и число попыток; delegation следует явной политике
@@ -190,12 +193,12 @@ comment может завершить Task как weaker `critical-codebase-acce
 Ответ в Codex, Goal, reason code или `description` comment не заменяют.
 Существенный status transition считается завершённым только при фактическом
 comment и read-back; технический путь к этому результату выбирает агент.
-До публикации text готовит один availability-selected Strategic Explainer: Fast
-in-context без subagent либо ordinary clean provider при отсутствии Fast.
-Основной агент проверяет material factual conflict и не делает второй rewrite.
-При effective opt-out основной агент
-сообщает необходимые lifecycle facts по собственному truth contract без
-provider method или claim эквивалентного качества.
+До публикации ShipTask использует выбранный mode: ordinary clean terminal
+provider, иначе Fast in-context без subagent, иначе native writing. Основной
+агент проверяет material factual conflict и не делает второй rewrite. Opt-out,
+отсутствие providers или provider failure выбирают native: необходимые lifecycle
+facts публикуются по собственному truth contract без provider method или claim
+эквивалентного качества и без блокировки transition.
 
 ## Приёмка
 

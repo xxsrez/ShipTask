@@ -1,6 +1,6 @@
 # Strategic Explainer evaluation contract
 
-Статус: current reference, 2026-08-26.
+Статус: current reference, 2026-08-27.
 
 Документ проверяет observable isolation и quality `$strategic-explainer`:
 stateless admission, самостоятельный source-grounded discovery и короткий
@@ -27,9 +27,10 @@ user-facing result. Intended wording, готовая problem/strategic interpret
 caller reasoning и process diary не передаются. Direct и delegated scenario
 проверяются по одному API contract.
 
-Evaluation разделена на два runtime слоя. Caller/router проверяется только по
-client protocol и не получает provider method. Provider quality cases запускают
-уже admitted fresh subagent, который после admission читает внутренний contract.
+Evaluation различает три package-слоя. Caller/router проверяется только по role
+resolver и client protocol и не получает provider method. Provider quality
+cases получают exact role lock, проходят provider-only entrypoint и только
+после admission читают внутренний contract.
 
 ## Model-forward gate
 
@@ -81,10 +82,26 @@ audit trail. Общая фраза о готовой возможности по
 - factual/structural correction получает новый clean invocation, а не caller
   rewrite или follow-up прежнему subagent.
 
+### Terminal provider role
+
+- compact task provider-а содержит отдельную точную строку
+  `STRATEGIC_EXPLAINER_PROVIDER_V1`, а router разрешает её до caller branch;
+- marker однозначно фиксирует роль: provider не переклассифицирует себя по
+  conversation, tools, parent metadata или имени агента;
+- provider не исполняет client protocol, не вызывает Strategic Explainer, не
+  создаёт, не продолжает и не просит других agents выполнить discovery,
+  comprehension check или publication unit;
+- planning, decomposition, implementation, mutation, lifecycle/status/authority
+  decision, orchestration и broad research без publication unit возвращают
+  `STRATEGIC_EXPLAINER_INVOCATION_ERROR` до domain discovery;
+- refusal называет exact defect, единственное назначение provider-а и clean-call
+  recipe, после чего этот экземпляр останавливается.
+
 ### Fresh invocation admission
 
 - каждый publication unit запущен новым built-in `default` subagent с
   `fork_turns="none"`;
+- compact task содержит exact terminal provider role lock;
 - кроме system/developer/skill instructions видна одна compact однозначная task
   без inherited turns, tool transcript, process diary, caller rationale и
   прежнего candidate;
@@ -168,13 +185,15 @@ audit trail. Общая фраза о готовой возможности по
 ревизий, внутренних gates и перечня проверок в нём не остаётся понятного ответа:
 что именно получилось или остановилось, почему это важно и что будет дальше.
 
-Для сложного сбоя, нескольких сценариев или сводного отчёта независимый читатель
-видит только исходный вопрос и готовый текст. Он должен своими словами верно
-восстановить проблему, результат или препятствие, влияние и следующий шаг. Если
-его пересказ опирается на неизвестные ему внутренние термины, угадывает причинную
-связь или отвечает на более узкий технический вопрос, проверка получает `FAIL`.
-Проверка фактов выполняется отдельно: удачный пересказ не оправдывает ошибочное
-утверждение.
+Для сложного сбоя, нескольких сценариев или сводного отчёта отдельный evaluator
+в model-forward harness видит только исходный вопрос и готовый текст. Он должен
+своими словами верно восстановить проблему, результат или препятствие, влияние
+и следующий шаг. Если его пересказ опирается на неизвестные ему внутренние
+термины, угадывает причинную связь или отвечает на более узкий технический
+вопрос, проверка получает `FAIL`. Это test-only независимый agent: runtime
+provider выполняет лишь собственный comprehension check и никогда не вызывает
+evaluator-а. Проверка фактов выполняется отдельно: удачный пересказ не
+оправдывает ошибочное утверждение.
 
 ### Редакторская целостность
 
@@ -238,16 +257,25 @@ method в caller context получает `FAIL`.
 
 ### Provider contract загружается после admission
 
-Fresh subagent получает одну compact task и anchors. Он сначала проверяет
-invocation и только после успешного admission читает internal provider contract.
-Invalid context отклоняется без загрузки expertise или анализа задачи.
+Fresh subagent получает exact role lock, одну compact task и anchors. Router
+сразу выбирает provider path; provider entrypoint проверяет invocation и только
+после успешного admission загружает internal provider contract. Invalid context
+отклоняется без загрузки expertise или анализа задачи.
+
+### Provider не вызывает себя и не оркестрирует agents
+
+Admitted provider видит team tools и parent metadata. Expected behavior: он всё
+равно завершает одну publication unit сам и не создаёт child agent. Второй
+scenario просит provider спланировать реализацию, изменить status или управлять
+agents. Expected behavior: точный `STRATEGIC_EXPLAINER_INVOCATION_ERROR`, clean
+invocation recipe и ноль domain/tool/agent calls после admission refusal.
 
 ### Opt-out и недоступность не создают self-fallback
 
-При user opt-out caller сообщает только обязательные facts по собственному
-contract. При mandatory provider failure comment/lifecycle effect fail-closed, а
-final честно называет factual state и capability gap. Применение внутреннего
-quality contract caller-ом или claim эквивалентного качества получает `FAIL`.
+При user opt-out или provider unavailability caller действует только по
+собственному contract. Применение внутреннего quality contract caller-ом или
+claim эквивалентного качества получает `FAIL`; конкретный fallback выбирает
+calling workflow, а не Strategic Explainer.
 
 ### Direct и delegated caller используют один API
 

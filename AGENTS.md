@@ -84,7 +84,10 @@ manifest/install/byte-identity правила остаются repository-level 
   право автоматически менять Label taxonomy.
 - `$strategic-explainer` остаётся generic: не добавляйте в его runtime contract
   ShipTask, Task Manager, конкретный tracker, project lifecycle или право
-  принимать решения/выполнять mutations.
+  принимать решения/выполнять mutations. Provider-subagent имеет одну terminal
+  роль, заданную exact role lock: он не становится caller/router/coordinator/
+  evaluator, не вызывает Strategic Explainer и не создаёт других agents;
+  off-role invocation получает operational error до domain discovery.
 - `$strategic-explainer-fast` также остаётся generic и read-only. Не добавляйте
   в него ShipTask, Task Manager, tracker lifecycle или скрытый subagent; его
   отличительный boundary — in-context execution без clean/stateless guarantee.
@@ -106,9 +109,9 @@ manifest/install/byte-identity правила остаются repository-level 
   ShipTask или любой Strategic Explainer внутрь его package и не встраивайте
   providers обратно в ShipTask package. Codex manifest не поддерживает
   plugin-to-plugin dependency: ShipTask предпочитает
-  `$strategic-explainer-fast:strategic-explainer-fast`, а при его отсутствии
-  использует `$strategic-explainer:strategic-explainer`; Task Composer сохраняет
-  ordinary dependency.
+  `$strategic-explainer:strategic-explainer`, затем
+  `$strategic-explainer-fast:strategic-explainer-fast`, а без обоих использует
+  native writing; Task Composer сохраняет ordinary dependency.
   Не создавайте и не синхронизируйте
   standalone user-level копии `~/.codex/skills/ship-tasks`,
   `~/.codex/skills/task-composer` и
@@ -132,17 +135,18 @@ manifest/install/byte-identity правила остаются repository-level 
   однозначное правило пользователя свободным языком — exact/relative count,
   role scope, общий или узкий opt-out, duration/complexity condition — имеет
   приоритет и сохраняется по смыслу; root agent не входит в явно названное число
-  субагентов; если effective rule не отключает comment Explainer, каждый
-  комментарий проходит один availability-selected provider: Fast имеет
-  приоритет и выполняется current agent без subagent, ordinary используется
-  только когда Fast отсутствует; один publication unit не получает оба
-  provider и ordinary не служит quality retry Fast; Fast читает собственный
+  субагентов; в начале run ShipTask выбирает communication mode: ordinary имеет
+  приоритет, затем Fast, затем native; один publication unit не получает оба
+  provider, а failure выбранного provider переводит run в native без secondary
+  provider retry; Fast читает собственный
   in-context reference, отделяет authoritative anchors от inherited
   turns/tool transcript/process diary/caller candidate и не заявляет clean или
   independent guarantee; ordinary publication unit получает нового built-in
-  `default` subagent с `fork_turns="none"`, одной compact task и resolvable
-  read-only anchors, а caller знает только его opaque protocol; invalid ordinary
-  call получает automatic corrected fresh retry; candidate blocker до
+  `default` subagent с `fork_turns="none"`, exact terminal provider role lock,
+  одной compact task и resolvable read-only anchors, а caller знает только его
+  opaque protocol; invalid ordinary call получает automatic corrected fresh
+  retry; native mode следует только ShipTask truth/lifecycle/reporting contract,
+  не имитирует providers и не блокирует comment/status; candidate blocker до
   публикации становится reflection input ShipTask для повторной проверки safe
   frontier без расширения scope/authority; ready result не переписывается;
   каждый

@@ -1,6 +1,8 @@
 # 0032. Strategic Explainer Fast как отдельный in-context plugin
 
-Статус: принято, 2026-08-27.
+Статус: частично заменено ADR-0033, 2026-08-27. Fast package и in-context
+boundary сохраняются; Fast-first routing и fail-closed ShipTask failure policy
+заменены [ADR-0033](0033-terminal-provider-and-optional-shiptask-routing.md).
 
 Дополняет [ADR-0031](0031-standalone-strategic-explainer-plugin.md), не изменяя
 opaque/stateless boundary ordinary provider из

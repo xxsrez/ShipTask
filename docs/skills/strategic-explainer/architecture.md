@@ -1,6 +1,6 @@
 # Strategic Explainer
 
-Статус: current Level 2 contract, 2026-08-26. Применимые Level 1 requirements —
+Статус: current Level 2 contract, 2026-08-27. Применимые Level 1 requirements —
 `SE-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Problem-first
@@ -10,6 +10,8 @@ fresh stateless invocation и blocker reflection — в
 [ADR-0029](../../decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md),
 а самостоятельная plugin distribution — в
 [ADR-0031](../../decisions/0031-standalone-strategic-explainer-plugin.md).
+Терминальная provider-роль и запрет рекурсивной маршрутизации приняты в
+[ADR-0033](../../decisions/0033-terminal-provider-and-optional-shiptask-routing.md).
 
 Продуктовая архитектура раскрыта в
 [стратегическом видении](product-vision.md). Эта architecture описывает
@@ -21,8 +23,9 @@ fresh stateless invocation и blocker reflection — в
 
 Эта architecture вместе с локальным `requirements.md` является полным current
 source package `$strategic-explainer`. Runtime package — производная смысловая
-компиляция требований и architecture; он состоит из публичного
-routing/admission layer `strategic-explainer/SKILL.md` и внутреннего
+компиляция требований и architecture; он состоит из публичного role
+resolver/client protocol `strategic-explainer/SKILL.md`, provider-only admission
+`strategic-explainer/references/provider-entrypoint.md` и внутреннего
 `strategic-explainer/references/provider-contract.md`. Вместе они являются
 компиляцией этих двух документов: package можно удалить и
 собрать заново, сохранив все `SE-*` и выбранную здесь реализацию примерно
@@ -50,39 +53,46 @@ discovery и объём публикации не связаны: сложное
 двумя ясными предложениями, а сложная причинная граница может потребовать больше.
 
 Остальные Requirements раскрывают этот принцип, source grounding, read-only
-boundary и отсутствие новой authority. `SE-10` является явным исключением из
-общей свободы orchestration: direct и delegated use проходят один stateless API,
-новый built-in `default` subagent и `fork_turns="none"`; контекст допускает одну
-compact task и resolvable anchors без inherited process state.
+boundary и отсутствие новой authority. `SE-10` и `SE-17` являются явными
+исключениями из общей свободы orchestration: direct и delegated use проходят
+один stateless API, новый built-in `default` subagent и `fork_turns="none"`;
+compact task несёт exact role lock, одну publication unit и resolvable anchors
+без inherited process state. Provider после role resolution не оркестрирует
+agents и не вызывает Strategic Explainer повторно.
 
 За этой границей provider-subagent выбирает tool sequence, форму source note,
 внутренний reasoning, длину и визуальную форму. Caller не знает и не применяет
 эту часть architecture. Структуры и examples полезны только внутри provider,
 если помогают передать смысл; они не заменяют observable result.
 
-### 1.1 Два runtime-слоя
+### 1.1 Три runtime-слоя и однозначная роль
 
 Catalog metadata и `SKILL.md` видны routing agent, поэтому они содержат только
-client protocol и admission gate. Если текущий agent уже несёт рабочий диалог,
-ход задачи или собственные рассуждения, router запрещает читать внутренний
-provider contract и требует создать новый built-in `default` subagent с
-`fork_turns="none"`.
+детерминированный role resolver и opaque client protocol. Caller создаёт новый
+built-in `default` subagent с `fork_turns="none"` и передаёт отдельной точной
+строкой `STRATEGIC_EXPLAINER_PROVIDER_V1`. Отсутствие marker означает caller
+mode; наличие marker в compact task означает terminal provider mode. История,
+tool calls, parent metadata или имя агента не участвуют в классификации.
 
-Новый subagent сначала проверяет invocation по `SE-10`. Invalid call завершается
-refusal без загрузки expertise. Только после успешного admission он читает
+Provider никогда не исполняет client protocol и сразу читает только
+`references/provider-entrypoint.md`. Этот слой проверяет роль и invocation по
+`SE-10`/`SE-17`; invalid call завершается
+`STRATEGIC_EXPLAINER_INVOCATION_ERROR` без domain discovery, source reads или
+загрузки expertise. Только admitted provider читает
 `references/provider-contract.md`, где находятся discovery, explanation,
-comprehension и editorial reconstruction. Так conversation isolation защищает
-не только входные turns, но и разделение знаний: coordinating caller не получает
-метод, ради независимости которого создан provider.
+внутренний comprehension check и editorial reconstruction. Так conversation
+isolation защищает не только входные turns, но и разделение знаний:
+coordinating caller не получает метод, ради независимости которого создан
+provider.
 
 Caller принимает publication-ready text и отдельно обозначенный source basis как
 opaque result. Он публикует только text, а basis использует для factual check; не
 смешивает эти части, не читает provider contract, не формирует candidate, не
 запускает внутренний checklist и не переписывает output. Фиксированный envelope
 не требуется, но граница двух частей должна быть однозначной.
-Factual/structural correction всегда получает новый clean invocation. При
-mandatory unavailability caller fail-closed для comment/lifecycle publication и
-честно сообщает capability failure в обязательном final без имитации provider.
+Factual/structural correction всегда получает новый clean invocation. Поведение
+при opt-out или недоступности задаёт contract конкретного caller-а: он не читает
+и не имитирует provider method и не заявляет эквивалентное качество.
 
 ## 2. Результат и граница роли
 
@@ -110,10 +120,11 @@ Skill является интерпретационным слоем. Он:
 
 Direct request и вызов из другого workflow адресуют один API: caller создаёт
 новый built-in `default` subagent с `fork_turns="none"`. Единственный user/task
-message является compact selector, а не brief или черновиком объяснения. Он
-называет один исходный вопрос, exact scope либо resolvable source anchors и
-назначение user-facing result. System/developer/skill instructions остаются
-нормальной частью context и не считаются загрязнением.
+message содержит точный role lock `STRATEGIC_EXPLAINER_PROVIDER_V1` и является
+compact selector, а не brief или черновиком объяснения. Он называет один
+исходный вопрос, exact scope либо resolvable source anchors и назначение
+user-facing result. System/developer/skill instructions остаются нормальной
+частью context и не считаются загрязнением.
 
 До первого discovery call Explainer проверяет доступные признаки:
 
@@ -124,11 +135,15 @@ message является compact selector, а не brief или черновик
 - подтверждает ли доступный metadata clean fork; если metadata скрыт, проверка
   не изображает недоступное доказательство.
 
-Invalid invocation возвращает только короткую operational correction: какой
-признак нарушен и какой clean call нужен. Discovery и explanation не начинаются.
-Caller создаёт новый subagent с исправленной постановкой; follow-up старому
-экземпляру запрещён. Explicit editing/review task может содержать target text,
-потому что он является предметом, а не унаследованной формулировкой.
+Invalid invocation возвращает `STRATEGIC_EXPLAINER_INVOCATION_ERROR`, точный
+defect, единственное назначение provider-а и исправимый clean-call recipe.
+Discovery и explanation не начинаются. Planning, decomposition, implementation,
+mutation, lifecycle/status/authority decision, broad research без publication
+unit и orchestration отклоняются тем же способом. Caller создаёт новый subagent
+с исправленной постановкой; follow-up старому экземпляру запрещён, а provider не
+создаёт замену самостоятельно. Explicit editing/review task может содержать
+target text, потому что он является предметом, а не унаследованной
+формулировкой.
 
 После admission Explainer сам устанавливает исходный вопрос, beneficiary,
 desired observable outcome, current facts/evidence/confidence, impact,
@@ -247,16 +262,15 @@ subagent; старый candidate не передаётся как framing.
 - не требуется ли читателю знать предметную область исполнителя, чтобы понять
   основную причинность.
 
-Для сложного сбоя, нескольких независимых сценариев, существенного препятствия
-или сводного отчёта current архитектура использует независимого читателя. Он
-получает только исходный вопрос и готовый кандидат, не видит технический журнал,
-намерение автора или эталонную формулировку и возвращает свой краткий пересказ
-либо точный пробел понимания. Читатель не исправляет текст, не добавляет факты и
-не принимает решение. При провале Explainer заново строит объяснение из
-авторитетного входа с учётом найденного пробела. Простому однозначному результату
-достаточно той же проверки внутри Explainer, если причинная модель очевидна;
-простота не освобождает его от model-forward regression и не делает технический
-перечень приемлемым.
+Runtime provider всегда выполняет comprehension check самостоятельно, без
+вызова другого agent: временно откладывает evidence map и проверяет, можно ли из
+готового текста восстановить исходный вопрос, причинность, результат, границу и
+следующий шаг. При пробеле provider заново строит объяснение из авторитетного
+входа. Независимый читатель сохраняется только как внешний model-forward
+evaluation harness: он получает исходный вопрос и готовый candidate отдельным
+fresh trial, не входит в runtime orchestration и ничего не возвращает provider-у.
+Так качество продолжает проверяться независимо, но terminal provider остаётся
+единственным агентом своей publication unit.
 
 Фактическая полнота и понятность проверяются раздельно: хороший пересказ не
 компенсирует ошибку в фактах, а формально точный перечень не компенсирует

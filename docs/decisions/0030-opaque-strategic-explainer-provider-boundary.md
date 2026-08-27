@@ -1,6 +1,8 @@
 # 0030. Opaque provider boundary для Strategic Explainer
 
-Статус: принято, 2026-08-26.
+Статус: частично заменено ADR-0033, 2026-08-27. Opaque expertise сохраняется;
+terminal role lock, provider-only entrypoint и caller-owned fallback policy
+определены [ADR-0033](0033-terminal-provider-and-optional-shiptask-routing.md).
 
 Уточняет [ADR-0029](0029-fresh-strategic-explainer-and-blocker-reflection.md) и
 исправляет оставшуюся утечку между

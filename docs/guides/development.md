@@ -38,14 +38,15 @@
   инвалидирует только attributed downstream results.
 - Ни один Strategic Explainer не получает право решать факты, статус, границы
   работы, полномочия или действие. ShipTask выбирает один provider по live
-  catalog: Fast имеет приоритет, ordinary используется только при отсутствии
-  Fast. Для одной publication unit не запускайте оба.
+  catalog: ordinary имеет приоритет, затем Fast; без provider используется
+  native writing. Для одной publication unit не запускайте оба.
 - Fast выполняйте current agent без subagent. Его in-context contract отделяет
   authoritative anchors от inherited process history и не заявляет
   clean/independent guarantee. Ordinary provider сохраняет opaque protocol:
   новый `default` subagent с `fork_turns="none"`, compact task и resolvable
-  anchors без inherited context/candidate. Invalid ordinary invocation
-  исправляется новым clean call, а не follow-up старому.
+  anchors без inherited context/candidate и с exact terminal role lock. Invalid
+  ordinary invocation исправляется новым clean call, а не follow-up старому;
+  provider failure переводит ShipTask в native без secondary provider retry.
 - Обычный переход `To Do → In Progress` не создаёт комментарий и поэтому не
   запускает Strategic Explainer.
 - Не добавляйте fallback task provider. Task Manager остаётся единственным
@@ -207,8 +208,8 @@ Runtime-distribution разделена на три независимых plugi
 устанавливается отдельно как adapter-only `task-manager@srez-marketplace`.
 
 Manifest не поддерживает plugin-to-plugin dependency, поэтому ShipTask хранит
-availability-based logical dependency: Fast preferred, ordinary fallback, а
-отсутствие обоих не разрешает обязательный comment/status write. Старый путь
+availability-based optional routing: ordinary preferred, Fast fallback, затем
+native. Отсутствие обоих не мешает обязательному comment/status write. Старый путь
 `plugins/ship-tasks/skills/strategic-explainer` отсутствует.
 
 При изменении runtime payload:

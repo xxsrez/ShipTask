@@ -1,6 +1,9 @@
 # 0022. Каждый комментарий ShipTask проходит независимый Strategic Explainer
 
-Статус: partially superseded, 2026-08-26. Частично заменяет
+Статус: partially superseded, 2026-08-27. Current optional communication mode
+ShipTask определён
+[ADR-0033](0033-terminal-provider-and-optional-shiptask-routing.md); требования к
+видимости comments и отсутствию start-comment сохраняются. Исторически частично заменяет
 [ADR-0021](0021-requirements-as-agent-constitution.md): свобода выбора способа
 работы сохраняется, но отдельная смысловая проверка каждого комментария
 ShipTask является явным пользовательским требованием, а не необязательной

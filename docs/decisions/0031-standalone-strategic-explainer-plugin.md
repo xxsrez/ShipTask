@@ -1,6 +1,9 @@
 # 0031. Strategic Explainer как самостоятельный plugin
 
-Статус: принято, 2026-08-26.
+Статус: частично заменено ADR-0033, 2026-08-27. Distribution сохраняется;
+fail-closed logical dependency заменена только для ShipTask, а Task Composer
+остаётся под собственным contract. См.
+[ADR-0033](0033-terminal-provider-and-optional-shiptask-routing.md).
 
 Изменяет distribution-часть
 [ADR-0011](0011-separate-shiptask-plugin-distribution.md),

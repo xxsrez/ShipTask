@@ -15,15 +15,21 @@
 
 Generating subagent не получает rubric, diagnosis, intended wording, прежний
 плохой комментарий или candidate другого trial. Он запускается новым built-in
-`default` subagent с `fork_turns="none"`, читает router
-`$strategic-explainer:strategic-explainer` и один `facts.md`, затем возвращает publication
-text и отдельно обозначенный source basis.
+`default` subagent с `fork_turns="none"`; compact task содержит отдельную точную
+строку `STRATEGIC_EXPLAINER_PROVIDER_V1`, одну publication task и anchor на один
+`facts.md`. Router выбирает terminal provider path, provider-only entrypoint
+выполняет admission, после чего subagent возвращает publication text и отдельно
+обозначенный source basis.
 
 Evaluator получает исходный `facts.md`, соответствующий `rubric.md`, publication
 text, source basis и общий [semantic gate](common-rubric.md). Он отдельно проверяет factual coverage и человеческое
 понимание. Формулировка может отличаться между trials; `PASS` требует, чтобы
 читатель понял, что именно проверено, при каком значимом входе или границе, что
 наблюдалось и готов ли результат к следующему состоянию.
+
+Evaluator — отдельный test-harness agent, а не часть runtime provider-а. Provider
+не вызывает evaluator, не создаёт child agents и выполняет только внутренний
+comprehension check перед возвратом result.
 
 ## Cases
 

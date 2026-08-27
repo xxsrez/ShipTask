@@ -67,15 +67,14 @@ Manager adapter и всегда используются для material lifecyc
 существующее meaningful название не перезаписывается, а отсутствие или failure
 capability не блокируют delivery.
 
-Каждый comment, Task/scope report, blocker explanation и final ShipTask до
-публикации проходит один provider. Live catalog предпочитает
-`$strategic-explainer-fast:strategic-explainer-fast`; если Fast отсутствует,
-используется ordinary `$strategic-explainer:strategic-explainer`. Fast работает
-в текущем agent без subagent и отделяет authoritative anchors от process
-history. Ordinary сохраняет opaque clean-subagent protocol. Для одной
-publication unit providers не смешиваются, ordinary не служит quality retry
-Fast, а ready text не получает второй rewrite. Routine chat и progress updates
-Explainer не запускают.
+Для каждого comment, Task/scope report, blocker explanation и final ShipTask
+использует один communication mode. Live catalog выбирает ordinary
+`$strategic-explainer:strategic-explainer`, иначе Fast
+`$strategic-explainer-fast:strategic-explainer-fast`, иначе native ShipTask
+writing. Fast работает в текущем agent без subagent; ordinary получает terminal
+clean provider-subagent. Provider failure переводит run в native без вызова
+второго provider. Native не имитирует provider method и не блокирует
+comment/status. Routine chat и progress updates publication unit не создают.
 
 Приёмочный incident сообщается сразу в chat и сохраняется в Task history до
 начала repair. Opening comment остаётся видимым после исправления, resolution
@@ -133,8 +132,9 @@ context в каждой child Task. При delivery ShipTask перечитыв�
 - [`task-composer/SKILL.md`](task-composer/SKILL.md) — planning-only
   формулировка, декомпозиция и создание Task Manager scope.
 - [`strategic-explainer/SKILL.md`](strategic-explainer/SKILL.md) — общий
-  router/admission layer к stateless provider-subagent; внутренний provider
-  contract загружается только после clean admission.
+  deterministic role resolver и opaque client protocol; terminal provider
+  проходит отдельный provider-only admission и только затем загружает внутренний
+  contract.
 - [`strategic-explainer-fast/SKILL.md`](strategic-explainer-fast/SKILL.md) —
   отдельный in-context provider без subagent и clean/stateless claim.
 - [`docs/skills/README.md`](docs/skills/README.md) — source model и независимые
@@ -175,8 +175,8 @@ Runtime публикуется тремя независимыми plugin: `ship
 `strategic-explainer-fast@srez-marketplace` — только Fast.
 Task Manager connector устанавливается отдельно как adapter-only
 `task-manager@srez-marketplace`. Codex manifest не умеет автоматически
-устанавливать plugin dependency, поэтому ShipTask выбирает Fast при наличии и
-ordinary fallback при отсутствии; Task Composer использует ordinary. Standalone каталоги
+устанавливать plugin dependency, поэтому ShipTask выбирает ordinary, затем Fast,
+а без обоих — native; Task Composer использует ordinary. Standalone каталоги
 `~/.codex/skills/ship-tasks`, `~/.codex/skills/task-composer` и
 `~/.codex/skills/strategic-explainer` и
 `~/.codex/skills/strategic-explainer-fast` не устанавливаются: они создают вторые

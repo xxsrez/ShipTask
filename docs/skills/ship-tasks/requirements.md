@@ -137,60 +137,72 @@ ShipTask сам выбирает способ реализации, диагно
 ShipTask сначала сверяет фактическое состояние. Пока обязательный комментарий
 не подтверждён, зависящий от него переход статуса не считается выполненным.
 
-### `ST-07` — Понятное объяснение через выбранный Explainer
+### `ST-07` — Понятное объяснение через выбранный Explainer или native mode
 
-Если пользователь явно не отключил Explainer для применимой publication unit,
-каждый комментарий ShipTask проходит один выбранный Strategic Explainer.
-ShipTask определяет provider по live skill catalog перед invocation:
+В начале run ShipTask определяет один communication mode по live skill catalog и
+effective user rule. Mode сохраняется для следующих publication units этого run,
+пока пользователь явно не изменит правило или выбранный provider не завершится
+ошибкой:
 
-- если доступен `$strategic-explainer-fast:strategic-explainer-fast`, он имеет
-  приоритет и выполняет один сфокусированный in-context проход без subagent;
-- если Fast недоступен, ShipTask использует
-  `$strategic-explainer:strategic-explainer` по прежнему opaque stateless
-  protocol через новый built-in `default` subagent с `fork_turns="none"`;
-- для одной publication unit вызывается только один provider. Ошибка уже
-  выбранного Fast не запускает скрытый повтор через обычный Explainer и не
-  превращает fallback в quality retry.
+1. обычный `$strategic-explainer:strategic-explainer`, если он доступен и
+   разрешён;
+2. иначе Fast `$strategic-explainer-fast:strategic-explainer-fast`, если он
+   доступен и разрешён;
+3. иначе native ShipTask writing.
+
+Таким образом, при установленных ordinary и Fast выбирается ordinary; только
+ordinary также выбирает ordinary; только Fast выбирает Fast; отсутствие обоих
+выбирает native. Ни одна из четырёх комбинаций сама по себе не является warning,
+capability failure или blocker. Для одной publication unit вызывается не более
+одного provider: availability fallback применяется только при начальном выборе,
+а не как скрытый quality/error retry.
 
 Каждый обязательный комментарий, отдельный отчёт по Task, blocker report и
 итоговый ответ являются самостоятельными publication units. Обычные progress
-updates и рабочее общение Explainer не запускают. В обоих режимах ShipTask
+updates и рабочее общение provider не запускают. В provider mode ShipTask
 передаёт или устанавливает одну короткую и однозначную задачу, exact scope и
 разрешимые read-only source anchors. Material factual conflict проверяется по
 authoritative sources; изменившиеся facts, scope или anchors требуют нового
-прохода выбранного provider.
+прохода того же выбранного provider.
 
-Fast работает в текущем ShipTask context: он читает собственный provider
-reference, отделяет authoritative anchors от tool transcript, process diary,
-предыдущих гипотез и candidate и сам возвращает publication-ready text с
+Обычный Strategic Explainer остаётся opaque terminal provider. ShipTask не
+читает и не применяет его provider-internal contract, не пишет explanation
+candidate, не передаёт strategic summary, требования к структуре или стилю и не
+оценивает result внутренним quality checklist. Каждый pass получает новый
+built-in `default` subagent с `fork_turns="none"`, exact provider role lock, одной
+publication unit и resolvable anchors. Invalid invocation получает один
+автоматически исправленный новый clean subagent; повторный structural refusal
+или другой provider failure переводит communication mode в native без вызова
+Fast.
+
+Fast работает в текущем ShipTask context без subagent: он читает собственный
+provider reference, отделяет authoritative anchors от tool transcript, process
+diary, предыдущих гипотез и candidate и сам возвращает publication-ready text с
 отдельным source basis. ShipTask проверяет material facts и не выполняет второй
 самостоятельный rewrite. Он не заявляет для Fast независимость, statelessness
-или clean-context guarantees обычного Explainer.
+или clean-context guarantees обычного Explainer. Ошибка выбранного Fast
+переводит communication mode в native без вызова ordinary.
 
-Обычный Strategic Explainer остаётся opaque provider. ShipTask не читает и не
-применяет его provider-internal contract, не пишет explanation candidate, не
-передаёт strategic summary, требования к структуре или стилю и не оценивает
-result внутренним quality checklist. Invalid invocation получает один
-автоматически исправленный новый clean subagent; повторный structural refusal
-является orchestration failure.
+В native mode ShipTask сразу формулирует publication unit по собственным
+truth/lifecycle/reporting requirements, публикует обязательный комментарий,
+выполняет его read-back и продолжает разрешённый status transition. Native mode
+не загружает, не применяет и не имитирует внутренний метод ordinary или Fast и
+не заявляет эквивалентное provider quality. Переход в native из-за отсутствия,
+opt-out или failure provider-а не добавляет человеку capability warning и не
+мешает lifecycle effect.
 
-Итоговый ответ Codex также является отдельным scope-level invocation с исходным
-вопросом, exact scope и anchors всего run. Он не собирается механической склейкой
-комментариев или передачей прежнего draft.
+Итоговый ответ Codex также является отдельной scope-level publication unit с
+исходным вопросом, exact scope и anchors всего run. Он не собирается
+механической склейкой комментариев или передачей прежнего draft. В native mode
+он сообщает тот же обязательный factual result без служебного предупреждения об
+отсутствии Explainer.
 
 Пользователь может обычным языком отключить оба Explainer, только Fast, только
-обычный fallback или Explainer лишь для отдельных publication units. Общий
-запрет создавать subagents сам по себе не отключает доступный Fast, потому что
-Fast не создаёт subagent; при отсутствии Fast такой запрет делает обычный
-fallback недоступным. Opt-out не переносит метод отключённого provider в другой
-workflow и не разрешает заявлять эквивалентное качество.
-
-Если ни один разрешённый provider не доступен или выбранный provider не может
-выполнить задачу надлежащим образом, комментарий и зависящий от него переход
-остаются незавершёнными. Итоговый ответ всё равно честно сообщает установленное
-состояние и capability failure по собственному contract ShipTask, но не
-имитирует provider и не скрывает результат. Другая независимая и безопасная
-работа может продолжаться.
+ordinary или Explainer лишь для отдельных publication units. Общий запрет
+создавать subagents исключает ordinary: при доступном Fast выбирается Fast, а
+без Fast — native. Полный opt-out сразу выбирает native. Любой opt-out не
+переносит метод отключённого provider в ShipTask и не разрешает заявлять
+эквивалентное качество.
 
 ### `ST-08` — Инциденты приёмки всегда видимы
 
@@ -464,10 +476,10 @@ Explainer и Strategic Explainer Fast также устанавливаются 
 выбирает plugin-qualified skill по `ST-07`.
 
 Current Codex manifest не поддерживает нативную plugin-to-plugin dependency или
-автоматическую установку другого plugin. Поэтому отсутствие обоих разрешённых
-Explainer обрабатывается как уже определённая в `ST-07` capability failure:
-зависящие comment/lifecycle effect не выполняются и не имитируются, а
-независимая безопасная работа может продолжаться.
+автоматическую установку другого plugin. Для ShipTask оба Explainer являются
+независимыми optional communication enhancements, а не обязательными runtime
+dependencies: отсутствие обоих выбирает native mode по `ST-07` и не мешает
+comment/lifecycle effect.
 
 После любого изменения поведения runtime-исходник в репозитории, исходник в
 Marketplace и установленная копия должны быть побайтно идентичны. Отдельные
@@ -520,9 +532,10 @@ Manager. Он проходит отдельный Strategic Explainer, если 
 но не получает права менять состояние, объём работ или статус.
 
 Task остаётся в достоверном незавершённом состоянии, пока обычная приёмка не
-получила evidence либо не сработал отдельный fallback `ST-25`. Если обязательный
-Strategic Explainer недоступен, зависящие от него комментарий и переход не
-считаются выполненными, а другая независимая безопасная работа продолжается.
+получила evidence либо не сработал отдельный fallback `ST-25`. Отсутствие или
+failure Strategic Explainer не является acceptance blocker: ShipTask переходит
+в native mode по `ST-07`, публикует и перечитывает grounded report и продолжает
+разрешённый lifecycle effect.
 
 ### `ST-24` — Периодические пакетные выпуски в UAT
 

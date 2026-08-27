@@ -153,10 +153,13 @@
   internal checklist и self-fallback.
 - [0031: Strategic Explainer как самостоятельный plugin](decisions/0031-standalone-strategic-explainer-plugin.md)
   — выносит generic Explainer из ShipTask package в отдельный installable
-  plugin и задаёт fail-closed logical dependency для ShipTask и Task Composer.
+  plugin и фиксирует исходную logical dependency ShipTask и Task Composer.
 - [0032: Strategic Explainer Fast как отдельный in-context plugin](decisions/0032-strategic-explainer-fast-plugin.md)
-  — создаёт отдельный no-subagent provider и Fast-first/ordinary-fallback
-  routing ShipTask без изменения ordinary contract.
+  — создаёт отдельный no-subagent provider и фиксирует исходный Fast-first
+  routing ShipTask.
+- [0033: Terminal ordinary provider и optional routing ShipTask](decisions/0033-terminal-provider-and-optional-shiptask-routing.md)
+  — запрещает provider-у становиться caller или создавать agents и задаёт
+  current ordinary-first → Fast → native routing без lifecycle blocker-а.
 
 ## Reference
 
@@ -186,6 +189,9 @@
 
 ## Reports
 
+- [Terminal Strategic Explainer и ShipTask routing: evaluation](reports/2026-08-27-terminal-provider-routing-evaluation.md)
+  — terminal role/off-role regression, ноль provider descendants, full 20-case
+  independent evaluation и четыре install combinations ShipTask.
 - [Strategic Explainer: model-forward evaluation из 20 сценариев](reports/2026-08-26-strategic-explainer-20-case-evaluation.md)
   — полный fresh-subagent прогон на 10 сценариях ExampleNotes и 10 сценариях Task
   Manager, найденные дефекты первого кандидата и финальный результат 20/20.
