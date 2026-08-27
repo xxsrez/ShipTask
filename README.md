@@ -24,18 +24,19 @@ contract в exact integration candidate, даже если blocking Task ещё 
 Документация здесь является исходным кодом, причём source unit — отдельный
 skill. В [`docs/skills/<skill>/`](docs/skills/README.md) у каждого skill есть
 собственные `requirements.md` (Level 1) и `architecture.md` (Level 2); требования
-трёх skills не объединяются. Runtime является компактной стохастической
+четырёх skills не объединяются. Runtime является компактной стохастической
 компиляцией этих двух локальных документов. У Strategic Explainer видимый
 `SKILL.md` содержит только router/admission layer, а provider expertise находится
-в reference для admitted fresh subagent. Удаление и повторная сборка runtime из
+в reference для admitted fresh subagent. Strategic Explainer Fast загружает
+свой in-context reference в текущий agent и не создаёт subagent. Удаление и повторная сборка runtime из
 source package должны давать примерно эквивалентный по смыслу package.
 
 Current requirements являются конституцией для агентов: они задают outcome,
 rationale, observable evidence и authority/safety boundaries, но оставляют
-агенту план, декомпозицию, инструменты и внутренний reasoning. Явное исключение —
-fresh stateless invocation Strategic Explainer API. Каждый user-facing publication
-unit получает fresh built-in `default` subagent с `fork_turns="none"`, одной compact task и без
-inherited process context. Другое исключение — execution topology: без явного
+агенту план, декомпозицию, инструменты и внутренний reasoning. Ordinary
+Strategic Explainer сохраняет fresh stateless API с новым `default` subagent и
+`fork_turns="none"`; Fast является отдельным explicit in-context/no-subagent
+контрактом. Другое исключение — execution topology: без явного
 user rule ShipTask сам решает, где
 субагенты дают реальную пользу, сохраняя одного integration owner. Пользователь
 может свободным языком задать exact/relative count, role scope, общий или узкий
@@ -66,14 +67,15 @@ Manager adapter и всегда используются для material lifecyc
 существующее meaningful название не перезаписывается, а отсутствие или failure
 capability не блокируют delivery.
 
-Каждый комментарий, который создаёт ShipTask, до публикации проходит отдельного
-независимого `$strategic-explainer:strategic-explainer`, пока effective user topology rule
-не отключило эту роль. Каждый Task/scope report, blocker explanation и final
-также является отдельным publication unit. Caller знает только opaque protocol:
-новый clean subagent, одна короткая задача, exact scope и resolvable read-only
-anchors без analysis, method rules или candidate caller-а. Ready text не
-переписывается; opt-out/unavailability не переносят provider method в основной
-агент. Routine chat и progress updates Explainer не запускают.
+Каждый comment, Task/scope report, blocker explanation и final ShipTask до
+публикации проходит один provider. Live catalog предпочитает
+`$strategic-explainer-fast:strategic-explainer-fast`; если Fast отсутствует,
+используется ordinary `$strategic-explainer:strategic-explainer`. Fast работает
+в текущем agent без subagent и отделяет authoritative anchors от process
+history. Ordinary сохраняет opaque clean-subagent protocol. Для одной
+publication unit providers не смешиваются, ordinary не служит quality retry
+Fast, а ready text не получает второй rewrite. Routine chat и progress updates
+Explainer не запускают.
 
 Приёмочный incident сообщается сразу в chat и сохраняется в Task history до
 начала repair. Opening comment остаётся видимым после исправления, resolution
@@ -94,17 +96,15 @@ Strategic Explainer comment о непроведённой functional check и re
 Browser switch допустим как диагностика, но не как repair или причина
 отложить уже доказанный product failure, пока безопасная in-scope работа над
 продуктом может продолжаться.
-До окончательного blocker claim ShipTask перечитывает fresh Explainer result как
-independent reflection input и заново проверяет safe frontier. Найденный путь не
+До окончательного blocker claim ShipTask перечитывает новый Explainer result как
+reflection input и заново проверяет safe frontier. Найденный путь не
 принимается на веру: он подтверждается current sources/acceptance; при достаточном
 пути stale blocker не публикуется и работа продолжается.
 Перед завершением skill сверяет обещанный и фактический результат,
 самостоятельно устраняет доступные проблемы внутри выбранной работы и только
-затем передаёт final publication unit отдельному Strategic Explainer.
-Пока effective topology rule не отключает comment Explainer, каждый комментарий
-ShipTask проходит отдельного `$strategic-explainer:strategic-explainer`. Основной агент
-знает только client protocol, проверяет material facts и не переписывает ready
-text. Если правило отключает Explainer, caller сообщает обязательные lifecycle
+затем проводит final publication unit через выбранный Strategic Explainer.
+Основной агент проверяет material facts и не переписывает ready text. Если
+правило отключает Explainer, caller сообщает обязательные lifecycle
 facts по собственному contract без provider method. Explainer не выбирает
 статус, полномочия или действие и ничего не меняет; общий router можно
 использовать отдельно от ShipTask.
@@ -135,6 +135,8 @@ context в каждой child Task. При delivery ShipTask перечитыв�
 - [`strategic-explainer/SKILL.md`](strategic-explainer/SKILL.md) — общий
   router/admission layer к stateless provider-subagent; внутренний provider
   contract загружается только после clean admission.
+- [`strategic-explainer-fast/SKILL.md`](strategic-explainer-fast/SKILL.md) —
+  отдельный in-context provider без subagent и clean/stateless claim.
 - [`docs/skills/README.md`](docs/skills/README.md) — source model и независимые
   Requirements/Architecture packages для каждого skill.
 - [`docs/skills/ship-tasks/requirements.md`](docs/skills/ship-tasks/requirements.md)
@@ -144,6 +146,9 @@ context в каждой child Task. При delivery ShipTask перечитыв�
 - [`docs/skills/strategic-explainer/requirements.md`](docs/skills/strategic-explainer/requirements.md)
   и [Architecture](docs/skills/strategic-explainer/architecture.md) — source
   Strategic Explainer.
+- [`docs/skills/strategic-explainer-fast/requirements.md`](docs/skills/strategic-explainer-fast/requirements.md)
+  и [Architecture](docs/skills/strategic-explainer-fast/architecture.md) — source
+  Strategic Explainer Fast.
 - [`ship-tasks/references/project-memory.md`](ship-tasks/references/project-memory.md)
   — runtime contract project scope/profile memory.
 - [Документация](docs/README.md) — канонические specifications, Task Manager
@@ -159,19 +164,21 @@ python3 -B -m unittest discover -s tests -p 'test_*.py'
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer-fast
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```
 
-Runtime публикуется двумя независимыми plugin: `ship-tasks@srez-marketplace`
+Runtime публикуется тремя независимыми plugin: `ship-tasks@srez-marketplace`
 содержит ShipTask и Task Composer, а
-`strategic-explainer@srez-marketplace` — только общий Strategic Explainer.
+`strategic-explainer@srez-marketplace` — только ordinary Strategic Explainer, а
+`strategic-explainer-fast@srez-marketplace` — только Fast.
 Task Manager connector устанавливается отдельно как adapter-only
 `task-manager@srez-marketplace`. Codex manifest не умеет автоматически
-устанавливать plugin dependency, поэтому ShipTask и Task Composer fail-closed
-используют отдельно установленный
-`$strategic-explainer:strategic-explainer`. Standalone каталоги
+устанавливать plugin dependency, поэтому ShipTask выбирает Fast при наличии и
+ordinary fallback при отсутствии; Task Composer использует ordinary. Standalone каталоги
 `~/.codex/skills/ship-tasks`, `~/.codex/skills/task-composer` и
-`~/.codex/skills/strategic-explainer` не устанавливаются: они создают вторые
+`~/.codex/skills/strategic-explainer` и
+`~/.codex/skills/strategic-explainer-fast` не устанавливаются: они создают вторые
 logical skills рядом с plugin-qualified runtime. Каждый repository source
 сверяется со своим Marketplace package и installed plugin cache.

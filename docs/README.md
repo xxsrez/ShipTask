@@ -40,6 +40,13 @@
   model-forward regression и независимым пересказом. По явному запросу skill выполняет глубокую
   редакторскую реконструкцию без потери смысла. Он ничего не изменяет и не
   принимает решений о статусе или полномочиях.
+- `$strategic-explainer-fast:strategic-explainer-fast`:
+  [Requirements](skills/strategic-explainer-fast/requirements.md),
+  [Architecture](skills/strategic-explainer-fast/architecture.md) и
+  [product vision](skills/strategic-explainer-fast/product-vision.md) — тот же
+  observable communication outcome с отдельным in-context/no-subagent runtime.
+  Fast отделяет authoritative anchors от process history, но не заявляет
+  clean-context или independent-reader guarantee ordinary provider.
 
 Документация является исходным кодом. Локальный Level 1 отвечает за «что обязано
 быть истинно», локальный Level 2 — за agent-owned «как сейчас этого достигать»,
@@ -147,6 +154,9 @@
 - [0031: Strategic Explainer как самостоятельный plugin](decisions/0031-standalone-strategic-explainer-plugin.md)
   — выносит generic Explainer из ShipTask package в отдельный installable
   plugin и задаёт fail-closed logical dependency для ShipTask и Task Composer.
+- [0032: Strategic Explainer Fast как отдельный in-context plugin](decisions/0032-strategic-explainer-fast-plugin.md)
+  — создаёт отдельный no-subagent provider и Fast-first/ordinary-fallback
+  routing ShipTask без изменения ordinary contract.
 
 ## Reference
 
@@ -156,6 +166,9 @@
   — observable invocation-isolation, self-discovery,
   fidelity/authority/comprehension gates и regression cases без фиксированной
   scoring ceremony.
+- [Strategic Explainer Fast evaluation](reference/strategic-explainer-fast-evaluation.md)
+  — общий 20-case corpus, no-subagent generation protocol и независимая
+  evaluation boundary.
 - [Task Composer evaluation](reference/task-composer-evaluation.md) —
   observable gates для decomposition, metadata, relations, duplicate safety и
   planning-only authority.
@@ -176,6 +189,9 @@
 - [Strategic Explainer: model-forward evaluation из 20 сценариев](reports/2026-08-26-strategic-explainer-20-case-evaluation.md)
   — полный fresh-subagent прогон на 10 сценариях ExampleNotes и 10 сценариях Task
   Manager, найденные дефекты первого кандидата и финальный результат 20/20.
+- [Strategic Explainer Fast: feasibility experiment](reports/2026-08-27-strategic-explainer-fast-feasibility.md)
+  — 20/20 self-review без subagent, token telemetry и честная граница до blind
+  independent A/B.
 - [Исследование подходов для Strategic Explainer](reports/2026-08-20-strategic-explainer-research.md)
   — official agent guidance, clear-communication и handoff patterns,
   существующие skills, принятые механизмы, отклонённые альтернативы и

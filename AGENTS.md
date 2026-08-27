@@ -5,10 +5,10 @@
 ## Назначение
 
 - Репозиторий является source of truth для Task Manager-only Codex skills
-  `$ship-tasks`, `$ship-tasks:task-composer` и общего communication skill
-  `$strategic-explainer`.
+  `$ship-tasks`, `$ship-tasks:task-composer` и общих communication skills
+  `$strategic-explainer` и `$strategic-explainer-fast`.
 - Исполнимые skills находятся в sibling-каталогах `ship-tasks/`,
-  `task-composer/` и `strategic-explainer/`.
+  `task-composer/`, `strategic-explainer/` и `strategic-explainer-fast/`.
 - Документация проекта находится в `docs/`; `docs/README.md` — её
   канонический индекс.
 - Основной язык документации — русский. Точные protocol/state/tool names можно
@@ -16,7 +16,7 @@
 
 ## Документация как исходный код
 
-Документация является исходным кодом всех трёх skills. Единица source —
+Документация является исходным кодом всех четырёх skills. Единица source —
 отдельный skill: его Requirements и Architecture находятся только в
 `docs/skills/<skill>/` и не смешиваются с контрактами соседних skills. Для
 каждого source package обязательны три уровня с таким приоритетом:
@@ -36,11 +36,14 @@
    новое требование пользователя. Дополнительные локальные design/reference/
    evaluation документы допустимы, но не создают второй current contract.
 3. **Level 3 — runtime skills.**
-   `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и runtime package
-   `strategic-explainer/` являются компактной исполнимой проекцией Level 1 и
+   `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и runtime packages
+   `strategic-explainer/`, `strategic-explainer-fast/` являются компактной
+   исполнимой проекцией Level 1 и
    применимой части Level 2. У Strategic Explainer caller-visible `SKILL.md`
    содержит только router/admission contract, а provider expertise находится в
-   reference, который читает лишь admitted fresh subagent. Формулировка и
+   reference, который читает лишь admitted fresh subagent. Fast, напротив,
+   загружает свой provider reference в current caller context и не создаёт
+   subagent. Формулировка и
    структура могут отличаться от документации, но runtime package должен нести
    весь применимый смысл Level 1 без семантических потерь.
 
@@ -82,6 +85,9 @@ manifest/install/byte-identity правила остаются repository-level 
 - `$strategic-explainer` остаётся generic: не добавляйте в его runtime contract
   ShipTask, Task Manager, конкретный tracker, project lifecycle или право
   принимать решения/выполнять mutations.
+- `$strategic-explainer-fast` также остаётся generic и read-only. Не добавляйте
+  в него ShipTask, Task Manager, tracker lifecycle или скрытый subagent; его
+  отличительный boundary — in-context execution без clean/stateless guarantee.
 - Requests сформулировать, создать, разложить или положить Task Manager работу
   в backlog направляйте через `$ship-tasks:task-composer`, когда он доступен. Это
   planning-only mutation и не запускает ShipTask delivery. Read/status/audit
@@ -93,17 +99,21 @@ manifest/install/byte-identity правила остаются repository-level 
   создавайте параллельные поколения или альтернативные Requirements/
   Architecture одного runtime skill.
 - Распространяйте ShipTask и Task Composer через plugin
-  `ship-tasks@srez-marketplace`, а Strategic Explainer — только через отдельный
-  `strategic-explainer@srez-marketplace`. Task Manager connector устанавливается
+  `ship-tasks@srez-marketplace`, а оба Strategic Explainer — только через
+  отдельные `strategic-explainer@srez-marketplace` и
+  `strategic-explainer-fast@srez-marketplace`. Task Manager connector устанавливается
   отдельно как adapter-only `task-manager@srez-marketplace`; не помещайте
-  ShipTask или Strategic Explainer внутрь его package и не встраивайте
-  Strategic Explainer обратно в ShipTask package. Codex manifest не поддерживает
-  plugin-to-plugin dependency: ShipTask и Task Composer используют
-  `$strategic-explainer:strategic-explainer` как fail-closed logical dependency.
+  ShipTask или любой Strategic Explainer внутрь его package и не встраивайте
+  providers обратно в ShipTask package. Codex manifest не поддерживает
+  plugin-to-plugin dependency: ShipTask предпочитает
+  `$strategic-explainer-fast:strategic-explainer-fast`, а при его отсутствии
+  использует `$strategic-explainer:strategic-explainer`; Task Composer сохраняет
+  ordinary dependency.
   Не создавайте и не синхронизируйте
   standalone user-level копии `~/.codex/skills/ship-tasks`,
   `~/.codex/skills/task-composer` и
-  `~/.codex/skills/strategic-explainer`.
+  `~/.codex/skills/strategic-explainer` и
+  `~/.codex/skills/strategic-explainer-fast`.
 
 ## Изменения
 
@@ -123,19 +133,18 @@ manifest/install/byte-identity правила остаются repository-level 
   role scope, общий или узкий opt-out, duration/complexity condition — имеет
   приоритет и сохраняется по смыслу; root agent не входит в явно названное число
   субагентов; если effective rule не отключает comment Explainer, каждый
-  комментарий проходит отдельного независимого Strategic Explainer; каждый
-  Strategic Explainer publication unit — comment, Task/scope report, blocker
-  explanation или final — получает нового built-in `default` subagent с
-  `fork_turns="none"`, одной compact task и resolvable read-only anchors без
-  inherited turns/tool transcript/process diary/caller candidate; Explainer до
-  discovery проверяет invocation, invalid call получает automatic corrected
-  fresh retry, а candidate blocker до публикации становится reflection input
-  ShipTask для повторной проверки safe frontier без расширения scope/authority;
-  caller знает только opaque client protocol, не читает provider-internal
-  contract, не пишет candidate, не передаёт analysis/strategic summary/format
-  rules, не применяет provider method при opt-out/unavailability и не
-  переписывает ready result; только admitted fresh subagent читает внутренний
-  provider reference;
+  комментарий проходит один availability-selected provider: Fast имеет
+  приоритет и выполняется current agent без subagent, ordinary используется
+  только когда Fast отсутствует; один publication unit не получает оба
+  provider и ordinary не служит quality retry Fast; Fast читает собственный
+  in-context reference, отделяет authoritative anchors от inherited
+  turns/tool transcript/process diary/caller candidate и не заявляет clean или
+  independent guarantee; ordinary publication unit получает нового built-in
+  `default` subagent с `fork_turns="none"`, одной compact task и resolvable
+  read-only anchors, а caller знает только его opaque protocol; invalid ordinary
+  call получает automatic corrected fresh retry; candidate blocker до
+  публикации становится reflection input ShipTask для повторной проверки safe
+  frontier без расширения scope/authority; ready result не переписывается;
   каждый
   одновременно пишущий implementation
   subagent получает собственные feature branch и Git worktree, не разделяемые с
@@ -165,25 +174,28 @@ manifest/install/byte-identity правила остаются repository-level 
 1. Exact repository scope закоммичен в этом репозитории.
 2. Этот commit запушен в `origin/main`, а local `HEAD` совпадает с
    `origin/main`.
-3. Два Marketplace package являются единственной runtime-дистрибуцией:
+3. Три Marketplace package являются единственной runtime-дистрибуцией:
    `Srez Marketplace/plugins/ship-tasks/skills/ship-tasks`,
    `Srez Marketplace/plugins/ship-tasks/skills/task-composer` и
-   `Srez Marketplace/plugins/strategic-explainer/skills/strategic-explainer`
+   `Srez Marketplace/plugins/strategic-explainer/skills/strategic-explainer` и
+   `Srez Marketplace/plugins/strategic-explainer-fast/skills/strategic-explainer-fast`
    byte-identical соответствующим repository sources; каталог
    `Srez Marketplace/plugins/ship-tasks/skills/strategic-explainer` отсутствует.
-   Installed cache каждого package byte-identical marketplace source и оба
+   Installed cache каждого package byte-identical marketplace source и все три
    plugin отображаются installed/enabled. Если
    изменился runtime payload, manifest version или cachebuster обновлён,
    соответствующий marketplace commit запушен в `origin/main`, а затронутые
    plugin переустановлены из `ship-tasks@srez-marketplace` и/или
-   `strategic-explainer@srez-marketplace`. Отдельно установленный
+   `strategic-explainer@srez-marketplace` и/или
+   `strategic-explainer-fast@srez-marketplace`. Отдельно установленный
    `task-manager@srez-marketplace` остаётся adapter-only и не содержит
    `skills/ship-tasks`, `skills/task-composer` или
-   `skills/strategic-explainer`.
+   `skills/strategic-explainer` или `skills/strategic-explainer-fast`.
 
 Standalone user-level каталоги `~/.codex/skills/ship-tasks`,
 `~/.codex/skills/task-composer` и
-`~/.codex/skills/strategic-explainer` должны отсутствовать, а fresh
+`~/.codex/skills/strategic-explainer` и
+`~/.codex/skills/strategic-explainer-fast` должны отсутствовать, а fresh
 `skills/list` не должен возвращать отдельные user skills.
 Plugin-managed marketplace snapshot и installed cache являются внутренними
 копиями одной plugin installation и не удаляются вручную.
@@ -202,6 +214,7 @@ python3 -B -m unittest discover -s tests -p 'test_*.py'
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer-fast
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```

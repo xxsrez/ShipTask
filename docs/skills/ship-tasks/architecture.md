@@ -1,6 +1,6 @@
 # ShipTask: канонический контракт
 
-Статус: current Level 2 contract, 2026-08-26. Применимые Level 1 requirements —
+Статус: current Level 2 contract, 2026-08-27. Применимые Level 1 requirements —
 `ST-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Основан на
@@ -14,8 +14,10 @@ reporting contract уточнён
 [ADR-0022](../../decisions/0022-mandatory-independent-strategic-explainer-for-comments.md),
 а clean stateless API и blocker reflection —
 [ADR-0029](../../decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md),
-а отдельная distribution и logical dependency Strategic Explainer —
-[ADR-0031](../../decisions/0031-standalone-strategic-explainer-plugin.md),
+а отдельная distribution обычного Strategic Explainer —
+[ADR-0031](../../decisions/0031-standalone-strategic-explainer-plugin.md), а
+availability-based выбор Fast с ordinary fallback —
+[ADR-0032](../../decisions/0032-strategic-explainer-fast-plugin.md),
 а automatic default, natural-language topology rules и writer/worktree isolation —
 [ADR-0024](../../decisions/0024-adaptive-multi-agent-execution-by-default.md), а
 cost-aware выбор профиля субагента и обязательная эскалация Luna —
@@ -61,11 +63,12 @@ candidate с обязательным честным comment. Marketplace source
 отдельный distribution step: локальная компиляция сама по себе не доказывает,
 что новый runtime уже released или загружен fresh Codex session.
 
-ShipTask package не содержит Strategic Explainer runtime. Для обязательных
-publication units caller вызывает отдельно установленный qualified skill
+ShipTask package не содержит runtime Explainer. Для обязательных publication
+units live catalog выбирает отдельно установленный
+`$strategic-explainer-fast:strategic-explainer-fast`, а при его отсутствии —
 `$strategic-explainer:strategic-explainer`. Manifest не умеет автоматически
-устанавливать plugin dependency, поэтому отсутствие capability проходит
-существующую fail-closed ветвь `ST-07`, а не self-fallback или встроенную копию.
+устанавливать plugin dependency, поэтому отсутствие обоих capabilities проходит
+fail-closed ветвь `ST-07`, а не встроенную копию.
 
 `blocked by` в этой компиляции открывает downstream implementation после
 подтверждённого fan-in нужного upstream contract в exact integration candidate,
@@ -307,10 +310,10 @@ ShipTask всегда создаёт и перечитывает обязате�
 по adapter contract; пока comment фактически не существует, связанный
 существенный transition не завершён.
 
-Пока effective topology rule не отключает comment Explainer, каждый комментарий
-ShipTask сначала проходит отдельного независимого Strategic Explainer. Основной
-агент не может заменить этот проход собственной редактурой; недоступность роли
-оставляет комментарий и зависящий transition незавершёнными. Если user rule
+Пока effective rule не отключает comment Explainer, каждый комментарий ShipTask
+проходит один availability-selected provider: Fast in-context без subagent либо
+ordinary independent provider при отсутствии Fast. Недоступность разрешённого
+provider оставляет комментарий и зависящий transition незавершёнными. Если user rule
 отключает Explainer, основной агент сообщает необходимые lifecycle facts по
 собственному truth contract ShipTask, не читает и не имитирует provider method и
 не заявляет эквивалентное качество.
@@ -442,7 +445,7 @@ To Do → In Progress → In Review → Done
 Explainer. Отдельное существенное событие может требовать своего комментария,
 но переход как таковой не является основанием для текста.
 
-До opaque invocation ShipTask подтверждает factual anchors:
+До provider pass ShipTask подтверждает factual anchors:
 
 - что установлено сейчас;
 - почему Task меняет статус или остаётся незавершённой;
@@ -453,12 +456,13 @@ Explainer. Отдельное существенное событие может
 Это inventory фактов и lifecycle decisions, а не explanation draft, формальный
 шаблон, internal journal или инструкция о структуре текста. Языковая и
 редакторская обработка принадлежит provider.
-Пока effective topology rule не отключает comment Explainer, перед публикацией
-отдельный provider получает compact task и resolvable anchors, а возвращает
+Пока effective rule не отключает comment Explainer, перед публикацией выбранный
+provider получает compact task и resolvable anchors, а возвращает
 готовый text и отдельно обозначенный source basis. Основной агент публикует
 только text, проверяет material factual conflict по basis и при необходимости
-исправляет source/anchor для нового clean
-invocation; он не читает provider method и не переписывает text. Когда rule
+исправляет source/anchor для нового pass того же provider; он не делает второй
+editorial rewrite. Ordinary method остаётся opaque, Fast method загружает сам
+текущий агент. Когда rule
 отключает Explainer, основной агент публикует необходимые lifecycle facts по
 собственному contract без имитации provider. Статус меняется только после
 публикации и повторного чтения комментария; затем Task также перечитывается.
@@ -521,12 +525,12 @@ ledger даже при последующем `verified-success`.
 - альтернативы только когда реальный выбор materially меняет authority, risk,
   cost или доказательную силу, с понятным trade-off.
 
-До окончательного blocker claim ShipTask запускает fresh Strategic Explainer для
-candidate report и перечитывает его explanation/source basis как независимый
-reflection input. Он повторно проверяет исходную цель, primary/cascade cause,
+До окончательного blocker claim ShipTask запускает новый pass выбранного
+Strategic Explainer для candidate report и перечитывает explanation/source basis
+как reflection input. Он повторно проверяет исходную цель, primary/cascade cause,
 applicable Task/Epic/Release/Project context и всю безопасную in-scope
 diagnostic/repair/verification/reconciliation frontier. Provider result и source
-basis остаются opaque reflection input: Explainer не
+basis не являются primary evidence: Explainer не
 получает authority на mutation, scope или status decision, а любой найденный в
 result путь становится действием только после проверки ShipTask по current
 sources и acceptance.
@@ -627,57 +631,48 @@ comment предшествует reopen, после чего обычный rewo
 
 ## 6. Человеческое объяснение
 
-Пока effective topology rule не отключает comment Explainer, каждый комментарий
-Task Manager, который создаёт ShipTask, обязательно проходит отдельного
-Strategic Explainer. Это явное требование к независимой смысловой проверке, а не
-способ, который основной агент может молча заменить собственной редактурой.
+Пока effective user rule не отключает Explainer, каждый comment, отдельный
+Task/scope report, blocker report и final является самостоятельным publication
+unit и получает ровно один provider pass. Routine chat и progress updates его
+не запускают.
 
-Каждый comment, отдельный Task/scope report, blocker report и final является
-самостоятельным publication unit. Для него ShipTask создаёт новый built-in
-`default` read-only subagent с `fork_turns="none"`; direct и delegated API не
-различаются. Invocation содержит одну compact task, exact scope и resolvable
-read-only anchors к session, Task/relations, evidence, project/repository docs и
-candidate. Previous conversation, tool transcript, process diary, ShipTask
-rationale/analysis, strategic summary, требования к форме ответа и готовый
-candidate не передаются. Routine chat и progress updates этот API не запускают.
+Перед publication ShipTask читает live skill catalog. Доступный
+`$strategic-explainer-fast:strategic-explainer-fast` имеет приоритет. Если Fast
+отсутствует, используется `$strategic-explainer:strategic-explainer`. Выбор
+фиксируется на всю unit: уже выбранный Fast не получает скрытый quality retry
+через ordinary provider после error или неудовлетворительного result.
 
-ShipTask знает только opaque client protocol из runtime reference. Он не читает
-и не применяет provider-internal contract. Он не пишет factual/
-strategic narrative за Explainer и не передаёт provider-у собственную модель
-ответа. Exact anchors должны лишь разрешать самостоятельный read-only доступ к
-authoritative sources.
+Fast выполняется текущим agent без subagent. ShipTask устанавливает одну compact
+task, exact scope и resolvable read-only anchors, затем загружает Fast runtime.
+Provider сам отделяет authoritative sources от inherited conversation, tool
+transcript, process diary, прежнего candidate и caller framing. Он возвращает
+готовый text и отдельно обозначенный source basis. ShipTask проверяет material
+facts, публикует только text и не делает второй editorial rewrite. Для Fast не
+заявляются independent/stateless/clean-context guarantees.
 
-Strategic Explainer возвращает готовый text и отдельно обозначенный короткий
-source basis либо operational refusal. ShipTask отвечает за фактическое состояние, status, границы
-задачи, полномочия, способ исправления и итог, поэтому проверяет material claims
-по authoritative sources. Он не получает права оценивать либо улучшать text по
-внутреннему quality checklist provider.
+Ordinary path сохраняет opaque protocol: новый built-in `default` read-only
+subagent с `fork_turns="none"` получает одну compact task, exact scope и
+resolvable anchors без inherited turns, tool transcript, process diary,
+ShipTask analysis/strategic summary, format rules или candidate. Caller не
+читает ordinary provider-internal contract. Invalid invocation автоматически
+исправляется новым clean subagent; follow-up запрещён.
 
-Если обнаружен material factual conflict, основной агент исправляет
-source/anchor или compact task и создаёт новый fresh invocation. Если Explainer
-отклонил context как
-унаследованный, многословный, неоднозначный или иначе invalid, ShipTask
-автоматически исправляет названную причину и повторяет вызов новым subagent;
-follow-up старому запрещён. Повторный structural failure после исправления
-является orchestration failure. Самостоятельно переписать candidate и признать
-его прошедшим Explainer нельзя. Если субагент недоступен или не дал пригодный
-текст, комментарий не публикуется, а связанный transition остаётся
-незавершённым. Если effective user rule отключает Explainer, отдельный проход не
-запускается: основной агент сообщает необходимые lifecycle facts по собственному
-truth contract, не читает и не имитирует provider method и не заявляет
-эквивалентное качество.
+В обоих paths material factual conflict исправляется current sources/anchors и
+новым pass того же выбранного provider. Missing либо непригодный provider
+оставляет mandatory comment и зависящий transition незавершёнными; safe
+independent work продолжается. При explicit opt-out ShipTask сообщает только
+необходимые lifecycle facts по собственному truth contract и не заявляет
+эквивалентное provider quality.
 
-Финальный ответ готовится отдельно от Task-комментариев. После перечитывания
-authoritative state ShipTask создаёт новый clean invocation с исходным вопросом,
-exact scope и source anchors всего run. Сводный ответ нельзя собирать склейкой
-готовых комментариев или передачей предыдущего draft.
+Общий запрет subagents не отключает доступный Fast, потому что Fast не создаёт
+subagent. При отсутствии Fast такой запрет делает ordinary path недоступным.
+Узкие правила могут отдельно отключить Fast, ordinary fallback или Explainer
+для выбранных publication units.
 
-Основной агент публикует только готовый text без source basis и самостоятельной
-editorial переработки. Полезные ссылки входят в anchors/source basis либо требуют нового
-invocation, а не дописывания narrative caller-ом. Если обязательный для
-комментария Explainer недоступен, действует fail-closed правило выше. Если
-недоступен final provider, ShipTask всё равно сообщает установленные facts и
-capability failure по собственному truth contract, не имитируя provider.
+Финальный ответ готовится отдельной scope-level unit после current read-back, а
+не склейкой Task comments или переносом прежнего draft. Если final provider
+недоступен, ShipTask всё равно сообщает установленные facts и capability gap по
+собственному truth contract.
 
 Client protocol: [runtime reference](../../../ship-tasks/references/strategic-explainer.md).
 

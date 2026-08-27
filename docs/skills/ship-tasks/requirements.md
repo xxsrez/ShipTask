@@ -1,6 +1,6 @@
 # ShipTask: требования пользователя
 
-Статус: действующий Level 1. Редакция от 2026-08-26.
+Статус: действующий Level 1. Редакция от 2026-08-27.
 
 Это полный набор действующих пользовательских требований только к
 `$ship-tasks`. Требования к Task Composer и Strategic Explainer находятся в их
@@ -137,55 +137,60 @@ ShipTask сам выбирает способ реализации, диагно
 ShipTask сначала сверяет фактическое состояние. Пока обязательный комментарий
 не подтверждён, зависящий от него переход статуса не считается выполненным.
 
-### `ST-07` — Независимое понятное объяснение
+### `ST-07` — Понятное объяснение через выбранный Explainer
 
-Если пользователь не задал другого применимого правила о составе субагентов,
-каждый комментарий ShipTask проходит отдельный независимый Strategic Explainer.
-Основной агент отвечает за факты и решение, но не заменяет независимый проход
-собственной редактурой.
+Если пользователь явно не отключил Explainer для применимой publication unit,
+каждый комментарий ShipTask проходит один выбранный Strategic Explainer.
+ShipTask определяет provider по live skill catalog перед invocation:
 
-Каждый такой комментарий, отдельный отчёт по Task, blocker report и итоговый
-ответ являются самостоятельными publication units и получают новый built-in
-`default` subagent с `fork_turns="none"`. ShipTask передаёт одну короткую и
-однозначную задачу, exact scope и разрешимые read-only source anchors, а не
-предыдущий диалог, tool transcript, process diary, собственные рассуждения или
-готовый candidate. Он также не передаёт provider-у strategic summary, требования
-к структуре или стилю ответа. Обычные progress updates и рабочее общение
-отдельного Explainer не запускают.
+- если доступен `$strategic-explainer-fast:strategic-explainer-fast`, он имеет
+  приоритет и выполняет один сфокусированный in-context проход без subagent;
+- если Fast недоступен, ShipTask использует
+  `$strategic-explainer:strategic-explainer` по прежнему opaque stateless
+  protocol через новый built-in `default` subagent с `fork_turns="none"`;
+- для одной publication unit вызывается только один provider. Ошибка уже
+  выбранного Fast не запускает скрытый повтор через обычный Explainer и не
+  превращает fallback в quality retry.
 
-Для ShipTask Strategic Explainer является opaque provider. Caller знает только
-client protocol: когда вызвать, какой clean envelope передать и как обработать
-готовый текст/source basis либо refusal. ShipTask не читает и не применяет
-provider-internal contract, не пишет
-explanation candidate и не оценивает либо улучшает result по внутренним
-критериям Explainer. Material factual conflict проверяется по authoritative
-sources; исправление facts/anchors получает новый clean invocation.
+Каждый обязательный комментарий, отдельный отчёт по Task, blocker report и
+итоговый ответ являются самостоятельными publication units. Обычные progress
+updates и рабочее общение Explainer не запускают. В обоих режимах ShipTask
+передаёт или устанавливает одну короткую и однозначную задачу, exact scope и
+разрешимые read-only source anchors. Material factual conflict проверяется по
+authoritative sources; изменившиеся facts, scope или anchors требуют нового
+прохода выбранного provider.
+
+Fast работает в текущем ShipTask context: он читает собственный provider
+reference, отделяет authoritative anchors от tool transcript, process diary,
+предыдущих гипотез и candidate и сам возвращает publication-ready text с
+отдельным source basis. ShipTask проверяет material facts и не выполняет второй
+самостоятельный rewrite. Он не заявляет для Fast независимость, statelessness
+или clean-context guarantees обычного Explainer.
+
+Обычный Strategic Explainer остаётся opaque provider. ShipTask не читает и не
+применяет его provider-internal contract, не пишет explanation candidate, не
+передаёт strategic summary, требования к структуре или стилю и не оценивает
+result внутренним quality checklist. Invalid invocation получает один
+автоматически исправленный новый clean subagent; повторный structural refusal
+является orchestration failure.
 
 Итоговый ответ Codex также является отдельным scope-level invocation с исходным
 вопросом, exact scope и anchors всего run. Он не собирается механической склейкой
 комментариев или передачей прежнего draft.
 
-Пользователь может обычным языком изменить это правило: например, запретить всех
-субагентов или отключить только Strategic Explainer для комментариев. Такой
-opt-out не переносит provider expertise в основной
-агент: он сообщает только обязательные факты по собственному truth/lifecycle
-contract ShipTask и не заявляет эквивалентное качество.
+Пользователь может обычным языком отключить оба Explainer, только Fast, только
+обычный fallback или Explainer лишь для отдельных publication units. Общий
+запрет создавать subagents сам по себе не отключает доступный Fast, потому что
+Fast не создаёт subagent; при отсутствии Fast такой запрет делает обычный
+fallback недоступным. Opt-out не переносит метод отключённого provider в другой
+workflow и не разрешает заявлять эквивалентное качество.
 
-Если действующее правило требует Strategic Explainer, а тот недоступен или не
-может выполнить задачу надлежащим образом, комментарий и зависящий от него
-переход остаются незавершёнными. Итоговый ответ всё равно честно сообщает
-установленное состояние и capability failure по собственному contract ShipTask,
-но не имитирует Explainer и не утверждает эквивалентное provider quality:
-невозможность вызвать provider не даёт права скрыть результат или оставить
-пользователя без ответа. Другая независимая и безопасная работа может
-продолжаться.
-
-Если Explainer отклонил загрязнённый, многословный, неоднозначный или иначе
-неправильный invocation, ShipTask исправляет названную причину и автоматически
-создаёт новый clean invocation; старый subagent не продолжается. Повторный
-структурный отказ после исправленного вызова является orchestration failure:
-ShipTask не обходит обязательный Explainer, честно сообщает capability gap и
-продолжает только независимую безопасную работу.
+Если ни один разрешённый provider не доступен или выбранный provider не может
+выполнить задачу надлежащим образом, комментарий и зависящий от него переход
+остаются незавершёнными. Итоговый ответ всё равно честно сообщает установленное
+состояние и capability failure по собственному contract ShipTask, но не
+имитирует provider и не скрывает результат. Другая независимая и безопасная
+работа может продолжаться.
 
 ### `ST-08` — Инциденты приёмки всегда видимы
 
@@ -452,14 +457,14 @@ worktree, ShipTask по возможности безопасно восстан
 
 ShipTask распространяется только как отдельный `plugin`
 `ship-tasks@srez-marketplace`. Коннектор Task Manager устанавливается отдельно
-и остаётся `adapter-only plugin` без правил выполнения. Strategic Explainer
-также устанавливается отдельным plugin
-`strategic-explainer@srez-marketplace`; ShipTask не содержит его копию и
-вызывает plugin-qualified skill `$strategic-explainer:strategic-explainer` как
-обязательную logical dependency по `ST-07`.
+и остаётся `adapter-only plugin` без правил выполнения. Обычный Strategic
+Explainer и Strategic Explainer Fast также устанавливаются отдельными plugins
+`strategic-explainer@srez-marketplace` и
+`strategic-explainer-fast@srez-marketplace`; ShipTask не содержит их копий и
+выбирает plugin-qualified skill по `ST-07`.
 
 Current Codex manifest не поддерживает нативную plugin-to-plugin dependency или
-автоматическую установку второго plugin. Поэтому отсутствие Strategic
+автоматическую установку другого plugin. Поэтому отсутствие обоих разрешённых
 Explainer обрабатывается как уже определённая в `ST-07` capability failure:
 зависящие comment/lifecycle effect не выполняются и не имитируются, а
 независимая безопасная работа может продолжаться.
@@ -673,8 +678,8 @@ exact change boundary или полномочия дочерней Task, не р
 
 ShipTask не признаёт Task, Release или весь run окончательно заблокированными и
 не публикует terminal blocker claim, пока candidate blocker не прошёл отдельный
-fresh Strategic Explainer по `ST-07`. Получив publication-ready explanation и
-его source basis, ShipTask сам перечитывает объяснение как независимый взгляд,
+новый pass выбранного Strategic Explainer по `ST-07`. Получив publication-ready explanation и
+его source basis, ShipTask сам перечитывает объяснение как reflection input,
 повторно проверяет primary/cascade cause, исходную цель, applicable
 Task/Epic/Release/Project context, scope/authority boundaries и всю безопасную
 in-scope diagnostic, repair, verification и reconciliation frontier.

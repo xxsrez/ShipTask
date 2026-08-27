@@ -1,6 +1,6 @@
 # Skill source packages
 
-Статус: current repository source model, 2026-08-26.
+Статус: current repository source model, 2026-08-27.
 
 Документация в этом каталоге является исходным кодом runtime skills. Единица
 исходного кода — отдельный skill, а не repository целиком. Поэтому требования и
@@ -16,7 +16,11 @@ docs/skills/
 ├── task-composer/
 │   ├── requirements.md
 │   └── architecture.md
-└── strategic-explainer/
+├── strategic-explainer/
+    ├── requirements.md
+    ├── architecture.md
+    └── product-vision.md
+└── strategic-explainer-fast/
     ├── requirements.md
     ├── architecture.md
     └── product-vision.md
@@ -64,6 +68,11 @@ caller-у только router/admission contract, а полный provider contr
 в runtime reference и загружается только admitted fresh subagent. Совокупность
 этих файлов, а не один caller-visible `SKILL.md`, является его Level 3.
 
+Strategic Explainer Fast использует другое progressive disclosure: compact
+`SKILL.md` устанавливает одну publication unit и после admission текущий агент
+читает полный in-context contract. Fast не создаёт subagent и не заявляет
+clean/stateless isolation обычного provider.
+
 Изменение цели, инварианта или пользовательской границы сначала меняет локальный
 `requirements.md`. Изменение способа достижения при сохранённой цели меняет
 локальный `architecture.md`. После этого пересобираются runtime и применимые
@@ -92,3 +101,6 @@ level, однако plugin packaging не объединяет source contracts 
 - [`$strategic-explainer:strategic-explainer`](strategic-explainer/requirements.md) —
   [Architecture](strategic-explainer/architecture.md) и
   [product vision](strategic-explainer/product-vision.md).
+- [`$strategic-explainer-fast:strategic-explainer-fast`](strategic-explainer-fast/requirements.md) —
+  [Architecture](strategic-explainer-fast/architecture.md) и
+  [product vision](strategic-explainer-fast/product-vision.md).
