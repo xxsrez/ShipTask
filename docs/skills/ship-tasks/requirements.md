@@ -146,16 +146,13 @@ effective user rule. Mode сохраняется для следующих publi
 
 1. обычный `$strategic-explainer:strategic-explainer`, если он доступен и
    разрешён;
-2. иначе Fast `$strategic-explainer-fast:strategic-explainer-fast`, если он
-   доступен и разрешён;
-3. иначе native ShipTask writing.
+2. иначе native ShipTask writing.
 
-Таким образом, при установленных ordinary и Fast выбирается ordinary; только
-ordinary также выбирает ordinary; только Fast выбирает Fast; отсутствие обоих
-выбирает native. Ни одна из четырёх комбинаций сама по себе не является warning,
-capability failure или blocker. Для одной publication unit вызывается не более
-одного provider: availability fallback применяется только при начальном выборе,
-а не как скрытый quality/error retry.
+Таким образом, установленный и разрешённый ordinary выбирает provider mode, а
+его отсутствие или opt-out выбирает native. Ни одна комбинация сама по себе не
+является warning, capability failure или blocker. Для одной publication unit
+вызывается не более одного provider; availability fallback ведёт только в
+native, а не в другой communication provider или скрытый quality/error retry.
 
 Каждый обязательный комментарий, отдельный отчёт по Task, blocker report и
 итоговый ответ являются самостоятельными publication units. Обычные progress
@@ -172,21 +169,12 @@ candidate, не передаёт strategic summary, требования к ст
 built-in `default` subagent с `fork_turns="none"`, exact provider role lock, одной
 publication unit и resolvable anchors. Invalid invocation получает один
 автоматически исправленный новый clean subagent; повторный structural refusal
-или другой provider failure переводит communication mode в native без вызова
-Fast.
-
-Fast работает в текущем ShipTask context без subagent: он читает собственный
-provider reference, отделяет authoritative anchors от tool transcript, process
-diary, предыдущих гипотез и candidate и сам возвращает publication-ready text с
-отдельным source basis. ShipTask проверяет material facts и не выполняет второй
-самостоятельный rewrite. Он не заявляет для Fast независимость, statelessness
-или clean-context guarantees обычного Explainer. Ошибка выбранного Fast
-переводит communication mode в native без вызова ordinary.
+или другой provider failure переводит communication mode в native.
 
 В native mode ShipTask сразу формулирует publication unit по собственным
 truth/lifecycle/reporting requirements, публикует обязательный комментарий,
 выполняет его read-back и продолжает разрешённый status transition. Native mode
-не загружает, не применяет и не имитирует внутренний метод ordinary или Fast и
+не загружает, не применяет и не имитирует внутренний метод ordinary и
 не заявляет эквивалентное provider quality. Переход в native из-за отсутствия,
 opt-out или failure provider-а не добавляет человеку capability warning и не
 мешает lifecycle effect.
@@ -197,12 +185,10 @@ opt-out или failure provider-а не добавляет человеку capa
 он сообщает тот же обязательный factual result без служебного предупреждения об
 отсутствии Explainer.
 
-Пользователь может обычным языком отключить оба Explainer, только Fast, только
-ordinary или Explainer лишь для отдельных publication units. Общий запрет
-создавать subagents исключает ordinary: при доступном Fast выбирается Fast, а
-без Fast — native. Полный opt-out сразу выбирает native. Любой opt-out не
-переносит метод отключённого provider в ShipTask и не разрешает заявлять
-эквивалентное качество.
+Пользователь может обычным языком отключить ordinary Explainer полностью или
+только для отдельных publication units. Общий запрет создавать subagents также
+исключает ordinary и выбирает native. Любой opt-out не переносит метод
+отключённого provider в ShipTask и не разрешает заявлять эквивалентное качество.
 
 ### `ST-08` — Инциденты приёмки всегда видимы
 
@@ -470,15 +456,14 @@ worktree, ShipTask по возможности безопасно восстан
 ShipTask распространяется только как отдельный `plugin`
 `ship-tasks@srez-marketplace`. Коннектор Task Manager устанавливается отдельно
 и остаётся `adapter-only plugin` без правил выполнения. Обычный Strategic
-Explainer и Strategic Explainer Fast также устанавливаются отдельными plugins
-`strategic-explainer@srez-marketplace` и
-`strategic-explainer-fast@srez-marketplace`; ShipTask не содержит их копий и
+Explainer также устанавливается отдельным plugin
+`strategic-explainer@srez-marketplace`; ShipTask не содержит его копии и
 выбирает plugin-qualified skill по `ST-07`.
 
 Current Codex manifest не поддерживает нативную plugin-to-plugin dependency или
-автоматическую установку другого plugin. Для ShipTask оба Explainer являются
-независимыми optional communication enhancements, а не обязательными runtime
-dependencies: отсутствие обоих выбирает native mode по `ST-07` и не мешает
+автоматическую установку другого plugin. Для ShipTask ordinary Explainer является
+независимым optional communication enhancement, а не обязательной runtime
+dependency: его отсутствие выбирает native mode по `ST-07` и не мешает
 comment/lifecycle effect.
 
 После любого изменения поведения runtime-исходник в репозитории, исходник в

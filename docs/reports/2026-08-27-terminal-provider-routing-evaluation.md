@@ -11,8 +11,8 @@ Repository candidate прошёл оба изменённых контракта
   provider trials было ноль дочерних agents;
 - все 20 model-forward cases получили финальный `PASS` от отдельных fresh
   evaluators;
-- статическая матрица ShipTask подтверждает `ordinary → Fast → native` для всех
-  четырёх install combinations и native fallback без блокировки comments/status.
+- статическая матрица ShipTask подтверждает `ordinary → native` для обеих
+  install combinations и native fallback без блокировки comments/status.
 
 ## Проверка terminal role
 
@@ -67,16 +67,14 @@ generation trials, каждый с provider child count `0`.
 
 ## ShipTask routing matrix
 
-| Ordinary | Fast | Mode |
-| --- | --- | --- |
-| установлен | установлен | ordinary |
-| установлен | отсутствует | ordinary |
-| отсутствует | установлен | Fast |
-| отсутствует | отсутствует | native |
+| Ordinary | Mode |
+| --- | --- |
+| установлен и разрешён | ordinary |
+| отсутствует или отключён | native |
 
 Отдельные runtime tests проверяют no-subagent rule, full opt-out, один corrected
-ordinary structural retry, переход provider failure в native без secondary
-provider и продолжение comment/read-back/status effect в native mode.
+ordinary structural retry, переход provider failure в native и продолжение
+comment/read-back/status effect в native mode.
 
 ## Граница вывода
 

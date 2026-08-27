@@ -24,20 +24,18 @@ contract в exact integration candidate, даже если blocking Task ещё 
 Документация здесь является исходным кодом, причём source unit — отдельный
 skill. В [`docs/skills/<skill>/`](docs/skills/README.md) у каждого skill есть
 собственные `requirements.md` (Level 1) и `architecture.md` (Level 2); требования
-четырёх skills не объединяются. Runtime является компактной стохастической
+трёх skills не объединяются. Runtime является компактной стохастической
 компиляцией этих двух локальных документов. У Strategic Explainer видимый
 `SKILL.md` содержит только router/admission layer, а provider expertise находится
-в reference для admitted fresh subagent. Strategic Explainer Fast загружает
-свой in-context reference в текущий agent и не создаёт subagent. Удаление и повторная сборка runtime из
+в reference для admitted fresh subagent. Удаление и повторная сборка runtime из
 source package должны давать примерно эквивалентный по смыслу package.
 
 Current requirements являются конституцией для агентов: они задают outcome,
 rationale, observable evidence и authority/safety boundaries, но оставляют
 агенту план, декомпозицию, инструменты и внутренний reasoning. Ordinary
 Strategic Explainer сохраняет fresh stateless API с новым `default` subagent и
-`fork_turns="none"`; Fast является отдельным explicit in-context/no-subagent
-контрактом. Другое исключение — execution topology: без явного
-user rule ShipTask сам решает, где
+`fork_turns="none"`. Другое исключение — execution topology: без явного user
+rule ShipTask сам решает, где
 субагенты дают реальную пользу, сохраняя одного integration owner. Пользователь
 может свободным языком задать exact/relative count, role scope, общий или узкий
 запрет и условие вроде «используй субагентов только для работы дольше получаса»;
@@ -69,11 +67,9 @@ capability не блокируют delivery.
 
 Для каждого comment, Task/scope report, blocker explanation и final ShipTask
 использует один communication mode. Live catalog выбирает ordinary
-`$strategic-explainer:strategic-explainer`, иначе Fast
-`$strategic-explainer-fast:strategic-explainer-fast`, иначе native ShipTask
-writing. Fast работает в текущем agent без subagent; ordinary получает terminal
-clean provider-subagent. Provider failure переводит run в native без вызова
-второго provider. Native не имитирует provider method и не блокирует
+`$strategic-explainer:strategic-explainer`, если он доступен и разрешён, иначе
+native ShipTask writing. Ordinary получает terminal clean provider-subagent.
+Provider failure переводит run в native. Native не имитирует provider method и не блокирует
 comment/status. Routine chat и progress updates publication unit не создают.
 
 Приёмочный incident сообщается сразу в chat и сохраняется в Task history до
@@ -135,8 +131,6 @@ context в каждой child Task. При delivery ShipTask перечитыв�
   deterministic role resolver и opaque client protocol; terminal provider
   проходит отдельный provider-only admission и только затем загружает внутренний
   contract.
-- [`strategic-explainer-fast/SKILL.md`](strategic-explainer-fast/SKILL.md) —
-  отдельный in-context provider без subagent и clean/stateless claim.
 - [`docs/skills/README.md`](docs/skills/README.md) — source model и независимые
   Requirements/Architecture packages для каждого skill.
 - [`docs/skills/ship-tasks/requirements.md`](docs/skills/ship-tasks/requirements.md)
@@ -146,9 +140,6 @@ context в каждой child Task. При delivery ShipTask перечитыв�
 - [`docs/skills/strategic-explainer/requirements.md`](docs/skills/strategic-explainer/requirements.md)
   и [Architecture](docs/skills/strategic-explainer/architecture.md) — source
   Strategic Explainer.
-- [`docs/skills/strategic-explainer-fast/requirements.md`](docs/skills/strategic-explainer-fast/requirements.md)
-  и [Architecture](docs/skills/strategic-explainer-fast/architecture.md) — source
-  Strategic Explainer Fast.
 - [`ship-tasks/references/project-memory.md`](ship-tasks/references/project-memory.md)
   — runtime contract project scope/profile memory.
 - [Документация](docs/README.md) — канонические specifications, Task Manager
@@ -164,21 +155,18 @@ python3 -B -m unittest discover -s tests -p 'test_*.py'
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
-python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer-fast
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```
 
-Runtime публикуется тремя независимыми plugin: `ship-tasks@srez-marketplace`
+Runtime публикуется двумя независимыми plugin: `ship-tasks@srez-marketplace`
 содержит ShipTask и Task Composer, а
-`strategic-explainer@srez-marketplace` — только ordinary Strategic Explainer, а
-`strategic-explainer-fast@srez-marketplace` — только Fast.
+`strategic-explainer@srez-marketplace` — только ordinary Strategic Explainer.
 Task Manager connector устанавливается отдельно как adapter-only
 `task-manager@srez-marketplace`. Codex manifest не умеет автоматически
-устанавливать plugin dependency, поэтому ShipTask выбирает ordinary, затем Fast,
-а без обоих — native; Task Composer использует ordinary. Standalone каталоги
+устанавливать plugin dependency, поэтому ShipTask выбирает ordinary при его
+наличии и разрешении, иначе native; Task Composer использует ordinary. Standalone каталоги
 `~/.codex/skills/ship-tasks`, `~/.codex/skills/task-composer` и
-`~/.codex/skills/strategic-explainer` и
-`~/.codex/skills/strategic-explainer-fast` не устанавливаются: они создают вторые
+`~/.codex/skills/strategic-explainer` не устанавливаются: они создают вторые
 logical skills рядом с plugin-qualified runtime. Каждый repository source
 сверяется со своим Marketplace package и installed plugin cache.

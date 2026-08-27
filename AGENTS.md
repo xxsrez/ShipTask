@@ -6,9 +6,9 @@
 
 - Репозиторий является source of truth для Task Manager-only Codex skills
   `$ship-tasks`, `$ship-tasks:task-composer` и общих communication skills
-  `$strategic-explainer` и `$strategic-explainer-fast`.
+  `$strategic-explainer`.
 - Исполнимые skills находятся в sibling-каталогах `ship-tasks/`,
-  `task-composer/`, `strategic-explainer/` и `strategic-explainer-fast/`.
+  `task-composer/` и `strategic-explainer/`.
 - Документация проекта находится в `docs/`; `docs/README.md` — её
   канонический индекс.
 - Основной язык документации — русский. Точные protocol/state/tool names можно
@@ -16,7 +16,7 @@
 
 ## Документация как исходный код
 
-Документация является исходным кодом всех четырёх skills. Единица source —
+Документация является исходным кодом всех трёх skills. Единица source —
 отдельный skill: его Requirements и Architecture находятся только в
 `docs/skills/<skill>/` и не смешиваются с контрактами соседних skills. Для
 каждого source package обязательны три уровня с таким приоритетом:
@@ -37,13 +37,10 @@
    evaluation документы допустимы, но не создают второй current contract.
 3. **Level 3 — runtime skills.**
    `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и runtime packages
-   `strategic-explainer/`, `strategic-explainer-fast/` являются компактной
-   исполнимой проекцией Level 1 и
+   `strategic-explainer/` являются компактной исполнимой проекцией Level 1 и
    применимой части Level 2. У Strategic Explainer caller-visible `SKILL.md`
    содержит только router/admission contract, а provider expertise находится в
-   reference, который читает лишь admitted fresh subagent. Fast, напротив,
-   загружает свой provider reference в current caller context и не создаёт
-   subagent. Формулировка и
+   reference, который читает лишь admitted fresh subagent. Формулировка и
    структура могут отличаться от документации, но runtime package должен нести
    весь применимый смысл Level 1 без семантических потерь.
 
@@ -88,9 +85,6 @@ manifest/install/byte-identity правила остаются repository-level 
   роль, заданную exact role lock: он не становится caller/router/coordinator/
   evaluator, не вызывает Strategic Explainer и не создаёт других agents;
   off-role invocation получает operational error до domain discovery.
-- `$strategic-explainer-fast` также остаётся generic и read-only. Не добавляйте
-  в него ShipTask, Task Manager, tracker lifecycle или скрытый subagent; его
-  отличительный boundary — in-context execution без clean/stateless guarantee.
 - Requests сформулировать, создать, разложить или положить Task Manager работу
   в backlog направляйте через `$ship-tasks:task-composer`, когда он доступен. Это
   planning-only mutation и не запускает ShipTask delivery. Read/status/audit
@@ -102,21 +96,18 @@ manifest/install/byte-identity правила остаются repository-level 
   создавайте параллельные поколения или альтернативные Requirements/
   Architecture одного runtime skill.
 - Распространяйте ShipTask и Task Composer через plugin
-  `ship-tasks@srez-marketplace`, а оба Strategic Explainer — только через
-  отдельные `strategic-explainer@srez-marketplace` и
-  `strategic-explainer-fast@srez-marketplace`. Task Manager connector устанавливается
+  `ship-tasks@srez-marketplace`, а Strategic Explainer — только через отдельный
+  `strategic-explainer@srez-marketplace`. Task Manager connector устанавливается
   отдельно как adapter-only `task-manager@srez-marketplace`; не помещайте
   ShipTask или любой Strategic Explainer внутрь его package и не встраивайте
-  providers обратно в ShipTask package. Codex manifest не поддерживает
-  plugin-to-plugin dependency: ShipTask предпочитает
-  `$strategic-explainer:strategic-explainer`, затем
-  `$strategic-explainer-fast:strategic-explainer-fast`, а без обоих использует
-  native writing; Task Composer сохраняет ordinary dependency.
+  provider обратно в ShipTask package. Codex manifest не поддерживает
+  plugin-to-plugin dependency: ShipTask использует
+  `$strategic-explainer:strategic-explainer`, когда он доступен и разрешён, а
+  иначе native writing; Task Composer сохраняет ordinary dependency.
   Не создавайте и не синхронизируйте
   standalone user-level копии `~/.codex/skills/ship-tasks`,
   `~/.codex/skills/task-composer` и
-  `~/.codex/skills/strategic-explainer` и
-  `~/.codex/skills/strategic-explainer-fast`.
+  `~/.codex/skills/strategic-explainer`.
 
 ## Изменения
 
@@ -135,18 +126,14 @@ manifest/install/byte-identity правила остаются repository-level 
   однозначное правило пользователя свободным языком — exact/relative count,
   role scope, общий или узкий opt-out, duration/complexity condition — имеет
   приоритет и сохраняется по смыслу; root agent не входит в явно названное число
-  субагентов; в начале run ShipTask выбирает communication mode: ordinary имеет
-  приоритет, затем Fast, затем native; один publication unit не получает оба
-  provider, а failure выбранного provider переводит run в native без secondary
-  provider retry; Fast читает собственный
-  in-context reference, отделяет authoritative anchors от inherited
-  turns/tool transcript/process diary/caller candidate и не заявляет clean или
-  independent guarantee; ordinary publication unit получает нового built-in
+  субагентов; в начале run ShipTask выбирает ordinary при его наличии и
+  разрешении, иначе native; failure provider-а переводит run прямо в native;
+  ordinary publication unit получает нового built-in
   `default` subagent с `fork_turns="none"`, exact terminal provider role lock,
   одной compact task и resolvable read-only anchors, а caller знает только его
   opaque protocol; invalid ordinary call получает automatic corrected fresh
   retry; native mode следует только ShipTask truth/lifecycle/reporting contract,
-  не имитирует providers и не блокирует comment/status; candidate blocker до
+  не имитирует provider и не блокирует comment/status; candidate blocker до
   публикации становится reflection input ShipTask для повторной проверки safe
   frontier без расширения scope/authority; ready result не переписывается;
   каждый
@@ -178,28 +165,25 @@ manifest/install/byte-identity правила остаются repository-level 
 1. Exact repository scope закоммичен в этом репозитории.
 2. Этот commit запушен в `origin/main`, а local `HEAD` совпадает с
    `origin/main`.
-3. Три Marketplace package являются единственной runtime-дистрибуцией:
+3. Два Marketplace package являются единственной runtime-дистрибуцией:
    `Srez Marketplace/plugins/ship-tasks/skills/ship-tasks`,
    `Srez Marketplace/plugins/ship-tasks/skills/task-composer` и
-   `Srez Marketplace/plugins/strategic-explainer/skills/strategic-explainer` и
-   `Srez Marketplace/plugins/strategic-explainer-fast/skills/strategic-explainer-fast`
+   `Srez Marketplace/plugins/strategic-explainer/skills/strategic-explainer`
    byte-identical соответствующим repository sources; каталог
    `Srez Marketplace/plugins/ship-tasks/skills/strategic-explainer` отсутствует.
-   Installed cache каждого package byte-identical marketplace source и все три
+   Installed cache каждого package byte-identical marketplace source и оба
    plugin отображаются installed/enabled. Если
    изменился runtime payload, manifest version или cachebuster обновлён,
    соответствующий marketplace commit запушен в `origin/main`, а затронутые
    plugin переустановлены из `ship-tasks@srez-marketplace` и/или
-   `strategic-explainer@srez-marketplace` и/или
-   `strategic-explainer-fast@srez-marketplace`. Отдельно установленный
+   `strategic-explainer@srez-marketplace`. Отдельно установленный
    `task-manager@srez-marketplace` остаётся adapter-only и не содержит
    `skills/ship-tasks`, `skills/task-composer` или
-   `skills/strategic-explainer` или `skills/strategic-explainer-fast`.
+   `skills/strategic-explainer`.
 
 Standalone user-level каталоги `~/.codex/skills/ship-tasks`,
 `~/.codex/skills/task-composer` и
-`~/.codex/skills/strategic-explainer` и
-`~/.codex/skills/strategic-explainer-fast` должны отсутствовать, а fresh
+`~/.codex/skills/strategic-explainer` должны отсутствовать, а fresh
 `skills/list` не должен возвращать отдельные user skills.
 Plugin-managed marketplace snapshot и installed cache являются внутренними
 копиями одной plugin installation и не удаляются вручную.
@@ -218,7 +202,6 @@ python3 -B -m unittest discover -s tests -p 'test_*.py'
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
-python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer-fast
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```

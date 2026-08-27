@@ -12,34 +12,25 @@ ARCHITECTURE = ROOT / "docs" / "skills" / "ship-tasks" / "architecture.md"
 
 
 class ShipTaskExplainerRoutingTest(unittest.TestCase):
-    def test_four_install_combinations_are_explicit(self) -> None:
+    def test_two_install_combinations_are_explicit(self) -> None:
         text = PROTOCOL.read_text()
         for row in (
-            "| доступен | доступен | ordinary |",
-            "| доступен | отсутствует | ordinary |",
-            "| отсутствует | доступен | Fast |",
-            "| отсутствует | отсутствует | native |",
+            "| доступен и разрешён | ordinary |",
+            "| отсутствует или отключён | native |",
         ):
             self.assertIn(row, text)
 
-    def test_priority_is_ordinary_then_fast_then_native(self) -> None:
+    def test_priority_is_ordinary_then_native(self) -> None:
         text = PROTOCOL.read_text()
         routing = text[text.index("## Матрица выбора") : text.index("## Ordinary path")]
         self.assertLess(
             routing.index("ordinary `$strategic-explainer:strategic-explainer`"),
-            routing.index("Fast `$strategic-explainer-fast:strategic-explainer-fast`"),
-        )
-        self.assertLess(
-            routing.index("Fast `$strategic-explainer-fast:strategic-explainer-fast`"),
             routing.index("native ShipTask writing"),
         )
-        self.assertIn("При\nустановленных обоих приоритет у ordinary", SKILL.read_text())
 
-    def test_provider_failure_goes_native_without_secondary_provider(self) -> None:
+    def test_provider_failure_goes_native(self) -> None:
         text = PROTOCOL.read_text()
-        self.assertIn("Ошибка уже выбранного ordinary не\nзапускает Fast", text)
-        self.assertIn("ошибка выбранного Fast не запускает ordinary", text)
-        self.assertIn("перейди в native mode", text)
+        self.assertIn("Ошибка уже выбранного ordinary переводит\nrun в native mode", text)
         self.assertIn(
             "Invalid invocation получает один\nавтоматически исправленный новый clean subagent",
             REQUIREMENTS.read_text(),
@@ -60,15 +51,14 @@ class ShipTaskExplainerRoutingTest(unittest.TestCase):
         self.assertNotIn("не публикуй comment", combined)
         self.assertNotIn("обязательный Strategic Explainer недоступен", combined)
 
-    def test_topology_and_opt_out_route_to_fast_or_native(self) -> None:
+    def test_topology_and_opt_out_route_to_native(self) -> None:
         text = PROTOCOL.read_text()
-        self.assertIn("Общий запрет создавать subagents исключает\nordinary", text)
-        self.assertIn("выбери Fast, если он разрешён и доступен, иначе native", text)
-        self.assertIn("Explicit full\nopt-out выбирает native", text)
+        self.assertIn("Общий запрет создавать subagents также исключает ordinary", text)
+        self.assertIn("выбирает native", text)
 
     def test_ordinary_invocation_contains_terminal_role_lock(self) -> None:
         text = PROTOCOL.read_text()
-        ordinary = text[text.index("## Ordinary path") : text.index("## Fast path")]
+        ordinary = text[text.index("## Ordinary path") : text.index("## Native path")]
         self.assertIn("STRATEGIC_EXPLAINER_PROVIDER_V1", ordinary)
         self.assertIn("fork_turns=\"none\"", ordinary)
         self.assertIn("одну короткую user-facing formulation task", ordinary)

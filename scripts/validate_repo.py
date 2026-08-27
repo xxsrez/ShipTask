@@ -21,11 +21,6 @@ STRATEGIC_PROVIDER = (
 STRATEGIC_ENTRYPOINT = (
     ROOT / "strategic-explainer" / "references" / "provider-entrypoint.md"
 )
-FAST_SKILL = ROOT / "strategic-explainer-fast" / "SKILL.md"
-FAST_METADATA = ROOT / "strategic-explainer-fast" / "agents" / "openai.yaml"
-FAST_PROVIDER = (
-    ROOT / "strategic-explainer-fast" / "references" / "in-context-contract.md"
-)
 SKILL_SOURCES = ROOT / "docs" / "skills"
 SOURCE_INDEX = SKILL_SOURCES / "README.md"
 SHIP_REQUIREMENTS = SKILL_SOURCES / "ship-tasks" / "requirements.md"
@@ -36,8 +31,6 @@ STRATEGIC_REQUIREMENTS = (
     SKILL_SOURCES / "strategic-explainer" / "requirements.md"
 )
 STRATEGIC_SPEC = SKILL_SOURCES / "strategic-explainer" / "architecture.md"
-FAST_REQUIREMENTS = SKILL_SOURCES / "strategic-explainer-fast" / "requirements.md"
-FAST_SPEC = SKILL_SOURCES / "strategic-explainer-fast" / "architecture.md"
 OVERVIEW = ROOT / "docs" / "overview.md"
 DOCS_INDEX = ROOT / "docs" / "README.md"
 DEVELOPMENT = ROOT / "docs" / "guides" / "development.md"
@@ -47,16 +40,12 @@ REVIEW_MATRIX = (
 STRATEGIC_EVALUATION = (
     ROOT / "docs" / "reference" / "strategic-explainer-evaluation.md"
 )
-FAST_EVALUATION = (
-    ROOT / "docs" / "reference" / "strategic-explainer-fast-evaluation.md"
-)
 COMPOSER_EVALUATION = ROOT / "docs" / "reference" / "task-composer-evaluation.md"
 TERMINAL_ROUTING_REPORT = (
     ROOT / "docs" / "reports" / "2026-08-27-terminal-provider-routing-evaluation.md"
 )
 ADAPTER = ROOT / "docs" / "reference" / "task-manager-adapter.md"
 VISION = SKILL_SOURCES / "strategic-explainer" / "product-vision.md"
-FAST_VISION = SKILL_SOURCES / "strategic-explainer-fast" / "product-vision.md"
 REPORT = ROOT / "ship-tasks" / "references" / "delivery-report.md"
 RUN_REPORT = ROOT / "ship-tasks" / "references" / "run-report.md"
 AUTONOMY = ROOT / "ship-tasks" / "references" / "autonomy-and-release.md"
@@ -136,10 +125,6 @@ ADR = {
             "0031-standalone-strategic-explainer-plugin.md",
         ),
         (
-            "0032",
-            "0032-strategic-explainer-fast-plugin.md",
-        ),
-        (
             "0033",
             "0033-terminal-provider-and-optional-shiptask-routing.md",
         ),
@@ -158,34 +143,23 @@ CORE_FILES = (
     STRATEGIC_SKILL,
     STRATEGIC_METADATA,
     STRATEGIC_ENTRYPOINT,
-    FAST_SKILL,
-    FAST_METADATA,
     STRATEGIC_PROVIDER,
-    FAST_SKILL,
-    FAST_METADATA,
-    FAST_PROVIDER,
     TERMINAL_ROUTING_REPORT,
     SPEC,
     COMPOSER_SPEC,
     STRATEGIC_SPEC,
-    FAST_SPEC,
-    FAST_SPEC,
     SOURCE_INDEX,
     SHIP_REQUIREMENTS,
     COMPOSER_REQUIREMENTS,
     STRATEGIC_REQUIREMENTS,
-    FAST_REQUIREMENTS,
-    FAST_REQUIREMENTS,
     OVERVIEW,
     DOCS_INDEX,
     DEVELOPMENT,
     REVIEW_MATRIX,
     COMPOSER_EVALUATION,
     STRATEGIC_EVALUATION,
-    FAST_EVALUATION,
     ADAPTER,
     VISION,
-    FAST_VISION,
     REPORT,
     RUN_REPORT,
     AUTONOMY,
@@ -220,9 +194,7 @@ CURRENT_CONTRACT_FILES = (
     REVIEW_MATRIX,
     COMPOSER_EVALUATION,
     STRATEGIC_EVALUATION,
-    FAST_EVALUATION,
     VISION,
-    FAST_VISION,
     REPORT,
     RUN_REPORT,
     AUTONOMY,
@@ -242,7 +214,6 @@ CURRENT_CONTRACT_FILES = (
     ADR["0028"],
     ADR["0029"],
     ADR["0031"],
-    ADR["0032"],
     ADAPTER,
     CRITICAL_REVIEW,
 )
@@ -450,19 +421,17 @@ def validate_ship_skill(errors: list[str]) -> None:
         "сохраняй unrelated пользовательские изменения",
         "не используй blind rollback или destructive cleanup",
         "В начале run выбери communication mode",
-        "ordinary `$strategic-explainer:strategic-explainer`, иначе Fast",
+        "ordinary `$strategic-explainer:strategic-explainer`",
         "иначе native",
-        "$strategic-explainer-fast:strategic-explainer-fast",
         "не делай второй editorial\nrewrite",
         "не имитируй внутренний\nметод provider",
         "Обычный `To Do → In Progress` не запускает publication unit",
         "Финальный ответ — новая scope-level unit",
         "Каждый Task Manager comment, отдельный\nTask/scope report, blocker explanation и final",
-        "одну compact user-facing task,\nexact scope и resolvable read-only anchors",
+        "одной compact user-facing task, exact scope, resolvable read-only\nanchors",
         "Invalid ordinary invocation исправь одним новым clean subagent",
         "provider explanation/source basis как\nreflection input",
         "Достаточный путь отменяет\nstale blocker",
-        "без вызова второго provider",
         "Периодический UAT batch release",
         "лёгкий targeted gate",
         "разумный exact integrated batch",
@@ -788,87 +757,6 @@ def validate_strategic_skill(errors: list[str]) -> None:
     )
 
 
-def validate_fast_skill(errors: list[str]) -> None:
-    validate_frontmatter(errors, FAST_SKILL, "strategic-explainer-fast", 240)
-    require(
-        errors,
-        FAST_SKILL,
-        "in-context communication skill",
-        "одной реальной publication unit",
-        "не создаёт subagent",
-        "exact scope",
-        "resolvable read-only anchors",
-        "references/in-context-contract.md",
-        "publication-ready текст",
-        "короткий source\n   basis",
-        "ничего не публикует",
-        "не заявляет\nнезависимость или stateless-гарантии",
-    )
-    require(
-        errors,
-        FAST_PROVIDER,
-        "In-context контракт Strategic Explainer Fast",
-        "текущий агент",
-        "не создаёт\nsubagent",
-        "Глубоко разберись, но объясни только главное",
-        "Твой продукт — понимание читателя",
-        "Установи исходный вопрос и факты",
-        "Собери strategic context снизу вверх",
-        "Строй публикацию из reader model",
-        "Английские слова не должны нести основную мысль",
-        "in-context comprehension pass",
-        "не выдавай self-review за независимую оценку",
-        "Completion gate",
-        "Не смешивай source basis с publication text",
-    )
-    forbid(errors, FAST_SKILL, "fork_turns", "spawn_agent")
-    forbid(errors, FAST_PROVIDER, "fork_turns", "spawn_agent")
-    text = read(FAST_SKILL)
-    for coupling in ("Task Manager", "TM-123", "ShipTask"):
-        if coupling in text:
-            fail(errors, f"Strategic Explainer Fast runtime is coupled to {coupling!r}")
-    require(
-        errors,
-        FAST_METADATA,
-        'display_name: "Strategic Explainer Fast"',
-        'short_description: "Понятное объяснение без отдельного субагента"',
-        "$strategic-explainer-fast:strategic-explainer-fast",
-        "in-context discovery без subagent",
-        "allow_implicit_invocation: true",
-    )
-    require(
-        errors,
-        FAST_REQUIREMENTS,
-        "## Конституционное ядро",
-        "`SEF-01`",
-        "`SEF-16`",
-        "Единый in-context API и сфокусированный проход",
-        "не создаёт subagent",
-        "Явный in-context provider boundary",
-        "не заявляет\nизоляцию, независимость или stateless-гарантии",
-        "strategic-explainer-fast@srez-marketplace",
-        "$strategic-explainer-fast:strategic-explainer-fast",
-    )
-    require(
-        errors,
-        FAST_SPEC,
-        "Статус: current Level 2, 2026-08-27",
-        "[требования `SEF-*`](requirements.md)",
-        "смысловая изоляция",
-        "Context firewall без очистки context",
-        "In-context comprehension gate",
-        "Трассировка требований",
-    )
-    require(
-        errors,
-        FAST_EVALUATION,
-        "тот же сложный 20-case portfolio",
-        "не создаёт subagent",
-        "Независимый evaluator относится к test harness",
-        "Self-review и batched run являются\nfeasibility evidence",
-    )
-
-
 def validate_strategic_provider_encapsulation(errors: list[str]) -> None:
     caller_files = (
         SHIP_SKILL,
@@ -914,7 +802,7 @@ def validate_strategic_provider_encapsulation(errors: list[str]) -> None:
     require(
         errors,
         SHIP_SKILL,
-        "ordinary `$strategic-explainer:strategic-explainer`, иначе Fast",
+        "ordinary `$strategic-explainer:strategic-explainer`",
         "иначе native",
         "ошибка выбранного provider-а\nпереводит mode в native",
         "не имитируй внутренний\nметод provider",
@@ -1278,9 +1166,8 @@ REVIEW_CASES = {
         "fallback в description",
         "skip обязательного comment",
     ),
-    "Выбранный Strategic Explainer отсутствует или завершился failure": (
+    "Strategic Explainer отсутствует или завершился failure": (
         "переключён в native",
-        "второй provider не вызывается",
         "разрешённый transition выполняется",
         "блокировать comment/status",
     ),
@@ -1294,9 +1181,9 @@ REVIEW_CASES = {
         "новая scope-level unit",
         "provider mode использует выбранный provider",
         "native mode пишет по ShipTask report contract",
-        "смешать providers",
+        "продолжить прежний subagent",
     ),
-    "Оба Explainer недоступны, но ответ пользователю уже должен быть дан": (
+    "Ordinary Explainer недоступен, но ответ пользователю уже должен быть дан": (
         "native mode сообщает установленные facts",
         "без служебного capability warning",
         "разрешённые transitions выполняются",
@@ -1360,7 +1247,7 @@ REVIEW_CASES = {
     "Общий prompt `не используй субагентов`": (
         "ноль subagents",
         "ordinary исключён",
-        "Fast используется in-context при наличии, иначе native",
+        "используется native",
         "имитировать provider method",
     ),
     "Prompt `используй ровно три субагента`": (
@@ -1393,7 +1280,7 @@ REVIEW_CASES = {
         "coordinator-only",
         "communication mode выбирается независимо",
     ),
-    "Оба comment Explainer недоступны": (
+    "Comment Explainer недоступен": (
         "mode native",
         "grounded comment публикуется",
         "comment-dependent transition выполняется",
@@ -1415,12 +1302,9 @@ def validate_review_matrix(errors: list[str]) -> None:
         errors,
         REVIEW_MATRIX,
         "## Матрица communication mode",
-        "| установлен | установлен | ordinary |",
-        "| установлен | отсутствует | ordinary |",
-        "| отсутствует | установлен | Fast |",
-        "| отсутствует | отсутствует | native |",
+        "| установлен и разрешён | ordinary |",
+        "| отсутствует или отключён | native |",
         "Failure выбранного provider-а переводит mode в native",
-        "без вызова второго\nprovider",
         "один corrected fresh retry",
     )
     rows = table_rows(read(REVIEW_MATRIX), "## Обязательная матрица")
@@ -1493,10 +1377,9 @@ def validate_source_layers(errors: list[str]) -> None:
         "только\nпосле свежей проверки `selector`",
         "Goal хранит его идентичность и правило отбора",
         "Доказанный сбой продукта описывается раньше проблем с браузером",
-        "Пользователь может обычным языком отключить оба Explainer",
-        "Общий запрет\nсоздавать subagents исключает ordinary",
-        "$strategic-explainer-fast:strategic-explainer-fast",
-        "Ошибка выбранного Fast\nпереводит communication mode в native без вызова ordinary",
+        "Пользователь может обычным языком отключить ordinary Explainer полностью",
+        "Общий запрет создавать subagents также\nисключает ordinary",
+        "другой provider failure переводит communication mode в native",
         "Пользователь может обычным языком задать обязательное правило "
         "делегации",
         "точное или относительное число субагентов",
@@ -1678,7 +1561,7 @@ def validate_source_layers(errors: list[str]) -> None:
         errors,
         ROOT / "README.md",
         "[`docs/skills/<skill>/`](docs/skills/README.md)",
-        "требования\nчетырёх skills не объединяются",
+        "требования\nтрёх skills не объединяются",
         "Project, Release и\ncurrent scope остаются live selectors",
         "без повторного approval",
         "Browser switch допустим как диагностика",
@@ -1688,7 +1571,6 @@ def validate_source_layers(errors: list[str]) -> None:
         "сохраняя применимый strategic\ncontext в каждой child Task",
         "ShipTask перечитывает current Epic",
         "не расширяет exact child scope",
-        "Fast является отдельным explicit in-context/no-subagent\nконтрактом",
         "новый Explainer result как\nreflection input",
     )
     require(
@@ -1700,7 +1582,6 @@ def validate_source_layers(errors: list[str]) -> None:
         "[0028: Интегрированная реализация удовлетворяет `blocked by`]",
         "[0029: Fresh Strategic Explainer и reflection до blocker]",
         "[0031: Strategic Explainer как самостоятельный plugin]",
-        "[0032: Strategic Explainer Fast как отдельный in-context plugin]",
         "[0033: Terminal ordinary provider и optional routing ShipTask]",
         "[Terminal Strategic Explainer и ShipTask routing: evaluation]",
     )
@@ -1766,9 +1647,9 @@ def validate_current_contract(errors: list[str]) -> None:
         "comment",
         "до записи статуса",
         "всегда создаёт и перечитывает обязательный comment",
-        "ordinary `$strategic-explainer:strategic-explainer`, иначе Fast",
-        "При\nустановленных обоих приоритет у ordinary",
-        "переводит mode в native без вызова второго provider",
+        "ordinary `$strategic-explainer:strategic-explainer`, если он доступен и",
+        "иначе native",
+        "переводит mode в native",
         "`To Do → In Progress` комментария не создаёт",
         "Приёмочный инцидент виден сразу",
         "примерно каждые 10 минут",
@@ -1876,7 +1757,7 @@ def validate_current_contract(errors: list[str]) -> None:
         "До связанного существенного status transition",
         "transition не завершён",
         "всегда создаёт и перечитывает обязательный comment",
-        "ordinary, иначе Fast, иначе\nnative",
+        "ordinary, если он доступен и\nразрешён, иначе native",
         "availability protocol",
         "native mode основной\nагент сообщает обязательные lifecycle facts",
         "Если provider отсутствует, отключён или завершился failure",
@@ -1894,8 +1775,7 @@ def validate_current_contract(errors: list[str]) -> None:
         errors,
         RUN_REPORT,
         "authoritative source anchors и factual inventory",
-        "ordinary или\nFast mode выбранный provider получает",
-        "Fast выполняется текущим agent без subagent",
+        "В ordinary mode\nprovider получает одну короткую задачу",
         "проверяется только на material factual conflict",
         "не делает второй editorial rewrite",
         "без имитации provider",
@@ -1965,21 +1845,19 @@ def validate_current_contract(errors: list[str]) -> None:
         errors,
         HANDOFF,
         "Client protocol выбора Strategic Explainer",
-        "$strategic-explainer-fast:strategic-explainer-fast",
         "$strategic-explainer:strategic-explainer",
         "Availability fallback",
         "Матрица выбора",
         "ordinary",
         "native",
-        "Fast path",
         "Ordinary path",
         "нового built-in `default` read-only subagent",
         "STRATEGIC_EXPLAINER_PROVIDER_V1",
         "одну короткую user-facing formulation task",
         "Не\nчитай ordinary provider-only entrypoint",
         "готовый text и отдельно обозначенный source basis",
-        "перейди в native mode",
-        "Explicit full\nopt-out выбирает native",
+        "переводит\nrun в native mode",
+        "Общий запрет создавать subagents также исключает ordinary",
         "Native path",
         "Обязательный comment всё равно публикуется и перечитывается",
         "Reflection до blocker",
@@ -2368,8 +2246,8 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "все 20 model-forward cases получили финальный `PASS`",
         "Всего выполнено 22\ngeneration trials",
         "PASS after fresh retry",
-        "ordinary → Fast → native",
-        "provider failure в native без secondary\nprovider",
+        "ordinary → native",
+        "переход provider failure в native",
     )
 
     numbered = []
@@ -2428,7 +2306,6 @@ def validate_supersession(errors: list[str]) -> None:
         "0022": ("partially superseded", "ADR-0024", "ADR-0029", "ADR-0033"),
         "0030": ("частично заменено ADR-0033",),
         "0031": ("частично заменено ADR-0033",),
-        "0032": ("частично заменено ADR-0033",),
     }
     for number, terms in required_markers.items():
         header = "\n".join(read(ADR[number]).splitlines()[:18])
@@ -2443,7 +2320,7 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         ADAPTER,
         "current compatibility contract",
         "adapter skill `task-manager`",
-        "не содержит\n`ship-tasks`/`task-composer`/`strategic-explainer`/`strategic-explainer-fast`",
+        "не содержит\n`ship-tasks`/`task-composer`/`strategic-explainer`",
         "Adapter не выбирает business scope",
         "current Task `version`",
         "native Label catalogs/assignment",
@@ -2479,17 +2356,6 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
     )
     require(
         errors,
-        ADR["0032"],
-        "Strategic Explainer Fast как отдельный in-context plugin",
-        "$strategic-explainer-fast:strategic-explainer-fast",
-        "не создаёт subagent",
-        "strategic-explainer-fast@srez-marketplace",
-        "использовать ordinary как quality retry Fast",
-        "Task Composer продолжает использовать ordinary Strategic Explainer",
-        "одной publication unit нельзя\n  вызывать оба",
-    )
-    require(
-        errors,
         ADR["0033"],
         "Terminal ordinary provider и optional routing ShipTask",
         "STRATEGIC_EXPLAINER_PROVIDER_V1",
@@ -2497,10 +2363,8 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "не создаёт и не продолжает agents",
         "STRATEGIC_EXPLAINER_INVOCATION_ERROR",
         "ordinary Strategic Explainer",
-        "Fast",
         "native ShipTask writing",
         "не более одного provider",
-        "не вызывает второй provider",
         "не создают capability warning",
         "не блокируют разрешённый status\ntransition",
         "Task Composer не наследует новый routing автоматически",
@@ -2515,17 +2379,15 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "installed/enabled",
         "Standalone user-level каталоги",
         "~/.codex/skills/task-composer",
-        "Три Marketplace package",
+        "Два Marketplace package",
         "Srez Marketplace/plugins/strategic-explainer/skills/strategic-explainer",
-        "Srez Marketplace/plugins/strategic-explainer-fast/skills/strategic-explainer-fast",
         "Srez Marketplace/plugins/ship-tasks/skills/strategic-explainer` отсутствует",
         "strategic-explainer@srez-marketplace",
-        "$strategic-explainer-fast:strategic-explainer-fast",
-        "ShipTask предпочитает\n  `$strategic-explainer:strategic-explainer`",
+        "ShipTask использует\n  `$strategic-explainer:strategic-explainer`",
         "task-manager@srez-marketplace` остаётся adapter-only",
-        "в начале run ShipTask выбирает communication mode",
-        "ordinary имеет\n  приоритет, затем Fast, затем native",
-        "failure выбранного provider переводит run в native",
+        "в начале run ShipTask\n  выбирает ordinary",
+        "выбирает ordinary при его наличии и разрешении, иначе native",
+        "failure provider-а переводит run прямо в native",
         "exact terminal provider role lock",
         "не блокирует comment/status",
         "`To Do → In Progress` комментария не создаёт",
@@ -2545,10 +2407,9 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
     require(
         errors,
         ROOT / "README.md",
-        "Runtime публикуется тремя независимыми plugin",
+        "Runtime публикуется двумя независимыми plugin",
         "ship-tasks@srez-marketplace`\nсодержит ShipTask и Task Composer",
         "strategic-explainer@srez-marketplace` — только ordinary Strategic Explainer",
-        "strategic-explainer-fast@srez-marketplace` — только Fast",
         "Codex manifest не умеет автоматически\nустанавливать plugin dependency",
         "$strategic-explainer:strategic-explainer",
         "Каждый repository source\nсверяется со своим Marketplace package и installed plugin cache",
@@ -2556,11 +2417,9 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
     require(
         errors,
         DEVELOPMENT,
-        "три независимых plugin",
+        "два независимых plugin",
         "ship-tasks@srez-marketplace",
         "strategic-explainer@srez-marketplace",
-        "strategic-explainer-fast@srez-marketplace",
-        "$strategic-explainer-fast:strategic-explainer-fast",
         "$strategic-explainer:strategic-explainer",
         "plugin-to-plugin dependency",
         "availability-based optional routing",
@@ -2571,19 +2430,16 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         errors,
         SHIP_REQUIREMENTS,
         "strategic-explainer@srez-marketplace",
-        "strategic-explainer-fast@srez-marketplace",
-        "$strategic-explainer-fast:strategic-explainer-fast",
         "$strategic-explainer:strategic-explainer",
-        "ShipTask не содержит их копий",
+        "ShipTask не содержит его копии",
         "не поддерживает нативную plugin-to-plugin dependency",
-        "optional communication enhancements",
-        "отсутствие обоих выбирает native mode",
+        "optional communication enhancement",
+        "его отсутствие выбирает native mode",
     )
     require(
         errors,
         SPEC,
         "ShipTask package не содержит runtime Explainer",
-        "$strategic-explainer-fast:strategic-explainer-fast",
         "$strategic-explainer:strategic-explainer",
         "нормальным native mode",
         "встроенной копией",
@@ -2628,19 +2484,14 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         COMPOSER_METADATA,
         STRATEGIC_SKILL,
         STRATEGIC_METADATA,
-        FAST_SKILL,
-        FAST_METADATA,
         SHIP_REQUIREMENTS,
         SPEC,
         COMPOSER_REQUIREMENTS,
         COMPOSER_SPEC,
         STRATEGIC_REQUIREMENTS,
         STRATEGIC_SPEC,
-        FAST_REQUIREMENTS,
-        FAST_SPEC,
         OVERVIEW,
         STRATEGIC_EVALUATION,
-        FAST_EVALUATION,
         COMPOSER_EVALUATION,
         REVIEW_MATRIX,
         REPORT,
@@ -2740,7 +2591,6 @@ def markdown_files() -> list[Path]:
     files.extend(sorted((ROOT / "ship-tasks").rglob("*.md")))
     files.extend(sorted((ROOT / "task-composer").rglob("*.md")))
     files.extend(sorted((ROOT / "strategic-explainer").rglob("*.md")))
-    files.extend(sorted((ROOT / "strategic-explainer-fast").rglob("*.md")))
     files.extend(sorted((ROOT / "docs").rglob("*.md")))
     return files
 
@@ -2790,7 +2640,6 @@ def main() -> int:
         validate_ship_skill(errors)
         validate_composer_skill(errors)
         validate_strategic_skill(errors)
-        validate_fast_skill(errors)
         validate_strategic_provider_encapsulation(errors)
         validate_trigger_matrix(errors)
         validate_composer_trigger_matrix(errors)

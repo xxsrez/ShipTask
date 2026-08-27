@@ -5,9 +5,8 @@
 Частично заменяет ShipTask routing/failure clauses в
 [ADR-0022](0022-mandatory-independent-strategic-explainer-for-comments.md),
 [ADR-0030](0030-opaque-strategic-explainer-provider-boundary.md),
-[ADR-0031](0031-standalone-strategic-explainer-plugin.md) и
-[ADR-0032](0032-strategic-explainer-fast-plugin.md). Самостоятельная distribution
-обоих providers, opaque ordinary expertise, Task Composer ordinary dependency и
+[ADR-0031](0031-standalone-strategic-explainer-plugin.md). Самостоятельная
+distribution ordinary provider, его opaque expertise, Task Composer ordinary dependency и
 отсутствие комментария для обычного `To Do → In Progress` сохраняются.
 
 ## Контекст
@@ -19,10 +18,9 @@ provider. Роль определялась по эвристике о теку�
 self-call не улучшает объяснение, нарушает isolation contract и может создать
 рекурсивное дерево agents.
 
-Одновременно ShipTask предпочитал Fast и считал отсутствие или failure обоих
-providers capability blocker-ом для comments/status. Это не соответствовало
-желаемому A/B: при установленных обоих должен работать проверенный ordinary, а
-без plugins ShipTask должен просто писать по собственному contract.
+Одновременно ShipTask должен сохранять полноценный native path: при отсутствии,
+opt-out или failure ordinary plugin-а он просто пишет по собственному contract,
+не блокируя comments/status и не имитируя provider method.
 
 ## Решение
 
@@ -52,29 +50,27 @@ providers capability blocker-ом для comments/status. Это не соотв
 В начале run ShipTask выбирает первый разрешённый и доступный mode:
 
 1. ordinary Strategic Explainer;
-2. Fast;
-3. native ShipTask writing.
+2. native ShipTask writing.
 
-Четыре install combinations дают соответственно ordinary, ordinary, Fast и
-native. Общий no-subagent rule исключает ordinary и выбирает Fast либо native;
-полный Explainer opt-out выбирает native.
+Установленный и разрешённый ordinary выбирает provider mode; его отсутствие,
+opt-out или общий no-subagent rule выбирают native.
 
 Для одной publication unit используется не более одного provider. Failure уже
-выбранного provider переводит run в native, не вызывает второй provider и не
-создаёт quality retry. Единственное исключение — один corrected fresh retry,
+выбранного provider переводит run в native и не создаёт quality retry.
+Единственное исключение — один corrected fresh retry,
 который ordinary client protocol делает для structural invalid invocation.
 
 Native mode следует собственным truth/lifecycle/reporting requirements ShipTask,
 не читает и не имитирует provider method и не заявляет эквивалентное качество.
-Отсутствие, opt-out или failure providers не создают capability warning, не
+Отсутствие, opt-out или failure provider-а не создают capability warning, не
 мешают обязательному comment/read-back и не блокируют разрешённый status
 transition.
 
 ## Последствия
 
-Ordinary остаётся более дорогим, но при установке имеет приоритет как основной
-проверенный вариант. Fast можно испытать отдельно, отключив ordinary. Полное
-отсутствие Explainer plugins сохраняет функциональность ShipTask с более слабой,
+Ordinary остаётся более дорогим, но при установке является единственным внешним
+проверенным вариантом. Отсутствие Explainer plugin сохраняет функциональность
+ShipTask с более слабой,
 честно неэквивалентной communication path, но без служебного шума для человека.
 
 Task Composer не наследует новый routing автоматически: его локальный source
@@ -88,7 +84,7 @@ package продолжает определять ordinary dependency и соб�
   подтверждает отсутствие child agents;
 - off-role behavioral cases возвращают exact invocation error до source/domain
   calls;
-- ShipTask evaluation покрывает ordinary+Fast, ordinary-only, Fast-only и
-  neither, а также no-subagent, opt-out и provider failure;
+- ShipTask evaluation покрывает ordinary и native, а также no-subagent, opt-out
+  и provider failure;
 - current 20-case blind model-forward suite сохраняет независимый evaluator как
   test harness, не runtime dependency.

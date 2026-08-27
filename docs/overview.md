@@ -10,7 +10,6 @@ ShipTask skill      = требования к delivery result
 Task Composer       = постановка и planning graph в Backlog
 Project memory      = selector и project-specific context
 Strategic Explainer = stateless API независимого объяснения
-Explainer Fast      = in-context объяснение без subagent
 ```
 
 ## Documentation as source
@@ -55,9 +54,7 @@ frontier до окончательного blocker claim закреплены
 Самостоятельная Marketplace-поставка Strategic Explainer и первоначальная
 logical dependency закреплены
 [ADR-0031](decisions/0031-standalone-strategic-explainer-plugin.md).
-Отдельный Fast plugin и первоначальный Fast-first routing закреплены
-[ADR-0032](decisions/0032-strategic-explainer-fast-plugin.md).
-Terminal ordinary provider и current ordinary-first → Fast → native routing
+Terminal ordinary provider и current ordinary-or-native routing
 ShipTask закреплены
 [ADR-0033](decisions/0033-terminal-provider-and-optional-shiptask-routing.md).
 Вместо большого универсального сценария runtime содержит несколько обязательных
@@ -194,9 +191,9 @@ comment может завершить Task как weaker `critical-codebase-acce
 Существенный status transition считается завершённым только при фактическом
 comment и read-back; технический путь к этому результату выбирает агент.
 До публикации ShipTask использует выбранный mode: ordinary clean terminal
-provider, иначе Fast in-context без subagent, иначе native writing. Основной
+provider, если он доступен и разрешён, иначе native writing. Основной
 агент проверяет material factual conflict и не делает второй rewrite. Opt-out,
-отсутствие providers или provider failure выбирают native: необходимые lifecycle
+отсутствие provider-а или provider failure выбирают native: необходимые lifecycle
 facts публикуются по собственному truth contract без provider method или claim
 эквивалентного качества и без блокировки transition.
 
@@ -271,7 +268,6 @@ smoke evidence. Отсутствующий UAT receipt — proof gap, а не ve
 - [Требования как конституция для агентов](decisions/0021-requirements-as-agent-constitution.md)
 - [Независимый Strategic Explainer для каждого комментария](decisions/0022-mandatory-independent-strategic-explainer-for-comments.md)
 - [Opaque provider boundary Strategic Explainer](decisions/0030-opaque-strategic-explainer-provider-boundary.md)
-- [Strategic Explainer Fast plugin](decisions/0032-strategic-explainer-fast-plugin.md)
 - [Automatic delegation, natural-language topology rules и writer isolation](decisions/0024-adaptive-multi-agent-execution-by-default.md)
 - [Cost-aware профили субагентов](decisions/0025-cost-aware-subagent-profiles.md)
 - [Периодические UAT batch releases](decisions/0026-periodic-uat-batch-releases.md)
@@ -280,14 +276,11 @@ smoke evidence. Отсутствующий UAT receipt — proof gap, а не ve
 - [Lifecycle evaluation](reference/shiptask-review-disposition-evaluation.md)
 - [Strategic Explainer Requirements](skills/strategic-explainer/requirements.md)
 - [Strategic Explainer Architecture](skills/strategic-explainer/architecture.md)
-- [Strategic Explainer Fast Requirements](skills/strategic-explainer-fast/requirements.md)
-- [Strategic Explainer Fast Architecture](skills/strategic-explainer-fast/architecture.md)
 - [Task Composer Requirements](skills/task-composer/requirements.md)
 - [Task Composer Architecture](skills/task-composer/architecture.md)
 - [Task Composer как planning sibling-skill](decisions/0023-task-composer-as-planning-sibling.md)
 
-Runtime sources — `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и packages
-`strategic-explainer/`, `strategic-explainer-fast/`. Ordinary caller-visible
-`SKILL.md` является router/admission layer к fresh provider; Fast загружает
-свой in-context reference текущему agent. Plugin distribution и installed cache должны быть
+Runtime sources — `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и package
+`strategic-explainer/`. Ordinary caller-visible `SKILL.md` является
+router/admission layer к fresh provider. Plugin distribution и installed cache должны быть
 byte-identical repository source; standalone user-level copies не используются.

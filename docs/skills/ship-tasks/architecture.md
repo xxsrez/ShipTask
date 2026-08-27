@@ -14,12 +14,10 @@ reporting contract уточнён
 [ADR-0022](../../decisions/0022-mandatory-independent-strategic-explainer-for-comments.md),
 а clean stateless API и blocker reflection —
 [ADR-0029](../../decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md),
-а отдельная distribution обычного Strategic Explainer —
+a отдельная distribution обычного Strategic Explainer —
 [ADR-0031](../../decisions/0031-standalone-strategic-explainer-plugin.md), а
-	первоначальный Fast plugin —
-	[ADR-0032](../../decisions/0032-strategic-explainer-fast-plugin.md), а current
-	ordinary-first → Fast → native routing и terminal ordinary provider —
-	[ADR-0033](../../decisions/0033-terminal-provider-and-optional-shiptask-routing.md),
+current ordinary-or-native routing и terminal ordinary provider —
+[ADR-0033](../../decisions/0033-terminal-provider-and-optional-shiptask-routing.md),
 а automatic default, natural-language topology rules и writer/worktree isolation —
 [ADR-0024](../../decisions/0024-adaptive-multi-agent-execution-by-default.md), а
 cost-aware выбор профиля субагента и обязательная эскалация Luna —
@@ -67,9 +65,8 @@ candidate с обязательным честным comment. Marketplace source
 
 ShipTask package не содержит runtime Explainer. В начале run live catalog
 выбирает отдельно установленный `$strategic-explainer:strategic-explainer`,
-иначе `$strategic-explainer-fast:strategic-explainer-fast`, иначе native
-ShipTask writing. Manifest не умеет автоматически устанавливать plugin
-dependency, но отсутствие обоих providers является нормальным native mode по
+иначе native ShipTask writing. Manifest не умеет автоматически устанавливать
+plugin dependency, но отсутствие provider-а является нормальным native mode по
 `ST-07`, а не fail-closed ветвью или встроенной копией.
 
 `blocked by` в этой компиляции открывает downstream implementation после
@@ -313,7 +310,7 @@ ShipTask всегда создаёт и перечитывает обязате�
 существенный transition не завершён.
 
 Каждый комментарий проходит выбранный communication mode: ordinary independent
-provider, иначе Fast in-context, иначе native ShipTask writing. Opt-out и
+provider, иначе native ShipTask writing. Opt-out и
 provider failure также переводят mode в native. Во всех случаях основной агент
 публикует и перечитывает обязательный grounded comment; отсутствие Explainer не
 останавливает зависящий transition. Native mode следует собственному truth
@@ -462,7 +459,7 @@ compact task и resolvable anchors и возвращает готовый text �
 обозначенным source basis. Основной агент публикует только text, проверяет
 material factual conflict и при необходимости исправляет source/anchor для
 нового pass того же provider; второй editorial rewrite не выполняется. Ordinary
-method остаётся opaque, Fast method загружает текущий агент. В native mode
+method остаётся opaque. В native mode
 основной агент сам публикует необходимые lifecycle facts по собственному
 contract без имитации provider. Статус меняется только после публикации и
 повторного чтения комментария; затем Task также перечитывается.
@@ -634,10 +631,9 @@ comment предшествует reopen, после чего обычный rewo
 Каждый comment, отдельный Task/scope report, blocker report и final является
 самостоятельной publication unit. Routine chat и progress updates unit не
 создают. В начале run ShipTask читает live skill catalog и выбирает mode:
-ordinary `$strategic-explainer:strategic-explainer`, иначе Fast
-`$strategic-explainer-fast:strategic-explainer-fast`, иначе native. При
-установленных обоих приоритет у ordinary. Выбор сохраняется до explicit rule
-change или failure выбранного provider-а.
+ordinary `$strategic-explainer:strategic-explainer`, если он доступен и разрешён,
+иначе native. Выбор сохраняется до explicit rule change или failure выбранного
+provider-а.
 
 Ordinary path сохраняет opaque protocol: новый built-in `default` read-only
 subagent с `fork_turns="none"` получает exact terminal role lock, одну compact
@@ -646,26 +642,18 @@ process diary, ShipTask analysis/strategic summary, format rules или candidat
 Caller не читает ordinary provider-only/internal references. Invalid invocation
 автоматически исправляется одним новым clean subagent; follow-up запрещён.
 
-Fast выполняется текущим agent без subagent. ShipTask устанавливает одну compact
-task, exact scope и resolvable read-only anchors, затем загружает Fast runtime.
-Provider сам отделяет authoritative sources от inherited conversation, tool
-transcript, process diary, прежнего candidate и caller framing. Он возвращает
-готовый text и отдельно обозначенный source basis. ShipTask проверяет material
-facts, публикует только text и не делает второй editorial rewrite. Для Fast не
-заявляются independent/stateless/clean-context guarantees.
-
 Material factual conflict исправляется current sources/anchors и новым pass того
 же provider. Повторный ordinary refusal или другая ошибка выбранного provider-а
-переводит mode в native без вызова второго provider. Availability fallback
+переводит mode в native. Availability fallback
 работает только при начальном выборе, поэтому одна unit получает не более одного
 provider.
 
 В native mode ShipTask формулирует unit по собственному truth/lifecycle/reporting
 contract. Он не загружает и не имитирует provider method и не заявляет
-эквивалентное quality. Отсутствие обоих plugins, full opt-out, no-subagent rule
-без Fast или provider failure не создают capability warning и не блокируют
-comment, read-back или разрешённый transition. Узкие rules могут отдельно
-отключить ordinary, Fast или Explainer для выбранных publication units.
+эквивалентное quality. Отсутствие plugin-а, full opt-out, no-subagent rule или
+provider failure не создают capability warning и не блокируют comment, read-back
+или разрешённый transition. Узкие rules могут отдельно отключить ordinary
+Explainer для выбранных publication units.
 
 Финальный ответ готовится отдельной scope-level unit после current read-back, а
 не склейкой Task comments или переносом прежнего draft. В native mode он сразу

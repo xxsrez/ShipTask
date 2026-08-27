@@ -38,11 +38,8 @@
   инвалидирует только attributed downstream results.
 - Ни один Strategic Explainer не получает право решать факты, статус, границы
   работы, полномочия или действие. ShipTask выбирает один provider по live
-  catalog: ordinary имеет приоритет, затем Fast; без provider используется
-  native writing. Для одной publication unit не запускайте оба.
-- Fast выполняйте current agent без subagent. Его in-context contract отделяет
-  authoritative anchors от inherited process history и не заявляет
-  clean/independent guarantee. Ordinary provider сохраняет opaque protocol:
+  catalog: ordinary при его наличии и разрешении; без provider используется
+  native writing. Ordinary provider сохраняет opaque protocol:
   новый `default` subagent с `fork_turns="none"`, compact task и resolvable
   anchors без inherited context/candidate и с exact terminal role lock. Invalid
   ordinary invocation исправляется новым clean call, а не follow-up старому;
@@ -67,7 +64,6 @@ python3 -B -m unittest discover -s tests -p 'test_*.py'
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
-python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer-fast
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```
@@ -75,8 +71,8 @@ git diff --check
 Repository validator проверяет current contract, trigger matrix, lifecycle
 evaluation, retired loopholes, documentation navigation и distribution
 boundaries. Unit suite проверяет изоляцию model-forward fixtures: ordinary
-generating subagent или Fast current agent получает только raw facts, а
-semantic rubric остаётся у evaluator-а.
+generating subagent получает только raw facts, а semantic rubric остаётся у
+evaluator-а.
 Current Strategic Explainer suite содержит 20 cases поровну из ExampleNotes и Task
 Manager; behavior change прогоняет всю матрицу, а не удобную выборку.
 Проверка не должна требовать конкретных необязательных слов или
@@ -84,8 +80,7 @@ Manager; behavior change прогоняет всю матрицу, а не уд�
 сохранение natural-language exact/relative/role/conditional rules,
 writer/worktree isolation и один Strategic Explainer при разрешённой роли, а
 для ordinary Explainer также exact clean `fork_turns="none"` admission,
-self-discovery и один publication unit на invocation; Fast отдельно проверяется
-на no-subagent runtime и shared corpus; вне этих invariants evals не
+self-discovery и один publication unit на invocation; вне этих invariants evals не
 навязывают topology formula, tool sequence или число alternatives. Auto-title является отдельным best-effort UI convenience:
 проверяются попытка только при доказанной first-turn eligibility, сохранение
 meaningful title, отсутствие fallback при недоступной capability и адресация
@@ -197,19 +192,17 @@ Epic до implementation и передать bounded context исполните�
 
 ## Runtime-дистрибуция
 
-Repository directories `ship-tasks/`, `task-composer/`,
-`strategic-explainer/` и `strategic-explainer-fast/` — source of truth.
-Runtime-distribution разделена на три независимых plugin:
+Repository directories `ship-tasks/`, `task-composer/` и
+`strategic-explainer/` — source of truth.
+Runtime-distribution разделена на два независимых plugin:
 `ship-tasks@srez-marketplace` содержит `ship-tasks` и `task-composer`, а
 `strategic-explainer@srez-marketplace` содержит только
-`$strategic-explainer:strategic-explainer`, а
-`strategic-explainer-fast@srez-marketplace` содержит только
-`$strategic-explainer-fast:strategic-explainer-fast`. Task Manager connector
+`$strategic-explainer:strategic-explainer`. Task Manager connector
 устанавливается отдельно как adapter-only `task-manager@srez-marketplace`.
 
 Manifest не поддерживает plugin-to-plugin dependency, поэтому ShipTask хранит
-availability-based optional routing: ordinary preferred, Fast fallback, затем
-native. Отсутствие обоих не мешает обязательному comment/status write. Старый путь
+availability-based optional routing: ordinary при наличии и разрешении, иначе
+native. Отсутствие provider-а не мешает обязательному comment/status write. Старый путь
 `plugins/ship-tasks/skills/strategic-explainer` отсутствует.
 
 При изменении runtime payload:
@@ -217,25 +210,22 @@ native. Отсутствие обоих не мешает обязательно
 1. Выполните validations, закоммитьте exact scope и отправьте в `origin/main`;
    проверьте `HEAD == origin/main`.
 2. Синхронизируйте `ship-tasks` и `task-composer` в ShipTask plugin, а
-   `strategic-explainer` и `strategic-explainer-fast` — в их отдельные plugins;
+   `strategic-explainer` — в его отдельный plugin;
    проверьте каждую пару через `diff -qr`.
 3. Получите marketplace name через `read_marketplace_name.py` и обновите только
    cachebuster через `update_plugin_cachebuster.py`; не меняйте
    numeric version ради reinstall.
 4. Выполните marketplace/plugin tests, commit/push marketplace и переустановите
-   `ship-tasks@srez-marketplace`, `strategic-explainer@srez-marketplace` и
-   `strategic-explainer-fast@srez-marketplace`
+   `ship-tasks@srez-marketplace` и `strategic-explainer@srez-marketplace`
    штатным plugin lifecycle.
 5. Проверьте quick validation marketplace copies, byte identity installed cache
    и состояние installed/enabled.
 6. В fresh App Server catalog подтвердите `ship-tasks:ship-tasks`,
-   `ship-tasks:task-composer`, `strategic-explainer:strategic-explainer` и
-   `strategic-explainer-fast:strategic-explainer-fast`, отсутствие
+   `ship-tasks:task-composer` и `strategic-explainer:strategic-explainer`, отсутствие
    standalone user copies и отсутствие этих skills в adapter-only Task Manager
    plugin.
 
 Не создавайте `~/.codex/skills/ship-tasks`,
 `~/.codex/skills/task-composer` или
-`~/.codex/skills/strategic-explainer` или
-`~/.codex/skills/strategic-explainer-fast`. Marketplace snapshot и
+`~/.codex/skills/strategic-explainer`. Marketplace snapshot и
 installed cache не удаляются вручную.
