@@ -538,6 +538,11 @@ def validate_composer_skill(errors: list[str]) -> None:
         "secret store",
         "live active catalog",
         "relation graph",
+        "attachment mapping",
+        "Скриншот с проявлением бага считай осмысленным по умолчанию",
+        "native attachment самой конкретной создаваемой Task",
+        "Не начинай create,\nесли native transport заведомо недоступен",
+        "attachment disposition",
         "искусственный umbrella Epic",
         "Не превращай шаги исходного плана в Tasks механически",
         "самодостаточную проекцию",
@@ -569,7 +574,7 @@ def validate_composer_skill(errors: list[str]) -> None:
     require(
         errors,
         COMPOSER_SPEC,
-        "Статус: current Level 2 contract, 2026-08-26",
+        "Статус: current Level 2 contract, 2026-08-27",
         "`TC-*` в локальных",
         "[требованиях пользователя](requirements.md)",
         "planning mutations",
@@ -590,6 +595,11 @@ def validate_composer_skill(errors: list[str]) -> None:
         "Стратегическая преемственность",
         "одной ссылки недостаточно",
         "не разрешает выполнять\nсоседние подзадачи",
+        "Attachments из bug report",
+        "Скриншот,\nна котором показано заявленное проявление",
+        "самой конкретной\nсоздаваемой Task",
+        "native Task attachment",
+        "attachment disposition",
         "$strategic-explainer:strategic-explainer",
         "создание Epic не начинается; single Task",
         "не secret value",
@@ -613,6 +623,11 @@ def validate_composer_skill(errors: list[str]) -> None:
         "не расширяет exact scope",
         "Strategic Explainer",
         "блокирует только Epic create",
+        "каждый осмысленный attachment из bug report",
+        "screenshot с проявлением бага считается осмысленным",
+        "attachment binding и metadata",
+        "Native transport обязательного attachment заведомо недоступен",
+        "Task создана, но attachment bind завершился с ошибкой",
         "Release назначен только при однозначном current",
         "отсутствующий подходящий Label",
         "classification хранится в Label/hierarchy",
@@ -1353,7 +1368,7 @@ def validate_review_matrix(errors: list[str]) -> None:
 def validate_source_layers(errors: list[str]) -> None:
     packages = (
         (SHIP_REQUIREMENTS, "ST", 28),
-        (COMPOSER_REQUIREMENTS, "TC", 11),
+        (COMPOSER_REQUIREMENTS, "TC", 12),
         (STRATEGIC_REQUIREMENTS, "SE", 16),
     )
     for requirements, prefix, count in packages:
@@ -1379,7 +1394,11 @@ def validate_source_layers(errors: list[str]) -> None:
                 "семантически эквивалентным всем требованиям `ST-*`",
             )
         else:
-            level_one_status = "Статус: current Level 1, 2026-08-26"
+            level_one_status = (
+                "Статус: current Level 1, 2026-08-27"
+                if requirements == COMPOSER_REQUIREMENTS
+                else "Статус: current Level 1, 2026-08-26"
+            )
             require(
                 errors,
                 requirements,
@@ -1478,6 +1497,10 @@ def validate_source_layers(errors: list[str]) -> None:
         "Strategic Explainer для каждого Epic",
         "Независимая planning distribution",
         "Стратегическая преемственность от Epic к Task",
+        "Осмысленные attachments из bug report",
+        "Скриншот с проявлением описанного бага\nсчитается осмысленным по умолчанию",
+        "native attachment той создаваемой\nTask",
+        "Создание считается полным только когда read-back подтверждает\nкаждый обязательный attachment",
         "компактную самодостаточную проекцию",
         "Шаги исходного плана не превращаются в Tasks механически",
         "не\nрасширяет exact scope",
@@ -1536,7 +1559,7 @@ def validate_source_layers(errors: list[str]) -> None:
     )
     for architecture, prefix, status_marker in (
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
-        (COMPOSER_SPEC, "TC-*", "Статус: current Level 2 contract, 2026-08-26"),
+        (COMPOSER_SPEC, "TC-*", "Статус: current Level 2 contract, 2026-08-27"),
         (STRATEGIC_SPEC, "SE-*", "Статус: current Level 2 contract, 2026-08-26"),
     ):
         require(

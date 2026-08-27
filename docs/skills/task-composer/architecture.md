@@ -1,6 +1,6 @@
 # Task Composer
 
-Статус: current Level 2 contract, 2026-08-26. Применимые Level 1 requirements —
+Статус: current Level 2 contract, 2026-08-27. Применимые Level 1 requirements —
 `TC-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Архитектурная роль
@@ -31,6 +31,8 @@ Task Composer превращает требования человека в св
 - Epic сохраняет problem, strategic intent, требования и границы человека;
 - подзадачи получают конкретный исполнимый scope, технические детали,
   acceptance criteria и ожидаемое evidence;
+- осмысленные пользовательские attachments из bug report сохраняются на той
+  Task, для которой они являются evidence;
 - labels, hierarchy и relations отражают фактический смысл, а не формальную
   полноту карточки.
 
@@ -80,8 +82,9 @@ Task Composer может подготовить Task Manager scope, но дал�
 
 Task Manager connector остаётся единственным task adapter. До write skill
 разрешает live workspace, exact Project, доступ на запись, workflow statuses,
-доступные Labels и candidate duplicates. Memory, repository name и предыдущий
-run могут подсказать selector, но не заменяют current read.
+доступные Labels, candidate duplicates и native transport для каждого
+обязательного attachment source. Memory, repository name и предыдущий run могут
+подсказать selector, но не заменяют current read.
 
 Каждая Task требует однозначного Project. Если Project нельзя безопасно
 определить, skill запрашивает его и не создаёт orphaned или guessed Task.
@@ -105,9 +108,9 @@ relevant title/problem terms. Exact duplicate не создаётся. Material 
 ## 4. Композиция задачи
 
 Сначала формируется целая candidate-модель без writes: Project/Release/status,
-parent, children, descriptions, labels и relation graph. Модель должна покрыть
-требования человека без придуманного scope и без технических пробелов между
-подзадачами.
+parent, children, descriptions, attachment mapping, labels и relation graph.
+Модель должна покрыть требования человека без придуманного scope и без
+технических пробелов между подзадачами.
 
 Исходный план является материалом для понимания цели и зависимостей, а не
 готовым списком карточек. Task Composer строит outcome graph: отделяет
@@ -205,6 +208,24 @@ Epic помогает выбирать решение внутри этой гр
 соседние подзадачи или расширять scope. Material gap либо противоречие между
 Epic и child остаётся явным и требует исправления planning model до write.
 
+### 4.4 Attachments из bug report
+
+Attachment считается осмысленным, когда помогает исполнителю увидеть
+проявление бага, воспроизвести, локализовать или проверить проблему. Скриншот,
+на котором показано заявленное проявление, считается осмысленным по умолчанию;
+другие файлы, записи или логи оцениваются по той же пользе, а не по MIME type.
+Явно случайный, нерелевантный, избыточный или нарушающий secret-safe boundary
+материал не входит в candidate-модель, и его disposition сообщается явно.
+
+Каждый обязательный attachment до create сопоставляется с самой конкретной
+создаваемой Task, для которой он является evidence. Cross-cutting материал
+может принадлежать Epic, но не копируется механически во все children. Source
+route выбирается по current Task Manager adapter contract; результатом должен
+стать native Task attachment, а не пересказ, локальный путь, base64, временная
+или защищённая URL в durable text. Если source нельзя провести через native
+transport, известный до create scope не создаётся частично и limitation не
+маскируется.
+
 ## 5. Strategic Explainer
 
 Перед созданием каждого Epic его problem-first описание составляется с помощью
@@ -268,6 +289,14 @@ Epic подзадачи создаются native subtask operation с current p
 после каждой mutation authoritative state перечитывается. Relations создаются
 после существования обоих endpoints с caller-stable idempotency key.
 
+Обязательный attachment загружается через соответствующий native source route,
+его verified file identity связывается с выбранной Task после её создания, а
+attachment metadata перечитывается. Upload key и bind key стабильны и
+независимы; local path, protected URL или transport-only identifier не
+становятся durable Task content. Unknown upload/bind outcome сначала reconciles
+через file и Task attachment reads, а не повторяется с новым source или новой
+identity.
+
 Unknown write outcome сначала reconciles через reads и duplicate search; write
 не повторяется вслепую. Поскольку multi-Task create не является транзакцией,
 ошибка после частичного результата не скрывается и не вызывает destructive
@@ -283,9 +312,11 @@ cleanup без authority: skill перечисляет созданные, по�
 - отсутствие classification prefix/suffix в title, кроме explicit verbatim
   user title;
 - созданные relation types и direction;
-- description, сохраняющий intended strategic/technical split.
+- description, сохраняющий intended strategic/technical split;
+- каждый обязательный attachment на сопоставленной Task и отсутствие
+  unresolved attachment omission.
 
 Финальный ответ перечисляет созданный scope, duplicate disposition, Release,
-status, hierarchy, labels/label gaps, relations и любой unreconciled outcome.
-Task Manager read-back доказывает только planning projection, а не
-implementation или delivery.
+status, hierarchy, labels/label gaps, relations, attachment disposition и любой
+unreconciled outcome. Task Manager read-back доказывает только planning
+projection, а не implementation или delivery.

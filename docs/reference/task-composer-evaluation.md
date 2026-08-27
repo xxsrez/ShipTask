@@ -1,6 +1,6 @@
 # Task Composer evaluation contract
 
-Статус: current reference, 2026-08-26.
+Статус: current reference, 2026-08-27.
 
 Проверка оценивает observable planning result `$ship-tasks:task-composer`, а не exact
 wording, agent topology, tool order или число подзадач.
@@ -32,6 +32,9 @@ wording, agent topology, tool order или число подзадач.
   а не независимо допустимую single Task;
 - technical specifics, acceptance criteria и evidence находятся в применимых
   подзадачах, а secret values отсутствуют;
+- каждый осмысленный attachment из bug report сохранён как native attachment
+  применимой Task; screenshot с проявлением бага считается осмысленным по
+  умолчанию и не заменяется пересказом, local path или temporary URL;
 - созданные Tasks подтверждены в `Backlog`;
 - Release назначен только при однозначном current или explicit выборе, а его
   отсутствие не блокирует create;
@@ -41,7 +44,8 @@ wording, agent topology, tool order или число подзадач.
   Label не разрешает textual type prefix;
 - hierarchy и relation type/direction соответствуют реальной семантике;
 - duplicate search предшествует create, unknown outcome reconciles до retry;
-- read-back подтверждает каждую заявленную Task Manager mutation;
+- read-back подтверждает каждую заявленную Task Manager mutation, включая
+  attachment binding и metadata;
 - результат не назван implemented, delivered или verified product behavior.
 
 ## Regression cases
@@ -55,6 +59,11 @@ wording, agent topology, tool order или число подзадач.
 | Узкая child Task принадлежит широкому Epic | Description объясняет вклад и relevant boundaries; Epic не разрешает выполнить sibling scope |
 | Prompt содержит два независимых outcomes | Отдельные Tasks/Epics без искусственного общего parent |
 | Пользователь просит только draft | Текст сформулирован, Task Manager writes отсутствуют |
+| Bug report содержит screenshot с проявлением проблемы | Создать применимую Task, прикрепить screenshot как native attachment и подтвердить attachment read-back |
+| Bug report содержит релевантный log и случайный несвязанный файл | Прикрепить log к применимой Task; случайный файл не добавлять и явно сообщить disposition |
+| Составной Epic содержит screenshot, относящийся к одной child Task | Прикрепить screenshot к этой child Task, не копировать механически во все children |
+| Native transport обязательного attachment заведомо недоступен | Create не начинается; attachment не заменяется путём, URL или пересказом |
+| Task создана, но attachment bind завершился с ошибкой | Сообщить partial result и exact missing attachment; не объявлять planning create полным и не повторять bind с новой identity вслепую |
 | Project неизвестен | Запрос exact Project до create |
 | `Backlog` отсутствует в workflow | Create не начинается; default status не подставляется |
 | Current Release неизвестен | Tasks создаются без Release, gap сообщается |
@@ -78,5 +87,6 @@ wording, agent topology, tool order или число подзадач.
 Blind forward test получает user requirements, live Task Manager catalog и
 candidate duplicates без intended decomposition. Проверяется сохранность
 meaning, исполнимость, strategic continuity, graph correctness, write authority
-и read-back. Отдельно выбранная child Task должна позволять новому исполнителю
-восстановить её вклад и применимую планку качества без scope expansion.
+attachment mapping и read-back. Отдельно выбранная child Task должна позволять
+новому исполнителю восстановить её вклад и применимую планку качества без scope
+expansion; bug evidence должно быть доступно на той Task, которой оно помогает.
