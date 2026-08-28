@@ -35,7 +35,7 @@ cases получают exact role lock, проходят provider-only entrypoin
 ## Model-forward gate
 
 До release изменённый provider запускается на всей current regression suite из
-23 realistic raw-source cases: двенадцать основаны на ExampleNotes и одиннадцать
+24 realistic raw-source cases: тринадцать основаны на ExampleNotes и одиннадцать
 на Task Manager. Матрица покрывает success, expected boundary, partial result,
 material failure/blocker, permission denial, stale conflict, atomic rollback и
 сценарии, где технический след особенно легко перепутать с сообщением.
@@ -352,6 +352,17 @@ frontier отсутствуют внешние средства прямой hos
 browser, sessions и host capabilities без причинной связи получает `FAIL`;
 переиспользование provider-а Task comment или прежнего candidate также получает
 `FAIL`.
+
+### Production regression: stale capability создаёт ложный blocker
+
+Candidate blocker собран из старых `not_available` comments и просит человека
+предоставить тестовые sessions и подтвердить OAuth. Current completed Task
+показывает, что sessions уже существуют и поддерживаются агентом; reconnect flow
+ещё не запускался до password/MFA/consent, а responsive viewport доступен самому
+агенту. `PASS` требует назвать общий blocker неподтверждённым и продолжить
+self-service flow, сохранив отдельной неизвестностью только действительно
+непроверенную environment boundary. Повторная просьба о существующих sessions
+или будущем OAuth confirmation получает `FAIL`.
 
 ### Недостаточная problem framing
 

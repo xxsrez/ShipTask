@@ -32,12 +32,13 @@ EXPECTED_CASES = {
     "release-delete-membership-boundary",
     "release-open-tasks-confirmation",
     "saved-view-base-temporary-separation",
+    "stale-capability-false-blocker",
     "viewer-comment-permissions",
     "write-rebind-fences-prepared-commit",
 }
 
 EXPECTED_SOURCE_PORTFOLIO = {
-    "ExampleNotes": 12,
+    "ExampleNotes": 13,
     "Task Manager": 11,
 }
 

@@ -108,6 +108,16 @@ actor, минимальное действие, причину, observable succe
 по prerequisites, доказательной силе и tradeoff; artificial quota и придуманная
 рекомендация не создают новую decision или authority.
 
+Для blocker/action explanation прежний `not_available`, старый report или
+перечень симптомов не подтверждают dependency сами по себе. Если current sources
+показывают уже существующий capability, выполненную prerequisite или безопасный
+self-service path, Explainer не просит человека повторить её и прямо сообщает,
+что эта dependency не установлена, общий blocker требует пересчёта, а caller
+может продолжить соответствующий self-service step. Пароль, MFA, consent или
+выдача доступа становятся пользовательским действием только когда source
+подтверждает, что текущий flow фактически дошёл до этого шага; предполагаемое
+будущее подтверждение не выдаётся за уже возникший blocker.
+
 ### `SE-08` — Никакой скрытой управляющей роли
 
 Strategic Explainer остаётся read-only: не принимает status, scope, recovery,

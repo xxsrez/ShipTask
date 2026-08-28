@@ -381,6 +381,24 @@ ephemeral или локально управляемый substitute; если е
 identity и не меняет ACL без authority, а переводит ситуацию в
 `verification-blocked` с decision report.
 
+До такой классификации coordinator строит current prerequisite evidence map.
+Для каждой заявленной prerequisite он перечитывает exact Task, applicable parent
+chain, связанные и terminal Tasks, comments, project sources и live runtime
+surface. Старый `not_available`, прежний blocker comment или subagent summary
+являются только search anchors. Если current evidence показывает уже
+существующий capability, поддерживаемую тестовую identity/session, сохранённый
+reconnect/reissue path или выполненную prerequisite, coordinator использует или
+восстанавливает их сам и не просит пользователя повторить действие.
+
+User-controlled dependency возникает только после того, как current flow
+фактически дошёл до шага с паролем, MFA, consent, системным подтверждением или
+явным access grant, который coordinator не вправе либо не может выполнить.
+Environment-controlled capability сначала проверяется по live supported
+surfaces и безопасным bounded alternatives. Каждая ложная prerequisite
+исключается из blocker claim; любой remaining self-service path, который
+оставляет runnable in-scope работу, аннулирует общий blocker candidate и
+возвращает run к работе.
+
 Нет фиксированного числа попыток, обязательной последовательности repair или
 предпочтённого инструмента. Сбой отдельного способа сам по себе не является ни
 product defect, ни `verification-blocked`.
@@ -563,6 +581,14 @@ resume signal. Только после подготовки и factual check э�
 `update_goal(status=blocked)`; затем Goal перечитывается, а подготовленный текст
 возвращается человеку без технической редакторской подмены.
 
+Перед этим report prerequisite evidence map из раздела 2.4 пересобирается на
+current facts. Supposedly external dependency, которая уже существует,
+поддерживается агентом, восстанавливается безопасным reconnect/reissue flow или
+ещё не дошла до реального password/MFA/consent/access step, исключается из
+blocker claim. Если после этого остаётся runnable in-scope работа, scope-level
+blocker не проходит threshold: candidate аннулируется и coordinator продолжает
+работу.
+
 Доказанный material incident остаётся немедленно видимым по `ST-08`: если его
 нужно сообщить до завершения reflection, отдельный fresh publication unit
 описывает только установленный incident и продолжающуюся проверку, не утверждая
@@ -706,7 +732,10 @@ dependencies. Для первой группы он сам создаёт repres
 
 Если criterion требует независимый principal, вторую authenticated session,
 внешний account, provider-side log или access-policy effect, coordinator сначала
-проверяет, существует ли безопасная synthetic/ephemeral замена в current scope.
+проверяет, существует ли уже применимый capability либо безопасная
+synthetic/ephemeral замена в current scope. Completed related Tasks и принятые
+project sources проверяются до вывода, что identity/session отсутствует; старое
+`not_available` не заменяет live read/attempt.
 Если нет, это authority blocker, а не просьба «прислать файл» или голый
 «нужен principal». До defer coordinator фиксирует self-service attempts и
 готовит blocker decision report через Strategic Explainer: recommended path,
@@ -822,6 +851,9 @@ in-scope defect, Goal остаётся активным.
 внешней средой prerequisites, первый безопасный шаг и наблюдаемый сигнал
 возобновления. Только после factual check этой unit допустим status write;
 затем Goal перечитывается, а тот же готовый report возвращается человеку.
+Tool-level threshold включает current prerequisite reconciliation из раздела
+2.4; Goal нельзя блокировать по старому `not_available`, ранее закрытой
+dependency или flow, который ещё не доведён до реального user-only шага.
 
 Сначала coordinator выводит effective topology policy из current prompt и
 применимого conversation context. Однозначные natural-language указания

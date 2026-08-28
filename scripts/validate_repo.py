@@ -741,6 +741,10 @@ def validate_strategic_skill(errors: list[str]) -> None:
         "Строй публикацию из reader model",
         "Английские слова не должны нести основную мысль",
         "Действие формулируй через наблюдаемую операцию человека",
+        "Прежний `not_available`, старый report или список симптомов не доказывают её",
+        "эта dependency не установлена, общий blocker требует пересчёта",
+        "caller может продолжить соответствующий self-service step",
+        "current flow фактически дошёл до такого шага",
         "переводи внутренние компоненты в\nописании результата или границы",
         "Проверь понимание",
         "своими словами назвать",
@@ -1511,6 +1515,11 @@ def validate_source_layers(errors: list[str]) -> None:
         "publication-ready explanation и\nего source basis",
         "stale candidate\nне публикуется",
         "один reflection pass",
+        "Прежний `not_available`, старый blocker comment или summary\n"
+        "другого агента не доказывают текущую недоступность",
+        "не запрашиваются у пользователя повторно",
+        "текущий run сам дошёл\nдо фактического шага",
+        "blocker candidate аннулируется, Task/Goal не блокируются",
     )
     forbid(
         errors,
@@ -1567,6 +1576,9 @@ def validate_source_layers(errors: list[str]) -> None:
         "одна короткая, ёмкая, однозначная задача",
         "сам собирает current facts",
         "одну главную причинную мысль",
+        "прежний `not_available`, старый report или\nперечень симптомов не подтверждают dependency",
+        "Explainer не просит человека повторить её",
+        "текущий flow фактически дошёл до этого шага",
         "Один пользовательский результат на fresh invocation",
         "Семантический facade и изоляция provider expertise",
         "публичный semantic contract",
@@ -1881,6 +1893,10 @@ def validate_current_contract(errors: list[str]) -> None:
         "blocking/dependent Task refs",
         "Открытый implementation gate не выдаётся за upstream acceptance",
         "materially открытые или повторно закрытые dependency gates",
+        "Прежний `not_available`, старый blocker\ncomment или summary не являются current evidence",
+        "используются\nсамим агентом и не запрашиваются у пользователя повторно",
+        "flow фактически дошёл до\nэтого шага. Ложная prerequisite исключается из claim",
+        "self-service path\nоставляет runnable in-scope работу",
     )
     require(
         errors,
@@ -2269,6 +2285,10 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Следующий lifecycle comment, scope-level blocker и final являются новыми units",
         "raw shell/test commands",
         "неизменившиеся доказательства из предыдущего пользовательского сообщения",
+        "старому `not_available`",
+        "эта user dependency\nне установлена, общий blocker требует пересчёта",
+        "caller может продолжить\nсоответствующий self-service step",
+        "flow фактически дошёл до соответствующего user-only шага",
         "private evidence map",
         "reader model",
         "публикует только text",
@@ -2290,6 +2310,9 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "полный список тестовых файлов",
         "Новая lifecycle publication сообщает material delta",
         "не являются publication-ready result",
+        "прежний `not_available`, старый report или\nперечень симптомов не подтверждают dependency",
+        "Explainer не просит человека повторить её",
+        "текущий flow фактически дошёл до этого шага",
     )
     require(
         errors,
@@ -2348,6 +2371,9 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Completion comment не превращается в command dump",
         "Следующий lifecycle comment сообщает изменение, а не повтор",
         "Production regression: blocked Goal без причинного отчёта",
+        "Production regression: stale capability создаёт ложный blocker",
+        "старых `not_available` comments",
+        "reconnect flow\nещё не запускался до password/MFA/consent",
     )
     require(
         errors,

@@ -75,7 +75,7 @@ evaluation, retired loopholes, documentation navigation и distribution
 boundaries. Unit suite проверяет изоляцию model-forward fixtures: ordinary
 generating subagent получает только raw facts, а semantic rubric остаётся у
 evaluator-а.
-Current Strategic Explainer suite содержит 23 cases: двенадцать из ExampleNotes и
+Current Strategic Explainer suite содержит 24 cases: тринадцать из ExampleNotes и
 одиннадцать из Task Manager; behavior change прогоняет всю матрицу, а не
 удобную выборку.
 Проверка не должна требовать конкретных необязательных слов или
@@ -180,6 +180,10 @@ skill, реалистичный exact Task Manager scope и обычный proje
 - blocked Goal до status write получает новую scope-level unit, которая не
   переиспользует Task comment provider и называет primary cause, исчерпанную
   safe frontier, user/environment prerequisites и observable resume signal;
+- каждая claimed prerequisite перед blocker-ом сверяется с current related
+  Tasks/capabilities и live attempt: existing session/reconnect path используется
+  агентом, а user action возникает только после фактического password/MFA/consent
+  step; старый `not_available` не останавливает run;
 - нужный non-production release выполняется, production ждёт explicit approval;
 - каждая Task получает лёгкий targeted gate, а совместимые candidates периодически
   проходят один thorough review-batch gate и один UAT deploy без approval; UAT

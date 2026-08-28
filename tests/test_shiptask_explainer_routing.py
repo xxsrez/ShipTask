@@ -7,6 +7,7 @@ SKILL = ROOT / "ship-tasks" / "SKILL.md"
 PROTOCOL = ROOT / "ship-tasks" / "references" / "strategic-explainer.md"
 DELIVERY = ROOT / "ship-tasks" / "references" / "delivery-report.md"
 RUN_REPORT = ROOT / "ship-tasks" / "references" / "run-report.md"
+AUTONOMY = ROOT / "ship-tasks" / "references" / "autonomy-and-release.md"
 REQUIREMENTS = ROOT / "docs" / "skills" / "ship-tasks" / "requirements.md"
 ARCHITECTURE = ROOT / "docs" / "skills" / "ship-tasks" / "architecture.md"
 COMPOSER = ROOT / "task-composer" / "SKILL.md"
@@ -68,6 +69,31 @@ class ShipTaskExplainerRoutingTest(unittest.TestCase):
             "не переиспользует task comment provider",
             "первичную причину невозможности продолжать",
             "наблюдаемый сигнал возобновления",
+        ):
+            self.assertIn(marker, combined)
+
+    def test_blocker_reconciles_stale_or_self_service_prerequisites(self) -> None:
+        combined = " ".join(
+            "\n".join(
+                path.read_text()
+                for path in (
+                    SKILL,
+                    AUTONOMY,
+                    DELIVERY,
+                    RUN_REPORT,
+                    REQUIREMENTS,
+                    ARCHITECTURE,
+                )
+            ).split()
+        ).lower()
+        for marker in (
+            "для каждой заявленной prerequisite",
+            "прежний `not_available`",
+            "уже существующий capability",
+            "не запрашивается у пользователя повторно",
+            "фактически дошёл до шага",
+            "пароль, mfa",
+            "blocker candidate аннулируется",
         ):
             self.assertIn(marker, combined)
 

@@ -259,6 +259,15 @@ impact/risk, action или confidence читателя. Verification-only identi
 tradeoff и success signal. Он не придумывает alternatives ради количества и не
 выдаёт рекомендацию за принятое действие или новую authority.
 
+В blocker/action unit каждая объявленная prerequisite остаётся material claim.
+Provider проверяет её по current sources, а не по старому `not_available`,
+прежнему report или списку симптомов. Уже существующий capability, выполненная
+prerequisite либо безопасный self-service path означают, что эта user dependency
+не установлена, общий blocker требует пересчёта, а caller может продолжить
+соответствующий self-service step. Пароль, MFA, consent или access grant
+описываются как действие человека только если evidence подтверждает, что current
+flow фактически дошёл до соответствующего user-only шага.
+
 Direct и delegated caller получают один publication-ready result contract.
 Готовый текст самодостаточен без source basis. Полезные direct links могут стоять
 рядом с claim, если помогают самому читателю; delegated source refs возвращаются
@@ -373,6 +382,9 @@ publication text: из естественной формулировки дол�
   остаётся понятным без идентификаторов и внутренней терминологии;
 - читатель может своими словами восстановить проблему, результат или
   препятствие, влияние и следующий шаг без process diary;
+- blocker/action text не просит человека повторить уже выполненную prerequisite
+  и не превращает старый `not_available` или ещё не достигнутый user-only шаг в
+  current dependency;
 - первый слой передаёт одну главную причинную мысль без необязательной воды, а
   второй существует только при material need;
 - если пользователь прямо не запросил audit trail, publication body не содержит
