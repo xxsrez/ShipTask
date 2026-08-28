@@ -712,6 +712,50 @@ Explainer для выбранных publication units.
 сообщает grounded factual result без служебного сообщения об отсутствии
 provider.
 
+### 6.1 Terminal handoff gate и автоматическое восстановление отчёта
+
+Для любого незавершённого live selector coordinator перед возможной остановкой
+строит current blocker ledger. Каждая строка связывает exact Task или
+однозначную группу Tasks, criterion, последнее самостоятельное действие и его
+наблюдаемый результат, primary cause, owner оставшегося условия, minimum next
+action и observable resume signal. Группы объединяются только при совпадении
+criterion, cause, owner и resume path. Отдельно фиксируется любая runnable
+implementation/rework/redeploy/reconciliation frontier.
+
+Gate состоит из двух независимых проверок:
+
+1. **Stop-state gate.** Любая runnable строка отменяет terminal blocker claim и
+   возвращает run к выполнению. Статус `In Review`, прежний blocker comment,
+   отсутствие capability в текущем deployment или закрытый внутренний plan не
+   превращают доступный repair/redeploy в external blocker.
+2. **Publication coverage gate.** Coordinator откладывает source basis и по
+   одному publication body восстанавливает для каждой materially distinct
+   blocker-группы exact object/criterion, current attempt/result, primary
+   cause, owner, next action и resume signal. Затем восстановленное покрытие
+   сравнивается с current ledger. Basis используется только для factual check и
+   не дополняет отсутствующий в тексте смысл.
+
+Это внешний result contract, а не доступ к provider methodology, stylistic
+score или ручная редактура provider output. Общие категории без exact causal
+link, скрытые только в basis факты и фраза об исчерпанной frontier при наличии
+runnable строки дают `publication-contract-error`. Такой candidate не
+публикуется, Goal status не меняется и run не останавливается.
+
+В ordinary mode первый `publication-contract-error` создаёт одну новую clean
+correction unit того же semantic facade. Ей передаются исходный вопрос, тот же
+exact scope, current anchors и только material constraints о конкретно
+утраченных observable facts; explanation candidate, style recipe и provider
+method не передаются. Повторный непригодный result или failure facade переводит
+run в native mode. Native report строится из current ledger по ShipTask truth
+contract и проходит тот же gate. Если gate снова находит пропуск, coordinator
+исправляет grounded native report либо продолжает найденную работу; terminal
+handoff остаётся запрещённым до принятого текста.
+
+Один provider по-прежнему обслуживает не более одной publication unit: rejected
+candidate завершает не опубликованную unit, а correction является новой fresh
+unit по наблюдаемой comprehension error. Механизм одинаков для blocked Goal и
+для незавершённого run без Goal.
+
 Client protocol: [runtime reference](../../../ship-tasks/references/strategic-explainer.md).
 
 ## 7. Реализация и проверка
@@ -992,12 +1036,15 @@ verification, comments и read-back. При отсутствии approval Task �
 применимый Goal и обязательные external effects. Если есть безопасный in-scope
 способ устранить gap, он делает это до handoff.
 
-Blocked Goal не является самодостаточным объяснением. Если Goal должен получить
-этот статус, до `update_goal(status=blocked)` уже существует новая scope-level
+Незавершённый selector проходит terminal handoff gate раздела 6.1 независимо от
+того, существует ли Goal и как coordinator назвал mode. Blocked Goal не является
+самодостаточным объяснением. Если Goal должен получить этот статус, до
+`update_goal(status=blocked)` уже существует новая принятая scope-level
 publication unit с первичной причиной невозможности продолжать и наблюдаемым
 сигналом возобновления; она не переиспользует Task comment provider. После
 записи Goal перечитывается, а подготовленный report становится terminal final,
-а не заменяется перечнем симптомов или служебной сводкой.
+а не заменяется перечнем симптомов или служебной сводкой. Если Goal отсутствует,
+тот же принятый report обязателен до финального ответа и остановки.
 
 Каждый unresolved blocker в этом перечитывании должен иметь completed reflection
 по `ST-28` на current facts. ShipTask не использует wording Explainer как
@@ -1025,6 +1072,12 @@ Run report проходит scope-level Strategic Explainer по разделу 
 - причину незавершённости, если она есть;
 - какие исправления уже выполнены;
 - одно точное условие или действие для продолжения.
+
+Полнота anchors не доказывает пригодность publication body. После provider
+result coordinator применяет раздел 6.1; отсутствие exact blockers, попыток,
+owners/actions или resume signals в готовом тексте не компенсируется их наличием
+в source basis. Внутренний plan нельзя закрыть как полностью выполненный, пока
+terminal handoff незавершённого selector не прошёл этот gate.
 
 Если доказан product failure, он и доступная in-scope repair frontier сообщаются
 до browser/controller/OAuth/MFA logistics. Переключение средства не называется

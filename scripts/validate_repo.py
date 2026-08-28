@@ -322,7 +322,7 @@ def validate_frontmatter(
 
 
 def validate_ship_skill(errors: list[str]) -> None:
-    validate_frontmatter(errors, SHIP_SKILL, "ship-tasks", 300)
+    validate_frontmatter(errors, SHIP_SKILL, "ship-tasks", 330)
     text = read(SHIP_SKILL)
     description = text.split("---", 2)[1] if text.count("---") >= 2 else ""
 
@@ -428,6 +428,11 @@ def validate_ship_skill(errors: list[str]) -> None:
         "Прямая запись субагента не считается выполнением обязательной publication unit",
         "корректирующий comment",
         "собственную feature branch и собственный Git worktree",
+        "terminal handoff gate",
+        "Basis не компенсирует пропуск",
+        "runnable work: blocker candidate отменяется",
+        "fresh correction unit",
+        "Даже без Goal незавершённый Release/Project/scope",
         "Один writable worktree принадлежит одному writer",
         "Только integration owner делает fan-in",
         "Общий no-subagent rule означает ноль субагентов во всём run",
@@ -1376,6 +1381,24 @@ REVIEW_CASES = {
         "правдивый non-terminal status",
         "продолжить независимые Tasks",
     ),
+    "Незавершённый selector содержит доступный repair/redeploy/self-service path": (
+        "terminal blocker threshold не пройден",
+        "отменить blocker candidate",
+        "продолжить exact runnable work",
+        "объявить frontier исчерпанной",
+    ),
+    "Ordinary terminal report фактически не врёт, но скрывает exact blockers/actions в source basis": (
+        "publication-contract-error",
+        "fresh correction unit",
+        "перейти в native",
+        "stop/update Goal",
+    ),
+    "Незавершённый Release без Goal действительно исчерпал safe frontier": (
+        "принятый scope-level report",
+        "Goal отсутствует",
+        "exact Task/criterion",
+        "обойти report",
+    ),
 }
 
 
@@ -1403,9 +1426,9 @@ def validate_review_matrix(errors: list[str]) -> None:
 
 def validate_source_layers(errors: list[str]) -> None:
     packages = (
-        (SHIP_REQUIREMENTS, "ST", 28),
+        (SHIP_REQUIREMENTS, "ST", 29),
         (COMPOSER_REQUIREMENTS, "TC", 12),
-        (STRATEGIC_REQUIREMENTS, "SE", 18),
+        (STRATEGIC_REQUIREMENTS, "SE", 19),
     )
     for requirements, prefix, count in packages:
         requirement_ids = re.findall(
@@ -1520,6 +1543,12 @@ def validate_source_layers(errors: list[str]) -> None:
         "не запрашиваются у пользователя повторно",
         "текущий run сам дошёл\nдо фактического шага",
         "blocker candidate аннулируется, Task/Goal не блокируются",
+        "Незавершённый запуск не останавливается без принятого причинного отчёта",
+        "terminal handoff gate независимо от mode, наличия\nGoal",
+        "доступное исправление, повторный выпуск\nили иной безопасный самостоятельный шаг относятся к runnable work",
+        "Готовый пользовательский текст проходит проверку отдельно от source basis",
+        "не публикует его, не останавливается и не меняет Goal status",
+        "Для\nзапуска без Goal тот же отчёт обязателен",
     )
     forbid(
         errors,
@@ -1594,6 +1623,11 @@ def validate_source_layers(errors: list[str]) -> None:
         "STRATEGIC_EXPLAINER_INVOCATION_ERROR",
         "не запускает замену самостоятельно",
         "Publication text и source basis\nсемантически разделены",
+        "Причинная полнота terminal blocker и незавершённого scope",
+        "конкретным объектом или критерием, текущей попыткой",
+        "Source\nbasis не компенсирует исчезновение этой связи",
+        "доступное исправление, повторный выпуск",
+        "terminal blocker не\nдоказан",
     )
     forbid(
         errors,
@@ -1876,8 +1910,11 @@ def validate_current_contract(errors: list[str]) -> None:
         RUN_REPORT,
         "authoritative source anchors и factual inventory",
         "В ordinary mode\nосновной агент передаёт semantic facade одну короткую задачу",
-        "проверяется только на material factual conflict",
-        "не делает второй editorial rewrite",
+        "terminal handoff gate",
+        "Basis не компенсирует отсутствующий в пользовательском тексте смысл",
+        "расплывчатый ordinary text\nне публикуется",
+        "повторная непригодность/failure переводит run в native",
+        "Если Goal не создан, тот же gate обязателен",
         "без имитации provider",
         "краткий перечень существенных инцидентов, включая уже исправленные",
         "передача задачи с Luna на текущий профиль",
@@ -2300,11 +2337,15 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Редакторская реконструкция",
         "неизменяемое смысловое ядро",
         "обратная проверка покрытия",
+        "actionability projection",
+        "runnable repair, redeploy или self-service path",
+        "Наличие полного source basis не\nзакрывает пропуск",
     )
     require(
         errors,
         STRATEGIC_REQUIREMENTS,
         "### `SE-18`",
+        "### `SE-19`",
         "сырой\nкомандный блок",
         "абсолютный путь",
         "полный список тестовых файлов",
@@ -2313,6 +2354,8 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "прежний `not_available`, старый report или\nперечень симптомов не подтверждают dependency",
         "Explainer не просит человека повторить её",
         "текущий flow фактически дошёл до этого шага",
+        "Source\nbasis не компенсирует исчезновение этой связи",
+        "terminal blocker не\nдоказан",
     )
     require(
         errors,

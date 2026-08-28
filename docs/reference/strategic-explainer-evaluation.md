@@ -35,7 +35,7 @@ cases получают exact role lock, проходят provider-only entrypoin
 ## Model-forward gate
 
 До release изменённый provider запускается на всей current regression suite из
-24 realistic raw-source cases: тринадцать основаны на ExampleNotes и одиннадцать
+25 realistic raw-source cases: четырнадцать основаны на ExampleNotes и одиннадцать
 на Task Manager. Матрица покрывает success, expected boundary, partial result,
 material failure/blocker, permission denial, stale conflict, atomic rollback и
 сценарии, где технический след особенно легко перепутать с сообщением.
@@ -68,6 +68,14 @@ lost/unsupported fact либо comprehension gap. Проверка считае�
 verification-only шумом: их нельзя удалить вместе с SHA, deployments и прочим
 audit trail. Общая фраза о готовой возможности получает `FAIL`, если raw facts
 позволяли конкретно сказать, что именно проверено.
+
+Для terminal blocker и unfinished-scope report evaluator отдельно восстанавливает
+из publication body каждую materially distinct blocker-группу: exact
+object/criterion, current attempt/result, primary cause, owner, minimum next
+action и resume signal. Source basis не закрывает пропуск. Категориальная сводка
+и claim об исчерпанной frontier получают `FAIL`, если raw facts показывают
+runnable repair/redeploy/self-service path или разные владельцы следующих
+условий.
 
 Отдельный audit gate получает `FAIL`, если без прямой просьбы пользователя в
 publication body остаются сырой командный блок, shell/test command, абсолютный

@@ -88,6 +88,9 @@ structural refusal допускает один corrected fresh retry;
 | Comment Explainer недоступен | implementation workers продолжают; mode native | grounded comment публикуется и перечитывается | comment-dependent transition выполняется по evidence | продолжить без capability warning и без provider-method imitation | останавливать workers, comment или transition из-за отсутствия plugin-а |
 | Release готового candidate по Project/Release selector | `release` | только если lifecycle/blocker требует | statuses по фактам | commit/push/deploy/smoke по authority без нового Goal | создавать Goal из-за selector или production release |
 | Task-local blocker в `batch-implementation` | Task незавершена | понятный blocker comment с read-back | правдивый non-terminal status | продолжить независимые Tasks | завершить или искусственно блокировать Goal |
+| Незавершённый selector содержит доступный repair/redeploy/self-service path | terminal blocker threshold не пройден | candidate report не публикуется | Goal не получает `blocked`; Task остаётся truthful | отменить blocker candidate и продолжить exact runnable work | объявить frontier исчерпанной из-за `In Review`, старого comment или закрытого plan |
+| Ordinary terminal report фактически не врёт, но скрывает exact blockers/actions в source basis | `publication-contract-error` | text не публикуется; одна fresh correction unit получает current anchors и missing material constraints | Goal status не меняется | принять исправленный text либо после повторной непригодности перейти в native и проверить тот же gate | caller rewrite, stop/update Goal по расплывчатому тексту или считать полный basis достаточным |
+| Незавершённый Release без Goal действительно исчерпал safe frontier | current blocker ledger и publication body причинно совпадают | принятый scope-level report возвращается человеку | Goal отсутствует; Task statuses truthful | завершить terminal handoff с exact Task/criterion, attempt/result, cause, owner/action и resume signal | обойти report, назвав run `release`, reconciliation или bounded implementation |
 
 ## Regression questions
 
@@ -150,6 +153,13 @@ structural refusal допускает один corrected fresh retry;
   найденный path primary evidence вместо доверия wording?
 - Был ли stale blocker отброшен при доступном пути, а unchanged state получил
   только один reflection pass без бесконечного цикла формулировок?
+- Отменил ли terminal handoff любой найденный runnable repair/redeploy path,
+  даже если все оставшиеся Tasks уже `In Review` и Goal не создан?
+- Можно ли только из final body, без source basis, восстановить exact
+  Task/criterion, current attempt/result, primary cause, owner/action и resume
+  signal каждой materially distinct blocker-группы?
+- Был ли расплывчатый ordinary report автоматически отклонён до publish/stop/Goal
+  write, исправлен fresh unit либо переведён в native, а не переписан caller-ом?
 - Продолжил ли агент rework после reopen вместо завершения run?
 - Создан ли Goal только для реальной имплементации/rework минимум двух Tasks, а
   не из-за Project/Release selector, общего чтения или release-only?

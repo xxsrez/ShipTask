@@ -320,6 +320,26 @@ publication text: из естественной формулировки дол�
 не потеряны; наличие полного source basis или позднего наблюдаемого результата
 не компенсирует их исчезновение из пользовательского объяснения.
 
+Для terminal blocker либо отчёта о незавершённом scope scenario coverage map
+получает дополнительную actionability projection. Для каждой materially
+distinct blocker-группы она сохраняет exact object/criterion, current
+attempt/result, primary cause, owner оставшегося условия, minimum next action и
+observable resume signal. Две строки объединяются только при совпадении
+criterion, cause, owner и resume path. Устойчивые human-facing Task refs и
+названия критериев из sources остаются в publication body рядом с materially
+distinct действиями: их нельзя заменить обезличенным описанием сценария.
+Current attempt/result переносится как отдельная causal link и не считается
+покрытым общей фразой о проверенном классе способов.
+
+Перед completion provider восстанавливает эту projection только из готового
+publication body и сравнивает с evidence map. Наличие полного source basis не
+закрывает пропуск. Категориальная сводка о «не реализованных путях», «нескольких
+участниках» или «ограниченных действиях» отклоняется, если скрывает exact
+attempt, cause, owner/action либо resume signal. Если evidence map содержит
+runnable repair, redeploy или self-service path, формулировка об исчерпанной
+автономной работе также отклоняется; result сообщает caller-у, какой путь ещё
+доступен, не принимая recovery decision за него.
+
 ## 7. Редакторская реконструкция
 
 Этот режим применяется, когда пользователь или вызывающий агент явно просит
@@ -401,6 +421,9 @@ publication text: из естественной формулировки дол�
   структура читается естественно, а обратная проверка подтверждает сохранность
   смыслового ядра без новых решений;
 - source basis и material uncertainty остаются проверяемыми.
+- terminal blocker или unfinished-scope body покрывает actionability projection
+  каждого materially distinct препятствия, не заменяет её общей категорией и не
+  заявляет исчерпанную frontier при наличии current runnable path.
 
 Regression scenarios проверяются реальным model-forward запуском по observable
 behavior в [evaluation contract](../../reference/strategic-explainer-evaluation.md).

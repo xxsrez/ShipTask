@@ -72,6 +72,25 @@ class ShipTaskExplainerRoutingTest(unittest.TestCase):
         ):
             self.assertIn(marker, combined)
 
+    def test_unfinished_selector_has_non_bypassable_terminal_handoff_gate(self) -> None:
+        combined = " ".join(
+            "\n".join(
+                path.read_text()
+                for path in (SKILL, PROTOCOL, RUN_REPORT, REQUIREMENTS, ARCHITECTURE)
+            ).split()
+        ).lower()
+        for marker in (
+            "terminal handoff gate",
+            "независимо от mode",
+            "даже без goal",
+            "basis не компенсирует пропуск",
+            "runnable work: blocker candidate отменяется",
+            "fresh correction unit",
+            "повторный непригодный result/failure переводит mode в native",
+            "до принятого report не останавливай run",
+        ):
+            self.assertIn(marker, combined)
+
     def test_blocker_reconciles_stale_or_self_service_prerequisites(self) -> None:
         combined = " ".join(
             "\n".join(

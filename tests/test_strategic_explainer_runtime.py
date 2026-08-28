@@ -20,6 +20,29 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
         ):
             self.assertIn(marker, text)
 
+    def test_terminal_handoff_body_cannot_hide_actionability_in_source_basis(self) -> None:
+        text = " ".join(CONTRACT.read_text().split()).lower()
+        for marker in (
+            "actionability projection",
+            "current attempt/result",
+            "minimum next action",
+            "observable resume signal",
+            "полный source basis не исправляет пропуск",
+            "runnable repair, redeploy или self-service path",
+            "не заявляй, что автономная работа исчерпана",
+        ):
+            self.assertIn(marker, text)
+
+    def test_terminal_handoff_preserves_refs_and_exact_attempts(self) -> None:
+        text = " ".join(CONTRACT.read_text().split()).lower()
+        for marker in (
+            "human-facing task refs",
+            "не заменяй `md-x`/`task-x` обезличенным",
+            "точный current attempt/result",
+            "повторное использование и проверка owner session",
+        ):
+            self.assertIn(marker, text)
+
     def test_terminal_role_is_resolved_before_facade_protocol(self) -> None:
         text = SKILL.read_text()
         self.assertLess(
