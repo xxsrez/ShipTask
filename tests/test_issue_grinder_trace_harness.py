@@ -7,6 +7,7 @@ import unittest
 from scripts.issue_grinder_trace_harness import (
     BlockerContext,
     BlockerReport,
+    ExistingWorkArtifact,
     SafeAction,
     WriterPacket,
     decide_blocker,
@@ -15,6 +16,7 @@ from scripts.issue_grinder_trace_harness import (
     decide_goal_creation,
     decide_recovery,
     decide_stored_permission,
+    decide_startup_recovery,
     decide_transition,
     decide_writer_wave,
 )
@@ -70,6 +72,84 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
             decision.events.index("all_admissions_valid"),
             decision.events.index("authorize_implementation_dispatch"),
         )
+
+    def test_startup_inventory_precedes_fresh_work(self) -> None:
+        decision = decide_startup_recovery((), inventory_completed=False)
+
+        self.assertEqual(decision.action, "inspect_existing_work")
+        self.assertFalse(decision.may_prepare_fresh)
+        self.assertFalse(decision.may_resume)
+
+    def test_quiescent_checkpoint_is_resumed_instead_of_replaced(self) -> None:
+        decision = decide_startup_recovery(
+            (
+                ExistingWorkArtifact(
+                    "branch:codex/issue-grinder/md-331",
+                    scope_relation="exact",
+                    owner_state="quiescent",
+                ),
+            ),
+            inventory_completed=True,
+        )
+
+        self.assertEqual(decision.action, "resume_checkpoint")
+        self.assertTrue(decision.may_resume)
+        self.assertFalse(decision.may_prepare_fresh)
+
+    def test_active_or_ambiguous_artifact_blocks_parallel_replacement(self) -> None:
+        active = decide_startup_recovery(
+            (
+                ExistingWorkArtifact(
+                    "worktree:md-331",
+                    scope_relation="exact",
+                    owner_state="active",
+                ),
+            ),
+            inventory_completed=True,
+        )
+        ambiguous = decide_startup_recovery(
+            (
+                ExistingWorkArtifact(
+                    "diff:unknown",
+                    scope_relation="ambiguous",
+                    owner_state="unknown",
+                ),
+            ),
+            inventory_completed=True,
+        )
+
+        self.assertEqual(active.action, "continue_via_active_owner")
+        self.assertEqual(ambiguous.action, "resolve_artifact_scope")
+        self.assertFalse(active.may_prepare_fresh)
+        self.assertFalse(ambiguous.may_prepare_fresh)
+
+    def test_only_unrelated_artifacts_allow_fresh_work(self) -> None:
+        unrelated = decide_startup_recovery(
+            (
+                ExistingWorkArtifact(
+                    "worktree:user-experiment",
+                    scope_relation="unrelated",
+                    owner_state="unknown",
+                ),
+            ),
+            inventory_completed=True,
+        )
+        integrated = decide_startup_recovery(
+            (
+                ExistingWorkArtifact(
+                    "commit:finished",
+                    scope_relation="exact",
+                    owner_state="quiescent",
+                    integrated=True,
+                ),
+            ),
+            inventory_completed=True,
+        )
+
+        self.assertEqual(unrelated.action, "prepare_fresh")
+        self.assertTrue(unrelated.may_prepare_fresh)
+        self.assertEqual(integrated.action, "reuse_integrated_result")
+        self.assertFalse(integrated.may_prepare_fresh)
 
     def test_writer_wave_missing_admission_blocks_all_effects(self) -> None:
         decision = decide_writer_wave(

@@ -99,6 +99,97 @@ class WriterWaveDecision:
     defects: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class ExistingWorkArtifact:
+    artifact_id: str
+    scope_relation: str
+    owner_state: str
+    integrated: bool = False
+
+
+@dataclass(frozen=True)
+class StartupRecoveryDecision:
+    action: str
+    artifact_ids: tuple[str, ...]
+    may_prepare_fresh: bool
+    may_resume: bool
+
+
+def decide_startup_recovery(
+    artifacts: tuple[ExistingWorkArtifact, ...],
+    *,
+    inventory_completed: bool,
+) -> StartupRecoveryDecision:
+    """Choose packet-level recovery before any fresh implementation setup."""
+
+    if not inventory_completed:
+        return StartupRecoveryDecision(
+            action="inspect_existing_work",
+            artifact_ids=(),
+            may_prepare_fresh=False,
+            may_resume=False,
+        )
+
+    for artifact in artifacts:
+        if artifact.scope_relation not in {"exact", "ambiguous", "unrelated"}:
+            raise ValueError(
+                f"unsupported artifact scope relation: {artifact.scope_relation}"
+            )
+        if artifact.owner_state not in {"active", "quiescent", "unknown"}:
+            raise ValueError(f"unsupported artifact owner state: {artifact.owner_state}")
+
+    exact = tuple(item for item in artifacts if item.scope_relation == "exact")
+    unfinished = tuple(item for item in exact if not item.integrated)
+    if len(unfinished) > 1:
+        return StartupRecoveryDecision(
+            action="reconcile_existing_work",
+            artifact_ids=tuple(item.artifact_id for item in unfinished),
+            may_prepare_fresh=False,
+            may_resume=False,
+        )
+    if unfinished:
+        artifact = unfinished[0]
+        if artifact.owner_state == "active":
+            action = "continue_via_active_owner"
+            may_resume = False
+        elif artifact.owner_state == "quiescent":
+            action = "resume_checkpoint"
+            may_resume = True
+        else:
+            action = "resolve_ownership"
+            may_resume = False
+        return StartupRecoveryDecision(
+            action=action,
+            artifact_ids=(artifact.artifact_id,),
+            may_prepare_fresh=False,
+            may_resume=may_resume,
+        )
+    if exact:
+        return StartupRecoveryDecision(
+            action="reuse_integrated_result",
+            artifact_ids=tuple(item.artifact_id for item in exact),
+            may_prepare_fresh=False,
+            may_resume=False,
+        )
+
+    ambiguous = tuple(
+        item for item in artifacts if item.scope_relation == "ambiguous"
+    )
+    if ambiguous:
+        return StartupRecoveryDecision(
+            action="resolve_artifact_scope",
+            artifact_ids=tuple(item.artifact_id for item in ambiguous),
+            may_prepare_fresh=False,
+            may_resume=False,
+        )
+    return StartupRecoveryDecision(
+        action="prepare_fresh",
+        artifact_ids=(),
+        may_prepare_fresh=True,
+        may_resume=False,
+    )
+
+
 def decide_writer_wave(
     packets: tuple[WriterPacket, ...],
     *,

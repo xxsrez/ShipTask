@@ -69,6 +69,31 @@ class WriterWorktreeGuardTest(unittest.TestCase):
         )
         return worktree, json.loads(result.stdout)
 
+    def resume(
+        self,
+        name: str,
+        *,
+        branch: str,
+        allow_dirty: bool = False,
+    ) -> tuple[Path, subprocess.CompletedProcess[str]]:
+        worktree = self.root / name
+        arguments = [
+            "resume",
+            "--repo",
+            str(self.repository),
+            "--worktree",
+            str(worktree),
+            "--branch",
+            branch,
+            "--expect-head",
+            self.git("rev-parse", branch).stdout.strip(),
+            "--owner",
+            name,
+        ]
+        if allow_dirty:
+            arguments.append("--allow-dirty")
+        return worktree, self.guard(*arguments)
+
     def test_prepare_creates_distinct_locked_writer_worktrees(self) -> None:
         first, first_receipt = self.prepare("packet-one")
         second, second_receipt = self.prepare("packet-two")
@@ -181,6 +206,25 @@ class WriterWorktreeGuardTest(unittest.TestCase):
         self.assertEqual(reused_branch.returncode, 2)
         self.assertIn("writer branch already exists", reused_branch.stderr)
 
+        existing_path = self.root / "existing-path"
+        existing_path.mkdir()
+        reused_path = self.guard(
+            "prepare",
+            "--repo",
+            str(self.repository),
+            "--worktree",
+            str(existing_path),
+            "--branch",
+            "codex/issue-grinder/another-packet",
+            "--base",
+            self.base,
+            "--owner",
+            "another-packet",
+            check=False,
+        )
+        self.assertEqual(reused_path.returncode, 2)
+        self.assertIn("writer worktree path already exists", reused_path.stderr)
+
     def test_receipt_cannot_dirty_a_git_worktree(self) -> None:
         receipt_path = self.repository / "guard-receipt.json"
         rejected = self.guard(
@@ -233,6 +277,78 @@ class WriterWorktreeGuardTest(unittest.TestCase):
         self.assertEqual(rejected.returncode, 2)
         self.assertIn("dirty before admission", rejected.stderr)
         self.assertFalse(json.loads(admitted.stdout)["clean"])
+
+    def test_resume_restores_existing_branch_without_a_worktree(self) -> None:
+        branch = "codex/issue-grinder/interrupted-packet"
+        self.git("branch", branch, self.base)
+
+        worktree, result = self.resume("interrupted-packet", branch=branch)
+        receipt = json.loads(result.stdout)
+
+        self.assertEqual(receipt["operation"], "resume")
+        self.assertEqual(receipt["branch"], f"refs/heads/{branch}")
+        self.assertEqual(receipt["head"], self.base)
+        self.assertEqual(Path(str(receipt["worktree"])).resolve(), worktree.resolve())
+        self.assertTrue(receipt["linked"])
+        self.assertTrue(receipt["locked"])
+        self.assertTrue(receipt["clean"])
+
+    def test_resume_reuses_dirty_existing_worktree_only_when_allowed(self) -> None:
+        worktree, receipt = self.prepare("interrupted-packet")
+        self.git("worktree", "unlock", str(worktree))
+        (worktree / "source.txt").write_text("partial implementation\n", encoding="utf-8")
+        common_arguments = (
+            "resume",
+            "--repo",
+            str(self.repository),
+            "--worktree",
+            str(worktree),
+            "--branch",
+            "codex/issue-grinder/interrupted-packet",
+            "--expect-head",
+            self.base,
+            "--owner",
+            "interrupted-packet",
+        )
+
+        rejected = self.guard(*common_arguments, check=False)
+        after_rejection = self.git("worktree", "list", "--porcelain").stdout
+        resumed = self.guard(*common_arguments, "--allow-dirty")
+        resumed_receipt = json.loads(resumed.stdout)
+
+        self.assertEqual(rejected.returncode, 2)
+        self.assertIn("dirty without --allow-dirty", rejected.stderr)
+        checkpoint_record = after_rejection.split(
+            f"worktree {worktree.resolve()}\n", 1
+        )[1]
+        self.assertNotIn("\nlocked", checkpoint_record.split("\n\n", 1)[0])
+        self.assertEqual(
+            Path(str(resumed_receipt["worktree"])).resolve(), worktree.resolve()
+        )
+        self.assertFalse(resumed_receipt["clean"])
+        self.assertTrue(resumed_receipt["locked"])
+        self.assertEqual((worktree / "source.txt").read_text(), "partial implementation\n")
+
+    def test_resume_refuses_parallel_replacement_for_checked_out_branch(self) -> None:
+        existing_worktree, _ = self.prepare("interrupted-packet")
+        replacement = self.guard(
+            "resume",
+            "--repo",
+            str(self.repository),
+            "--worktree",
+            str(self.root / "replacement"),
+            "--branch",
+            "codex/issue-grinder/interrupted-packet",
+            "--expect-head",
+            self.base,
+            "--owner",
+            "replacement",
+            check=False,
+        )
+
+        self.assertEqual(replacement.returncode, 2)
+        self.assertIn(str(existing_worktree), replacement.stderr)
+        self.assertIn("resume that exact worktree", replacement.stderr)
 
 
 if __name__ == "__main__":

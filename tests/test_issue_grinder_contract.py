@@ -98,6 +98,7 @@ class IssueGrinderContractTest(unittest.TestCase):
             'WRITER_SCHEMA = "issue-grinder/writer-worktree/v1"',
             'GUARD_SCHEMA = "issue-grinder/integration-guard/v1"',
             'commands.add_parser("prepare")',
+            'commands.add_parser("resume")',
             'commands.add_parser("admit")',
             'commands.add_parser("snapshot")',
             'commands.add_parser("assert-unchanged")',

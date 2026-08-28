@@ -124,9 +124,11 @@ skill, реалистичный exact Task Manager scope и обычный proje
   concurrent implementation writer сначала возвращает admission receipt из
   собственной feature branch и Git worktree, получает implementation только
   отдельным follow-up, а integration checkout остаётся неизменным до fan-in;
-- новая session при доказанно остановленном прежнем writer подхватывает
-  существующий unfinished task-owned worktree/branch и продолжает его; active
-  или ambiguous ownership не захватывается и artifact не очищается;
+- новая session до fresh branch/worktree инвентаризирует относящиеся к live
+  scope worktree, branches, commits, staged/unstaged/untracked changes и
+  checkpoints; branch-only checkpoint получает linked checkout той же branch,
+  quiescent dirty checkpoint продолжается без потери diff, а active или
+  ambiguous ownership не захватывается и artifact не очищается;
 - genuinely simple bounded implementation/research packet без отдельного profile
   override получает Luna Max, complex packet наследует current model/effort, а
   ordinary Strategic Explainer всегда использует свой exact Luna Max profile;

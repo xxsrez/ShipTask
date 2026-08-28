@@ -59,7 +59,7 @@
 | `IG-MA-09` | `multi-agent-execution.md` | complete-packet-contract |
 | `IG-MA-10` | `SKILL.md` §2; `multi-agent-execution.md` | exact-integrated-verification |
 | `IG-MA-11` | `multi-agent-execution.md` | redispatch-after-return-and-scope-change |
-| `IG-MA-12` | `multi-agent-execution.md` | quiescent-takeover; active-owner-rejected |
+| `IG-MA-12` | `SKILL.md` §2; `multi-agent-execution.md`; `writer_worktree_guard.py`; trace harness | startup-inventory-before-fresh-work; branch-only-restored; dirty-checkpoint-resumed; active-owner-rejected; ambiguous-preserved |
 | `IG-MA-13` | `multi-agent-execution.md` | explicit-profile-preserved |
 | `IG-MA-14` | `multi-agent-execution.md` | simple-luna-max; small-diff-not-simple |
 | `IG-MA-15` | `multi-agent-execution.md` | material-packet-current-profile |
@@ -123,7 +123,13 @@ Corpus доказывает, что:
 - snapshot integration checkout обнаруживает даже незакоммиченную stray write;
 - receipt невозможно записать внутрь Git worktree и тем самым испачкать guard-ом
   защищаемый checkout;
-- существующие branch и worktree path не переиспользуются молча.
+- fresh `prepare` запрещён, пока exact-scope artifact требует reuse, продолжения
+  через active owner, takeover либо разрешения ownership;
+- branch-only checkpoint восстанавливается как linked worktree той же branch, а
+  существующий dirty worktree продолжается только с явным `--allow-dirty` без
+  потери diff;
+- replacement для уже checked-out branch и молчаливое присвоение ambiguous
+  artifact отвергаются;
 - implementation dispatch разрешается только после всех valid admission
   receipts; missing/failed admission, изменившийся integration checkout и
   отсутствующий task-owned commit запрещают fan-in и lifecycle effect.

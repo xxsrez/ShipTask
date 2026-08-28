@@ -292,7 +292,44 @@ coordinator не выдаёт его за собственную продукт�
 получения результата продолжает run; обойти платформенный gate скрытым способом
 он не пытается.
 
-### 3.1 Best-effort название текущей Codex task
+### 3.1 Startup recovery gate
+
+После разрешения repository и live scope, но до новой implementation, branch
+или worktree coordinator выполняет read-only Git inventory. Он читает все
+зарегистрированные worktree, локальные task-owned refs и их достижимость от
+integration target, staged/unstaged/untracked status каждого доступного
+checkout, незавершённые commits и известные run/worker checkpoints. Discovery
+не ограничивается текущим `cwd`, текущей branch или артефактами этой Codex
+сессии.
+
+Provenance устанавливается по совокупности evidence: сохранённым receipts и
+owner, exact issue/packet identity, branch/worktree metadata, commit history,
+затронутым поверхностям и live scope. Одного похожего имени branch или каталога
+недостаточно. После inventory каждый найденный candidate получает один исход:
+
+- уже интегрированный результат переиспользуется и проверяется, а не
+  реализуется повторно;
+- exact-scope checkpoint с остановленным owner подхватывается в фактическом
+  состоянии: существующий worktree используется на месте, branch без worktree
+  получает новый linked checkout той же branch, а staged/unstaged/untracked
+  изменения остаются частью checkpoint;
+- active owner продолжает владеть worktree; coordinator взаимодействует с ним
+  либо ждёт подтверждённой quiescence, но не создаёт replacement writer;
+- ambiguous или unrelated artifact сохраняется без reset, cleanup, merge или
+  присвоения run. Если он мешает выбранному integration target, coordinator
+  использует отдельный clean task-owned integration worktree либо сообщает
+  точный конфликт.
+
+Dirty root checkout, доказанно принадлежащий текущему scope, может продолжаться
+основным агентом как одна serial exclusive lane. Он не становится общим
+integration checkout для параллельной wave и не передаётся subagent-у. Для
+linked checkpoint bundled guard выполняет `resume`, затем обычный двухфазный
+`admit`; `--allow-dirty` означает только сохранение доказанно task-owned
+незавершённого diff после проверки quiescence. Recovery всегда предшествует
+fresh `prepare`, поэтому новая branch не может молча дублировать найденную
+работу.
+
+### 3.2 Best-effort название текущей Codex task
 
 `IG-UI-01` компилируется тем же безопасным first-turn contract, который
 использует legacy ShipTask, но с namespace Issue Grinder. Auto-title является
@@ -643,8 +680,10 @@ coordinator исполняет fail-closed protocol:
    Git worktree, чтобы guard сам не создавал mutation.
 3. Для каждого нового packet вызывает `prepare` с уникальными owner, branch и
    путём вне всех существующих worktree. Existing unfinished checkpoint не
-   дублируется: после проверки quiescence он проходит admission с текущими
-   branch/HEAD и явно разрешённым dirty state.
+   дублируется: после startup recovery и проверки quiescence `resume`
+   переиспользует exact worktree либо восстанавливает linked worktree той же
+   branch, после чего checkpoint проходит admission с текущими branch/HEAD и
+   явно разрешённым dirty state.
 4. Создаёт subagent сначала только для admission turn. В нём запрещены любые
    FileChange/implementation mutations; subagent запускает `admit` своим первым
    Git-действием именно с `cwd` своего worktree и возвращает JSON receipt.
@@ -700,7 +739,10 @@ identity, terminal state, Goal ref при наличии, task-owned Git identit
 publication/status receipts и незавершённые effects. Формат и место хранения
 выбираются по доступной platform capability; Architecture не требует
 несуществующий durable store. Возобновление сверяет checkpoint с live state и не
-принимает совместимый Goal либо тот же Release за достаточную lineage.
+принимает совместимый Goal либо тот же Release за достаточную lineage. Даже при
+отсутствующем durable run checkpoint startup recovery заново ищет Git-artifacts
+по `IG-MA-12`: отсутствие записи прошлой сессии не разрешает игнорировать
+однозначно связанную со scope ветку, worktree, commit или локальный diff.
 
 Git integration принимает только task-owned изменения с понятным происхождением.
 Чужие или пользовательские изменения не очищаются, не reset-ятся и не
