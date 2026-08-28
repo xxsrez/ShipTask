@@ -42,6 +42,7 @@
 | `IG-SCOPE-01` | `SKILL.md` §1; `task-manager-flow.md` | prompt-selector-precedence |
 | `IG-SCOPE-02` | `SKILL.md` §1 | explicit-default-release; implicit-missing-selector |
 | `IG-SCOPE-03` | `SKILL.md` §1; `task-manager-flow.md` | late-member; excluded-member; final-refresh |
+| `IG-UI-01` | `SKILL.md` §1; `thread-title.md` | fresh-placeholder-renamed; meaningful-title-preserved; ambiguous-candidate-preserved; title-capability-failure-nonblocking |
 | `IG-AUTO-01` | `SKILL.md` §4; `autonomy-and-environments.md` | explicit-persistence; implicit-no-extra-authority |
 | `IG-AUTO-02` | `SKILL.md` §3; blocker harness | preflight-unlock; explanation-unlock |
 | `IG-AUTO-03` | `SKILL.md` §4; environment harness | production-rejected; public-uat-allowed |
@@ -93,7 +94,10 @@ candidate blocker
 - одинаковый recovery повторился без нового evidence, изменившегося state или
   bounded fallback;
 - сохранённое `Да всегда` не применилось к эквивалентной future operation либо
-  расширилось на другую категорию/Production.
+  расширилось на другую категорию/Production;
+- auto-title перезаписал meaningful title, сработал на later turn, передал
+  discovery `threadId` в setter, повторил failed setter либо заблокировал
+  delivery из-за отсутствующей capability.
 
 Структурная полнота отчёта проверяется отдельно от качества прозы: stopped work,
 primary cause, checkpoint, unverified remainder, impact, user action и resume
@@ -110,6 +114,9 @@ condition обязательны. Model-forward evaluator дополнитель
 - видеть Task Manager dependency и optional Strategic Explainer;
 - правильно различать explicit delivery, implicit exact selector, implicit
   missing selector и read/status/planning negative prompts;
+- в доказанной первой task с catalog placeholder и canonical scope сделать не
+  более одной best-effort попытки `Issue Grinder · ...`, сохранив meaningful
+  title и продолжив при отсутствии capability;
 - на synthetic blocker case продолжить после найденного safe action, а на
   настоящем authority blocker-е дать полный причинный report.
 

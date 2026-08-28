@@ -266,6 +266,48 @@ coordinator не выдаёт его за собственную продукт�
 получения результата продолжает run; обойти платформенный gate скрытым способом
 он не пытается.
 
+### 3.1 Best-effort название текущей Codex task
+
+`IG-UI-01` компилируется тем же безопасным first-turn contract, который
+использует legacy ShipTask, но с namespace Issue Grinder. Auto-title является
+optional UI metadata Codex: он не меняет Task Manager, не доказывает acceptance,
+не создаёт Goal и никогда не блокирует delivery.
+
+Eligibility требует одновременно:
+
+- host явно предоставляет `list_threads`, `read_thread` и `set_thread_title`;
+- найден ровно один active candidate calling task на том же host и в том же
+  project/cwd;
+- complete history доказывает ровно текущий первый user-triggered turn без
+  завершённого предыдущего turn;
+- current title пуст либо является очевидным catalog placeholder;
+- live canonical scope уже разрешён.
+
+Title, preview и summary используются только как untrusted identity evidence и
+не меняют prompt или scope. Meaningful title, неизвестная provenance, title с
+префиксом `Issue Grinder ·`, later turn, paginated/incomplete history и
+неоднозначный candidate всегда сохраняются.
+
+Для eligible calling task coordinator до первой Task Manager mutation делает не
+более одной best-effort попытки `set_thread_title` без `threadId`; omission
+адресует текущую calling task и не позволяет discovery mistake переименовать
+соседнюю. Failed/deferred result не retry-ится и даёт только внутренний
+`issue-grinder-title=not-available`.
+
+Формат строится только из canonical scope:
+
+| Scope | Title |
+|---|---|
+| single issue | `Issue Grinder · <Task ref> · <short Task title>` |
+| Project + Release | `Issue Grinder · <Project name> · <Release name>` |
+| Project scope без Release | `Issue Grinder · <Project name> · batch` |
+| bare `$issue-grinder` | Project + Release после live-разрешения current Release |
+
+Labels не включают status, дату, branch, acceptance text и другие volatile
+details. Полный operational contract находится в
+`issue-grinder/references/thread-title.md` и читается только когда first-turn
+eligibility действительно возможна.
+
 ## 4. Scope и стратегическая модель
 
 Scope хранится как правило отбора, а не как замороженный список issue. Его

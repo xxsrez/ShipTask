@@ -46,6 +46,9 @@ class IssueGrinderContractTest(unittest.TestCase):
             "report не задерживается",
             "будущих run",
             "одинаковая попытка с тем же результатом",
+            "Issue Grinder ·",
+            "не более одного раза без",
+            "Meaningful title",
             "To Do → In Progress",
             "comment committed / status failed",
             "Blind retry",
@@ -67,7 +70,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertEqual(len(rows), len(set(rows)), "duplicate coverage rows")
         self.assertEqual(set(rows), requirement_ids)
-        self.assertEqual(len(requirement_ids), 38)
+        self.assertEqual(len(requirement_ids), 39)
 
     def test_architecture_runtime_layout_exists(self) -> None:
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
@@ -75,6 +78,7 @@ class IssueGrinderContractTest(unittest.TestCase):
             "SKILL.md",
             "agents/openai.yaml",
             "references/task-manager-flow.md",
+            "references/thread-title.md",
             "references/autonomy-and-environments.md",
             "references/multi-agent-execution.md",
             "references/strategic-explainer.md",

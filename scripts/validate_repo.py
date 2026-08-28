@@ -21,6 +21,7 @@ ISSUE_MULTI_AGENT = (
 ISSUE_EXPLAINER = (
     ROOT / "issue-grinder" / "references" / "strategic-explainer.md"
 )
+ISSUE_TITLE = ROOT / "issue-grinder" / "references" / "thread-title.md"
 SHIP_SKILL = ROOT / "ship-tasks" / "SKILL.md"
 SHIP_METADATA = ROOT / "ship-tasks" / "agents" / "openai.yaml"
 COMPOSER_SKILL = ROOT / "task-composer" / "SKILL.md"
@@ -165,6 +166,7 @@ CORE_FILES = (
     ISSUE_AUTONOMY,
     ISSUE_MULTI_AGENT,
     ISSUE_EXPLAINER,
+    ISSUE_TITLE,
     SHIP_SKILL,
     SHIP_METADATA,
     COMPOSER_SKILL,
@@ -370,6 +372,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         "финальный комментарий только пользователю в чате",
         "Production запрещён полностью",
         "[Task Manager flow](references/task-manager-flow.md)",
+        "[title contract](references/thread-title.md)",
         "[Autonomy and environments](references/autonomy-and-environments.md)",
         "[multi-agent execution](references/multi-agent-execution.md)",
         "[Strategic Explainer routing](references/strategic-explainer.md)",
@@ -421,6 +424,16 @@ def validate_issue_skill(errors: list[str]) -> None:
         "observable resume condition",
         "только пользователю в чате",
     )
+    require(
+        errors,
+        ISSUE_TITLE,
+        "первый user turn новой Codex task",
+        "catalog-generated\n   placeholder",
+        "Issue Grinder · <Task ref> · <short Task title>",
+        "set_thread_title` не более одного раза без\n`threadId`",
+        "Meaningful title",
+        "не retry",
+    )
 
     requirement_ids = re.findall(
         r"^### `(IG-[A-Z]+-\d{2})`", read(ISSUE_REQUIREMENTS), re.MULTILINE
@@ -429,6 +442,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         *(f"IG-FLOW-{number:02d}" for number in range(1, 7)),
         *(f"IG-GOAL-{number:02d}" for number in range(1, 7)),
         *(f"IG-SCOPE-{number:02d}" for number in range(1, 4)),
+        "IG-UI-01",
         *(f"IG-AUTO-{number:02d}" for number in range(1, 6)),
         *(f"IG-MA-{number:02d}" for number in range(1, 19)),
     ]
@@ -458,6 +472,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "Если scope вырос с одного issue до нескольких",
         "весь входящий в scope фронт issue",
         "не превращать эту проверку в бюрократическую блокировку",
+        "Название новой задачи Codex по возможности",
+        "Issue Grinder ·",
         "Production",
         "Luna",
     )
@@ -471,6 +487,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "удаляет локально `ship-tasks@srez-marketplace`",
         "candidate blocker",
         "post-explanation reflection",
+        "Best-effort название текущей Codex task",
+        "Issue Grinder · <Project name> · <Release name>",
         "наблюдаемым evaluation scenario",
     )
 
