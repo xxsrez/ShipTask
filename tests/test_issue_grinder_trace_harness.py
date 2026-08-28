@@ -12,6 +12,8 @@ from scripts.issue_grinder_trace_harness import (
     decide_environment_effect,
     decide_finalization,
     decide_goal_creation,
+    decide_recovery,
+    decide_stored_permission,
     decide_transition,
 )
 
@@ -143,10 +145,13 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
             self.report,
         )
 
-        self.assertEqual(decision.action, "continue_platform_blocker_audit")
-        self.assertFalse(decision.may_publish)
-        self.assertFalse(decision.may_stop)
+        self.assertEqual(decision.action, "terminal_blocker")
+        self.assertTrue(decision.may_publish)
+        self.assertTrue(decision.may_stop)
         self.assertFalse(decision.may_update_goal_blocked)
+        self.assertIn("publish_blocker_report", decision.events)
+        self.assertIn("goal_block_pending_audit", decision.events)
+        self.assertNotIn("update_goal:blocked", decision.events)
 
     def test_optional_improvement_does_not_create_bureaucratic_loop(self) -> None:
         decision = decide_blocker(
@@ -184,6 +189,90 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
         self.assertEqual(
             decide_finalization(active_issue_count=0, material_action_available=True),
             "continue_work",
+        )
+
+    def test_goal_reuse_requires_same_run_continuity(self) -> None:
+        self.assertEqual(
+            decide_goal_creation(
+                explicit_run=True,
+                active_issue_count=2,
+                compatible_goal_exists=True,
+                same_run_continuity=True,
+            ),
+            "reuse_goal",
+        )
+        self.assertEqual(
+            decide_goal_creation(
+                explicit_run=True,
+                active_issue_count=2,
+                compatible_goal_exists=True,
+                same_run_continuity=False,
+            ),
+            "goal_continuity_required",
+        )
+        self.assertEqual(
+            decide_goal_creation(
+                explicit_run=False,
+                active_issue_count=3,
+                compatible_goal_exists=True,
+                same_run_continuity=False,
+            ),
+            "no_goal",
+        )
+
+    def test_recovery_requires_changed_input_or_uses_bounded_exit(self) -> None:
+        self.assertEqual(
+            decide_recovery(
+                previous_progress_fingerprint="scope-v1:error-timeout",
+                current_progress_fingerprint="scope-v2:error-timeout",
+                fallback_available=False,
+            ),
+            "continue_with_changed_input",
+        )
+        self.assertEqual(
+            decide_recovery(
+                previous_progress_fingerprint="scope-v1:error-timeout",
+                current_progress_fingerprint="scope-v1:error-timeout",
+                fallback_available=True,
+            ),
+            "use_fallback",
+        )
+        self.assertEqual(
+            decide_recovery(
+                previous_progress_fingerprint="scope-v1:error-timeout",
+                current_progress_fingerprint="scope-v1:error-timeout",
+                fallback_available=False,
+            ),
+            "candidate_blocker",
+        )
+
+    def test_stored_always_permission_is_narrow_and_cross_run(self) -> None:
+        self.assertEqual(
+            decide_stored_permission(
+                persisted=True,
+                same_project=True,
+                same_category=True,
+                target_production=False,
+            ),
+            "authorize_exact_category",
+        )
+        self.assertEqual(
+            decide_stored_permission(
+                persisted=True,
+                same_project=True,
+                same_category=False,
+                target_production=False,
+            ),
+            "request_permission",
+        )
+        self.assertEqual(
+            decide_stored_permission(
+                persisted=True,
+                same_project=True,
+                same_category=True,
+                target_production=True,
+            ),
+            "reject_production",
         )
 
     def test_comment_transaction_and_backlog_boundary(self) -> None:

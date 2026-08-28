@@ -203,6 +203,16 @@ tracker-ом или памятью. Недоступность adapter-а обн
 mutations и выдаётся как точная technical/context failure. Strategic Explainer,
 напротив, остаётся optional communication dependency с native path.
 
+Dependency declaration делает adapter доступным, но не заменяет его current wire
+contract. Перед первой Task Manager mutation coordinator сверяет доступные tool
+schemas и использует только реально объявленные операции и поля; названия,
+idempotency и conflict shape не угадываются и не копируются в Issue Grinder как
+вторая быстро устаревающая схема. Если обязательная semantic capability —
+pagination, versioned write, comment/read-back или Goal operation — отсутствует,
+это exact capability failure до соответствующего write. Механический guard,
+если он нужен, принадлежит Task Manager adapter-у, а Issue Grinder сохраняет
+собственные lifecycle и authority decisions.
+
 ## 3. Режим прогона и ранний context gate
 
 В начале нового run coordinator фиксирует два разных факта:
@@ -214,8 +224,13 @@ mutations и выдаётся как точная technical/context failure. Str
 Прошлый `$issue-grinder` не разрешает начинать новый явный run или новый Goal.
 Однако `run mode` не теряется посреди того же незавершённого прогона из-за
 следующего turn, compaction, автоматического продолжения или восстановления
-контекста. Совместимый активный Goal и task-owned run checkpoints сохраняют
-происхождение текущего run; при отсутствии доказанной непрерывности старый
+контекста. Непрерывность доказывается не одним совпадением selector-а: checkpoint
+связывает origin `explicit|implicit`, identity Project/selector, terminal flag,
+Goal ref при его наличии и task-owned implementation/effect receipts. Для
+single-issue run отсутствие Goal не уничтожает origin: тот же thread lineage и
+согласованные checkpoints сохраняют его отдельно. Совместимый активный Goal
+является одним из anchors, но сам по себе не доказывает тот же run и не переносит
+autonomy в новый implicit request. При отсутствии доказанной непрерывности старый
 explicit marker не восстанавливается по догадке. Terminal result либо явная
 отмена, замена или существенная смена текущего прогона пользователем закрывают
 этот режим.
@@ -291,14 +306,17 @@ Coordinator перечитывает scope:
 - наблюдаемое условие завершения.
 
 Goal создаётся только при выполнении `IG-GOAL-01`. До `create_goal` coordinator
-читает текущий Goal. Совместимый незавершённый Goal переиспользуется, а его
-сохранённый selector сверяется с live scope без ложного обещания переписать
-objective через недоступный интерфейс. Несовместимый Goal не перезаписывается и
-не завершается ради Issue Grinder. Если платформа не позволяет завести второй
-Goal, coordinator сохраняет найденный безопасный frontier как read-only
-checkpoint и сообщает несовместимость как точное препятствие Goal lifecycle;
-он не начинает требующую Goal изменяющую работу без обязательного Goal и не
-присваивает чужую цель.
+читает текущий Goal. Совместимый незавершённый Goal переиспользуется только при
+доказанной continuity текущего run; совпадения selector-а и objective для этого
+недостаточно. Его сохранённый selector сверяется с live scope без ложного
+обещания переписать objective через недоступный интерфейс. Новый implicit run не
+присваивает даже совместимый Goal и не наследует из него explicit autonomy.
+Несовместимый либо не принадлежащий доказанно текущему run Goal не
+перезаписывается и не завершается ради Issue Grinder. Если платформа не позволяет
+завести второй Goal, coordinator сохраняет найденный безопасный frontier как
+read-only checkpoint и сообщает несовместимость как точное препятствие Goal
+lifecycle; он не начинает требующую Goal изменяющую работу без обязательного
+Goal и не присваивает чужую цель.
 
 Если явный run начался с одного issue, coordinator работает без Goal и создаёт
 его лишь после роста scope. После создания Goal уменьшение scope не уничтожает
@@ -385,6 +403,13 @@ coordinator сначала reconciles live state и повторяет толь�
 unknown status outcome — повторным чтением issue. Повторная запись допустима
 только после доказательства отсутствующего эффекта.
 
+Publication checkpoint сохраняет доступную identity операции: returned comment
+ref или idempotency key adapter-а, exact target issue/version и digest готового
+текста. Если adapter не предоставляет operation identity, coordinator не
+изобретает поле, а reconciles bounded thread window по фактическому результату.
+Одинаковая повторная проверка без изменения live state не создаёт нового права
+на запись.
+
 Если Strategic Explainer отсутствует, сразу используется native writing. Если
 установленный facade вернул caller error, coordinator исправляет semantic call
 по сообщённой причине. Настоящая техническая ошибка provider-а раскрывается как
@@ -429,12 +454,24 @@ issue без Goal. Наличие Goal меняет только его lifecycl
 Полученный текст и его source basis обязательно проходят отдельную
 `post-explanation reflection` по current primary sources: объяснение не является
 доказательством собственной блокировки.
-Отсутствие frontier сначала фиксируется как candidate blocker. Goal получает
-terminal `blocked` только когда дальнейшее продвижение действительно требует
-пользовательского решения или новой authority и выполнен действующий
-платформенный blocker audit. Пока платформа ещё не разрешает terminal
-`blocked`, Goal остаётся активным; coordinator не симулирует завершение и не
-теряет точное условие возобновления.
+Отсутствие frontier сначала фиксируется как candidate blocker. После принятой
+post-explanation reflection полный blocker-report показывается пользователю и
+текущая попытка останавливается с точным resume condition независимо от наличия
+Goal. Goal получает terminal `blocked` только когда дальнейшее продвижение
+действительно требует пользовательского решения или новой authority и выполнен
+действующий платформенный blocker audit. Пока платформа ещё не разрешает
+terminal `blocked`, Goal остаётся активным, а report честно называет это
+расхождение; audit не задерживает объяснение пользователю и не запускает
+внутренний бесконечный цикл.
+
+Каждая recovery-ветка имеет наблюдаемую границу прогресса. Coordinator сравнивает
+scope/frontier, object versions, attempted effect, result/error class, available
+authority и новый evidence. Повтор допустим, когда изменился хотя бы один из этих
+входов либо выбран другой существенный action. Та же комбинация без нового
+evidence не считается продвижением: caller error переходит к исправленному
+semantic call, повторившаяся provider failure — к native path, unknown write — к
+live reconciliation, а исчерпанный safe path — к candidate blocker. Это не
+универсальный лимит попыток, а bounded recovery конкретного effect.
 
 Завершение использует fresh full inventory выбранного scope. Отсутствие issue в
 `To Do`, `In Progress` и `In Review` является достаточным предметным критерием;
@@ -472,14 +509,19 @@ canonical refs, optimistic concurrency и read-back.
 доказать synthetic/ephemeral fixtures без реальных данных и получателей,
 coordinator выбирает такой путь самостоятельно.
 
-Если prompt необходим, UI selector предлагает `Да`, `Нет` и `Да всегда`.
-Категория `Да всегда` строится из типа действия, класса данных и среды, чтобы не
-стать безграничным разрешением. После выбора она сохраняется в project memory и
-в дальнейшем применяется только к эквивалентным операциям этого проекта.
-Persistence подтверждается read-back. Если project memory недоступна, текущее
-`Да` остаётся действительным для exact action, но coordinator честно сообщает,
-что обещание `Да всегда` не удалось сохранить, и не симулирует постоянное
-разрешение.
+Если prompt необходим, UI selector предлагает `Да`, `Нет` и `Да всегда`. Если
+специализированная selector capability недоступна, coordinator показывает те же
+три взаимоисключающих варианта обычным структурированным вопросом и ждёт явного
+выбора; отсутствие UI не считается согласием.
+Категория `Да всегда` строится из типа действия, класса данных, среды и
+ограниченного resource scope, чтобы не стать безграничным разрешением. После
+выбора она сохраняется в project memory и в дальнейшем, включая будущие run,
+применяется только к эквивалентным операциям этого проекта. Сохранённое
+разрешение не превращает implicit run в explicit, не разрешает Production и не
+расширяет соседние action/data/environment/resource категории. Persistence
+подтверждается read-back. Если project memory недоступна, текущее `Да` остаётся
+действительным для exact action, но coordinator честно сообщает, что обещание
+`Да всегда` не удалось сохранить, и не симулирует постоянное разрешение.
 
 `Нет` запрещает exact action и эквивалентные попытки обойти отказ. Coordinator
 заново ищет безопасный путь в пределах прежних полномочий и блокируется только
@@ -543,6 +585,13 @@ Material uncertainty немедленно возвращает тот же check
 подтверждается read-back. Unknown write outcome сначала reconciles через live
 read; повторять mutation вслепую нельзя.
 
+Run checkpoint хранит только проверяемую continuity: origin, Project/selector
+identity, terminal state, Goal ref при наличии, task-owned Git identity,
+publication/status receipts и незавершённые effects. Формат и место хранения
+выбираются по доступной platform capability; Architecture не требует
+несуществующий durable store. Возобновление сверяет checkpoint с live state и не
+принимает совместимый Goal либо тот же Release за достаточную lineage.
+
 Git integration принимает только task-owned изменения с понятным происхождением.
 Чужие или пользовательские изменения не очищаются, не reset-ятся и не
 присваиваются run. При interruption сохраняются ветки, worktree, результаты
@@ -570,16 +619,17 @@ evaluation scenario.
 Отсутствующий exact ID считается пробелом компиляции, но совпадение текста или
 ID само по себе не доказывает поведение.
 
-Evaluation состоит из четырёх слоёв:
+Целевой release gate состоит из четырёх слоёв; их текущий фактический статус
+фиксируется в `evaluation.md`, а описание слоя не считается доказательством его
+исполнения:
 
 1. **Static contract.** Проверяет frontmatter, manifest, ссылки, уникальность и
    полноту `IG-*`, разрешимость references, отсутствие скрытой второй policy и
    byte identity source → Marketplace → installed cache.
 2. **Deterministic trace harness.** Получает синтетическое начальное состояние,
    scripted tool results и fault injection, затем проверяет required/forbidden
-   events и final state. Harness наблюдает reads, Goal calls, comments, status
-   mutations, user prompts, subagent/worktree events, integration, environment
-   effects и final report; он не пытается воспроизвести внутреннее reasoning.
+   decisions и их порядок. Текущий harness является oracle отдельных hard
+   invariants и не доказывает, что Markdown runtime вызовет те же effects.
 3. **Independent model-forward evaluation.** Запускает реальный skill на
    синтетическом Task Manager и временном Git repository. Детерминированные
    assertions проверяют effects, а отдельный evaluator — стратегический смысл,
@@ -597,8 +647,10 @@ Evaluation состоит из четырёх слоёв:
   pagination и concurrent status change;
 - недоступный Task Manager adapter и навязанный платформой approval, который не
   превращается во внутренний permission loop;
-- совместимый и несовместимый активный Goal, сохранение explicit run mode и
-  платформенный blocker audit;
+- совместимый и несовместимый активный Goal, доказанная continuity против одного
+  совпадения selector-а, single-issue explicit checkpoint и новый implicit run;
+- платформенный blocker audit, включая принятый report при отложенной Goal
+  mutation;
 - каждый lifecycle transition, `comment committed / status failed`, оба
   unknown outcomes, version conflict и защита от duplicate comment;
 - реализацию `blocked by` в integration base, код только в постороннем worker
@@ -608,13 +660,16 @@ Evaluation состоит из четырёх слоёв:
 - non-material verification gap и соседний material gap, где исключение
   запрещено;
 - public UAT, неизвестный target, Production alias, попытку production read и
-  узкий `Да всегда` с успешным и неуспешным memory read-back;
+  узкий `Да всегда` с успешным/неуспешным memory read-back, future equivalent
+  operation и несовпадающую категорию;
 - synthetic substitute для real data/recipient и настоящий high-risk внешний
   effect, требующий selector-а;
 - независимые и конфликтующие writer surfaces, недоступных subagents, worker
   interruption, Luna return и exact integrated verification;
 - optional improvement при финальной reflection, который попадает в отчёт, но
-  не создаёт бесконечный run.
+  не создаёт бесконечный run;
+- повтор recovery с тем же progress fingerprint, changed-input retry, доступный
+  fallback и переход к candidate blocker после исчерпания safe path.
 
 Hard invariants — отсутствие Production access и Backlog mutations, корректный
 Goal gate, обязательный comment, exclusive writable worktree, отсутствие blind

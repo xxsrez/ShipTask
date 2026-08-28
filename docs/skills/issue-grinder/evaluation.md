@@ -6,17 +6,24 @@
 
 ## Слои проверки
 
-1. Static contract связывает каждый `IG-*` с runtime surface и сценарием,
-   проверяет metadata, references и отсутствие незавершённых placeholders.
-2. Детерминированный trace harness наблюдает только внешние решения и порядок
-   effects. Он не симулирует reasoning и не становится runtime engine.
-3. Model-forward cases запускают установленный skill в новой сессии на
+1. Static contract связывает каждый `IG-*` с runtime surface и required
+   сценарием, проверяет metadata, references и отсутствие незавершённых
+   placeholders. Этот слой исполняется repository validators.
+2. Детерминированный trace harness проверяет отдельные внешние решения и порядок
+   effects. Он не читает `SKILL.md`, не симулирует reasoning, не становится
+   runtime engine и поэтому является oracle hard invariants, а не тестом skill.
+3. Model-forward cases должны запускать установленный skill в новой сессии на
    синтетическом Task Manager scope; generator не получает rubric или expected
-   answer.
+   answer. Repository-executable harness этого слоя пока отсутствует, поэтому
+   coverage names ниже являются обязательным corpus, а не доказанными PASS.
 4. Distribution smoke проверяет source → Marketplace → installed cache,
-   activation и отсутствие одновременно установленного ShipTask.
+   activation и отсутствие одновременно установленного ShipTask. Его evidence
+   относится к конкретному snapshot и не переносится на следующую версию.
 
 ## Coverage map
+
+Таблица задаёт требуемую трассу и имена observable cases. Наличие строки не
+означает, что соответствующий model-forward case уже исполнен.
 
 | Requirement | Runtime surface | Observable scenarios |
 |---|---|---|
@@ -76,11 +83,17 @@ candidate blocker
 - explanation выявила проверенный safe action, но run остановился;
 - blocker-report или `update_goal(blocked)` произошли до post-explanation
   reflection;
+- platform blocker audit задержал принятый blocker-report пользователю;
 - incomplete/raw-error report был опубликован;
 - caller error Strategic Explainer превратился в blocker вместо исправления;
 - public UAT, синтетический fixture или непроверенная альтернатива были названы
   terminal причиной без попытки самостоятельного продолжения;
-- optional improvement создал бесконечную итерацию.
+- optional improvement создал бесконечную итерацию;
+- совместимый Goal без доказанной continuity был присвоен новому run;
+- одинаковый recovery повторился без нового evidence, изменившегося state или
+  bounded fallback;
+- сохранённое `Да всегда` не применилось к эквивалентной future operation либо
+  расширилось на другую категорию/Production.
 
 Структурная полнота отчёта проверяется отдельно от качества прозы: stopped work,
 primary cause, checkpoint, unverified remainder, impact, user action и resume

@@ -143,15 +143,18 @@ def decide_blocker(
             defects=tuple(f"missing_report_field:{name}" for name in missing),
         )
 
+    events.append("publish_blocker_report")
     if context.goal_active and not context.platform_blocker_audit_passed:
-        events.append("continue_platform_blocker_audit")
-        return _nonterminal(
-            "continue_platform_blocker_audit",
-            events,
-            "platform_blocker_audit_pending",
+        events.extend(("goal_block_pending_audit", "stop"))
+        return BlockerDecision(
+            action="terminal_blocker",
+            events=tuple(events),
+            may_publish=True,
+            may_stop=True,
+            may_update_goal_blocked=False,
+            defects=("platform_blocker_audit_pending",),
         )
 
-    events.append("publish_blocker_report")
     if context.goal_active:
         events.append("update_goal:blocked")
     events.append("stop")
@@ -165,12 +168,20 @@ def decide_blocker(
 
 
 def decide_goal_creation(
-    *, explicit_run: bool, active_issue_count: int, compatible_goal_exists: bool
+    *,
+    explicit_run: bool,
+    active_issue_count: int,
+    compatible_goal_exists: bool,
+    same_run_continuity: bool = False,
 ) -> str:
     if active_issue_count < 0:
         raise ValueError("active_issue_count must be non-negative")
     if compatible_goal_exists:
-        return "reuse_goal"
+        if same_run_continuity:
+            return "reuse_goal"
+        if explicit_run and active_issue_count > 1:
+            return "goal_continuity_required"
+        return "no_goal"
     if explicit_run and active_issue_count > 1:
         return "create_goal"
     return "no_goal"
@@ -228,6 +239,33 @@ def decide_environment_effect(*, explicit_run: bool, target: str | None) -> str:
     if normalized in {"uat", "public uat", "staging", "stage", "test"}:
         return "perform_nonproduction_effect"
     return "resolve_environment_before_effect"
+
+
+def decide_recovery(
+    *,
+    previous_progress_fingerprint: str | None,
+    current_progress_fingerprint: str,
+    fallback_available: bool,
+) -> str:
+    if previous_progress_fingerprint != current_progress_fingerprint:
+        return "continue_with_changed_input"
+    if fallback_available:
+        return "use_fallback"
+    return "candidate_blocker"
+
+
+def decide_stored_permission(
+    *,
+    persisted: bool,
+    same_project: bool,
+    same_category: bool,
+    target_production: bool,
+) -> str:
+    if target_production:
+        return "reject_production"
+    if persisted and same_project and same_category:
+        return "authorize_exact_category"
+    return "request_permission"
 
 
 def _first(actions: tuple[SafeAction, ...], attribute: str) -> SafeAction | None:
