@@ -22,6 +22,9 @@ ISSUE_EXPLAINER = (
     ROOT / "issue-grinder" / "references" / "strategic-explainer.md"
 )
 ISSUE_TITLE = ROOT / "issue-grinder" / "references" / "thread-title.md"
+ISSUE_WORKTREE_GUARD = (
+    ROOT / "issue-grinder" / "scripts" / "writer_worktree_guard.py"
+)
 SHIP_SKILL = ROOT / "ship-tasks" / "SKILL.md"
 SHIP_METADATA = ROOT / "ship-tasks" / "agents" / "openai.yaml"
 COMPOSER_SKILL = ROOT / "task-composer" / "SKILL.md"
@@ -167,6 +170,7 @@ CORE_FILES = (
     ISSUE_MULTI_AGENT,
     ISSUE_EXPLAINER,
     ISSUE_TITLE,
+    ISSUE_WORKTREE_GUARD,
     SHIP_SKILL,
     SHIP_METADATA,
     COMPOSER_SKILL,
@@ -214,6 +218,7 @@ CURRENT_CONTRACT_FILES = (
     ISSUE_SPEC,
     ISSUE_EVALUATION,
     ISSUE_REQUIREMENTS,
+    ISSUE_WORKTREE_GUARD,
     SHIP_SKILL,
     SHIP_METADATA,
     COMPOSER_SKILL,
@@ -375,6 +380,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         "[title contract](references/thread-title.md)",
         "[Autonomy and environments](references/autonomy-and-environments.md)",
         "[multi-agent execution](references/multi-agent-execution.md)",
+        "двухфазного worktree admission",
         "[Strategic Explainer routing](references/strategic-explainer.md)",
     )
     require(
@@ -410,10 +416,28 @@ def validate_issue_skill(errors: list[str]) -> None:
         ISSUE_MULTI_AGENT,
         "Только coordinator владеет Goal",
         "собственные feature branch и Git worktree",
+        "Writer admission — hard gate",
+        "writer_worktree_guard.py",
+        "admission-only",
+        "integration checkout read-only",
+        "assert-unchanged",
+        "task-owned commit",
         "gpt-5.6-luna",
         "`max`",
         "contract/context conflict",
     )
+    require(
+        errors,
+        ISSUE_WORKTREE_GUARD,
+        'WRITER_SCHEMA = "issue-grinder/writer-worktree/v1"',
+        'GUARD_SCHEMA = "issue-grinder/integration-guard/v1"',
+        'commands.add_parser("prepare")',
+        'commands.add_parser("admit")',
+        'commands.add_parser("snapshot")',
+        'commands.add_parser("assert-unchanged")',
+        '"worktree",\n        "add",\n        "--lock"',
+    )
+    forbid(errors, ISSUE_WORKTREE_GUARD, '"--force"')
     require(
         errors,
         ISSUE_EXPLAINER,

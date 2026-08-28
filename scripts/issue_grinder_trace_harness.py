@@ -80,6 +80,114 @@ class BlockerDecision:
     defects: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class WriterPacket:
+    owner: str
+    prepared: bool
+    admission_receipt_valid: bool
+    implementation_dispatched: bool = False
+    task_owned_commit: bool = False
+
+
+@dataclass(frozen=True)
+class WriterWaveDecision:
+    action: str
+    events: tuple[str, ...]
+    may_dispatch_implementation: bool
+    may_fan_in: bool
+    may_write_lifecycle: bool
+    defects: tuple[str, ...] = ()
+
+
+def decide_writer_wave(
+    packets: tuple[WriterPacket, ...],
+    *,
+    integration_snapshot_valid: bool,
+    integration_unchanged: bool,
+) -> WriterWaveDecision:
+    """Apply the two-phase writer barrier before dispatch and fan-in."""
+
+    events = ["writer_wave"]
+    if not packets:
+        return _writer_wave_stop("no_writer_packets", events)
+    if not integration_snapshot_valid:
+        return _writer_wave_stop("invalid_integration_snapshot", events)
+    events.append("integration_snapshot_valid")
+
+    invalid_dispatch = tuple(
+        packet.owner
+        for packet in packets
+        if packet.implementation_dispatched
+        and (not packet.prepared or not packet.admission_receipt_valid)
+    )
+    if invalid_dispatch:
+        return _writer_wave_stop(
+            "dispatch_without_admission",
+            events,
+            *(f"owner:{owner}" for owner in invalid_dispatch),
+        )
+
+    missing_prepare = tuple(packet.owner for packet in packets if not packet.prepared)
+    if missing_prepare:
+        return _writer_wave_stop(
+            "writer_not_prepared",
+            events,
+            *(f"owner:{owner}" for owner in missing_prepare),
+        )
+    events.append("all_writers_prepared")
+
+    missing_admission = tuple(
+        packet.owner for packet in packets if not packet.admission_receipt_valid
+    )
+    if missing_admission:
+        return WriterWaveDecision(
+            action="await_admission",
+            events=tuple((*events, "admission_pending")),
+            may_dispatch_implementation=False,
+            may_fan_in=False,
+            may_write_lifecycle=False,
+            defects=tuple(f"owner:{owner}" for owner in missing_admission),
+        )
+    events.append("all_admissions_valid")
+
+    if not all(packet.implementation_dispatched for packet in packets):
+        events.append("authorize_implementation_dispatch")
+        return WriterWaveDecision(
+            action="dispatch_implementation",
+            events=tuple(events),
+            may_dispatch_implementation=True,
+            may_fan_in=False,
+            may_write_lifecycle=False,
+        )
+    events.append("implementation_dispatched")
+
+    if not integration_unchanged:
+        return _writer_wave_stop("integration_checkout_changed", events)
+    events.append("integration_checkout_unchanged")
+
+    missing_commit = tuple(
+        packet.owner for packet in packets if not packet.task_owned_commit
+    )
+    if missing_commit:
+        return WriterWaveDecision(
+            action="await_task_owned_commits",
+            events=tuple((*events, "commit_pending")),
+            may_dispatch_implementation=False,
+            may_fan_in=False,
+            may_write_lifecycle=False,
+            defects=tuple(f"owner:{owner}" for owner in missing_commit),
+        )
+
+    events.append("fan_in_ready")
+    return WriterWaveDecision(
+        action="fan_in",
+        events=tuple(events),
+        may_dispatch_implementation=False,
+        may_fan_in=True,
+        may_write_lifecycle=False,
+    )
+
+
 def decide_blocker(
     context: BlockerContext,
     report: BlockerReport,
@@ -280,4 +388,19 @@ def _nonterminal(action: str, events: list[str], defect: str) -> BlockerDecision
         may_stop=False,
         may_update_goal_blocked=False,
         defects=(defect,),
+    )
+
+
+def _writer_wave_stop(
+    defect: str,
+    events: list[str],
+    *details: str,
+) -> WriterWaveDecision:
+    return WriterWaveDecision(
+        action="reconcile_writer_wave",
+        events=tuple((*events, "writer_wave_stopped")),
+        may_dispatch_implementation=False,
+        may_fan_in=False,
+        may_write_lifecycle=False,
+        defects=(defect, *details),
     )

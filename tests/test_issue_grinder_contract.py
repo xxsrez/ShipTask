@@ -10,6 +10,7 @@ SKILL_ROOT = ROOT / "issue-grinder"
 REQUIREMENTS = ROOT / "docs" / "skills" / "issue-grinder" / "requirements.md"
 ARCHITECTURE = ROOT / "docs" / "skills" / "issue-grinder" / "architecture.md"
 EVALUATION = ROOT / "docs" / "skills" / "issue-grinder" / "evaluation.md"
+WRITER_GUARD = SKILL_ROOT / "scripts" / "writer_worktree_guard.py"
 
 
 class IssueGrinderContractTest(unittest.TestCase):
@@ -56,6 +57,10 @@ class IssueGrinderContractTest(unittest.TestCase):
             "публичного UAT",
             "Да всегда",
             "собственные feature branch и Git worktree",
+            "Writer admission — hard gate",
+            "admission-only",
+            "integration checkout read-only",
+            "assert-unchanged",
             "Luna retry loop",
             "$strategic-explainer:strategic-explainer",
             "только пользователю в чате",
@@ -82,9 +87,25 @@ class IssueGrinderContractTest(unittest.TestCase):
             "references/autonomy-and-environments.md",
             "references/multi-agent-execution.md",
             "references/strategic-explainer.md",
+            "scripts/writer_worktree_guard.py",
         ):
             self.assertTrue((SKILL_ROOT / relative).is_file(), relative)
             self.assertIn(Path(relative).name, architecture)
+
+    def test_writer_guard_is_fail_closed_and_part_of_runtime(self) -> None:
+        guard = WRITER_GUARD.read_text(encoding="utf-8")
+        for invariant in (
+            'WRITER_SCHEMA = "issue-grinder/writer-worktree/v1"',
+            'GUARD_SCHEMA = "issue-grinder/integration-guard/v1"',
+            'commands.add_parser("prepare")',
+            'commands.add_parser("admit")',
+            'commands.add_parser("snapshot")',
+            'commands.add_parser("assert-unchanged")',
+            '"worktree",\n        "add",\n        "--lock"',
+            'return 2',
+        ):
+            self.assertIn(invariant, guard)
+        self.assertNotIn('"--force"', guard)
 
 
 if __name__ == "__main__":

@@ -9,9 +9,9 @@
 1. Static contract связывает каждый `IG-*` с runtime surface и required
    сценарием, проверяет metadata, references и отсутствие незавершённых
    placeholders. Этот слой исполняется repository validators.
-2. Детерминированный trace harness проверяет отдельные внешние решения и порядок
-   effects. Он не читает `SKILL.md`, не симулирует reasoning, не становится
-   runtime engine и поэтому является oracle hard invariants, а не тестом skill.
+2. Детерминированные harness-ы проверяют отдельные внешние решения, порядок
+   effects и механические Git-инварианты writer admission. Они не симулируют
+   reasoning и поэтому являются oracle hard invariants, а не полным тестом skill.
 3. Model-forward cases должны запускать установленный skill в новой сессии на
    синтетическом Task Manager scope; generator не получает rubric или expected
    answer. Repository-executable harness этого слоя пока отсутствует, поэтому
@@ -53,8 +53,8 @@
 | `IG-MA-03` | `multi-agent-execution.md` | dependency-ready-frontier |
 | `IG-MA-04` | `multi-agent-execution.md` | adaptive-width; no-filler-packet |
 | `IG-MA-05` | `SKILL.md` §2; `multi-agent-execution.md` | coordinator-only-fan-in-and-writes |
-| `IG-MA-06` | `multi-agent-execution.md` | separate-branch-worktree-before-write |
-| `IG-MA-07` | `multi-agent-execution.md` | exclusive-writable-owner |
+| `IG-MA-06` | `multi-agent-execution.md`; `writer_worktree_guard.py` | two-phase-admission; shared-main-rejected; integration-canary |
+| `IG-MA-07` | `multi-agent-execution.md`; `writer_worktree_guard.py` | exclusive-writable-owner; duplicate-branch-and-path-rejected |
 | `IG-MA-08` | `multi-agent-execution.md` | read-only-role-no-worktree |
 | `IG-MA-09` | `multi-agent-execution.md` | complete-packet-contract |
 | `IG-MA-10` | `SKILL.md` §2; `multi-agent-execution.md` | exact-integrated-verification |
@@ -105,6 +105,33 @@ condition обязательны. Model-forward evaluator дополнитель
 текст естественно объясняет причинную связь и не переносит основной смысл в
 внутренние термины.
 
+## Быстрый writer-isolation corpus
+
+Узкий Git guard и barrier trace проверяются без модели и Task Manager:
+
+```bash
+python3 -B -m unittest discover -s tests -p 'test_writer_worktree_guard.py'
+python3 -B -m unittest discover -s tests -p 'test_issue_grinder_trace_harness.py'
+```
+
+Corpus доказывает, что:
+
+- два writer packet получают разные locked linked worktree, private Git dir и
+  branch от одного exact base;
+- admission проходит только из exact `cwd` подготовленного worktree и отвергает
+  общий main checkout;
+- snapshot integration checkout обнаруживает даже незакоммиченную stray write;
+- receipt невозможно записать внутрь Git worktree и тем самым испачкать guard-ом
+  защищаемый checkout;
+- существующие branch и worktree path не переиспользуются молча.
+- implementation dispatch разрешается только после всех valid admission
+  receipts; missing/failed admission, изменившийся integration checkout и
+  отсутствующий task-owned commit запрещают fan-in и lifecycle effect.
+
+Это проверка enforcement-механизма, а не решения coordinator-а разделить работу,
+не полнота packet contract и не качество fan-in. Эти части остаются предметом
+fresh model-forward smoke.
+
 ## Fresh smoke acceptance
 
 После install/upgrade новая Codex-сессия должна:
@@ -114,6 +141,12 @@ condition обязательны. Model-forward evaluator дополнитель
 - видеть Task Manager dependency и optional Strategic Explainer;
 - правильно различать explicit delivery, implicit exact selector, implicit
   missing selector и read/status/planning negative prompts;
+- на scope с двумя независимыми write packets сначала получить от каждого
+  admission-only receipt отдельного linked worktree, разрешить implementation
+  только follow-up turn-ом и сохранить integration checkout неизменным до
+  fan-in; admission mismatch должен закрыть wave до implementation dispatch, а
+  stray Git-visible write в общем checkout — до fan-in и lifecycle effects с
+  сохранением неизвестного diff;
 - в доказанной первой task с catalog placeholder и canonical scope сделать не
   более одной best-effort попытки `Issue Grinder · ...`, сохранив meaningful
   title и продолжив при отсутствии capability;

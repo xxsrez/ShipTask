@@ -116,7 +116,7 @@ repository source `task-composer/`; его planning-only lifecycle не расш
 native writing по `IG-FLOW-03`. Жёсткая plugin-to-plugin dependency для него не
 моделируется.
 
-### 1.4 Почему в первой версии нет scripts и hooks
+### 1.4 Узкий runtime guard вместо скрытого orchestration engine
 
 Runtime script добавляется только для повторяемой детерминированной операции,
 которую существующие tools и инструкции не выполняют надёжно. Scope resolution,
@@ -124,30 +124,56 @@ Goal, lifecycle, verification, reflection и multi-agent dispatch зависят
 живого контекста и остаются решениями coordinator-а. Выносить их во второй
 скрытый orchestration engine нельзя.
 
-Build- и evaluation-скрипты допустимы на уровне repository: semantic coverage
-Level 1/Level 2, behavioural scenarios, сборка Marketplace package и проверка
-byte identity. Они проверяют runtime, но не участвуют в пользовательском run и
-не входят в skill только ради удобства разработки.
+Наблюдаемый дефект двух первых реальных прогонов доказал ровно одну подходящую
+для механизации операцию: coordinator прочитал hard invariant worktree, но
+несколько writers всё равно начали запись в общий checkout. Поэтому runtime
+содержит узкий `scripts/writer_worktree_guard.py`. Он:
+
+- создаёт новую task-owned branch и linked worktree от exact base через
+  `git worktree add --lock` без `--force`;
+- выдаёт машинно проверяемый receipt по стабильному
+  `git worktree list --porcelain -z`;
+- допускает writer только из фактического current working directory exact
+  linked worktree;
+- фиксирует clean integration checkout и обнаруживает любую Git-visible mutation
+  во время writer wave.
+
+Guard не выбирает scope, packet, число writers, profile, owner, integration
+strategy или cleanup policy. Он не удаляет worktree, не reset-ит состояние и не
+считает receipt доказательством качества реализации. Это механическая проекция
+только `IG-MA-06..07`; Git сохраняет отдельные `HEAD` и index каждого linked
+worktree, но exclusive agent ownership остаётся ответственностью coordinator-а.
+Guard не является filesystem sandbox и сам не отзывает у subagent доступ к
+другим путям. Поэтому admission barrier предупреждает обычную ошибку до
+implementation dispatch, а integration canary обнаруживает оставшееся нарушение
+до fan-in/lifecycle effect и переводит wave в fail-closed reconciliation.
+Опора на `--lock` и porcelain format соответствует
+[официальному `git-worktree`](https://git-scm.com/docs/git-worktree.html).
+
+Build- и evaluation-скрипты на уровне repository по-прежнему проверяют semantic
+coverage Level 1/Level 2, behavioural scenarios, Marketplace package и byte
+identity. В отличие от них writer guard входит в runtime package, потому что
+обеспечивает доказанный хрупкий precondition до внешней записи.
 
 Hooks являются plugin/Codex lifecycle-механизмом, а не внутренним шагом skill.
 Они могут выполняться вместе с hooks из других источников, требуют отдельного
 trust review и срабатывают по общим lifecycle events. Поэтому основной цикл,
 Production boundary, Goal completion и blocker reflection не реализуются через
-hooks. Plugin-bundled hook появится только после доказанного случая чисто
-механического cross-cutting инварианта, который нельзя надёжно обеспечить
-обычным skill workflow. Текущая архитектура такого случая не содержит. Это
-соответствует [официальной модели Codex hooks](https://learn.chatgpt.com/docs/hooks).
+hooks. Writer isolation не реализуется hook-ом: admission относится только к
+конкретному packet и точному Git state, а глобальный lifecycle event не знает
+его owner/base. Это соответствует
+[официальной модели Codex hooks](https://learn.chatgpt.com/docs/hooks).
 
 ### 1.5 Repository source и установка
 
-Когда начнётся runtime implementation, канонический source появится в этом
-repository:
+Канонический runtime source находится в этом repository:
 
 ```text
 issue-grinder/
 ├── SKILL.md
 ├── agents/openai.yaml
-└── references/...
+├── references/...
+└── scripts/writer_worktree_guard.py
 ```
 
 После проверки `issue-grinder/` и `task-composer/` копируются в отдельный
@@ -603,6 +629,48 @@ delegation не отключает отдельный Strategic Explainer interf
 7. принимает отчёты, но сам объединяет изменения;
 8. проверяет exact integrated result;
 9. после каждого результата или изменения scope пересчитывает frontier.
+
+### 10.1 Двухфазный writer admission
+
+Прямой dispatch implementation writer-а запрещён. Для каждой параллельной wave
+coordinator исполняет fail-closed protocol:
+
+1. Выбирает exact clean integration worktree и base SHA. Dirty пользовательский
+   checkout не stash-ится и не reset-ится: при необходимости создаётся отдельный
+   task-owned integration worktree.
+2. До запуска writers сохраняет receipt состояния integration checkout через
+   `writer_worktree_guard.py snapshot`; все receipt-файлы находятся вне всех
+   Git worktree, чтобы guard сам не создавал mutation.
+3. Для каждого нового packet вызывает `prepare` с уникальными owner, branch и
+   путём вне всех существующих worktree. Existing unfinished checkpoint не
+   дублируется: после проверки quiescence он проходит admission с текущими
+   branch/HEAD и явно разрешённым dirty state.
+4. Создаёт subagent сначала только для admission turn. В нём запрещены любые
+   FileChange/implementation mutations; subagent запускает `admit` своим первым
+   Git-действием именно с `cwd` своего worktree и возвращает JSON receipt.
+5. Coordinator со своей стороны сопоставляет owner, absolute worktree, private
+   git dir, common dir, branch, HEAD, lock и clean/approved-checkpoint state,
+   затем проверяет `assert-unchanged`. Только после этого отдельный follow-up
+   разрешает implementation.
+6. Пока хотя бы один writer активен, integration checkout остаётся read-only.
+   Если coordinator хочет писать параллельно, он становится отдельной writer
+   lane с собственными branch/worktree и тем же admission. Read-only Git,
+   Task Manager orchestration и проверки, не меняющие checkout, разрешены.
+7. После каждого agent interaction/return и перед fan-in coordinator повторяет
+   `assert-unchanged`. Любое Git-visible изменение integration checkout
+   останавливает wave:
+   новые mutations и fan-in запрещены, активные writers прерываются, состояние
+   сохраняется и reconciles без reset/присвоения неизвестного diff.
+8. Для fan-in принимается task-owned commit из ожидаемой branch. Uncommitted
+   checkpoint сохраняется, но не интегрируется. После объединения coordinator
+   проверяет exact candidate; clean worktree удаляется только отдельным
+   безопасным cleanup после доказанной достижимости результата.
+
+Двухфазность нужна не как общий стиль prompting, а как barrier перед
+параллельным внешним эффектом. OpenAI рекомендует для coding-agent orchestration
+явно задавать delegation, acceptance criteria и проверяемые stopping conditions;
+одного логического file ownership недостаточно
+([официальная model guidance](https://developers.openai.com/api/docs/guides/latest-model)).
 
 Каждый packet содержит exact scope, owned surfaces, исходные данные,
 ограничения, ожидаемый результат и способ проверки. Сохранившийся task-owned

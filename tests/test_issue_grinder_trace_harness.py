@@ -8,6 +8,7 @@ from scripts.issue_grinder_trace_harness import (
     BlockerContext,
     BlockerReport,
     SafeAction,
+    WriterPacket,
     decide_blocker,
     decide_environment_effect,
     decide_finalization,
@@ -15,6 +16,7 @@ from scripts.issue_grinder_trace_harness import (
     decide_recovery,
     decide_stored_permission,
     decide_transition,
+    decide_writer_wave,
 )
 
 
@@ -49,6 +51,109 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
         self.assertFalse(decision.may_update_goal_blocked)
         self.assertNotIn("publish_blocker_report", decision.events)
         self.assertNotIn("update_goal:blocked", decision.events)
+
+    def test_writer_wave_dispatches_only_after_all_admissions(self) -> None:
+        decision = decide_writer_wave(
+            (
+                WriterPacket("packet-one", prepared=True, admission_receipt_valid=True),
+                WriterPacket("packet-two", prepared=True, admission_receipt_valid=True),
+            ),
+            integration_snapshot_valid=True,
+            integration_unchanged=True,
+        )
+
+        self.assertEqual(decision.action, "dispatch_implementation")
+        self.assertTrue(decision.may_dispatch_implementation)
+        self.assertFalse(decision.may_fan_in)
+        self.assertFalse(decision.may_write_lifecycle)
+        self.assertLess(
+            decision.events.index("all_admissions_valid"),
+            decision.events.index("authorize_implementation_dispatch"),
+        )
+
+    def test_writer_wave_missing_admission_blocks_all_effects(self) -> None:
+        decision = decide_writer_wave(
+            (WriterPacket("packet-one", prepared=True, admission_receipt_valid=False),),
+            integration_snapshot_valid=True,
+            integration_unchanged=True,
+        )
+
+        self.assertEqual(decision.action, "await_admission")
+        self.assertFalse(decision.may_dispatch_implementation)
+        self.assertFalse(decision.may_fan_in)
+        self.assertFalse(decision.may_write_lifecycle)
+
+    def test_writer_wave_rejects_dispatch_without_admission(self) -> None:
+        decision = decide_writer_wave(
+            (
+                WriterPacket(
+                    "packet-one",
+                    prepared=True,
+                    admission_receipt_valid=False,
+                    implementation_dispatched=True,
+                ),
+            ),
+            integration_snapshot_valid=True,
+            integration_unchanged=True,
+        )
+
+        self.assertEqual(decision.action, "reconcile_writer_wave")
+        self.assertIn("dispatch_without_admission", decision.defects)
+        self.assertFalse(decision.may_dispatch_implementation)
+        self.assertFalse(decision.may_fan_in)
+        self.assertFalse(decision.may_write_lifecycle)
+
+    def test_writer_wave_integration_change_blocks_fan_in(self) -> None:
+        decision = decide_writer_wave(
+            (
+                WriterPacket(
+                    "packet-one",
+                    prepared=True,
+                    admission_receipt_valid=True,
+                    implementation_dispatched=True,
+                    task_owned_commit=True,
+                ),
+            ),
+            integration_snapshot_valid=True,
+            integration_unchanged=False,
+        )
+
+        self.assertEqual(decision.action, "reconcile_writer_wave")
+        self.assertIn("integration_checkout_changed", decision.defects)
+        self.assertFalse(decision.may_fan_in)
+        self.assertFalse(decision.may_write_lifecycle)
+
+    def test_writer_wave_fan_in_requires_task_owned_commits(self) -> None:
+        packet = WriterPacket(
+            "packet-one",
+            prepared=True,
+            admission_receipt_valid=True,
+            implementation_dispatched=True,
+        )
+        waiting = decide_writer_wave(
+            (packet,),
+            integration_snapshot_valid=True,
+            integration_unchanged=True,
+        )
+        ready = decide_writer_wave(
+            (
+                WriterPacket(
+                    "packet-one",
+                    prepared=True,
+                    admission_receipt_valid=True,
+                    implementation_dispatched=True,
+                    task_owned_commit=True,
+                ),
+            ),
+            integration_snapshot_valid=True,
+            integration_unchanged=True,
+        )
+
+        self.assertEqual(waiting.action, "await_task_owned_commits")
+        self.assertFalse(waiting.may_fan_in)
+        self.assertEqual(ready.action, "fan_in")
+        self.assertTrue(ready.may_fan_in)
+        self.assertFalse(ready.may_write_lifecycle)
 
     def test_public_uat_is_not_a_permission_blocker(self) -> None:
         decision = decide_blocker(

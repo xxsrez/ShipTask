@@ -82,7 +82,9 @@ Current Strategic Explainer suite содержит 24 cases: тринадцат�
 Проверка не должна требовать конкретных необязательных слов или
 числа tool calls вместо observable behavior. Evals проверяют automatic default,
 сохранение natural-language exact/relative/role/conditional rules,
-writer/worktree isolation и один Strategic Explainer при разрешённой роли, а
+writer/worktree isolation через двухфазный admission receipt и canary
+неизменяемого integration checkout, а также один Strategic Explainer при
+разрешённой роли, а
   для ordinary Explainer также exact clean `fork_turns="none"` admission на
   `gpt-5.6-luna`/`max`,
 self-discovery и один publication unit на invocation; вне этих invariants evals не
@@ -119,8 +121,9 @@ skill, реалистичный exact Task Manager scope и обычный proje
   capability не блокируют run;
 - несколько independent conflict-free Tasks без user rule автоматически
   получают полезную delegation и одного integration owner; каждый
-  concurrent implementation writer до первой mutation получает собственные
-  feature branch и Git worktree;
+  concurrent implementation writer сначала возвращает admission receipt из
+  собственной feature branch и Git worktree, получает implementation только
+  отдельным follow-up, а integration checkout остаётся неизменным до fan-in;
 - новая session при доказанно остановленном прежнем writer подхватывает
   существующий unfinished task-owned worktree/branch и продолжает его; active
   или ambiguous ownership не захватывается и artifact не очищается;
