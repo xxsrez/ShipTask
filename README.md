@@ -1,6 +1,14 @@
-# ShipTask
+# Issue Grinder / ShipTask
 
-ShipTask — репозиторий Codex skill `$ship-tasks`, который через Task Manager
+Репозиторий содержит current Task Manager delivery skill `$issue-grinder`,
+planning-only `$issue-grinder:task-composer`, общий
+`$strategic-explainer:strategic-explainer` и legacy source `$ship-tasks`.
+Issue Grinder доводит выбранный scope из `To Do`, `In Progress`, `In Review` до
+проверенного результата, создаёт стратегический Goal только для явно вызванного
+multi-issue run и использует blocker explanation как обязательную reflection
+точку для автоматического продолжения.
+
+Legacy ShipTask — skill `$ship-tasks`, который через Task Manager
 доводит выбранные Tasks, Project или Release до проверенного terminal outcome
 при явном invocation и по natural-language delivery intent с однозначным Task
 Manager anchor. Один delivery verb или обычная просьба исправить код/продукт/
@@ -24,7 +32,7 @@ contract в exact integration candidate, даже если blocking Task ещё 
 Документация здесь является исходным кодом, причём source unit — отдельный
 skill. В [`docs/skills/<skill>/`](docs/skills/README.md) у каждого skill есть
 собственные `requirements.md` (Level 1) и `architecture.md` (Level 2); требования
-трёх skills не объединяются. Runtime является компактной стохастической
+четырёх skills не объединяются. Runtime является компактной стохастической
 компиляцией этих двух локальных документов. Strategic Explainer предоставляет
 semantic facade: callers передают только назначение, scope и source anchors,
 facade владеет invocation/admission, а provider expertise находится в reference,
@@ -129,6 +137,7 @@ context в каждой child Task. При delivery ShipTask перечитыв�
 
 ## Структура
 
+- [`issue-grinder/SKILL.md`](issue-grinder/SKILL.md) — current delivery skill.
 - [`ship-tasks/SKILL.md`](ship-tasks/SKILL.md) — исполнимый skill.
 - [`task-composer/SKILL.md`](task-composer/SKILL.md) — planning-only
   формулировка, декомпозиция и создание Task Manager scope.
@@ -138,6 +147,10 @@ context в каждой child Task. При delivery ShipTask перечитыв�
   text-improvement contract.
 - [`docs/skills/README.md`](docs/skills/README.md) — source model и независимые
   Requirements/Architecture packages для каждого skill.
+- [`docs/skills/issue-grinder/requirements.md`](docs/skills/issue-grinder/requirements.md)
+  и [Architecture](docs/skills/issue-grinder/architecture.md) — source
+  `$issue-grinder`; [Evaluation](docs/skills/issue-grinder/evaluation.md) хранит
+  точную трассировку и быстрый сценарный корпус.
 - [`docs/skills/ship-tasks/requirements.md`](docs/skills/ship-tasks/requirements.md)
   и [Architecture](docs/skills/ship-tasks/architecture.md) — source `$ship-tasks`.
 - [`docs/skills/task-composer/requirements.md`](docs/skills/task-composer/requirements.md)
@@ -157,6 +170,7 @@ context в каждой child Task. При delivery ShipTask перечитыв�
 ```bash
 python3 scripts/validate_repo.py
 python3 -B -m unittest discover -s tests -p 'test_*.py'
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py issue-grinder
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
@@ -164,14 +178,16 @@ ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```
 
-Runtime публикуется двумя независимыми plugin: `ship-tasks@srez-marketplace`
-содержит ShipTask и Task Composer, а
+Current runtime публикуется двумя установленными независимыми plugin:
+`issue-grinder@srez-marketplace` содержит Issue Grinder и Task Composer, а
 `strategic-explainer@srez-marketplace` — только ordinary Strategic Explainer.
 Task Manager connector устанавливается отдельно как adapter-only
-`task-manager@srez-marketplace`. Codex manifest не умеет автоматически
-устанавливать plugin dependency, поэтому ShipTask выбирает ordinary при его
-наличии и разрешении, иначе native; Task Composer использует ordinary. Standalone каталоги
-`~/.codex/skills/ship-tasks`, `~/.codex/skills/task-composer` и
+`task-manager@srez-marketplace`. Legacy `ship-tasks@srez-marketplace` остаётся
+доступным как неустановленный rollback artifact и не устанавливается вместе с
+Issue Grinder. Codex manifest не умеет автоматически устанавливать plugin
+dependency, поэтому Issue Grinder выбирает ordinary при его наличии и
+разрешении, иначе native; Task Composer использует ordinary. Standalone каталоги
+`~/.codex/skills/issue-grinder`, `~/.codex/skills/ship-tasks`, `~/.codex/skills/task-composer` и
 `~/.codex/skills/strategic-explainer` не устанавливаются: они создают вторые
 logical skills рядом с plugin-qualified runtime. Каждый repository source
 сверяется со своим Marketplace package и installed plugin cache.

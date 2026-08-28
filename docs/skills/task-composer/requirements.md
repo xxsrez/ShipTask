@@ -3,7 +3,7 @@
 Статус: current Level 1, 2026-08-27.
 
 Этот документ — полный пользовательский исходный код только для
-`$ship-tasks:task-composer`. Он не определяет требования к ShipTask или
+`$issue-grinder:task-composer`. Он не определяет требования к Issue Grinder или
 Strategic Explainer; их использование ниже является локальной dependency Task
 Composer.
 
@@ -25,9 +25,9 @@ scope/truth/safety/authority boundaries. Architecture и runtime могут
 
 Task Composer формулирует и по явному intent создаёт Task Manager planning
 scope, но не реализует, тестирует, выпускает или принимает работу, не создаёт
-Goal и не запускает ShipTask delivery. Просьба только сформулировать или показать
+Goal и не запускает Issue Grinder delivery. Просьба только сформулировать или показать
 draft не разрешает writes; просьба создать/add/capture разрешает только planning
-mutations. Создать ровно одну Task и сразу выполнить её — отдельный ShipTask
+mutations. Создать ровно одну Task и сразу выполнить её — отдельный delivery
 create-and-deliver flow, а не обход этой границы.
 
 ### `TC-02` — Human intent без придуманного scope
@@ -111,9 +111,9 @@ semantic call; старый result самостоятельно не улучш�
 ### `TC-10` — Независимая planning distribution
 
 Task Composer остаётся отдельным planning-only runtime skill внутри
-`ship-tasks@srez-marketplace` и использует отдельно установленный Task Manager
+`issue-grinder@srez-marketplace` и использует отдельно установленный Task Manager
 только как adapter. Для `TC-09` он использует отдельно установленный
-`$strategic-explainer:strategic-explainer`; копия provider-а в ShipTask package
+`$strategic-explainer:strategic-explainer`; копия provider-а в Issue Grinder package
 не встраивается. Он не переносится в adapter plugin, не получает скрытый
 delivery lifecycle и не устанавливается standalone user-level duplicate.
 Checked-in runtime source, Marketplace source и installed cache после изменения

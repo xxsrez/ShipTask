@@ -1,6 +1,6 @@
 # Skill source packages
 
-Статус: current repository source model, 2026-08-27.
+Статус: current repository source model, 2026-08-28.
 
 Документация в этом каталоге является исходным кодом runtime skills. Единица
 исходного кода — отдельный skill, а не repository целиком. Поэтому требования и
@@ -10,6 +10,10 @@
 
 ```text
 docs/skills/
+├── issue-grinder/
+│   ├── requirements.md
+│   ├── architecture.md
+│   └── evaluation.md
 ├── ship-tasks/
 │   ├── requirements.md
 │   └── architecture.md
@@ -85,9 +89,13 @@ level, однако plugin packaging не объединяет source contracts 
 
 ## Current packages
 
+- [`$issue-grinder`](issue-grinder/requirements.md) —
+  [Architecture](issue-grinder/architecture.md) и
+  [Evaluation](issue-grinder/evaluation.md); source package и repository runtime
+  созданы, а installed state доказывается отдельно.
 - [`$ship-tasks`](ship-tasks/requirements.md) —
   [Architecture](ship-tasks/architecture.md).
-- [`$ship-tasks:task-composer`](task-composer/requirements.md) —
+- [`$issue-grinder:task-composer`](task-composer/requirements.md) —
   [Architecture](task-composer/architecture.md).
 - [`$strategic-explainer:strategic-explainer`](strategic-explainer/requirements.md) —
   [Architecture](strategic-explainer/architecture.md) и

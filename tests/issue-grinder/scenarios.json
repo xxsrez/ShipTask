@@ -1,0 +1,39 @@
+{
+  "completeReport": {
+    "stopped_work": "Release verification cannot finish",
+    "primary_cause": "The required external signing authority is unavailable",
+    "checkpoint": "Implementation and local checks are preserved in the integration branch",
+    "unverified_work": "The signed UAT artifact remains unverified",
+    "impact": "The release cannot be accepted yet",
+    "user_action": "Restore the signing authority",
+    "resume_condition": "A fresh UAT signing request succeeds"
+  },
+  "explanationUnlock": {
+    "action_id": "create_synthetic_fixture",
+    "material": true,
+    "in_scope": true,
+    "authorized": true,
+    "primary_source_verified": true
+  },
+  "publicUatUnlock": {
+    "action_id": "deploy_public_uat",
+    "material": true,
+    "in_scope": true,
+    "authorized": true,
+    "primary_source_verified": true
+  },
+  "unverifiedAlternative": {
+    "action_id": "try_alternate_ingress",
+    "material": true,
+    "in_scope": true,
+    "authorized": true,
+    "primary_source_verified": false
+  },
+  "optionalImprovement": {
+    "action_id": "polish_optional_copy",
+    "material": false,
+    "in_scope": false,
+    "authorized": true,
+    "primary_source_verified": true
+  }
+}

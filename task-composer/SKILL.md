@@ -1,6 +1,6 @@
 ---
 name: task-composer
-description: "Формулировать и по явному planning intent создавать Task Manager Tasks: оставлять один independently deliverable outcome одной Task, а составную работу превращать в Epic с problem-first описанием через Strategic Explainer, конкретными подзадачами, live labels, hierarchy и реальными relations. Использовать явно через $ship-tasks:task-composer и неявно для постановки, декомпозиции или backlog capture в Task Manager. Не использовать для implementation, delivery, release, status/audit-only запросов или изменения Label taxonomy."
+description: "Формулировать и по явному planning intent создавать Task Manager Tasks: оставлять один independently deliverable outcome одной Task, а составную работу превращать в Epic с problem-first описанием через Strategic Explainer, конкретными подзадачами, live labels, hierarchy и реальными relations. Использовать явно через $issue-grinder:task-composer и неявно для постановки, декомпозиции или backlog capture в Task Manager. Не использовать для implementation, delivery, release, status/audit-only запросов или изменения Label taxonomy."
 ---
 
 # Task Composer
@@ -15,7 +15,7 @@ draft; явный create/add/backlog intent разрешает только plan
 - Не реализуй, не тестируй, не выпускай и не принимай созданную работу; не
   создавай Goal и не выводи Tasks из `Backlog`.
 - Одновременный запрос создать ровно одну Task и сразу выполнить её передай
-  ShipTask create-and-deliver contract.
+  separate create-and-deliver contract.
 - Не создавай, не переименовывай и не архивируй Labels. Не помещай secret
   values, credentials или signed URLs в Task text.
 

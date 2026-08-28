@@ -8,6 +8,14 @@
 со своими Requirements и Architecture. Требования разных skills не смешиваются;
 общими остаются только repository build и plugin distribution rules.
 
+- `$issue-grinder`:
+  [Requirements](skills/issue-grinder/requirements.md) и
+  [Architecture](skills/issue-grinder/architecture.md),
+  [Evaluation](skills/issue-grinder/evaluation.md) — current source package
+  нового Task Manager-only delivery skill со стратегическим Goal,
+  максимальной автономностью явного run, blocker reflection и изолированной
+  multi-agent работой. Runtime source создан; публикация подтверждается только
+  отдельной distribution проверкой.
 - `$ship-tasks`: [Requirements](skills/ship-tasks/requirements.md) и
   [Architecture](skills/ship-tasks/architecture.md) — канонический Task
   Manager-only workflow
@@ -22,7 +30,7 @@
   comments, видимые acceptance incidents, свобода выбора инструментов и
   фактическая классификация приёмки; лёгкие per-Task gates и периодические
   thorough UAT batch releases одним exact integrated candidate без approval.
-- `$ship-tasks:task-composer`:
+- `$issue-grinder:task-composer`:
   [Requirements](skills/task-composer/requirements.md) и
   [Architecture](skills/task-composer/architecture.md) — planning-only Task
   Manager workflow: одна Task либо strategic Epic с конкретными подзадачами,
@@ -161,6 +169,8 @@
 
 ## Reference
 
+- [Issue Grinder evaluation](skills/issue-grinder/evaluation.md) — exact
+  coverage `IG-*`, deterministic blocker/reflection trace и fresh-plugin smoke.
 - [Task Manager adapter](reference/task-manager-adapter.md) — точный discovery,
   identity, lifecycle, concurrency, текущие возможности и границы connector.
 - [Strategic Explainer evaluation](reference/strategic-explainer-evaluation.md)

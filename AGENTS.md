@@ -5,10 +5,10 @@
 ## Назначение
 
 - Репозиторий является source of truth для Task Manager-only Codex skills
-  `$ship-tasks`, `$ship-tasks:task-composer` и общих communication skills
-  `$strategic-explainer`.
-- Исполнимые skills находятся в sibling-каталогах `ship-tasks/`,
-  `task-composer/` и `strategic-explainer/`.
+  `$issue-grinder`, legacy `$ship-tasks`, `$issue-grinder:task-composer` и
+  общего communication skill `$strategic-explainer`.
+- Исполнимые skills находятся в sibling-каталогах `issue-grinder/`,
+  `ship-tasks/`, `task-composer/` и `strategic-explainer/`.
 - Документация проекта находится в `docs/`; `docs/README.md` — её
   канонический индекс.
 - Основной язык документации — русский. Точные protocol/state/tool names можно
@@ -16,7 +16,7 @@
 
 ## Документация как исходный код
 
-Документация является исходным кодом всех трёх skills. Единица source —
+Документация является исходным кодом всех четырёх skills. Единица source —
 отдельный skill: его Requirements и Architecture находятся только в
 `docs/skills/<skill>/` и не смешиваются с контрактами соседних skills. Для
 каждого source package обязательны три уровня с таким приоритетом:
@@ -36,8 +36,8 @@
    новое требование пользователя. Дополнительные локальные design/reference/
    evaluation документы допустимы, но не создают второй current contract.
 3. **Level 3 — runtime skills.**
-   `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и runtime packages
-   `strategic-explainer/` являются компактной исполнимой проекцией Level 1 и
+   `issue-grinder/SKILL.md`, `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и
+   runtime package `strategic-explainer/` являются компактной исполнимой проекцией Level 1 и
    применимой части Level 2. У Strategic Explainer `SKILL.md` является
    semantic facade и содержит только routing/admission contract, а provider
    expertise находится в reference, который читает лишь admitted fresh
@@ -74,10 +74,13 @@ manifest/install/byte-identity правила остаются repository-level 
 
 ## Границы
 
+- `$issue-grinder` работает только через Task Manager connector. Не добавляйте
+  fallback providers, generic task-source abstraction или альтернативный
+  tracker workflow.
 - `$ship-tasks` работает только через Task Manager connector. Не добавляйте
   fallback providers, generic task-source abstraction или альтернативный
   tracker workflow.
-- `$ship-tasks:task-composer` остаётся Task Manager-only planning workflow: не добавляйте
+- `$issue-grinder:task-composer` остаётся Task Manager-only planning workflow: не добавляйте
   delivery, implementation, release, Goal lifecycle, fallback provider или
   право автоматически менять Label taxonomy.
 - `$strategic-explainer` остаётся generic: не добавляйте в его runtime contract
@@ -87,8 +90,8 @@ manifest/install/byte-identity правила остаются repository-level 
   вызывает Strategic Explainer и не создаёт других agents; off-role invocation
   получает operational error до domain discovery.
 - Requests сформулировать, создать, разложить или положить Task Manager работу
-  в backlog направляйте через `$ship-tasks:task-composer`, когда он доступен. Это
-  planning-only mutation и не запускает ShipTask delivery. Read/status/audit
+  в backlog направляйте через `$issue-grinder:task-composer`, когда он доступен. Это
+  planning-only mutation и не запускает Issue Grinder delivery. Read/status/audit
   без постановки оставляйте техническому Task Manager adapter.
 - Project и Release refs, repository path, branch, deployment provider,
   environment, URL, команды проекта и production policy брать из текущего
@@ -96,17 +99,20 @@ manifest/install/byte-identity правила остаются repository-level 
 - Каждый локальный `architecture.md` описывает один current workflow. Не
   создавайте параллельные поколения или альтернативные Requirements/
   Architecture одного runtime skill.
-- Распространяйте ShipTask и Task Composer через plugin
-  `ship-tasks@srez-marketplace`, а Strategic Explainer — только через отдельный
+- Распространяйте Issue Grinder и Task Composer через plugin
+  `issue-grinder@srez-marketplace`, а Strategic Explainer — только через отдельный
   `strategic-explainer@srez-marketplace`. Task Manager connector устанавливается
   отдельно как adapter-only `task-manager@srez-marketplace`; не помещайте
-  ShipTask или любой Strategic Explainer внутрь его package и не встраивайте
-  provider обратно в ShipTask package. Codex manifest не поддерживает
-  plugin-to-plugin dependency: ShipTask использует
+  Issue Grinder, ShipTask или любой Strategic Explainer внутрь его package и не
+  встраивайте provider обратно в delivery package. Codex manifest не
+  поддерживает plugin-to-plugin dependency: Issue Grinder использует
   `$strategic-explainer:strategic-explainer`, когда он доступен и разрешён, а
   иначе native writing; Task Composer сохраняет ordinary dependency.
+  `ship-tasks@srez-marketplace` остаётся неустановленным legacy rollback
+  artifact и не устанавливается одновременно с Issue Grinder.
   Не создавайте и не синхронизируйте
-  standalone user-level копии `~/.codex/skills/ship-tasks`,
+  standalone user-level копии `~/.codex/skills/issue-grinder`,
+  `~/.codex/skills/ship-tasks`,
   `~/.codex/skills/task-composer` и
   `~/.codex/skills/strategic-explainer`.
 
@@ -122,7 +128,7 @@ manifest/install/byte-identity правила остаются repository-level 
   rationale, observable evidence и authority/safety boundaries, но не
   предписывайте agent topology, tool choreography, число попыток, форму context
   или внутренний reasoning, если только это не является явным требованием
-  пользователя. Текущие явные исключения: без user rule ShipTask автоматически
+  пользователя. Текущие явные исключения: без user rule Issue Grinder автоматически
   использует субагентов для действительно независимой полезной работы;
   однозначное правило пользователя свободным языком — exact/relative count,
   role scope, общий или узкий opt-out, duration/complexity condition — имеет
@@ -169,23 +175,25 @@ manifest/install/byte-identity правила остаются repository-level 
 1. Exact repository scope закоммичен в этом репозитории.
 2. Этот commit запушен в `origin/main`, а local `HEAD` совпадает с
    `origin/main`.
-3. Два Marketplace package являются единственной runtime-дистрибуцией:
-   `Srez Marketplace/plugins/ship-tasks/skills/ship-tasks`,
-   `Srez Marketplace/plugins/ship-tasks/skills/task-composer` и
+3. Два установленных Marketplace package являются current runtime-дистрибуцией:
+   `Srez Marketplace/plugins/issue-grinder/skills/issue-grinder`,
+   `Srez Marketplace/plugins/issue-grinder/skills/task-composer` и
    `Srez Marketplace/plugins/strategic-explainer/skills/strategic-explainer`
    byte-identical соответствующим repository sources; каталог
-   `Srez Marketplace/plugins/ship-tasks/skills/strategic-explainer` отсутствует.
+   `Srez Marketplace/plugins/issue-grinder/skills/strategic-explainer` отсутствует.
    Installed cache каждого package byte-identical marketplace source и оба
-   plugin отображаются installed/enabled. Если
+   plugin отображаются installed/enabled; `ship-tasks@srez-marketplace` не
+   установлен. Если
    изменился runtime payload, manifest version или cachebuster обновлён,
    соответствующий marketplace commit запушен в `origin/main`, а затронутые
-   plugin переустановлены из `ship-tasks@srez-marketplace` и/или
+   plugin переустановлены из `issue-grinder@srez-marketplace` и/или
    `strategic-explainer@srez-marketplace`. Отдельно установленный
    `task-manager@srez-marketplace` остаётся adapter-only и не содержит
-   `skills/ship-tasks`, `skills/task-composer` или
+   `skills/issue-grinder`, `skills/ship-tasks`, `skills/task-composer` или
    `skills/strategic-explainer`.
 
-Standalone user-level каталоги `~/.codex/skills/ship-tasks`,
+Standalone user-level каталоги `~/.codex/skills/issue-grinder`,
+`~/.codex/skills/ship-tasks`,
 `~/.codex/skills/task-composer` и
 `~/.codex/skills/strategic-explainer` должны отсутствовать, а fresh
 `skills/list` не должен возвращать отдельные user skills.
@@ -204,6 +212,7 @@ Plugin-managed marketplace snapshot и installed cache являются внут
 python3 scripts/validate_repo.py
 python3 -B -m unittest discover -s tests -p 'test_*.py'
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py issue-grinder
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation

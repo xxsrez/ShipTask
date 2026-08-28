@@ -9,6 +9,18 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+ISSUE_SKILL = ROOT / "issue-grinder" / "SKILL.md"
+ISSUE_METADATA = ROOT / "issue-grinder" / "agents" / "openai.yaml"
+ISSUE_FLOW = ROOT / "issue-grinder" / "references" / "task-manager-flow.md"
+ISSUE_AUTONOMY = (
+    ROOT / "issue-grinder" / "references" / "autonomy-and-environments.md"
+)
+ISSUE_MULTI_AGENT = (
+    ROOT / "issue-grinder" / "references" / "multi-agent-execution.md"
+)
+ISSUE_EXPLAINER = (
+    ROOT / "issue-grinder" / "references" / "strategic-explainer.md"
+)
 SHIP_SKILL = ROOT / "ship-tasks" / "SKILL.md"
 SHIP_METADATA = ROOT / "ship-tasks" / "agents" / "openai.yaml"
 COMPOSER_SKILL = ROOT / "task-composer" / "SKILL.md"
@@ -23,6 +35,9 @@ STRATEGIC_ENTRYPOINT = (
 )
 SKILL_SOURCES = ROOT / "docs" / "skills"
 SOURCE_INDEX = SKILL_SOURCES / "README.md"
+ISSUE_REQUIREMENTS = SKILL_SOURCES / "issue-grinder" / "requirements.md"
+ISSUE_SPEC = SKILL_SOURCES / "issue-grinder" / "architecture.md"
+ISSUE_EVALUATION = SKILL_SOURCES / "issue-grinder" / "evaluation.md"
 SHIP_REQUIREMENTS = SKILL_SOURCES / "ship-tasks" / "requirements.md"
 SPEC = SKILL_SOURCES / "ship-tasks" / "architecture.md"
 COMPOSER_REQUIREMENTS = SKILL_SOURCES / "task-composer" / "requirements.md"
@@ -144,6 +159,12 @@ CORE_FILES = (
     ROOT / "AGENTS.md",
     ROOT / ".gitignore",
     ROOT / ".gitattributes",
+    ISSUE_SKILL,
+    ISSUE_METADATA,
+    ISSUE_FLOW,
+    ISSUE_AUTONOMY,
+    ISSUE_MULTI_AGENT,
+    ISSUE_EXPLAINER,
     SHIP_SKILL,
     SHIP_METADATA,
     COMPOSER_SKILL,
@@ -153,10 +174,13 @@ CORE_FILES = (
     STRATEGIC_ENTRYPOINT,
     STRATEGIC_PROVIDER,
     TERMINAL_ROUTING_REPORT,
+    ISSUE_SPEC,
+    ISSUE_EVALUATION,
     SPEC,
     COMPOSER_SPEC,
     STRATEGIC_SPEC,
     SOURCE_INDEX,
+    ISSUE_REQUIREMENTS,
     SHIP_REQUIREMENTS,
     COMPOSER_REQUIREMENTS,
     STRATEGIC_REQUIREMENTS,
@@ -183,6 +207,11 @@ CORE_FILES = (
 CURRENT_CONTRACT_FILES = (
     ROOT / "README.md",
     ROOT / "AGENTS.md",
+    ISSUE_SKILL,
+    ISSUE_METADATA,
+    ISSUE_SPEC,
+    ISSUE_EVALUATION,
+    ISSUE_REQUIREMENTS,
     SHIP_SKILL,
     SHIP_METADATA,
     COMPOSER_SKILL,
@@ -319,6 +348,131 @@ def validate_frontmatter(
         fail(errors, f"{relative(path)} is too long: {len(lines)} > {max_lines}")
     if "[TODO" in text or "TODO:" in text:
         fail(errors, f"{relative(path)} contains an unfinished placeholder")
+
+
+def validate_issue_skill(errors: list[str]) -> None:
+    validate_frontmatter(errors, ISSUE_SKILL, "issue-grinder", 220)
+    require(
+        errors,
+        ISSUE_SKILL,
+        "Task Manager-only coordinator",
+        "$issue-grinder",
+        "current Release",
+        "current Release по памяти не подставляй",
+        "Перед первой mutation",
+        "`Backlog` не реализуй и не меняй",
+        "create_goal",
+        "стратегический outcome",
+        "комментарий для этого тривиального перехода не нужен",
+        "`blocked by` ограничивает доступность требуемой реализации",
+        "candidate blocker → причинное объяснение → reflection по current primary sources → continue | terminal blocker",
+        "platform blocker audit",
+        "финальный комментарий только пользователю в чате",
+        "Production запрещён полностью",
+        "[Task Manager flow](references/task-manager-flow.md)",
+        "[Autonomy and environments](references/autonomy-and-environments.md)",
+        "[multi-agent execution](references/multi-agent-execution.md)",
+        "[Strategic Explainer routing](references/strategic-explainer.md)",
+    )
+    require(
+        errors,
+        ISSUE_METADATA,
+        'display_name: "Issue Grinder"',
+        'short_description: "Довести Task Manager scope до результата"',
+        "$issue-grinder",
+        'value: "task-manager"',
+        'transport: "streamable_http"',
+        "allow_implicit_invocation: true",
+    )
+    require(
+        errors,
+        ISSUE_FLOW,
+        "To Do → In Progress",
+        "In Progress → In Review",
+        "In Review → In Progress",
+        "In Review → Done",
+        "unknown comment outcome",
+        "exact integration base",
+    )
+    require(
+        errors,
+        ISSUE_AUTONOMY,
+        "Пока есть безопасное существенное действие текущего scope",
+        "Production запрещён",
+        "UAT",
+        "`Да`, `Нет`, `Да всегда`",
+    )
+    require(
+        errors,
+        ISSUE_MULTI_AGENT,
+        "Только coordinator владеет Goal",
+        "собственные feature branch и Git worktree",
+        "gpt-5.6-luna",
+        "`max`",
+        "contract/context conflict",
+    )
+    require(
+        errors,
+        ISSUE_EXPLAINER,
+        "$strategic-explainer:strategic-explainer",
+        "post-explanation reflection",
+        "Caller error",
+        "technical/unavailability error",
+        "observable resume condition",
+        "только пользователю в чате",
+    )
+
+    requirement_ids = re.findall(
+        r"^### `(IG-[A-Z]+-\d{2})`", read(ISSUE_REQUIREMENTS), re.MULTILINE
+    )
+    expected_ids = [
+        *(f"IG-FLOW-{number:02d}" for number in range(1, 7)),
+        *(f"IG-GOAL-{number:02d}" for number in range(1, 7)),
+        *(f"IG-SCOPE-{number:02d}" for number in range(1, 4)),
+        *(f"IG-AUTO-{number:02d}" for number in range(1, 6)),
+        *(f"IG-MA-{number:02d}" for number in range(1, 19)),
+    ]
+    if requirement_ids != expected_ids:
+        fail(
+            errors,
+            f"{relative(ISSUE_REQUIREMENTS)} requirement IDs are missing, "
+            f"duplicated, or out of order: {requirement_ids}",
+        )
+
+    coverage_ids = re.findall(
+        r"^\| `(IG-[A-Z]+-\d{2})` \|", read(ISSUE_EVALUATION), re.MULTILINE
+    )
+    if coverage_ids != expected_ids:
+        fail(
+            errors,
+            f"{relative(ISSUE_EVALUATION)} coverage IDs do not exactly match "
+            "Issue Grinder Level 1",
+        )
+
+    require(
+        errors,
+        ISSUE_REQUIREMENTS,
+        "Статус: current Level 1, 2026-08-28",
+        "полный current-набор явно сформулированных пользователем",
+        "Изменение смысла Level 1 требует явного решения пользователя",
+        "Если scope вырос с одного issue до нескольких",
+        "весь входящий в scope фронт issue",
+        "не превращать эту проверку в бюрократическую блокировку",
+        "Production",
+        "Luna",
+    )
+    require(
+        errors,
+        ISSUE_SPEC,
+        "Статус: current Level 2, 2026-08-28",
+        "## 0. Compilation contract",
+        "issue-grinder@srez-marketplace",
+        "`issue-grinder:issue-grinder`, `issue-grinder:task-composer`",
+        "удаляет локально `ship-tasks@srez-marketplace`",
+        "candidate blocker",
+        "post-explanation reflection",
+        "наблюдаемым evaluation scenario",
+    )
 
 
 def validate_ship_skill(errors: list[str]) -> None:
@@ -533,9 +687,9 @@ def validate_composer_skill(errors: list[str]) -> None:
     require(
         errors,
         COMPOSER_SKILL,
-        "$ship-tasks:task-composer",
+        "$issue-grinder:task-composer",
         "planning mutations",
-        "ShipTask create-and-deliver contract",
+        "separate create-and-deliver contract",
         "canonical status `Backlog`",
         "current unreleased Release",
         "bounded duplicate search",
@@ -573,7 +727,7 @@ def validate_composer_skill(errors: list[str]) -> None:
         COMPOSER_METADATA,
         'display_name: "Task Composer"',
         'short_description: "Сформулировать и связать Task Manager задачи"',
-        "$ship-tasks:task-composer",
+        "$issue-grinder:task-composer",
         'value: "task-manager"',
         "live Labels",
         "реальные relations",
@@ -976,7 +1130,7 @@ def validate_trigger_matrix(errors: list[str]) -> None:
 
 
 COMPOSER_TRIGGER_CASES = {
-    "$ship-tasks:task-composer": (
+    "$issue-grinder:task-composer": (
         "да",
         "сформировать planning model; writes только при явном intent",
     ),
@@ -1000,10 +1154,10 @@ COMPOSER_TRIGGER_CASES = {
         "да",
         "compose и create при однозначном Project context",
     ),
-    "Выполни TM-123": ("нет", "ShipTask delivery"),
+    "Выполни TM-123": ("нет", "Issue Grinder delivery"),
     "Создай одну Task и сразу выполни её": (
         "нет",
-        "ShipTask create-and-deliver",
+        "отдельный create-and-deliver flow",
     ),
     "Покажи статус TM-123": ("нет", "read-only Task Manager adapter"),
     "Проведи аудит TM-123": ("нет", "read-only Task Manager adapter"),
@@ -1646,10 +1800,23 @@ def validate_source_layers(errors: list[str]) -> None:
         "Plugin — общий distribution artifact",
     )
     for architecture, prefix, status_marker in (
+        (ISSUE_SPEC, "IG-*", "Статус: current Level 2, 2026-08-28"),
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current Level 2 contract, 2026-08-27"),
         (STRATEGIC_SPEC, "SE-*", "Статус: current Level 2 contract, 2026-08-28"),
     ):
+        if architecture == ISSUE_SPEC:
+            require(
+                errors,
+                architecture,
+                status_marker,
+                f"`{prefix}`\nв локальных",
+                "[требованиях пользователя](requirements.md)",
+                "## 0. Compilation contract",
+                "компактной смысловой проекцией",
+                "примерно эквивалентное наблюдаемое поведение",
+            )
+            continue
         require(
             errors,
             architecture,
@@ -1690,7 +1857,7 @@ def validate_source_layers(errors: list[str]) -> None:
         errors,
         ROOT / "README.md",
         "[`docs/skills/<skill>/`](docs/skills/README.md)",
-        "требования\nтрёх skills не объединяются",
+        "требования\nчетырёх skills не объединяются",
         "Project, Release и\ncurrent scope остаются live selectors",
         "без повторного approval",
         "Browser switch допустим как диагностика",
@@ -2587,11 +2754,11 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "installed/enabled",
         "Standalone user-level каталоги",
         "~/.codex/skills/task-composer",
-        "Два Marketplace package",
+        "Два установленных Marketplace package",
         "Srez Marketplace/plugins/strategic-explainer/skills/strategic-explainer",
-        "Srez Marketplace/plugins/ship-tasks/skills/strategic-explainer` отсутствует",
+        "Srez Marketplace/plugins/issue-grinder/skills/strategic-explainer` отсутствует",
         "strategic-explainer@srez-marketplace",
-        "ShipTask использует\n  `$strategic-explainer:strategic-explainer`",
+        "Issue Grinder использует\n  `$strategic-explainer:strategic-explainer`",
         "task-manager@srez-marketplace` остаётся adapter-only",
         "в начале run ShipTask\n  выбирает ordinary",
         "выбирает ordinary при его наличии и разрешении, иначе native",
@@ -2617,8 +2784,8 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
     require(
         errors,
         ROOT / "README.md",
-        "Runtime публикуется двумя независимыми plugin",
-        "ship-tasks@srez-marketplace`\nсодержит ShipTask и Task Composer",
+        "Current runtime публикуется двумя установленными независимыми plugin",
+        "issue-grinder@srez-marketplace` содержит Issue Grinder и Task Composer",
         "strategic-explainer@srez-marketplace` — только ordinary Strategic Explainer",
         "Codex manifest не умеет автоматически\nустанавливать plugin dependency",
         "$strategic-explainer:strategic-explainer",
@@ -2658,7 +2825,7 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         errors,
         COMPOSER_REQUIREMENTS,
         "$strategic-explainer:strategic-explainer",
-        "копия provider-а в ShipTask package\nне встраивается",
+        "копия provider-а в Issue Grinder package\nне встраивается",
         "plugin-qualified skill проверяется в fresh Codex\nsession",
     )
     require(
@@ -2733,7 +2900,7 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "update_plugin_cachebuster.py",
         "не меняйте\n   numeric version",
         "fresh App Server catalog",
-        "ship-tasks:task-composer",
+        "issue-grinder:task-composer",
         "existing-only Labels",
         "один Strategic Explainer при разрешённой роли",
         "`To Do → In Progress` не создаёт комментарий",
@@ -2853,6 +3020,7 @@ def main() -> int:
             fail(errors, f"missing required file: {relative(path)}")
 
     if not errors:
+        validate_issue_skill(errors)
         validate_ship_skill(errors)
         validate_composer_skill(errors)
         validate_strategic_skill(errors)

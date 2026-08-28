@@ -63,6 +63,7 @@ backlog/generic-code cases. Один delivery verb не является trigger
 ```bash
 python3 scripts/validate_repo.py
 python3 -B -m unittest discover -s tests -p 'test_*.py'
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py issue-grinder
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
@@ -210,15 +211,17 @@ Epic до implementation и передать bounded context исполните�
 
 ## Runtime-дистрибуция
 
-Repository directories `ship-tasks/`, `task-composer/` и
+Repository directories `issue-grinder/`, `ship-tasks/`, `task-composer/` и
 `strategic-explainer/` — source of truth.
 Runtime-distribution разделена на два независимых plugin:
-`ship-tasks@srez-marketplace` содержит `ship-tasks` и `task-composer`, а
+`issue-grinder@srez-marketplace` содержит `issue-grinder` и `task-composer`, а
 `strategic-explainer@srez-marketplace` содержит только
 `$strategic-explainer:strategic-explainer`. Task Manager connector
 устанавливается отдельно как adapter-only `task-manager@srez-marketplace`.
+Legacy `ship-tasks@srez-marketplace` не устанавливается одновременно с Issue
+Grinder и сохраняется только как rollback artifact.
 
-Manifest не поддерживает plugin-to-plugin dependency, поэтому ShipTask хранит
+Manifest не поддерживает plugin-to-plugin dependency, поэтому Issue Grinder хранит
 availability-based optional routing: ordinary при наличии и разрешении, иначе
 native. Отсутствие provider-а не мешает обязательному comment/status write. Старый путь
 `plugins/ship-tasks/skills/strategic-explainer` отсутствует.
@@ -227,23 +230,25 @@ native. Отсутствие provider-а не мешает обязательн�
 
 1. Выполните validations, закоммитьте exact scope и отправьте в `origin/main`;
    проверьте `HEAD == origin/main`.
-2. Синхронизируйте `ship-tasks` и `task-composer` в ShipTask plugin, а
+2. Синхронизируйте `issue-grinder` и `task-composer` в Issue Grinder plugin, а
    `strategic-explainer` — в его отдельный plugin;
    проверьте каждую пару через `diff -qr`.
 3. Получите marketplace name через `read_marketplace_name.py` и обновите только
    cachebuster через `update_plugin_cachebuster.py`; не меняйте
    numeric version ради reinstall.
 4. Выполните marketplace/plugin tests, commit/push marketplace и переустановите
-   `ship-tasks@srez-marketplace` и `strategic-explainer@srez-marketplace`
+   `issue-grinder@srez-marketplace` и `strategic-explainer@srez-marketplace`
    штатным plugin lifecycle.
 5. Проверьте quick validation marketplace copies, byte identity installed cache
    и состояние installed/enabled.
-6. В fresh App Server catalog подтвердите `ship-tasks:ship-tasks`,
-   `ship-tasks:task-composer` и `strategic-explainer:strategic-explainer`, отсутствие
+6. В fresh App Server catalog подтвердите `issue-grinder:issue-grinder`,
+   `issue-grinder:task-composer` и `strategic-explainer:strategic-explainer`, отсутствие
+   установленного `ship-tasks:ship-tasks`,
    standalone user copies и отсутствие этих skills в adapter-only Task Manager
    plugin.
 
-Не создавайте `~/.codex/skills/ship-tasks`,
+Не создавайте `~/.codex/skills/issue-grinder`,
+`~/.codex/skills/ship-tasks`,
 `~/.codex/skills/task-composer` или
 `~/.codex/skills/strategic-explainer`. Marketplace snapshot и
 installed cache не удаляются вручную.

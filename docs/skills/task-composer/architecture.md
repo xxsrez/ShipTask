@@ -3,22 +3,23 @@
 Статус: current Level 2 contract, 2026-08-27. Применимые Level 1 requirements —
 `TC-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
-current архитектуру достижения и не может ослаблять Level 1. Архитектурная роль
-и distribution зафиксированы в
-[ADR-0023](../../decisions/0023-task-composer-as-planning-sibling.md), а
-отдельная dependency Strategic Explainer — в
+current архитектуру достижения и не может ослаблять Level 1. Planning boundary
+зафиксирован в
+[ADR-0023](../../decisions/0023-task-composer-as-planning-sibling.md), а current
+distribution находится в `issue-grinder@srez-marketplace`; отдельная
+dependency Strategic Explainer — в
 [ADR-0031](../../decisions/0031-standalone-strategic-explainer-plugin.md).
 
 ## 0. Compilation contract
 
 Эта architecture вместе с локальным `requirements.md` является полным current
-source package `$ship-tasks:task-composer`. Runtime `task-composer/SKILL.md` —
+source package `$issue-grinder:task-composer`. Runtime `task-composer/SKILL.md` —
 производная смысловая компиляция этих двух документов: его можно удалить и
 собрать заново, сохранив все `TC-*` и выбранную здесь реализацию примерно
 эквивалентными по наблюдаемому поведению. ADR, reports и evaluations дают
 rationale и evidence, но не являются параллельным current contract.
 
-Specification описывает Task Manager-only skill `$ship-tasks:task-composer`, который
+Specification описывает Task Manager-only skill `$issue-grinder:task-composer`, который
 формулирует, декомпозирует и по явному planning intent создаёт качественные
 Tasks. Он не выполняет созданную работу и не управляет delivery lifecycle.
 
@@ -36,28 +37,28 @@ Task Composer превращает требования человека в св
 - labels, hierarchy и relations отражают фактический смысл, а не формальную
   полноту карточки.
 
-Skill доступен явно через `$ship-tasks:task-composer` и неявно, когда пользователь просит
+Skill доступен явно через `$issue-grinder:task-composer` и неявно, когда пользователь просит
 сформулировать, создать, добавить в backlog или разложить Task Manager работу.
 Draft без просьбы о записи остаётся draft. Явная просьба создать/add/capture
 разрешает только соответствующие planning mutations.
 
 Task Composer не активируется для implementation, fix, test, delivery,
 release, status, audit или простого чтения существующих Tasks. Запрос создать
-ровно одну Task и сразу выполнить её относится к ShipTask create-and-deliver,
+ровно одну Task и сразу выполнить её относится к отдельному create-and-deliver,
 а не к planning-only Task Composer.
 
 ### 1.1 Проверяемая trigger matrix
 
 | Запрос | Task Composer | Результат |
 |---|---|---|
-| `$ship-tasks:task-composer` | да | сформировать planning model; writes только при явном intent |
+| `$issue-grinder:task-composer` | да | сформировать planning model; writes только при явном intent |
 | `Сформулируй Task Manager задачу, пока не создавай` | да | read-only draft |
 | `Создай Task в Task Manager` | да | одна Task либо Epic с подзадачами по реальному scope |
 | `Разбей это на Epic и подзадачи в Task Manager` | да | Epic и достаточные подзадачи |
 | `Просто добавь это в backlog` | да | planning-only capture без implementation |
 | `Спланируй это в текущем Task Manager Project` | да | compose и create при однозначном Project context |
-| `Выполни TM-123` | нет | ShipTask delivery |
-| `Создай одну Task и сразу выполни её` | нет | ShipTask create-and-deliver |
+| `Выполни TM-123` | нет | Issue Grinder delivery |
+| `Создай одну Task и сразу выполни её` | нет | отдельный create-and-deliver flow |
 | `Покажи статус TM-123` | нет | read-only Task Manager adapter |
 | `Проведи аудит TM-123` | нет | read-only Task Manager adapter |
 | `Исправь код` | нет | обычная implementation без Task Manager planning anchor |
@@ -76,7 +77,7 @@ Task Composer создаёт или формулирует planning artifacts, �
 
 Если пользователь одновременно просит спланировать и выполнить работу,
 Task Composer может подготовить Task Manager scope, но дальнейшая delivery
-принадлежит ShipTask и его отдельному lifecycle contract.
+принадлежит Issue Grinder и его отдельному lifecycle contract.
 
 ## 3. Live scope и preflight
 
