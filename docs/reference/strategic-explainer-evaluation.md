@@ -1,6 +1,6 @@
 # Strategic Explainer evaluation contract
 
-Статус: current reference, 2026-08-27.
+Статус: current reference, 2026-08-28.
 
 Документ проверяет observable isolation и quality `$strategic-explainer`:
 stateless admission, самостоятельный source-grounded discovery и короткий
@@ -35,8 +35,8 @@ cases получают exact role lock, проходят provider-only entrypoin
 ## Model-forward gate
 
 До release изменённый provider запускается на всей current regression suite из
-20 realistic raw-source cases: десять основаны на ExampleNotes и десять на Task
-Manager. Матрица покрывает success, expected boundary, partial result,
+23 realistic raw-source cases: двенадцать основаны на ExampleNotes и одиннадцать
+на Task Manager. Матрица покрывает success, expected boundary, partial result,
 material failure/blocker, permission denial, stale conflict, atomic rollback и
 сценарии, где технический след особенно легко перепутать с сообщением.
 Генерирующий subagent получает только compact task и raw read-only anchors: ему
@@ -68,6 +68,14 @@ lost/unsupported fact либо comprehension gap. Проверка считае�
 verification-only шумом: их нельзя удалить вместе с SHA, deployments и прочим
 audit trail. Общая фраза о готовой возможности получает `FAIL`, если raw facts
 позволяли конкретно сказать, что именно проверено.
+
+Отдельный audit gate получает `FAIL`, если без прямой просьбы пользователя в
+publication body остаются сырой командный блок, shell/test command, абсолютный
+путь, полный список тестовых файлов, неприменимые SHA/IDs либо другая техническая
+квитанция. Для следующего lifecycle comment evaluator сравнивает current result
+с предыдущим пользовательским сообщением: неизменившиеся доказательства и
+checklist не повторяются, а material delta, исправленный инцидент, новая граница
+или действие остаются явными.
 
 ## Критические требования
 
@@ -316,6 +324,34 @@ technical title получает `FAIL`.
 После Task comment требуется отдельный scope-level final, а затем changed facts
 требуют correction. Каждый result получает fresh invocation; final не строится
 follow-up старому Explainer и не получает предыдущий wording как framing.
+
+### Completion comment не превращается в command dump
+
+Raw facts содержат понятный пользовательский результат вместе с командами
+проверок, абсолютными путями, SHA/IDs и полным перечнем тестовых файлов. Если
+пользователь не просил audit trail, `PASS` требует оставить в публикации
+результат, значение и существенную границу, а техническую квитанцию вынести в
+source basis. Копирование команд или списка файлов в body получает `FAIL`.
+
+### Следующий lifecycle comment сообщает изменение, а не повтор
+
+Предыдущее пользовательское сообщение уже содержит evidence готовности; новое
+основание добавляет найденный и исправленный дефект, повторную проверку и новый
+следующий state. `PASS` сохраняет этот material delta и не повторяет прежние
+команды, идентификаторы и checklist. Почти дословная копия предыдущего отчёта
+получает `FAIL`, даже если все факты технически верны.
+
+### Production regression: blocked Goal без причинного отчёта
+
+Release остаётся активным, все незавершённые Tasks находятся в `In Review`, а
+Goal должен стать `blocked`, потому что после исчерпания безопасной автономной
+frontier отсутствуют внешние средства прямой hosted-проверки. `PASS` требует
+отдельной свежей scope-level unit до Goal write: она называет первичную причину,
+отделяет user-controlled prerequisites от ограничений среды, объясняет влияние,
+первый безопасный шаг и наблюдаемый сигнал возобновления. Перечень OAuth,
+browser, sessions и host capabilities без причинной связи получает `FAIL`;
+переиспользование provider-а Task comment или прежнего candidate также получает
+`FAIL`.
 
 ### Недостаточная problem framing
 

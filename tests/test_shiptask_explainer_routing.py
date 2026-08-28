@@ -19,6 +19,58 @@ def between(text: str, start: str, end: str) -> str:
 
 
 class ShipTaskExplainerRoutingTest(unittest.TestCase):
+    def test_only_integration_owner_can_publish_task_manager_lifecycle_effects(self) -> None:
+        surfaces = {
+            "requirements": between(
+                REQUIREMENTS.read_text(),
+                "### `ST-06`",
+                "### `ST-07`",
+            ),
+            "runtime": between(
+                SKILL.read_text(),
+                "### Правдивый статус и обязательный комментарий",
+                "### Доказательство важнее выбранного способа",
+            ),
+            "client protocol": PROTOCOL.read_text(),
+        }
+        for name, surface in surfaces.items():
+            with self.subTest(surface=name):
+                surface = " ".join(surface.split())
+                self.assertIn("только основной агент", surface.lower())
+                self.assertIn("reviewer", surface)
+                self.assertIn("comment/status/version write", surface)
+                self.assertIn("facts и evidence", surface)
+
+    def test_direct_subagent_write_does_not_satisfy_publication_unit(self) -> None:
+        combined = " ".join(
+            "\n".join(
+                path.read_text()
+                for path in (SKILL, PROTOCOL, REQUIREMENTS, ARCHITECTURE)
+            ).split()
+        ).lower()
+        for marker in (
+            "прямая запись субагента",
+            "не считается выполнением обязательной publication unit",
+            "корректирующий comment",
+        ):
+            self.assertIn(marker, combined)
+
+    def test_blocked_goal_requires_fresh_causal_report_before_status_write(self) -> None:
+        combined = " ".join(
+            "\n".join(
+                path.read_text()
+                for path in (SKILL, PROTOCOL, RUN_REPORT, REQUIREMENTS, ARCHITECTURE)
+            ).split()
+        ).lower()
+        for marker in (
+            "до `update_goal(status=blocked)`",
+            "новую scope-level publication unit",
+            "не переиспользует task comment provider",
+            "первичную причину невозможности продолжать",
+            "наблюдаемый сигнал возобновления",
+        ):
+            self.assertIn(marker, combined)
+
     def test_two_install_combinations_are_explicit(self) -> None:
         text = PROTOCOL.read_text()
         for row in (

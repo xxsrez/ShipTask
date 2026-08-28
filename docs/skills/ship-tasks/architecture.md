@@ -317,6 +317,17 @@ provider failure также переводят mode в native. Во всех с�
 contract ShipTask, не читает и не имитирует provider method и не заявляет
 эквивалентное качество.
 
+Comments и связанные status/version writes принадлежат только основному
+integration owner. Каждый worker/reviewer/scout packet явно запрещает эти Task
+Manager mutations и возвращает только facts и evidence, verdict и recommendation.
+Основной агент не принимает текст subagent-а за готовую publication unit: в
+ordinary mode он сначала получает fresh result semantic facade для exact unit.
+
+Если subagent всё же сделал прямую запись, она сохраняется как факт истории, но
+не удовлетворяет обязательный comment gate. Coordinator перечитывает Task,
+comment и status, не делает скрытый rollback, публикует корректирующий comment
+через выбранный mode и только после его read-back продолжает зависящий effect.
+
 ### 2.3 Приёмочный инцидент виден сразу и остаётся в истории
 
 `verified-failure`, `verification-blocked` и `task-contract-conflict`,
@@ -543,6 +554,15 @@ reflection pass; повтор допустим после changed facts/candidat
 либо исправления invalid invocation. Для shared gate используется один
 консолидированный report, а не повторяющиеся comments.
 
+Для Goal/shared-selector blocker coordinator отдельно строит новый scope-level
+report. Он не продолжает provider Task comment-а и не передаёт прежний candidate
+как framing. После fresh full inventory report должен назвать первичную причину
+невозможности продолжать, исчерпанную safe frontier, влияние, user-controlled и
+environment-controlled prerequisites, первый безопасный шаг и наблюдаемый
+resume signal. Только после подготовки и factual check этой unit допустим
+`update_goal(status=blocked)`; затем Goal перечитывается, а подготовленный текст
+возвращается человеку без технической редакторской подмены.
+
 Доказанный material incident остаётся немедленно видимым по `ST-08`: если его
 нужно сообщить до завершения reflection, отдельный fresh publication unit
 описывает только установленный incident и продолжающуюся проверку, не утверждая
@@ -648,6 +668,11 @@ call того же provider. Operational unavailability или другая фи
 facade переводит mode в native. Availability fallback
 работает только при начальном выборе, поэтому одна unit получает не более одного
 provider.
+
+Каждый Task comment, следующий lifecycle comment, scope-level blocker report и
+final получают собственный fresh semantic call. Task-level provider, включая
+удачный прежний comment, не продолжается и не переиспользуется для Goal/final;
+совпадающие facts передаются только через новые read-only anchors.
 
 В native mode ShipTask формулирует unit по собственному truth/lifecycle/reporting
 contract. Он не загружает и не имитирует provider method и не заявляет
@@ -788,6 +813,16 @@ Goal не решает, сколько раз проверять Task, не оп
 остаются `To Do`, `In Progress`, `In Review`, rework, незавершённые effects или
 in-scope defect, Goal остаётся активным.
 
+Если после tool-level blocker threshold и нового полного чтения selector
+доказано, что независимой безопасной работы не осталось, coordinator до
+`update_goal(status=blocked)` готовит новую scope-level publication unit через
+текущий communication mode. Она не переиспользует Task comment provider или
+его candidate и причинно называет первичную причину невозможности продолжать,
+исчерпанную автономную frontier, влияние, отдельно управляемые пользователем и
+внешней средой prerequisites, первый безопасный шаг и наблюдаемый сигнал
+возобновления. Только после factual check этой unit допустим status write;
+затем Goal перечитывается, а тот же готовый report возвращается человеку.
+
 Сначала coordinator выводит effective topology policy из current prompt и
 применимого conversation context. Однозначные natural-language указания
 пользователя сохраняются как constraints: точное или относительное число,
@@ -924,6 +959,13 @@ verification, comments и read-back. При отсутствии approval Task �
 Перед финальным ответом агент перечитывает affected Tasks, comments, statuses,
 применимый Goal и обязательные external effects. Если есть безопасный in-scope
 способ устранить gap, он делает это до handoff.
+
+Blocked Goal не является самодостаточным объяснением. Если Goal должен получить
+этот статус, до `update_goal(status=blocked)` уже существует новая scope-level
+publication unit с первичной причиной невозможности продолжать и наблюдаемым
+сигналом возобновления; она не переиспользует Task comment provider. После
+записи Goal перечитывается, а подготовленный report становится terminal final,
+а не заменяется перечнем симптомов или служебной сводкой.
 
 Каждый unresolved blocker в этом перечитывании должен иметь completed reflection
 по `ST-28` на current facts. ShipTask не использует wording Explainer как

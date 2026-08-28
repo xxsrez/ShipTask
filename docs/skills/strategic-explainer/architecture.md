@@ -1,6 +1,6 @@
 # Strategic Explainer
 
-Статус: current Level 2 contract, 2026-08-27. Применимые Level 1 requirements —
+Статус: current Level 2 contract, 2026-08-28. Применимые Level 1 requirements —
 `SE-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Problem-first
@@ -268,9 +268,12 @@ Direct и delegated caller получают один publication-ready result co
 
 Один invocation обслуживает один самостоятельный user-facing result: Task
 comment/report, material decision/state explanation, blocker report или final.
-Routine chat, progress commentary и внутренний draft не являются publication
-unit. Новый вопрос, changed facts/scope либо correction получают новый clean
-subagent; старый candidate не передаётся как framing.
+Следующий lifecycle comment, scope-level blocker и final являются новыми units,
+даже если используют те же facts: прежний Task provider не продолжается, не
+переименовывается и не получает новое назначение. Routine chat, progress
+commentary и внутренний draft не являются publication unit. Новый вопрос,
+changed facts/scope либо correction получают новый clean subagent; старый
+candidate не передаётся как framing.
 
 ## 6. Проверка понимания
 
@@ -372,6 +375,13 @@ publication text: из естественной формулировки дол�
   препятствие, влияние и следующий шаг без process diary;
 - первый слой передаёт одну главную причинную мысль без необязательной воды, а
   второй существует только при material need;
+- если пользователь прямо не запросил audit trail, publication body не содержит
+  raw shell/test commands, абсолютные пути, полный список тестовых файлов,
+  неприменимые SHA/IDs или другую техническую квитанцию; эти сведения остаются в
+  source basis;
+- следующий lifecycle result сообщает material delta и не повторяет
+  неизменившиеся доказательства из предыдущего пользовательского сообщения;
+  исправленный incident, новая граница либо новое действие при этом не теряются;
 - publication text самодостаточен, source basis отделён и не опубликован как его
   продолжение;
 - result пригоден для публикации без стилистической переработки caller-ом;

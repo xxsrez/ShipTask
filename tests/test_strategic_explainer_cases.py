@@ -12,8 +12,10 @@ COMMON_RUBRIC = SUITE / "common-rubric.md"
 
 EXPECTED_CASES = {
     "automatic-capture-safe-boundary",
+    "blocked-goal-causal-report",
     "bulk-cross-project-rollback",
     "comment-idempotency-and-stale-edit",
+    "completion-comment-command-dump",
     "concurrent-edit-no-hidden-merge",
     "green-local-failed-uat",
     "hierarchy-cycle-and-stale-guard",
@@ -26,6 +28,7 @@ EXPECTED_CASES = {
     "ownership-transfer-one-owner",
     "project-shadow-restore",
     "redeploy-persistence-failure",
+    "review-completion-duplicate-evidence",
     "release-delete-membership-boundary",
     "release-open-tasks-confirmation",
     "saved-view-base-temporary-separation",
@@ -34,8 +37,8 @@ EXPECTED_CASES = {
 }
 
 EXPECTED_SOURCE_PORTFOLIO = {
-    "ExampleNotes": 10,
-    "Task Manager": 10,
+    "ExampleNotes": 12,
+    "Task Manager": 11,
 }
 
 FACT_SECTIONS = (
@@ -102,7 +105,7 @@ class StrategicExplainerCasesTest(unittest.TestCase):
                 ):
                     self.assertNotIn(leaked_instruction, facts)
 
-    def test_suite_covers_both_product_sources_equally(self) -> None:
+    def test_suite_covers_expected_product_sources(self) -> None:
         actual = {project: 0 for project in EXPECTED_SOURCE_PORTFOLIO}
         for name in EXPECTED_CASES:
             facts = (CASES / name / "facts.md").read_text(encoding="utf-8")
@@ -151,6 +154,9 @@ class StrategicExplainerCasesTest(unittest.TestCase):
             "номера внутренних ревизий",
             "SHA",
             "source basis",
+            "командные строки",
+            "абсолютные пути",
+            "неизменившийся доказательный след",
         ):
             self.assertIn(concept, rubric)
 

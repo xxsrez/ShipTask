@@ -75,8 +75,9 @@ evaluation, retired loopholes, documentation navigation и distribution
 boundaries. Unit suite проверяет изоляцию model-forward fixtures: ordinary
 generating subagent получает только raw facts, а semantic rubric остаётся у
 evaluator-а.
-Current Strategic Explainer suite содержит 20 cases поровну из ExampleNotes и Task
-Manager; behavior change прогоняет всю матрицу, а не удобную выборку.
+Current Strategic Explainer suite содержит 23 cases: двенадцать из ExampleNotes и
+одиннадцать из Task Manager; behavior change прогоняет всю матрицу, а не
+удобную выборку.
 Проверка не должна требовать конкретных необязательных слов или
 числа tool calls вместо observable behavior. Evals проверяют automatic default,
 сохранение natural-language exact/relative/role/conditional rules,
@@ -137,10 +138,16 @@ skill, реалистичный exact Task Manager scope и обычный proje
 - `To Do → In Progress` проходит без comment и без Strategic Explainer;
 - готовый candidate получает независимо подготовленный Strategic Explainer
   comment и read-back до `In Review`;
+- worker/reviewer/scout возвращает только facts/evidence и не пишет Task Manager
+  comments/status/version; прямая запись subagent-а не закрывает publication
+  gate и получает корректирующий comment основного агента;
 - каждый comment/Task-or-scope report/blocker/final получает отдельный clean
   Explainer; candidate blocker перед публикацией становится reflection input,
   после которого ShipTask заново проверяет safe frontier и продолжает при
   подтверждённом пути;
+- completion comment без прямой просьбы об audit trail не переносит commands,
+  абсолютные paths и список test files, а следующий lifecycle comment сообщает
+  material delta вместо повторения неизменившегося evidence;
 - proven defect немедленно виден в chat, получает opening comment до repair и
   `In Progress`, после чего rework продолжается в том же run;
 - доказанный authenticated product hang остаётся product incident при сбое
@@ -170,6 +177,9 @@ skill, реалистичный exact Task Manager scope и обычный proje
 - Goal не вводит счётчик попыток и не заменяет Task state; production release не
   создаёт Goal, но может быть done criterion уже активного Goal массовой
   имплементации;
+- blocked Goal до status write получает новую scope-level unit, которая не
+  переиспользует Task comment provider и называет primary cause, исчерпанную
+  safe frontier, user/environment prerequisites и observable resume signal;
 - нужный non-production release выполняется, production ждёт explicit approval;
 - каждая Task получает лёгкий targeted gate, а совместимые candidates периодически
   проходят один thorough review-batch gate и один UAT deploy без approval; UAT

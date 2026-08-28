@@ -1,6 +1,6 @@
 # ShipTask: требования пользователя
 
-Статус: действующий Level 1. Редакция от 2026-08-27.
+Статус: действующий Level 1. Редакция от 2026-08-28.
 
 Это полный набор действующих пользовательских требований только к
 `$ship-tasks`. Требования к Task Composer и Strategic Explainer находятся в их
@@ -137,6 +137,21 @@ ShipTask сам выбирает способ реализации, диагно
 ShipTask сначала сверяет фактическое состояние. Пока обязательный комментарий
 не подтверждён, зависящий от него переход статуса не считается выполненным.
 
+Только основной агент создаёт Task Manager comments и выполняет связанные
+comment/status/version writes. Worker, reviewer, scout и любой другой subagent
+не вызывают Task Manager comment/status/version write operations: они
+возвращают основному агенту только facts и evidence, вывод проверки и
+рекомендацию. Этот запрет явно входит в каждый делегированный packet, даже если
+write tools технически доступны subagent-у.
+
+Прямая запись субагента не считается выполнением обязательной publication unit
+и не подтверждает связанный lifecycle transition. Основной агент перечитывает
+Task и историю, не скрывает или не удаляет такую запись и перед следующим
+зависящим effect публикует через выбранный communication mode корректирующий
+comment с текущими фактами. Уже произошедший status write сначала
+согласовывается с фактическим состоянием; его нельзя молча выдать за корректный
+переход или маскировать обратной сменой статуса.
+
 ### `ST-07` — Понятное объяснение через выбранный Explainer или native mode
 
 В начале run ShipTask определяет один communication mode по live skill catalog и
@@ -172,6 +187,13 @@ anchors. Никакие другие invocation parameters или provider instr
 ShipTask не передаются и не описываются: внутренним исполнением полностью
 владеет facade Strategic Explainer. Operational unavailability или другой
 финальный failure facade переводит communication mode в native.
+
+В provider mode до каждого Task Manager comment write основной агент получает
+новый publication-ready result именно для этой unit и проверяет его material
+facts по source basis. Текст или draft worker-а, reviewer-а, scout-а, прежнего
+Task comment provider-а либо другой publication unit не является таким result и
+не публикуется как замена fresh semantic call. Caller не дописывает source basis
+в comment и не возвращает результат на свой технический язык.
 
 В native mode ShipTask сразу формулирует publication unit по собственным
 truth/lifecycle/reporting requirements, публикует обязательный комментарий,
@@ -330,6 +352,15 @@ Goal не определяет результат отдельных Tasks и н
 Запуск, посвящённый только выпуску, не создаёт, не переназначает и не завершает
 Goal ради самого выпуска.
 
+Goal переводится в `blocked` только после выполнения tool-level threshold и
+подготовки отдельного причинного scope-level blocker report. До
+`update_goal(status=blocked)` основной агент перечитывает полный live selector,
+убеждается, что независимой безопасной работы не осталось, и получает новую
+scope-level publication unit через communication mode `ST-07`. Он не
+переиспользует Task comment provider, прежний candidate или сводку локальных
+комментариев. После status write Goal перечитывается, а подготовленный report
+публикуется человеку без редакторской подмены.
+
 ### `ST-15` — Полномочия на выпуск и внешние эффекты
 
 Обязательные изменения и внешние эффекты в текущем объёме работ, не относящиеся
@@ -397,6 +428,15 @@ ShipTask может не более одного раза попытаться �
 рекомендуется и какой наблюдаемый сигнал подтвердит успех. Сообщения вроде
 «нужен файл», «нужен principal» или `not-available` без такого объяснения
 недостаточны.
+
+Итог для заблокированного Goal прямо называет первичную причину невозможности
+продолжать, отличает её от списка затронутых проверок, объясняет, почему
+исчерпана безопасная автономная frontier, и разделяет: что может сделать
+пользователь, что требует изменения внешней среды и что вообще не является его
+действием. Он называет влияние, первый безопасный шаг и наблюдаемый сигнал
+возобновления. Статус `blocked`, перечень OAuth/browser/host symptoms или общая
+фраза «нужны внешние возможности» без этой причинной связи не являются
+blocker-report.
 
 ### `ST-19` — Приоритет состояний и контекст дубликатов
 
@@ -703,6 +743,13 @@ incident и продолжающуюся проверку, не утвержда
 исправления невалидного invocation; вариативные формулировки Explainer на том же
 основании не создают бесконечный recovery loop. Reflection не расширяет selector,
 Task contract или полномочия и не останавливает независимую runnable работу.
+
+Если blocker относится к Goal или всему selector, reflection и итоговый report
+являются новой scope-level publication unit. Task-level comment, provider,
+candidate либо explanation другой Task нельзя продолжать или переиспользовать
+для этой роли, даже если факты пересекаются. Scope-level report готовится до
+`update_goal(status=blocked)` и проверяется после fresh full inventory; смена
+Goal status без такого report считается незавершённым terminal effect.
 
 ## Изменение Level 1
 

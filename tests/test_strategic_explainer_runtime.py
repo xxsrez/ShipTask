@@ -9,6 +9,17 @@ CONTRACT = ROOT / "strategic-explainer" / "references" / "provider-contract.md"
 
 
 class StrategicExplainerRuntimeTest(unittest.TestCase):
+    def test_completion_gate_rejects_audit_dump_and_unchanged_repetition(self) -> None:
+        text = " ".join(CONTRACT.read_text().split()).lower()
+        for marker in (
+            "сырой командный блок",
+            "абсолютный путь",
+            "список тестовых файлов",
+            "неизменившиеся доказательства из предыдущего пользовательского сообщения",
+            "не проходит completion gate",
+        ):
+            self.assertIn(marker, text)
+
     def test_terminal_role_is_resolved_before_facade_protocol(self) -> None:
         text = SKILL.read_text()
         self.assertLess(

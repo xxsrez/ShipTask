@@ -422,6 +422,11 @@ def validate_ship_skill(errors: list[str]) -> None:
         "явный unavailable user profile не подменяй",
         "единственный integration owner",
         "владелец Goal, Task Manager\ncomments/status/version writes",
+        "Только основной агент выполняет Task Manager comment/status/version write",
+        "Worker, reviewer, scout",
+        "только facts и evidence",
+        "Прямая запись субагента не считается выполнением обязательной publication unit",
+        "корректирующий comment",
         "собственную feature branch и собственный Git worktree",
         "Один writable worktree принадлежит одному writer",
         "Только integration owner делает fan-in",
@@ -443,6 +448,10 @@ def validate_ship_skill(errors: list[str]) -> None:
         "Operational unavailability или любая другая финальная ошибка facade",
         "provider explanation/source basis как\nreflection input",
         "Достаточный путь отменяет\nstale blocker",
+        "до `update_goal(status=blocked)`",
+        "не переиспользует Task comment provider",
+        "первичную причину невозможности продолжать",
+        "наблюдаемый сигнал возобновления",
         "Периодический UAT batch release",
         "лёгкий targeted gate",
         "разумный exact integrated batch",
@@ -743,6 +752,11 @@ def validate_strategic_skill(errors: list[str]) -> None:
         "не добавляй решение или authority",
         "Completion gate",
         "Не смешивай source basis с publication text",
+        "сырой командный\nблок",
+        "абсолютный путь",
+        "полный список тестовых файлов",
+        "Неизменившиеся доказательства из предыдущего пользовательского сообщения",
+        "не проходит completion gate",
     )
     text = read(STRATEGIC_SKILL)
     for coupling in ("Task Manager", "TM-123"):
@@ -1387,7 +1401,7 @@ def validate_source_layers(errors: list[str]) -> None:
     packages = (
         (SHIP_REQUIREMENTS, "ST", 28),
         (COMPOSER_REQUIREMENTS, "TC", 12),
-        (STRATEGIC_REQUIREMENTS, "SE", 17),
+        (STRATEGIC_REQUIREMENTS, "SE", 18),
     )
     for requirements, prefix, count in packages:
         requirement_ids = re.findall(
@@ -1413,9 +1427,9 @@ def validate_source_layers(errors: list[str]) -> None:
             )
         else:
             level_one_status = (
-                "Статус: current Level 1, 2026-08-27"
-                if requirements in (COMPOSER_REQUIREMENTS, STRATEGIC_REQUIREMENTS)
-                else "Статус: current Level 1, 2026-08-26"
+                "Статус: current Level 1, 2026-08-28"
+                if requirements == STRATEGIC_REQUIREMENTS
+                else "Статус: current Level 1, 2026-08-27"
             )
             require(
                 errors,
@@ -1588,7 +1602,7 @@ def validate_source_layers(errors: list[str]) -> None:
     for architecture, prefix, status_marker in (
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current Level 2 contract, 2026-08-27"),
-        (STRATEGIC_SPEC, "SE-*", "Статус: current Level 2 contract, 2026-08-27"),
+        (STRATEGIC_SPEC, "SE-*", "Статус: current Level 2 contract, 2026-08-28"),
     ):
         require(
             errors,
@@ -2231,7 +2245,7 @@ def validate_strategic_contract(errors: list[str]) -> None:
     require(
         errors,
         STRATEGIC_SPEC,
-        "Статус: current Level 2 contract, 2026-08-27",
+        "Статус: current Level 2 contract, 2026-08-28",
         "`SE-*` в локальных",
         "[требованиях пользователя](requirements.md)",
         "общего skill `$strategic-explainer`",
@@ -2252,6 +2266,9 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Completion criteria",
         "Текст пишется на языке пользователя",
         "publication-ready result contract",
+        "Следующий lifecycle comment, scope-level blocker и final являются новыми units",
+        "raw shell/test commands",
+        "неизменившиеся доказательства из предыдущего пользовательского сообщения",
         "private evidence map",
         "reader model",
         "публикует только text",
@@ -2263,6 +2280,16 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Редакторская реконструкция",
         "неизменяемое смысловое ядро",
         "обратная проверка покрытия",
+    )
+    require(
+        errors,
+        STRATEGIC_REQUIREMENTS,
+        "### `SE-18`",
+        "сырой\nкомандный блок",
+        "абсолютный путь",
+        "полный список тестовых файлов",
+        "Новая lifecycle publication сообщает material delta",
+        "не являются publication-ready result",
     )
     require(
         errors,
@@ -2318,6 +2345,9 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Загрязнённый invocation",
         "Compact selector требует самостоятельного discovery",
         "Новый publication unit не продолжает старый candidate",
+        "Completion comment не превращается в command dump",
+        "Следующий lifecycle comment сообщает изменение, а не повтор",
+        "Production regression: blocked Goal без причинного отчёта",
     )
     require(
         errors,

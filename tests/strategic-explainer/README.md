@@ -39,18 +39,21 @@ comprehension check перед возвратом result.
 
 ## Cases
 
-Suite содержит ровно 20 materially different cases, поровну из двух соседних
-продуктов. ExampleNotes покрывает размер и тип файлов, persistence после
+Suite содержит ровно 23 materially different cases: двенадцать из ExampleNotes и
+одиннадцать из Task Manager. ExampleNotes покрывает размер и тип файлов, persistence после
 переиздания, concurrent edits, idempotent retry, current access к истории,
 write rebind, automatic capture, повторную выдачу приглашения и перенос
 ownership. Task Manager покрывает ACL комментариев, role ceiling, сохранённые и
 временные фильтры, recoverable deletion Project и Release, атомарный массовый
 перенос, hierarchy guards, idempotent comment edits, выпуск с открытыми Tasks и
-границу между зелёной локальной проверкой и провалившимся UAT.
+границу между зелёной локальной проверкой и провалившимся UAT. Два отдельных
+регрессионных случая воспроизводят перегруженный closing comment с командами и
+повтор уже опубликованного доказательного следа после review и блокировку Goal
+без причинного отчёта.
 
 Матрица намеренно содержит success, expected boundary, partial result,
 regression, permission denial, stale conflict, atomic rollback и blocker report.
-Это не двадцать перефразировок одного closing comment.
+Это не двадцать три перефразировки одного closing comment.
 
 ## Запуск
 
