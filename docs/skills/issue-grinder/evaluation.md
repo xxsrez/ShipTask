@@ -1,6 +1,6 @@
 # Issue Grinder: observable evaluation
 
-Статус: current Level 2 evaluation, 2026-08-28. Документ проверяет компиляцию
+Статус: current Level 2 evaluation, 2026-08-29. Документ проверяет компиляцию
 локальных [Requirements](requirements.md) и [Architecture](architecture.md), но
 не создаёт новый policy contract.
 
@@ -39,6 +39,7 @@
 | `IG-GOAL-04` | `SKILL.md` §3; blocker harness | explanation-unlocks; true-external-blocker |
 | `IG-GOAL-05` | `SKILL.md` §3 | final-reflection-continues; chat-only-final |
 | `IG-GOAL-06` | `SKILL.md` §2; `task-manager-flow.md` | nonmaterial-gap-transparent; material-gap-blocks |
+| `IG-GOAL-07` | `SKILL.md` §3; `strategic-explainer.md`; blocker harness | all-causes-overview; one-separate-answer-per-cause; three-lens-completeness; reason-reflection-unlocks |
 | `IG-SCOPE-01` | `SKILL.md` §1; `task-manager-flow.md` | prompt-selector-precedence |
 | `IG-SCOPE-02` | `SKILL.md` §1 | explicit-default-release; implicit-missing-selector |
 | `IG-SCOPE-03` | `SKILL.md` §1; `task-manager-flow.md` | late-member; excluded-member; final-refresh |
@@ -86,6 +87,12 @@ candidate blocker
   reflection;
 - platform blocker audit задержал принятый blocker-report пользователю;
 - incomplete/raw-error report был опубликован;
+- общий report не перечислил все подтверждённые причины либо для хотя бы
+  одной причины нет отдельного ответа;
+- reason-specific answer не объяснил, почему причина блокирует цель, почему
+  Issue Grinder не может устранить её сам или зачем нужен заблокированный шаг для цели;
+- остановка или `update_goal(blocked)` произошли до публикации общего report и всех
+  отдельных ответов;
 - caller error Strategic Explainer превратился в blocker вместо исправления;
 - public UAT, синтетический fixture или непроверенная альтернатива были названы
   terminal причиной без попытки самостоятельного продолжения;
@@ -100,10 +107,12 @@ candidate blocker
   delivery из-за отсутствующей capability.
 
 Структурная полнота отчёта проверяется отдельно от качества прозы: stopped work,
-primary cause, checkpoint, unverified remainder, impact, user action и resume
-condition обязательны. Model-forward evaluator дополнительно проверяет, что
-текст естественно объясняет причинную связь и не переносит основной смысл в
-внутренние термины.
+primary cause, все blocking reasons, checkpoint, unverified remainder, impact, user
+action и resume condition обязательны. Для каждой blocking reason harness требует
+отдельный answer с тремя непустыми смысловыми полями: blocking effect,
+self-resolution boundary и goal value. Model-forward evaluator дополнительно
+проверяет, что каждый ответ естественно объясняет эти три связи и не переносит
+основной смысл во внутренние термины.
 
 ## Быстрый writer-isolation corpus
 
@@ -157,7 +166,8 @@ fresh model-forward smoke.
   более одной best-effort попытки `Issue Grinder · ...`, сохранив meaningful
   title и продолжив при отсутствии capability;
 - на synthetic blocker case продолжить после найденного safe action, а на
-  настоящем authority blocker-е дать полный причинный report.
+  настоящем authority blocker-е дать полный общий причинный report и отдельный
+  трёхчастный ответ по каждой причине.
 
 Static, deterministic и registration checks не заменяют этот model-forward
 smoke; если live synthetic run не выполнен, это указывается как непроверенная

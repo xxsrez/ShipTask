@@ -40,6 +40,7 @@ class SafeAction:
 class BlockerReport:
     stopped_work: str = ""
     primary_cause: str = ""
+    blocking_reasons: tuple[str, ...] = ()
     checkpoint: str = ""
     unverified_work: str = ""
     impact: str = ""
@@ -47,7 +48,7 @@ class BlockerReport:
     resume_condition: str = ""
 
     def missing_fields(self) -> tuple[str, ...]:
-        return tuple(
+        missing = tuple(
             name
             for name in (
                 "stopped_work",
@@ -57,6 +58,31 @@ class BlockerReport:
                 "impact",
                 "user_action",
                 "resume_condition",
+            )
+            if not getattr(self, name).strip()
+        )
+        if not self.blocking_reasons or any(
+            not reason.strip() for reason in self.blocking_reasons
+        ):
+            return (*missing, "blocking_reasons")
+        return missing
+
+
+@dataclass(frozen=True)
+class BlockerReasonAnswer:
+    reason: str = ""
+    blocks_goal_because: str = ""
+    agent_cannot_resolve_because: str = ""
+    goal_value: str = ""
+
+    def missing_fields(self) -> tuple[str, ...]:
+        return tuple(
+            name
+            for name in (
+                "reason",
+                "blocks_goal_because",
+                "agent_cannot_resolve_because",
+                "goal_value",
             )
             if not getattr(self, name).strip()
         )
@@ -283,6 +309,7 @@ def decide_blocker(
     context: BlockerContext,
     report: BlockerReport,
     *,
+    reason_answers: tuple[BlockerReasonAnswer, ...] = (),
     communication_mode: str = "ordinary",
     explainer_outcome: str = "ready",
 ) -> BlockerDecision:
@@ -342,7 +369,29 @@ def decide_blocker(
             defects=tuple(f"missing_report_field:{name}" for name in missing),
         )
 
+    reason_defects = _reason_answer_defects(report, reason_answers)
+    if reason_defects:
+        action = (
+            "repair_explainer_reason_answers"
+            if effective_mode == "ordinary"
+            else "repair_native_reason_answers"
+        )
+        events.append(action)
+        return BlockerDecision(
+            action=action,
+            events=tuple(events),
+            may_publish=False,
+            may_stop=False,
+            may_update_goal_blocked=False,
+            defects=reason_defects,
+        )
+
+    events.append("blocker_reason_answers_ready")
     events.append("publish_blocker_report")
+    events.extend(
+        f"publish_blocker_reason:{index}"
+        for index, _ in enumerate(report.blocking_reasons, start=1)
+    )
     if context.goal_active and not context.platform_blocker_audit_passed:
         events.extend(("goal_block_pending_audit", "stop"))
         return BlockerDecision(
@@ -469,6 +518,38 @@ def decide_stored_permission(
 
 def _first(actions: tuple[SafeAction, ...], attribute: str) -> SafeAction | None:
     return next((action for action in actions if getattr(action, attribute)), None)
+
+
+def _reason_answer_defects(
+    report: BlockerReport,
+    reason_answers: tuple[BlockerReasonAnswer, ...],
+) -> tuple[str, ...]:
+    reasons = tuple(report.blocking_reasons)
+    defects: list[str] = []
+    if len(set(reasons)) != len(reasons):
+        defects.append("duplicate_blocking_reason")
+
+    answers_by_reason: dict[str, list[BlockerReasonAnswer]] = {}
+    for answer in reason_answers:
+        answers_by_reason.setdefault(answer.reason, []).append(answer)
+
+    for reason in reasons:
+        matches = answers_by_reason.get(reason, [])
+        if not matches:
+            defects.append(f"missing_reason_answer:{reason}")
+            continue
+        if len(matches) > 1:
+            defects.append(f"duplicate_reason_answer:{reason}")
+            continue
+        defects.extend(
+            f"missing_reason_answer_field:{reason}:{field}"
+            for field in matches[0].missing_fields()
+        )
+
+    for reason in answers_by_reason:
+        if reason not in reasons:
+            defects.append(f"unexpected_reason_answer:{reason}")
+    return tuple(defects)
 
 
 def _nonterminal(action: str, events: list[str], defect: str) -> BlockerDecision:

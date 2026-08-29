@@ -6,6 +6,7 @@ import unittest
 
 from scripts.issue_grinder_trace_harness import (
     BlockerContext,
+    BlockerReasonAnswer,
     BlockerReport,
     ExistingWorkArtifact,
     SafeAction,
@@ -34,7 +35,12 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))
-        cls.report = BlockerReport(**cls.fixture["completeReport"])
+        report = dict(cls.fixture["completeReport"])
+        report["blocking_reasons"] = tuple(report["blocking_reasons"])
+        cls.report = BlockerReport(**report)
+        cls.reason_answers = tuple(
+            BlockerReasonAnswer(**item) for item in cls.fixture["reasonAnswers"]
+        )
 
     def test_explanation_reveals_safe_action_and_forces_auto_continue(self) -> None:
         decision = decide_blocker(
@@ -43,6 +49,7 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
                 goal_active=True,
             ),
             self.report,
+            reason_answers=self.reason_answers,
         )
 
         self.assertEqual(decision.action, "continue_work")
@@ -242,6 +249,7 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
                 goal_active=True,
             ),
             self.report,
+            reason_answers=self.reason_answers,
         )
 
         self.assertEqual(decision.action, "continue_work")
@@ -258,6 +266,7 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
                 goal_active=True,
             ),
             self.report,
+            reason_answers=self.reason_answers,
         )
 
         self.assertEqual(decision.action, "verify_safe_action")
@@ -279,10 +288,47 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
             any(item == "missing_report_field:resume_condition" for item in decision.defects)
         )
 
+    def test_each_blocking_reason_requires_a_separate_answer(self) -> None:
+        decision = decide_blocker(
+            BlockerContext(goal_active=True),
+            self.report,
+            reason_answers=self.reason_answers[:-1],
+        )
+
+        self.assertEqual(decision.action, "repair_explainer_reason_answers")
+        self.assertFalse(decision.may_publish)
+        self.assertFalse(decision.may_stop)
+        self.assertFalse(decision.may_update_goal_blocked)
+        self.assertTrue(
+            any(item.startswith("missing_reason_answer:") for item in decision.defects)
+        )
+        self.assertNotIn("publish_blocker_report", decision.events)
+
+    def test_reason_answer_requires_all_three_explanatory_lenses(self) -> None:
+        incomplete = BlockerReasonAnswer(
+            reason=self.reason_answers[0].reason,
+            blocks_goal_because=self.reason_answers[0].blocks_goal_because,
+            agent_cannot_resolve_because=self.reason_answers[0].agent_cannot_resolve_because,
+        )
+        decision = decide_blocker(
+            BlockerContext(goal_active=True),
+            self.report,
+            reason_answers=(incomplete, self.reason_answers[1]),
+        )
+
+        self.assertEqual(decision.action, "repair_explainer_reason_answers")
+        self.assertIn(
+            f"missing_reason_answer_field:{incomplete.reason}:goal_value",
+            decision.defects,
+        )
+        self.assertFalse(decision.may_publish)
+        self.assertFalse(decision.may_stop)
+
     def test_caller_error_is_repaired_instead_of_becoming_a_blocker(self) -> None:
         decision = decide_blocker(
             BlockerContext(goal_active=True),
             self.report,
+            reason_answers=self.reason_answers,
             explainer_outcome="caller_error",
         )
 
@@ -297,6 +343,7 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
                 goal_active=True,
             ),
             self.report,
+            reason_answers=self.reason_answers,
             explainer_outcome="technical_error",
         )
 
@@ -309,14 +356,25 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
         decision = decide_blocker(
             BlockerContext(goal_active=True, platform_blocker_audit_passed=True),
             self.report,
+            reason_answers=self.reason_answers,
         )
 
         self.assertEqual(decision.action, "terminal_blocker")
         self.assertTrue(decision.may_publish)
         self.assertTrue(decision.may_stop)
         self.assertTrue(decision.may_update_goal_blocked)
+        reason_events = tuple(
+            event
+            for event in decision.events
+            if event.startswith("publish_blocker_reason:")
+        )
+        self.assertEqual(len(reason_events), len(self.report.blocking_reasons))
         self.assertLess(
             decision.events.index("publish_blocker_report"),
+            decision.events.index(reason_events[0]),
+        )
+        self.assertLess(
+            decision.events.index(reason_events[-1]),
             decision.events.index("update_goal:blocked"),
         )
         self.assertLess(
@@ -328,6 +386,7 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
         decision = decide_blocker(
             BlockerContext(goal_active=True, platform_blocker_audit_passed=False),
             self.report,
+            reason_answers=self.reason_answers,
         )
 
         self.assertEqual(decision.action, "terminal_blocker")
@@ -344,6 +403,7 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
                 explanation_actions=(action(self.fixture["optionalImprovement"]),)
             ),
             self.report,
+            reason_answers=self.reason_answers,
         )
 
         self.assertEqual(decision.action, "terminal_blocker")

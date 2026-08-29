@@ -6,7 +6,9 @@ planning-only `$issue-grinder:task-composer`, общий
 Issue Grinder доводит выбранный scope из `To Do`, `In Progress`, `In Review` до
 проверенного результата, создаёт стратегический Goal только для явно вызванного
 multi-issue run и использует blocker explanation как обязательную reflection
-точку для автоматического продолжения.
+точку для автоматического продолжения. Если пути вперёд нет, общий blocker-report
+перечисляет все причины, а отдельный ответ по каждой из них объясняет её влияние на
+цель, границу самостоятельного устранения и ценность заблокированного шага.
 
 Legacy ShipTask — skill `$ship-tasks`, который через Task Manager
 доводит выбранные Tasks, Project или Release до проверенного terminal outcome

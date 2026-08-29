@@ -373,6 +373,10 @@ def validate_issue_skill(errors: list[str]) -> None:
         "комментарий для этого тривиального перехода не нужен",
         "`blocked by` ограничивает доступность требуемой реализации",
         "candidate blocker → причинное объяснение → reflection по current primary sources → continue | terminal blocker",
+        "для каждой из них дай отдельный ответ",
+        "почему она блокирует цель",
+        "почему Issue Grinder не может устранить её сам",
+        "зачем нужен заблокированный шаг",
         "platform blocker audit",
         "финальный комментарий только пользователю в чате",
         "Production запрещён полностью",
@@ -450,6 +454,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "Caller error",
         "technical/unavailability error",
         "observable resume condition",
+        "отдельный answer должен объяснить",
+        "публикации общего report, всех\nотдельных ответов",
         "только пользователю в чате",
     )
     require(
@@ -468,7 +474,7 @@ def validate_issue_skill(errors: list[str]) -> None:
     )
     expected_ids = [
         *(f"IG-FLOW-{number:02d}" for number in range(1, 7)),
-        *(f"IG-GOAL-{number:02d}" for number in range(1, 7)),
+        *(f"IG-GOAL-{number:02d}" for number in range(1, 8)),
         *(f"IG-SCOPE-{number:02d}" for number in range(1, 4)),
         "IG-UI-01",
         *(f"IG-AUTO-{number:02d}" for number in range(1, 6)),
@@ -494,7 +500,7 @@ def validate_issue_skill(errors: list[str]) -> None:
     require(
         errors,
         ISSUE_REQUIREMENTS,
-        "Статус: current Level 1, 2026-08-28",
+        "Статус: current Level 1, 2026-08-29",
         "полный current-набор явно сформулированных пользователем",
         "Изменение смысла Level 1 требует явного решения пользователя",
         "Если scope вырос с одного issue до нескольких",
@@ -508,13 +514,14 @@ def validate_issue_skill(errors: list[str]) -> None:
     require(
         errors,
         ISSUE_SPEC,
-        "Статус: current Level 2, 2026-08-28",
+        "Статус: current Level 2, 2026-08-29",
         "## 0. Compilation contract",
         "issue-grinder@srez-marketplace",
         "`issue-grinder:issue-grinder`, `issue-grinder:task-composer`",
         "удаляет локально `ship-tasks@srez-marketplace`",
         "candidate blocker",
         "post-explanation reflection",
+        "общий report, затем отдельные\nответы по каждой причине",
         "Best-effort название текущей Codex task",
         "Issue Grinder · <Project name> · <Release name>",
         "наблюдаемым evaluation scenario",
@@ -1846,7 +1853,7 @@ def validate_source_layers(errors: list[str]) -> None:
         "Plugin — общий distribution artifact",
     )
     for architecture, prefix, status_marker in (
-        (ISSUE_SPEC, "IG-*", "Статус: current Level 2, 2026-08-28"),
+        (ISSUE_SPEC, "IG-*", "Статус: current Level 2, 2026-08-29"),
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current Level 2 contract, 2026-08-27"),
         (STRATEGIC_SPEC, "SE-*", "Статус: current Level 2 contract, 2026-08-28"),

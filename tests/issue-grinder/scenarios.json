@@ -1,13 +1,31 @@
 {
   "completeReport": {
     "stopped_work": "Release verification cannot finish",
-    "primary_cause": "The required external signing authority is unavailable",
+    "primary_cause": "The required external verification authorities are unavailable",
+    "blocking_reasons": [
+      "The external signing authority is unavailable",
+      "Independent second-principal evidence is unavailable"
+    ],
     "checkpoint": "Implementation and local checks are preserved in the integration branch",
-    "unverified_work": "The signed UAT artifact remains unverified",
+    "unverified_work": "The signed UAT artifact and the independent-principal behavior remain unverified",
     "impact": "The release cannot be accepted yet",
-    "user_action": "Restore the signing authority",
-    "resume_condition": "A fresh UAT signing request succeeds"
+    "user_action": "Restore the signing authority and provide an independent second-principal session",
+    "resume_condition": "A fresh UAT signing request and the independent-principal check both succeed"
   },
+  "reasonAnswers": [
+    {
+      "reason": "The external signing authority is unavailable",
+      "blocks_goal_because": "The release cannot produce the required signed UAT artifact",
+      "agent_cannot_resolve_because": "The agent has no authority to issue or restore the external signing credential",
+      "goal_value": "The signature proves that the exact release candidate is authentic and acceptable"
+    },
+    {
+      "reason": "Independent second-principal evidence is unavailable",
+      "blocks_goal_because": "The acceptance criterion requires evidence from a separate principal",
+      "agent_cannot_resolve_because": "The agent cannot create an independent identity or approve on that principal's behalf",
+      "goal_value": "The independent check proves the release works across the intended authorization boundary"
+    }
+  ],
   "explanationUnlock": {
     "action_id": "create_synthetic_fixture",
     "material": true,

@@ -41,6 +41,10 @@ class IssueGrinderContractTest(unittest.TestCase):
         runtime = re.sub(r"\s+", " ", runtime)
         for invariant in (
             "candidate blocker → причинное объяснение → reflection",
+            "для каждой из них дай отдельный ответ",
+            "почему она блокирует цель",
+            "почему Issue Grinder не может устранить её сам",
+            "зачем нужен заблокированный шаг",
             "post-explanation reflection",
             "update_goal(status=blocked)",
             "одного совпадения selector-а недостаточно",
@@ -75,7 +79,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertEqual(len(rows), len(set(rows)), "duplicate coverage rows")
         self.assertEqual(set(rows), requirement_ids)
-        self.assertEqual(len(requirement_ids), 39)
+        self.assertEqual(len(requirement_ids), 40)
 
     def test_architecture_runtime_layout_exists(self) -> None:
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
