@@ -1,6 +1,6 @@
 # Strategic Explainer evaluation contract
 
-Статус: current reference, 2026-08-28.
+Статус: current reference, 2026-08-29.
 
 Документ проверяет observable isolation и quality `$strategic-explainer`:
 stateless admission, самостоятельный source-grounded discovery и короткий
@@ -31,6 +31,15 @@ Evaluation различает три package-слоя. Caller/router прове�
 resolver и client protocol и не получает provider method. Provider quality
 cases получают exact role lock, проходят provider-only entrypoint и только
 после admission читают внутренний contract.
+
+Отдельный facade-routing trial проверяет topology самого clean invocation. Он
+вызывает semantic facade из обычной текущей Codex task и наблюдает orchestration
+metadata: provider должен появиться как built-in child/subagent с parent link и
+agent path, без нового пользовательского элемента в боковой панели, отдельного
+projectless-каталога или вызова `create_thread`. Поиск `spawn_agent` внутри
+`ALL_TOOLS` вложенного `functions.exec` не является capability check. Если
+прямой collaboration spawn недоступен, допустим только operational
+unavailability без app-level замены.
 
 ## Model-forward gate
 
@@ -123,6 +132,12 @@ checklist не повторяются, а material delta, исправленны
 - каждый publication unit запущен новым built-in `default` subagent с
   `fork_turns="none"`, `model="gpt-5.6-luna"` и
   `reasoning_effort="max"`;
+- facade вызывает `spawn_agent` прямым top-level collaboration call, а не через
+  `functions.exec`; отсутствие этого tool в nested `ALL_TOOLS` не разрешает
+  fallback;
+- `create_thread`, projectless task, fork или продолжение отдельной
+  пользовательской Codex task/session никогда не заменяют built-in subagent;
+  при недоступном child spawn возвращается operational unavailability;
 - compact task содержит exact terminal provider role lock;
 - кроме system/developer/skill instructions видна одна compact однозначная task
   без inherited turns, tool transcript, process diary, caller rationale и

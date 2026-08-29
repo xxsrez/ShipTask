@@ -6,6 +6,9 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / "strategic-explainer" / "SKILL.md"
 ENTRYPOINT = ROOT / "strategic-explainer" / "references" / "provider-entrypoint.md"
 CONTRACT = ROOT / "strategic-explainer" / "references" / "provider-contract.md"
+ARCHITECTURE = ROOT / "docs" / "skills" / "strategic-explainer" / "architecture.md"
+EVALUATION = ROOT / "docs" / "reference" / "strategic-explainer-evaluation.md"
+HARNESS = ROOT / "tests" / "strategic-explainer" / "README.md"
 
 
 class StrategicExplainerRuntimeTest(unittest.TestCase):
@@ -106,6 +109,31 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
             "comprehension check",
         ):
             self.assertNotIn(provider_recipe, text)
+
+    def test_facade_never_substitutes_user_visible_task_for_subagent(self) -> None:
+        runtime = SKILL.read_text()
+        internal = runtime[runtime.index("## Внутреннее исполнение facade") :]
+        for marker in (
+            "top-level вызовом\n   `spawn_agent`",
+            "`ALL_TOOLS`",
+            "`functions.exec`",
+            "Никогда не подменяй его\n   `create_thread`",
+            "новой пользовательской session",
+            "верни provider unavailability без app-level замены",
+        ):
+            self.assertIn(marker, internal)
+
+        architecture = " ".join(ARCHITECTURE.read_text().split())
+        evaluation = " ".join(EVALUATION.read_text().split())
+        harness = " ".join(HARNESS.read_text().split())
+        for text in (architecture, evaluation, harness):
+            self.assertIn("parent link", text)
+            self.assertIn("create_thread", text)
+            self.assertIn("operational unavailability", text)
+        self.assertIn("`Built-in subagent`", architecture)
+        self.assertIn("child/subagent", architecture)
+        for text in (evaluation, harness):
+            self.assertIn("built-in child/subagent", text)
 
     def test_metadata_exposes_semantics_not_invocation_recipe(self) -> None:
         metadata = (ROOT / "strategic-explainer" / "agents" / "openai.yaml").read_text()

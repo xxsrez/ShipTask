@@ -1856,7 +1856,7 @@ def validate_source_layers(errors: list[str]) -> None:
         (ISSUE_SPEC, "IG-*", "Статус: current Level 2, 2026-08-29"),
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current Level 2 contract, 2026-08-27"),
-        (STRATEGIC_SPEC, "SE-*", "Статус: current Level 2 contract, 2026-08-28"),
+        (STRATEGIC_SPEC, "SE-*", "Статус: current Level 2 contract, 2026-08-29"),
     ):
         if architecture == ISSUE_SPEC:
             require(
@@ -2518,7 +2518,7 @@ def validate_strategic_contract(errors: list[str]) -> None:
     require(
         errors,
         STRATEGIC_SPEC,
-        "Статус: current Level 2 contract, 2026-08-28",
+        "Статус: current Level 2 contract, 2026-08-29",
         "`SE-*` в локальных",
         "[требованиях пользователя](requirements.md)",
         "общего skill `$strategic-explainer`",
@@ -2530,6 +2530,12 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "fork_turns=\"none\"",
         "model=\"gpt-5.6-luna\"",
         "reasoning_effort=\"max\"",
+        "Built-in child вместо отдельной Codex task",
+        "top-level вызовом\n`spawn_agent`",
+        "`ALL_TOOLS`, доступном вложенному exec-коду",
+        "Facade не вызывает `create_thread`",
+        "child/subagent с parent link",
+        "operational unavailability по caller contract",
         "не наследует current\nmodel/effort",
         "compact selector",
         "Bounded strategic discovery",
@@ -2628,6 +2634,10 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Ясная структура с локальными языковыми дефектами",
         "Противоречие внутри редактируемого текста",
         "Fresh invocation admission",
+        "Отдельный facade-routing trial",
+        "без нового пользовательского элемента в боковой панели",
+        "вызова `create_thread`",
+        "прямой collaboration spawn недоступен",
         "Загрязнённый invocation",
         "Compact selector требует самостоятельного discovery",
         "Новый publication unit не продолжает старый candidate",

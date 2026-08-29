@@ -27,6 +27,19 @@ recipe, чтобы проверить released implementation. ShipTask, Task Co
 обычный direct client этих параметров не получают и вызывают только semantic
 facade.
 
+## Facade topology regression
+
+Отдельный smoke проверяет не качество текста, а способ запуска provider-а.
+Обычный агент вызывает semantic facade, после чего orchestration metadata должна
+показать built-in child/subagent с parent link и agent path внутри текущей Codex
+task. В журнале не должно быть `create_thread`, отдельной projectless task,
+новой пользовательской session или нового элемента боковой панели.
+
+`spawn_agent` вызывается как прямой top-level collaboration tool. Его отсутствие
+в `ALL_TOOLS` внутри `functions.exec` не считается отсутствием capability. Если
+прямой child spawn действительно недоступен, ожидается operational
+unavailability без app-level fallback.
+
 Evaluator получает исходный `facts.md`, соответствующий `rubric.md`, publication
 text, source basis и общий [semantic gate](common-rubric.md). Он отдельно проверяет factual coverage и человеческое
 понимание. Формулировка может отличаться между trials; `PASS` требует, чтобы
@@ -69,3 +82,5 @@ python3 -B -m unittest discover -s tests -p 'test_*.py'
 нужен как минимум один blind generation trial и отдельная независимая оценка.
 После изменения provider behavior запускаются все cases; нестабильный либо ранее
 провалившийся case повторяется новым fresh trial, а не follow-up прежнему агенту.
+Изменение facade routing дополнительно требует fresh topology smoke из раздела
+выше; provider quality cases его не заменяют.

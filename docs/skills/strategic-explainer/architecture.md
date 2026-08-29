@@ -1,6 +1,6 @@
 # Strategic Explainer
 
-Статус: current Level 2 contract, 2026-08-28. Применимые Level 1 requirements —
+Статус: current Level 2 contract, 2026-08-29. Применимые Level 1 requirements —
 `SE-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Problem-first
@@ -114,6 +114,27 @@ Factual correction приходит новым semantic request. Structural corr
 недоступности задаёт contract конкретного client-а: он не читает и не имитирует
 provider method и не заявляет эквивалентное качество.
 
+### 1.2 Built-in child вместо отдельной Codex task
+
+`Built-in subagent` в этой architecture означает дочернего агента текущей Codex
+task в её внутреннем team tree. Facade создаёт его прямым top-level вызовом
+`spawn_agent` из collaboration surface. Этот вызов не выполняется через
+`functions.exec`: collaboration tools намеренно могут отсутствовать в
+`ALL_TOOLS`, доступном вложенному exec-коду, и такой результат не доказывает
+отсутствие subagent capability.
+
+App-level операции с пользовательскими Codex tasks не являются альтернативным
+transport. Facade не вызывает `create_thread`, не создаёт projectless task, не
+fork-ает и не продолжает отдельную пользовательскую task или session ради
+provider-а. Правильный invocation наблюдается как child/subagent с parent link
+и agent path внутри текущей task, а не как новый элемент боковой панели или
+отдельный рабочий каталог пользователя.
+
+Если прямой `spawn_agent` недоступен или завершился ошибкой, facade возвращает
+operational unavailability по caller contract. Он не ищет похожий app tool и не
+подменяет скрытую внутреннюю делегацию внешне видимой task. Та же граница
+действует для единственного clean retry после structural refusal.
+
 ## 2. Результат и граница роли
 
 Strategic Explainer превращает локальную техническую ситуацию в problem-first
@@ -143,7 +164,8 @@ Direct request и вызов из другого workflow адресуют од�
 назначением, exact scope, языком, material constraints и resolvable read-only
 anchors. После загрузки skill facade router создаёт новый built-in `default`
 subagent с `fork_turns="none"`, `model="gpt-5.6-luna"` и
-`reasoning_effort="max"`. Единственный provider task содержит внутренний role
+`reasoning_effort="max"` через внутренний child-only transport из раздела 1.2.
+Единственный provider task содержит внутренний role
 lock `STRATEGIC_EXPLAINER_PROVIDER_V1` и является compact selector, а не brief
 или черновиком объяснения. System/developer/skill instructions остаются
 нормальной частью context и не считаются загрязнением.
@@ -389,6 +411,10 @@ runnable repair, redeploy или self-service path, формулировка о�
 - admission подтвердил доступные признаки одного compact task и clean context;
 - invalid invocation завершился точным отказом до discovery, а не частичным
   explanation;
+- provider invocation наблюдается как child/subagent текущей Codex task, а не
+  отдельная пользовательская task/session; недоступность прямого child spawn
+  завершилась operational unavailability без `create_thread` или app-level
+  замены;
 - проблема и desired outcome не выдуманы;
 - каждое material утверждение опирается на current facts или exact source;
 - каждый decision-relevant факт сохранён либо исключён только как не влияющий
