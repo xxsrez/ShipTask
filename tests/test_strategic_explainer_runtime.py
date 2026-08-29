@@ -114,12 +114,13 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
         runtime = SKILL.read_text()
         internal = runtime[runtime.index("## Внутреннее исполнение facade") :]
         for marker in (
-            "top-level вызовом\n   `spawn_agent`",
+            "top-level tool call\n   `collaboration.spawn_agent`",
             "`ALL_TOOLS`",
             "`functions.exec`",
             "Никогда не подменяй его\n   `create_thread`",
             "новой пользовательской session",
             "верни provider unavailability без app-level замены",
+            "Не пытайся\n   связаться с parent через app tools",
         ):
             self.assertIn(marker, internal)
 
@@ -132,8 +133,11 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
             self.assertIn("operational unavailability", text)
         self.assertIn("`Built-in subagent`", architecture)
         self.assertIn("child/subagent", architecture)
+        self.assertIn("`collaboration.spawn_agent`", architecture)
+        self.assertIn("не иметь права создавать grandchild", architecture)
         for text in (evaluation, harness):
             self.assertIn("built-in child/subagent", text)
+            self.assertIn("facts/evidence/anchors", text)
 
     def test_metadata_exposes_semantics_not_invocation_recipe(self) -> None:
         metadata = (ROOT / "strategic-explainer" / "agents" / "openai.yaml").read_text()

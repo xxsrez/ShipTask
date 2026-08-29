@@ -473,6 +473,18 @@ evidence. Один старый status не доказывает наличие 
 исходная ситуация, exact scope, язык, существенные ограничения и разрешимые
 read-only anchors. Внутреннюю методику provider-а coordinator не воспроизводит.
 
+Publication unit целиком остаётся у основного coordinator-а. Worker, reviewer
+или scout может вернуть проверенные facts, evidence и resolvable read-only
+anchors, но не получает пакет «сформулировать комментарий», не вызывает
+Strategic Explainer и не создаёт отдельную Codex task/session ради текста.
+Причина архитектурная: рабочий агент уже является built-in child, а его
+top-level tool surface может не содержать `collaboration.spawn_agent`; передача
+facade внутрь такого child делает обязательный fresh provider child
+невозможным. Coordinator принимает evidence handoff и сам вызывает semantic
+facade из своей top-level collaboration surface. Поэтому provider наблюдается
+как его прямой built-in child, а не как grandchild worker-а или отдельная
+пользовательская task.
+
 Тот же communication route применяется к любому другому Task Manager comment,
 который Issue Grinder решает опубликовать, а также к blocker- и final-report по
 правилам Level 1. Routine progress journal в Task Manager по умолчанию не
@@ -667,6 +679,12 @@ UAT либо другая непроизводственная среда; не�
 Если subagent capability или изолированная writable capacity недоступны,
 coordinator выполняет frontier последовательно на текущем профиле. Отсутствие
 multi-agent surface само по себе не является blocker-ом.
+
+Рабочая делегация и provider invocation — разные уровни. Coordinator не
+делегирует publication unit рабочему subagent-у: тот возвращает только
+проверяемый evidence handoff, после чего coordinator отдельно вызывает
+Strategic Explainer. Так worker topology не определяет и не ломает внутренний
+provider transport.
 
 Явное правило пользователя о topology — точное или относительное число
 субагентов, роли, условие делегации либо opt-out — имеет приоритет. Основной

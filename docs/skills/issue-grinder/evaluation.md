@@ -66,7 +66,7 @@
 | `IG-MA-15` | `multi-agent-execution.md` | material-packet-current-profile |
 | `IG-MA-16` | `multi-agent-execution.md` | luna-uncertainty-handoff-no-retry |
 | `IG-MA-17` | `multi-agent-execution.md` | luna-unavailable-current-profile |
-| `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing |
+| `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing; worker-evidence-coordinator-facade; nested-facade-no-new-task |
 
 ## Быстрый blocker corpus
 

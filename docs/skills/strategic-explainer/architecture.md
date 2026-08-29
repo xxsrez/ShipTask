@@ -118,10 +118,19 @@ provider method и не заявляет эквивалентное качест
 
 `Built-in subagent` в этой architecture означает дочернего агента текущей Codex
 task в её внутреннем team tree. Facade создаёт его прямым top-level вызовом
-`spawn_agent` из collaboration surface. Этот вызов не выполняется через
+`collaboration.spawn_agent`. Этот вызов не выполняется через
 `functions.exec`: collaboration tools намеренно могут отсутствовать в
 `ALL_TOOLS`, доступном вложенному exec-коду, и такой результат не доказывает
 отсутствие subagent capability.
+
+Facade должен исполняться агентом, у которого `collaboration.spawn_agent`
+реально присутствует в top-level tool surface. Уже созданный built-in child
+может видеть только `functions`/`clock` и не иметь права создавать grandchild;
+в этом случае facade не ищет transport и возвращает operational unavailability.
+Calling workflow, владеющий orchestration, не делегирует facade такому child:
+он принимает от рабочих агентов facts/evidence/anchors и вызывает semantic
+facade сам. Это сохраняет единый API и fresh provider, не добавляя caller-у
+знания provider recipe.
 
 App-level операции с пользовательскими Codex tasks не являются альтернативным
 transport. Facade не вызывает `create_thread`, не создаёт projectless task, не
@@ -130,10 +139,11 @@ provider-а. Правильный invocation наблюдается как child
 и agent path внутри текущей task, а не как новый элемент боковой панели или
 отдельный рабочий каталог пользователя.
 
-Если прямой `spawn_agent` недоступен или завершился ошибкой, facade возвращает
-operational unavailability по caller contract. Он не ищет похожий app tool и не
-подменяет скрытую внутреннюю делегацию внешне видимой task. Та же граница
-действует для единственного clean retry после structural refusal.
+Если прямой `collaboration.spawn_agent` недоступен или завершился ошибкой,
+facade возвращает operational unavailability по caller contract. Он не ищет
+похожий app tool, не просит parent через app messaging и не подменяет скрытую
+внутреннюю делегацию внешне видимой task. Та же граница действует для
+единственного clean retry после structural refusal.
 
 ## 2. Результат и граница роли
 

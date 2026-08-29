@@ -112,6 +112,27 @@ class IssueGrinderContractTest(unittest.TestCase):
             self.assertIn(invariant, guard)
         self.assertNotIn('"--force"', guard)
 
+    def test_publication_unit_stays_with_coordinator(self) -> None:
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        multi_agent = (
+            SKILL_ROOT / "references" / "multi-agent-execution.md"
+        ).read_text(encoding="utf-8")
+        explainer = (
+            SKILL_ROOT / "references" / "strategic-explainer.md"
+        ).read_text(encoding="utf-8")
+        architecture = ARCHITECTURE.read_text(encoding="utf-8")
+
+        for text in (skill, multi_agent, explainer, architecture):
+            self.assertIn("facts", text)
+            self.assertIn("evidence", text)
+            self.assertIn("anchors", text)
+        self.assertIn("всей publication unit", skill)
+        self.assertIn("не поручай им формулировать comment", skill)
+        self.assertIn("не вызывает Strategic Explainer", multi_agent)
+        self.assertIn("`create_thread`", multi_agent)
+        self.assertIn("provider наблюдается\nкак его прямой built-in child", architecture)
+        self.assertIn("не получает пакет «сформулировать комментарий»", architecture)
+
 
 if __name__ == "__main__":
     unittest.main()

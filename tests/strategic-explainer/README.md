@@ -30,15 +30,19 @@ facade.
 ## Facade topology regression
 
 Отдельный smoke проверяет не качество текста, а способ запуска provider-а.
-Обычный агент вызывает semantic facade, после чего orchestration metadata должна
-показать built-in child/subagent с parent link и agent path внутри текущей Codex
-task. В журнале не должно быть `create_thread`, отдельной projectless task,
-новой пользовательской session или нового элемента боковой панели.
+Основной coordinator с top-level collaboration surface вызывает semantic
+facade, после чего orchestration metadata должна показать built-in
+child/subagent с parent link и agent path внутри текущей Codex task. В журнале
+не должно быть `create_thread`, отдельной projectless task, новой
+пользовательской session или нового элемента боковой панели.
 
-`spawn_agent` вызывается как прямой top-level collaboration tool. Его отсутствие
-в `ALL_TOOLS` внутри `functions.exec` не считается отсутствием capability. Если
-прямой child spawn действительно недоступен, ожидается operational
-unavailability без app-level fallback.
+`collaboration.spawn_agent` вызывается как прямой top-level tool. Его отсутствие
+в `ALL_TOOLS` внутри `functions.exec` не считается отсутствием capability.
+Worker trial возвращает coordinator-у только facts/evidence/anchors, после чего
+facade вызывает coordinator, а не worker. Если facade запущен внутри built-in
+child без namespace `collaboration` или direct child spawn действительно
+недоступен, ожидается operational unavailability без app-level fallback,
+parent messaging и отдельной task/session.
 
 Evaluator получает исходный `facts.md`, соответствующий `rubric.md`, publication
 text, source basis и общий [semantic gate](common-rubric.md). Он отдельно проверяет factual coverage и человеческое
