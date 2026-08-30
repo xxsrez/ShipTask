@@ -181,7 +181,7 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
             "структура и длина следуют содержанию",
             "не превращай процесс подготовки объяснения в предмет публикации",
             "каждую material limitation, exception или uncertainty ставь рядом",
-            "сохрани в basis доступные точные значения и их смысл",
+            "сохрани в basis доступные точные значения и их смысл либо дай точный разрешимый anchor",
             "не заменяй их общей фразой о том, что технические детали исключены",
         ):
             self.assertIn(marker, text)
@@ -205,6 +205,8 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
             "обезличенное сообщение о создании отчёта или ответа тоже удаляется",
             editing,
         )
+        self.assertIn("для каждого точного факта", editing)
+        self.assertIn("само значение либо разрешимый anchor", editing)
         self.assertNotIn("run/deployment/request ids", editing)
 
 
