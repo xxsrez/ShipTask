@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SUITE = ROOT / "tests" / "strategic-explainer"
 CASES = SUITE / "cases"
 COMMON_RUBRIC = SUITE / "common-rubric.md"
+SOURCE_PATTERN = r"(?m)^Source project: (General|ExampleNotes|Task Manager)$"
 
 EXPECTED_CASES = {
     "automatic-capture-safe-boundary",
@@ -17,6 +18,7 @@ EXPECTED_CASES = {
     "comment-idempotency-and-stale-edit",
     "completion-comment-command-dump",
     "concurrent-edit-no-hidden-merge",
+    "editing-internal-process-audit-redaction",
     "green-local-failed-uat",
     "hierarchy-cycle-and-stale-guard",
     "historical-content-current-access",
@@ -38,7 +40,8 @@ EXPECTED_CASES = {
     "write-rebind-fences-prepared-commit",
 }
 
-EXPECTED_SOURCE_PORTFOLIO = {
+EXPECTED_SOURCE_MIX = {
+    "General": 1,
     "ExampleNotes": 14,
     "Task Manager": 11,
 }
@@ -91,10 +94,7 @@ class StrategicExplainerCasesTest(unittest.TestCase):
                 normalized_facts = normalized(facts)
                 self.assertIn("полностью синтетический сценарий", normalized_facts)
                 self.assertIn("не описывает текущую Task", normalized_facts)
-                self.assertRegex(
-                    facts,
-                    r"(?m)^Source project: (?:ExampleNotes|Task Manager)$",
-                )
+                self.assertRegex(facts, SOURCE_PATTERN)
 
                 # Generator sees facts.md only. Keep evaluator language and the
                 # desired-answer channel out of that fixture.
@@ -107,18 +107,36 @@ class StrategicExplainerCasesTest(unittest.TestCase):
                 ):
                     self.assertNotIn(leaked_instruction, facts)
 
-    def test_suite_covers_expected_product_sources(self) -> None:
-        actual = {project: 0 for project in EXPECTED_SOURCE_PORTFOLIO}
+    def test_suite_covers_expected_source_mix(self) -> None:
+        actual = {project: 0 for project in EXPECTED_SOURCE_MIX}
         for name in EXPECTED_CASES:
             facts = (CASES / name / "facts.md").read_text(encoding="utf-8")
-            match = re.search(
-                r"(?m)^Source project: (ExampleNotes|Task Manager)$",
-                facts,
-            )
+            match = re.search(SOURCE_PATTERN, facts)
             self.assertIsNotNone(match, name)
             actual[match.group(1)] += 1
 
-        self.assertEqual(actual, EXPECTED_SOURCE_PORTFOLIO)
+        self.assertEqual(actual, EXPECTED_SOURCE_MIX)
+
+    def test_generic_editing_regression_is_blind_and_behavioral(self) -> None:
+        case = CASES / "editing-internal-process-audit-redaction"
+        facts = normalized((case / "facts.md").read_text(encoding="utf-8")).lower()
+        rubric = normalized((case / "rubric.md").read_text(encoding="utf-8")).lower()
+
+        for source_fact in (
+            "работает во всех случаях",
+            "только с файлами размером до 10 мб",
+            "run id `run-eval-026-8841`",
+            "deployment id `dep-eval-026-117`",
+        ):
+            self.assertIn(source_fact, facts)
+
+        for semantic_gate in (
+            "файлы больше 10 мб не проверялись",
+            "точные названия внутренних ролей",
+            "обезличенное «отчёт сформирован»",
+            "служебные идентификаторы",
+        ):
+            self.assertIn(semantic_gate, rubric)
 
     def test_rubrics_grade_semantics_not_wording(self) -> None:
         for name in sorted(EXPECTED_CASES):

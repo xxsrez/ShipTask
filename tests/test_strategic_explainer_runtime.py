@@ -11,9 +11,18 @@ EVALUATION = ROOT / "docs" / "reference" / "strategic-explainer-evaluation.md"
 HARNESS = ROOT / "tests" / "strategic-explainer" / "README.md"
 
 
+def normalized(path: Path) -> str:
+    return " ".join(path.read_text(encoding="utf-8").split()).lower()
+
+
+def section(path: Path, start: str, end: str) -> str:
+    text = path.read_text(encoding="utf-8")
+    return text[text.index(start) : text.index(end)]
+
+
 class StrategicExplainerRuntimeTest(unittest.TestCase):
     def test_completion_gate_rejects_audit_dump_and_unchanged_repetition(self) -> None:
-        text = " ".join(CONTRACT.read_text().split()).lower()
+        text = normalized(CONTRACT)
         for marker in (
             "сырой командный блок",
             "абсолютный путь",
@@ -25,7 +34,7 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
             self.assertIn(marker, text)
 
     def test_incomplete_result_cannot_hide_causality_in_source_basis(self) -> None:
-        text = " ".join(CONTRACT.read_text().split()).lower()
+        text = normalized(CONTRACT)
         for marker in (
             "какой результат или условие не достигнуты",
             "какова основная причина",
@@ -38,7 +47,7 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
             self.assertIn(marker, text)
 
     def test_incomplete_result_keeps_only_useful_navigation_names(self) -> None:
-        text = " ".join(CONTRACT.read_text().split()).lower()
+        text = normalized(CONTRACT)
         for marker in (
             "точное имя объекта или критерия",
             "оставь имя в публикации как навигацию",
@@ -166,7 +175,7 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
         self.assertIn("Facade\nсам владеет clean-call recipe", entrypoint)
 
     def test_provider_contract_enforces_generic_human_output(self) -> None:
-        text = " ".join(CONTRACT.read_text().split()).lower()
+        text = normalized(CONTRACT)
         for marker in (
             "дай прямой ответ, а не заполняй отчётный шаблон",
             "структура и длина следуют содержанию",
@@ -175,19 +184,26 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
         ):
             self.assertIn(marker, text)
 
-    def test_editing_preserves_audit_facts_in_basis_not_publication(self) -> None:
-        text = " ".join(CONTRACT.read_text().split()).lower()
+    def test_editing_reuses_the_common_publication_filter(self) -> None:
+        text = normalized(CONTRACT)
+        editing = " ".join(
+            section(CONTRACT, "## Редакторская реконструкция", "## Completion gate").split()
+        ).lower()
         for marker in (
             "сохранение исходника относится ко всему двухчастному result contract",
             "audit-only identifiers, внутренний процесс подготовки",
             "такой перенос не является потерей содержания",
             "само присутствие детали в target text не доказывает её пользовательскую релевантность",
-            "явная просьба «не менять факты» не является просьбой опубликовать технический доказательный след",
             "не маскируй утечку переводом",
             "обезличенный внутренний процесс остаётся внутренним процессом",
-            "обезличенное сообщение о создании отчёта или ответа тоже удаляется",
         ):
             self.assertIn(marker, text)
+        self.assertIn("заново примени весь фильтр публикации", editing)
+        self.assertIn(
+            "обезличенное сообщение о создании отчёта или ответа тоже удаляется",
+            editing,
+        )
+        self.assertNotIn("run/deployment/request ids", editing)
 
 
 if __name__ == "__main__":

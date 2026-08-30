@@ -47,10 +47,11 @@ facts/evidence/anchors, а facade после handoff вызывает coordinato
 ## Model-forward gate
 
 До release изменённый provider запускается на всей current regression suite из
-25 realistic raw-source cases. Текущие fixtures используют две реальные
-технические предметные области как сложный материал, но не задают границу
-продукта: те же общие gates применяются к любому предназначенному человеку
-объяснению или явно редактируемому тексту. Матрица покрывает success, expected
+26 realistic raw-source cases. Двадцать пять fixtures используют две реальные
+технические предметные области как сложный материал; отдельный generic editing
+case проверяет тот же contract вне конкретного проекта. Матрица не задаёт
+границу продукта: общие gates применяются к любому предназначенному человеку
+объяснению или явно редактируемому тексту. Она покрывает success, expected
 boundary, partial result, material failure/obstacle, permission denial, stale
 conflict, atomic rollback и сценарии, где технический след особенно легко
 перепутать с сообщением.
