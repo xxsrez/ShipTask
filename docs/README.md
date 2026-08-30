@@ -1,15 +1,18 @@
 # Документация ShipTask
 
-Начните с [обзора](overview.md), чтобы понять назначение и границы skill.
+Начните с [философии проекта](philosophy.md): это ключевой документ о свободе
+агента, разделении ответственности и документации как исходном коде. Затем
+прочитайте [обзор](overview.md), чтобы понять назначение и границы skills.
 
 ## Skill source packages
 
-[Source model](skills/README.md) задаёт единицу исходного кода: отдельный skill
-со своими Requirements и Architecture. Требования разных skills не смешиваются;
-общими остаются только repository build и plugin distribution rules.
+[Source model](skills/README.md) задаёт единицу исходного кода: отдельную entity
+с тремя независимыми документами — user-owned Overview, user-owned Requirements
+и agent-owned Architecture. Документы разных skills не смешиваются; общими
+остаются только repository build и plugin distribution rules.
 
 - `$issue-grinder`:
-  [Requirements](skills/issue-grinder/requirements.md) и
+  [Requirements](skills/issue-grinder/requirements.md),
   [Architecture](skills/issue-grinder/architecture.md),
   [Evaluation](skills/issue-grinder/evaluation.md) — current source package
   нового Task Manager-only delivery skill со стратегическим Goal,
@@ -37,6 +40,7 @@
   переносом применимого strategic context в каждую child Task, live Labels,
   hierarchy, semantic relations, `Backlog` и необязательным current Release.
 - `$strategic-explainer:strategic-explainer`:
+  [Overview](skills/strategic-explainer/overview.md),
   [Requirements](skills/strategic-explainer/requirements.md),
   [Architecture](skills/strategic-explainer/architecture.md) и
   [product vision](skills/strategic-explainer/product-vision.md) — общий contract

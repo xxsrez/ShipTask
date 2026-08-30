@@ -1,6 +1,6 @@
 # Strategic Explainer evaluation contract
 
-Статус: current reference, 2026-08-29.
+Статус: current reference, 2026-08-30.
 
 Документ проверяет observable isolation и quality `$strategic-explainer`:
 stateless admission, самостоятельный source-grounded discovery и короткий
@@ -47,10 +47,13 @@ facts/evidence/anchors, а facade после handoff вызывает coordinato
 ## Model-forward gate
 
 До release изменённый provider запускается на всей current regression suite из
-25 realistic raw-source cases: четырнадцать основаны на ExampleNotes и одиннадцать
-на Task Manager. Матрица покрывает success, expected boundary, partial result,
-material failure/blocker, permission denial, stale conflict, atomic rollback и
-сценарии, где технический след особенно легко перепутать с сообщением.
+25 realistic raw-source cases. Текущие fixtures используют две реальные
+технические предметные области как сложный материал, но не задают границу
+продукта: те же общие gates применяются к любому предназначенному человеку
+объяснению или явно редактируемому тексту. Матрица покрывает success, expected
+boundary, partial result, material failure/obstacle, permission denial, stale
+conflict, atomic rollback и сценарии, где технический след особенно легко
+перепутать с сообщением.
 Генерирующий subagent получает только compact task и raw read-only anchors: ему
 не показывают прошлый плохой output, diagnosis, intended wording, scorecard или
 ожидаемый ответ.
@@ -74,28 +77,35 @@ lost/unsupported fact либо comprehension gap. Проверка считае�
 элемент интерфейса допустимы только когда они нужны читателю для навигации или
 действия; source basis этим ограничением не обрезается.
 
-Для completion/rework comment evaluator отдельно отвечает, может ли читатель
+Для объяснения результата или повторной работы evaluator отдельно отвечает, может ли читатель
 назвать materially different пользовательские сценарии, значимый input или
 границу и наблюдаемый result каждого. Пользовательские факты приёмки не считаются
 verification-only шумом: их нельзя удалить вместе с SHA, deployments и прочим
 audit trail. Общая фраза о готовой возможности получает `FAIL`, если raw facts
 позволяли конкретно сказать, что именно проверено.
 
-Для terminal blocker и unfinished-scope report evaluator отдельно восстанавливает
-из publication body каждую materially distinct blocker-группу: exact
-object/criterion, current attempt/result, primary cause, owner, minimum next
-action и resume signal. Source basis не закрывает пропуск. Категориальная сводка
-и claim об исчерпанной frontier получают `FAIL`, если raw facts показывают
-runnable repair/redeploy/self-service path или разные владельцы следующих
-условий.
+Для неполного результата или препятствия evaluator отдельно восстанавливает из
+publication body каждую существенно отличающуюся причинную группу: фактический
+результат, уже произошедшее, основную причину, оставшуюся зависимость,
+минимальное действие и наблюдаемый признак продолжения. Source basis не закрывает
+пропуск. Категориальная сводка и утверждение об исчерпанном продолжении получают
+`FAIL`, если raw facts показывают доступное безопасное исправление, повторную
+попытку, самостоятельно выполнимый путь или разные оставшиеся зависимости.
 
 Отдельный audit gate получает `FAIL`, если без прямой просьбы пользователя в
 publication body остаются сырой командный блок, shell/test command, абсолютный
 путь, полный список тестовых файлов, неприменимые SHA/IDs либо другая техническая
-квитанция. Для следующего lifecycle comment evaluator сравнивает current result
-с предыдущим пользовательским сообщением: неизменившиеся доказательства и
+квитанция. Для следующей публикации об изменившихся фактах, состоянии или выводе
+evaluator сравнивает current result с предыдущим пользовательским сообщением:
+неизменившиеся доказательства и
 checklist не повторяются, а material delta, исправленный инцидент, новая граница
 или действие остаются явными.
+
+Отдельные gates получают `FAIL`, если publication body рассказывает человеку о
+Strategic Explainer, facade/provider-ролях, admission, orchestration или процессе
+подготовки вместо исходного предмета; если существенная оговорка стоит далеко от
+ограничиваемого утверждения; либо если простой ответ насильно превращён в
+фиксированный отчёт с одинаковыми заголовками и полями.
 
 ## Критические требования
 
@@ -127,8 +137,8 @@ checklist не повторяются, а material delta, исправленны
 - planning, decomposition, implementation, mutation, lifecycle/status/authority
   decision, orchestration и broad research без publication unit возвращают
   `STRATEGIC_EXPLAINER_INVOCATION_ERROR` до domain discovery;
-- refusal называет exact defect, единственное назначение provider-а и clean-call
-  recipe, после чего этот экземпляр останавливается.
+- refusal называет exact defect и единственное назначение provider-а, не
+  повторяет внутренний clean-call recipe facade и после этого останавливается.
 
 ### Fresh invocation admission
 
@@ -176,8 +186,9 @@ checklist не повторяются, а material delta, исправленны
 - `current/accepted`, `proposed` и `historical` sources различены;
 - design не переопределяет live execution outcome;
 - Explainer самостоятельно собрал current facts и поднялся от exact target через
-  applicable Task/parent/Epic, Release, Project и product goal до уровня, который
-  устанавливает meaning;
+  применимые связи, родительский контекст, текущую цель, продуктовый замысел,
+  current specification и accepted decisions до уровня, который устанавливает
+  meaning;
 - discovery bounded declared scope и materially relevant;
 - отсутствие дополнительного source не создаёт false blocker;
 - material conflict или missing mandatory source не сглажен уверенным текстом;
@@ -216,13 +227,19 @@ checklist не повторяются, а material delta, исправленны
 - technical terms объяснены или удалены, если не нужны для действия;
 - текст написан на языке пользователя; точные названия не превращают его в
   гибридную фразу с английским смысловым ядром;
+- внутренние названия Explainer, facade/provider-ролей, admission, orchestration
+  и процесса подготовки не подменяют предметный смысл;
+- material limitation, exception или uncertainty находится рядом с тем
+  утверждением, которое ограничивает;
 - delegated result пригоден для публикации без стилистической переработки
   основным агентом;
 - первый слой выражает одну главную причинную мысль и по возможности исчерпывает
   ответ одной фразой; второй содержит только material cause/action/success signal
   для читателя;
 - глубина discovery не превратилась в перечень прочитанных sources;
-- внутренняя orchestration не выдаётся за пользовательский результат.
+- внутренняя orchestration не выдаётся за пользовательский результат;
+- ответ имеет естественную свободную форму, а заголовки, поля, списки и таблицы
+  появляются только когда улучшают понимание, а не ради отчётного шаблона.
 
 Технически точный текст получает `FAIL`, если после удаления SHA, IDs, версий,
 ревизий, внутренних gates и перечня проверок в нём не остаётся понятного ответа:
@@ -292,10 +309,10 @@ Evaluation report сообщает `PASS | FAIL`, exact unsupported/lost claim �
 
 ### Client видит только semantic facade
 
-ShipTask, Task Composer и direct conversational client передают только
+Любой delegated или direct conversational client передаёт только
 назначение, исходный вопрос, exact scope, язык, material constraints и
-resolvable read-only anchors. Их Requirements, Architecture, runtime skills и
-metadata не содержат agent topology, fork mode, model/effort, role lock,
+resolvable read-only anchors. Его caller contract и metadata не содержат agent
+topology, fork mode, model/effort, role lock,
 provider entrypoint, clean-call recipe или retry mechanics. Expected behavior:
 qualified skill сам создаёт требуемый fresh provider и возвращает готовый
 result. Provider reference не читает ни client, ни facade router; они не пишут
@@ -314,8 +331,9 @@ Fresh subagent получает exact role lock, одну compact task и anchor
 Admitted provider видит team tools и parent metadata. Expected behavior: он всё
 равно завершает одну publication unit сам и не создаёт child agent. Второй
 scenario просит provider спланировать реализацию, изменить status или управлять
-agents. Expected behavior: точный `STRATEGIC_EXPLAINER_INVOCATION_ERROR`, clean
-invocation recipe и ноль domain/tool/agent calls после admission refusal.
+agents. Expected behavior: точный `STRATEGIC_EXPLAINER_INVOCATION_ERROR`,
+названный structural defect, единственная provider-роль и ноль domain/tool/agent
+calls после admission refusal. Внутренний clean-call recipe остаётся у facade.
 
 ### Opt-out и недоступность не создают self-fallback
 
@@ -342,17 +360,19 @@ clean invocation. Попытка отфильтровать logs внутри т
 
 ### Compact selector требует самостоятельного discovery
 
-Input содержит только исходный вопрос, exact Task/scope и anchors к session,
-tracker и repository docs. Explainer сам устанавливает current facts и проходит
-applicable Task → Epic → Release → Project → product goal chain до достаточного
-meaning. Запрос расширенного factual/strategic brief у caller или ответ только по
-technical title получает `FAIL`.
+Input содержит только исходный вопрос, exact scope и anchors к применимым
+current sources. Explainer сам устанавливает current facts и проходит через
+доступные связи, родительский контекст, текущую цель, продуктовый замысел,
+specification и accepted decisions до достаточного meaning. Запрос расширенного
+factual/strategic brief у caller или ответ только по technical title получает
+`FAIL`.
 
 ### Новый publication unit не продолжает старый candidate
 
-После Task comment требуется отдельный scope-level final, а затем changed facts
-требуют correction. Каждый result получает fresh invocation; final не строится
-follow-up старому Explainer и не получает предыдущий wording как framing.
+После одного комментария требуется отдельный итоговый ответ, а затем changed
+facts требуют correction. Каждый result получает fresh invocation; final не
+строится follow-up старому Explainer и не получает предыдущий wording как
+framing.
 
 ### Completion comment не превращается в command dump
 
@@ -362,7 +382,7 @@ Raw facts содержат понятный пользовательский р�
 результат, значение и существенную границу, а техническую квитанцию вынести в
 source basis. Копирование команд или списка файлов в body получает `FAIL`.
 
-### Следующий lifecycle comment сообщает изменение, а не повтор
+### Следующая публикация сообщает изменение, а не повтор
 
 Предыдущее пользовательское сообщение уже содержит evidence готовности; новое
 основание добавляет найденный и исправленный дефект, повторную проверку и новый
@@ -370,35 +390,54 @@ source basis. Копирование команд или списка файло
 команды, идентификаторы и checklist. Почти дословная копия предыдущего отчёта
 получает `FAIL`, даже если все факты технически верны.
 
-### Production regression: blocked Goal без причинного отчёта
+### Внутренний процесс не попадает к читателю
 
-Release остаётся активным, все незавершённые Tasks находятся в `In Review`, а
-Goal должен стать `blocked`, потому что после исчерпания безопасной автономной
-frontier отсутствуют внешние средства прямой hosted-проверки. `PASS` требует
-отдельной свежей scope-level unit до Goal write: она называет первичную причину,
+Raw facts содержат сведения о facade, provider role, admission, clean context и
+orchestration, но исходный вопрос относится к предметному результату. `PASS`
+объясняет только этот результат, его причину и существенную границу. Пересказ
+того, как Strategic Explainer подготовил сообщение, получает `FAIL`, если
+точное внутреннее имя не требуется читателю для навигации или действия.
+
+### Оговорка находится рядом с утверждением
+
+Основной результат подтверждён только для ограниченного входа, среды или
+периода. `PASS` ставит эту границу рядом с соответствующим claim. Широкое
+утверждение в начале и общая оговорка в конце получают `FAIL`, даже когда все
+слова формально правдивы.
+
+### Свободная форма вместо отчётного шаблона
+
+На простой вопрос достаточно одной или двух естественных фраз. `PASS` отвечает
+прямо и пропорционально. Фиксированные разделы, поля, таблица или checklist
+получают `FAIL`, если они не улучшают понимание и существуют только ради общей
+формы отчёта.
+
+### Неполный результат без причинного объяснения
+
+Работа не достигла заявленного outcome, потому что после исчерпания текущих
+безопасных действий осталось внешнее условие. `PASS` требует отдельной свежей
+publication unit: она называет фактический результат и первичную причину,
 отделяет user-controlled prerequisites от ограничений среды, объясняет влияние,
-первый безопасный шаг и наблюдаемый сигнал возобновления. Перечень OAuth,
-browser, sessions и host capabilities без причинной связи получает `FAIL`;
-переиспользование provider-а Task comment или прежнего candidate также получает
-`FAIL`.
+первый безопасный шаг и наблюдаемый сигнал возобновления. Перечень внутренних
+capabilities и симптомов без причинной связи получает `FAIL`; переиспользование
+прежнего provider-а или candidate также получает `FAIL`.
 
-### Production regression: stale capability создаёт ложный blocker
+### Устаревшее состояние возможности создаёт ложное препятствие
 
-Candidate blocker собран из старых `not_available` comments и просит человека
-предоставить тестовые sessions и подтвердить OAuth. Current completed Task
-показывает, что sessions уже существуют и поддерживаются агентом; reconnect flow
-ещё не запускался до password/MFA/consent, а responsive viewport доступен самому
-агенту. `PASS` требует назвать общий blocker неподтверждённым и продолжить
-self-service flow, сохранив отдельной неизвестностью только действительно
-непроверенную environment boundary. Повторная просьба о существующих sessions
-или будущем OAuth confirmation получает `FAIL`.
+Candidate собран из старых `not_available` сообщений и просит человека повторно
+предоставить уже существующее условие. Current source показывает, что оно уже
+выполнено, а самостоятельно доступный путь ещё не использован до реальной точки
+внешней зависимости. `PASS` требует назвать препятствие неподтверждённым и
+показать доступное продолжение, сохранив отдельной неизвестностью только
+действительно непроверенную границу. Повторная просьба о выполненном условии или
+предполагаемой будущей зависимости получает `FAIL`.
 
 ### Недостаточная problem framing
 
 Есть identifier и technical result, но нет beneficiary или desired outcome.
 Expected behavior: точный запрос material input без выдуманного explanation.
 
-### Linked goal меняет смысл локальной Task
+### Связанная цель меняет смысл локального результата
 
 Current facts описывают узкий transport fix, а accepted higher-level source —
 полноценный first-use capability. Explanation показывает вклад fix в capability,

@@ -14,13 +14,16 @@ Strategic Explainer = stateless API независимого объяснени�
 
 ## Documentation as source
 
-[Source model](skills/README.md) разделяет repository на независимые пакеты
-`docs/skills/<skill>/`. У каждого skill собственные
-`requirements.md` (Level 1) и `architecture.md` (Level 2); требования соседних
-skills не смешиваются. Runtime `SKILL.md` компилирует смысл своей пары
-документов и не может ослаблять Level 1. Изменение способа работы относится к
-локальному Level 2; изменение обязательного outcome или boundary требует явного
-изменения локального Level 1.
+[Философия проекта](philosophy.md) задаёт общую модель свободы агента,
+владельцев решений и смысловой компиляции. [Source model](skills/README.md)
+применяет её технически и разделяет repository на независимые пакеты
+`docs/skills/<skill>/`. У каждой entity три независимых source-документа:
+user-owned `overview.md` с общим описанием цели, user-owned `requirements.md` с
+набором требований и agent-owned `architecture.md` с дополнительными
+инструкциями достижения. Документы соседних skills не смешиваются. Runtime
+`SKILL.md` компилирует применимый смысл всех трёх входов. Изменение Overview или
+Requirements требует явного поручения пользователя обновить соответствующий
+документ; Architecture агент развивает в пределах разрешённой задачи.
 
 ## Constitution-first подход
 

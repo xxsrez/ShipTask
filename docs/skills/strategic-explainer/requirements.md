@@ -1,11 +1,11 @@
 # Strategic Explainer: требования пользователя
 
-Статус: current Level 1, 2026-08-28.
+Статус: current Level 1, 2026-08-30.
 
 Этот документ — полный пользовательский исходный код только для
-`$strategic-explainer`. Он не определяет требования к ShipTask или Task
-Composer; direct и delegated вызовы являются локальными интерфейсами самого
-Explainer.
+`$strategic-explainer`. Он не определяет требования конкретного вызывающего
+workflow или предметной области; direct и delegated вызовы являются локальными
+интерфейсами самого Explainer.
 
 Требования задают обязательный outcome, rationale, observable evidence и
 scope/truth/safety/authority boundaries. Architecture и runtime могут
@@ -55,11 +55,12 @@ gap называется прямо с объяснением, какой input 
 После приёмки вызова Explainer сам собирает current facts и materially relevant
 sources доступными read-only способами, а не получает от caller готовую
 интерпретацию или пересказ его хода работы. Поиск начинается с exact scope и
-поднимается через применимые Task, parent/Epic, Release, Project, product goal,
-vision, current specification и accepted decisions, пока не станет понятно,
-зачем выполняется локальная работа и что её результат означает для исходного
-outcome. Caller передаёт короткую задачу и разрешимые source anchors, но не
-захламляет context своими рассуждениями, process diary или готовой формулировкой.
+поднимается через применимые связи, родительский контекст, текущую цель,
+продуктовый замысел, current specification и accepted decisions, пока не станет
+понятно, зачем выполняется локальная работа и что её результат означает для
+исходного outcome. Caller передаёт короткую задачу и разрешимые source anchors,
+но не захламляет context своими рассуждениями, process diary или готовой
+формулировкой.
 
 Current/accepted, proposed и historical context не смешиваются; design не
 переписывает наблюдаемый execution outcome. Discovery остаётся bounded declared
@@ -71,10 +72,10 @@ scope или authority.
 ### `SE-03` — Lossless by relevance
 
 Понятность не достигается потерей decision-relevant facts. Сохраняется всё, что
-меняет problem, outcome, impact/risk, action или confidence. Сохранить факт не
-означает поместить его в пользовательский текст: verification-only evidence
-остаётся в отдельном source basis. Process diary и детали, удаление которых не
-меняет понимание читателя, в публикацию не попадают.
+меняет problem, outcome, impact/risk, action или confidence; детали, удаление
+которых ничего из этого не меняет, не считаются частью результата. Это требование
+задаёт смысловое покрытие, а размещение доказательств между publication text и
+source basis определяют `SE-09` и `SE-18`.
 
 ### `SE-04` — Честная граница знания
 
@@ -82,6 +83,11 @@ scope или authority.
 состояния. Hypothesis не становится фактом, отсутствие проверки не называется
 defect, а контекстный документ не является completion evidence. Unrelated risk не
 выдаётся за границу текущего result, confidence не усиливается гладким текстом.
+
+Material limitation, exception или uncertainty располагается рядом с тем
+утверждением, которое она ограничивает. Общая оговорка в конце не считается
+достаточной, если до неё читатель может понять результат шире или увереннее, чем
+позволяют основания.
 
 ### `SE-05` — Human language и причинность
 
@@ -94,6 +100,13 @@ defect, а контекстный документ не является complet
 остальные точные опоры принадлежат source basis. Английские слова не несут
 основную мысль внутри формально русского текста и не подменяют знакомое
 пользователю понятие внутренним термином системы.
+
+Внутренние названия самого Explainer и вызывающего workflow, его agents, ролей,
+маршрутизации, admission, gates и процесса подготовки текста не несут основной
+пользовательский смысл и не становятся сюжетом публикации. Точное внутреннее
+название допустимо только когда самому читателю нужно найти, проверить или
+использовать именно его; способ создания объяснения сам по себе не является
+объясняемым результатом.
 
 ### `SE-06` — Независимые сценарии
 
@@ -108,15 +121,15 @@ actor, минимальное действие, причину, observable succe
 по prerequisites, доказательной силе и tradeoff; artificial quota и придуманная
 рекомендация не создают новую decision или authority.
 
-Для blocker/action explanation прежний `not_available`, старый report или
-перечень симптомов не подтверждают dependency сами по себе. Если current sources
-показывают уже существующий capability, выполненную prerequisite или безопасный
-self-service path, Explainer не просит человека повторить её и прямо сообщает,
-что эта dependency не установлена, общий blocker требует пересчёта, а caller
-может продолжить соответствующий self-service step. Пароль, MFA, consent или
-выдача доступа становятся пользовательским действием только когда source
-подтверждает, что текущий flow фактически дошёл до этого шага; предполагаемое
-будущее подтверждение не выдаётся за уже возникший blocker.
+Для объяснения препятствия или нужного действия прежний `not_available`, старый
+report или перечень симптомов не подтверждают dependency сами по себе. Если
+current sources показывают уже существующую возможность, выполненное условие или
+безопасный самостоятельно доступный путь, Explainer не просит человека повторить
+его и прямо сообщает, что заявленная dependency не установлена, вывод об
+остановке требует пересчёта, а caller может продолжить доступное действие.
+Действие человека называется необходимым только когда source подтверждает, что
+текущая ситуация действительно дошла до этого условия; предполагаемая будущая
+потребность не выдаётся за уже возникшее препятствие.
 
 ### `SE-08` — Никакой скрытой управляющей роли
 
@@ -159,15 +172,11 @@ unavailability, а client следует собственной явной fallb
 
 Facade router однозначно назначает fresh subagent терминальную роль Strategic
 Explainer provider по `SE-17`; роль не выводится из наличия диалога, tool
-history, имени агента, уже выполненных действий или догадки самого subagent. До
-discovery provider проверяет role lock, наблюдаемую чистоту context,
-компактность и однозначность задачи, доступный fork metadata и достаточность
-anchors. Если вызов не соответствует contract, provider ничего не анализирует
-и возвращает короткий operational refusal по `SE-17`. Facade исправляет
-структурную причину и создаёт один новый экземпляр; внешний client не получает
-clean-call recipe, не исправляет invocation сам и не продолжает загрязнённый
-subagent. Если platform не показывает fork metadata, provider проверяет только
-доступные признаки и не утверждает, что доказал скрытый mode.
+history, имени агента, уже выполненных действий или догадки самого subagent.
+Admission и terminal refusal принадлежат `SE-17`; facade может исправить
+структурную причину только одним новым clean invocation и никогда не продолжает
+загрязнённый subagent. Если platform не показывает fork metadata, provider
+проверяет только доступные признаки и не утверждает, что доказал скрытый mode.
 
 За пределами этого явного isolation invariant tool sequence, форма source note,
 внутренний reasoning, длина и визуальная форма остаются свободными. Table, flow
@@ -178,11 +187,9 @@ subagent. Если platform не показывает fork metadata, provider п
 Explainer возвращает одну согласованную модель problem, strategic meaning,
 current outcome, impact, boundary и next state, понятную без process diary и
 дополнительных уточняющих prompt-ов. Простой success остаётся коротким, сложный
-failure сохраняет необходимую причинность. Delegated result готов к публикации;
-caller публикует только готовый текст, проверяет факты по отдельному source basis
-и не переписывает одобренный текст обратно на своём техническом языке. При
-factual error или потерянном material fact исправляется вход и explanation
-строится заново.
+failure сохраняет необходимую причинность. Результат является прямым ответом, а
+не отчётным шаблоном: структура и длина следуют содержанию; заголовки, поля,
+списки, таблицы и одинаковая форма между разными ответами не обязательны.
 
 Первый слой формулирует одну главную причинную мысль и по возможности исчерпывает
 ответ одной фразой. Наличие сути имеет высший приоритет; отсутствие воды,
@@ -194,19 +201,22 @@ context. Перечень возможных смысловых измерени
 входят только реально нужные для данного читателя problem, outcome, impact,
 boundary или next state.
 
+Delegated result готов к публикации без стилистической переработки caller-ом.
+При factual error или потерянном material fact исправляется вход и explanation
+строится заново по facade contract из `SE-16`.
+
 ### `SE-12` — Общий переносимый communication skill
 
 Strategic Explainer остаётся generic и пригодным для direct и delegated use вне
-ShipTask: он не зашивает Task Manager, tracker lifecycle, project-specific
-commands или право управлять calling workflow. В этом repository он
-распространяется как самостоятельный plugin
+конкретного workflow: он не зашивает task tracker, lifecycle, project-specific
+commands или право управлять calling workflow. Он распространяется как
+самостоятельный plugin
 `strategic-explainer@srez-marketplace` с plugin-qualified skill
-`$strategic-explainer:strategic-explainer`. Он не встраивается в
-`ship-tasks@srez-marketplace`, Task Manager adapter plugin или другой package и
-не устанавливается standalone user-level duplicate. Packaging не меняет его
-generic runtime boundary; checked-in runtime source, отдельный Marketplace
-source и installed cache после изменения остаются byte-identical и проверяются
-в fresh Codex session.
+`$strategic-explainer:strategic-explainer`. Он не встраивается в package
+вызывающего workflow или adapter и не устанавливается standalone user-level
+duplicate. Packaging не меняет его generic runtime boundary; checked-in runtime
+source, отдельный Marketplace source и installed cache после изменения остаются
+byte-identical и проверяются в fresh Codex session.
 
 ### `SE-13` — Редакторская реконструкция без потери смысла
 
@@ -249,11 +259,11 @@ Explainer отвечает на исходный вопрос пользоват
 ### `SE-15` — Один пользовательский результат на fresh invocation
 
 Explainer применяется к самостоятельной формулировке, которая действительно
-попадёт человеку: Task comment, отчёту по Task или scope, объяснению material
-решения/состояния, blocker report либо финальному ответу. Обычный разговор,
-рабочая переписка, промежуточный progress update и внутренний черновик не
-запускают этот API. Единицей является один целостный пользовательский результат,
-а не предложение, абзац или технический слой ответа.
+попадёт человеку: комментарию, отчёту, объяснению material решения, состояния
+или препятствия либо финальному ответу. Обычный разговор, рабочая переписка,
+промежуточный progress update и внутренний черновик не запускают этот API.
+Единицей является один целостный пользовательский результат, а не предложение,
+абзац или технический слой ответа.
 
 Каждый такой результат, новый вопрос, changed facts/scope и повтор после
 factual/comprehension error получают новый clean invocation. Старый subagent не
@@ -262,42 +272,34 @@ factual/comprehension error получают новый clean invocation. Ста
 проверить конкретный текст: тогда этот текст является предметом fresh invocation,
 а не унаследованным process context.
 
-Task-level comment, следующий lifecycle comment, scope-level blocker report и
-финальный ответ являются разными publication units, даже если используют часть
-одних facts. Provider одной Task или предыдущего lifecycle state нельзя
-продолжить либо переименовать в scope-level/Goal report; для нового назначения
-всегда создаётся новый clean invocation с его собственным вопросом, scope и
-anchors.
+Следующая публикация об изменившемся состоянии и итоговое объяснение являются
+разными publication units, даже если используют часть одних facts. Provider
+предыдущей публикации нельзя продолжить либо переименовать для нового назначения:
+оно получает собственный clean invocation по `SE-10`.
 
 ### `SE-16` — Семантический facade и изоляция provider expertise
 
-Внешний вызывающий агент знает только публичный semantic contract: когда нужен
-Explainer, какую одну formulation/editing task, цель, exact scope, язык,
-material constraints и resolvable read-only anchors передать, а также что в
-ответ приходит готовый publication text с отдельно обозначенным source basis
-либо operational unavailability. В caller package, его Requirements,
-Architecture, runtime instructions и metadata не попадают agent topology,
-fork mode, model/effort, role lock, provider entrypoint, clean-call recipe или
-retry mechanics.
+Внешний вызывающий агент знает только публичный semantic contract: какую одну
+formulation/editing task, цель, exact scope, язык, material constraints и
+resolvable read-only anchors передать, а также что в ответ приходит готовый
+publication text с отдельно обозначенным source basis либо operational
+unavailability. Agent topology, profile, role lock, provider entrypoint и retry
+mechanics остаются внутри facade по `SE-10`.
 
 Runtime использует progressive disclosure из трёх слоёв. Внешний client только
 вызывает qualified skill с semantic request. Загруженный facade router знает
 внутренний invocation/admission protocol, но не получает, не читает и не
 применяет правила strategic discovery, построения причинного объяснения,
 редакторской реконструкции, языковой очистки или проверки понимания. Полный
-provider contract читает только новый subagent после успешной проверки clean
-invocation и явного role lock по `SE-17`. Direct request проходит тот же facade
-и не разрешает текущему conversational agent выполнить provider method
-самостоятельно. Routing всегда заканчивается на границе fresh invocation:
-provider-subagent не исполняет facade protocol, не маршрутизирует следующий
-вызов и не вызывает Strategic Explainer повторно.
+provider contract читает только admitted subagent по `SE-17`. Direct request
+проходит тот же facade и не разрешает текущему conversational agent выполнить
+provider method самостоятельно.
 
 Ни внешний client, ни facade router не пишут explanation candidate, не
 формулируют за provider strategic view, не передают требования к структуре
 ответа, не оценивают result внутренним quality checklist и не улучшают его
 самостоятельно. Client может проверить material factual conflict по
-authoritative sources; исправленные facts/anchors образуют новый semantic call,
-а весь clean invocation и structural retry снова остаются внутри facade.
+authoritative sources; исправленные facts/anchors образуют новый semantic call.
 
 Если provider недоступен или отключён, конкретный client следует собственному
 truth/lifecycle contract и выбранной им fallback policy. Он не имитирует
@@ -315,27 +317,23 @@ admission, ни после него. Provider не вызывает Strategic Ex
 и не продолжает других agents, не делегирует им discovery или проверку
 понимания и не просит другого агента закончить его publication unit.
 
-Facade router до spawn явно помещает в compact task однозначный provider role
-lock, одну publication unit, exact scope и resolvable read-only anchors. Role lock
-имеет терминальный смысл: получивший его subagent не решает заново, является ли
-он caller, и не применяет caller branch даже если видит team tools, parent
-metadata, собственные tool calls или неоднозначные признаки чистоты context.
-Отсутствующий, конфликтующий или смешанный role lock является invalid
-invocation, а не основанием породить ещё один subagent.
+Facade router явно помещает в compact task однозначный provider role lock, одну
+publication unit, exact scope и resolvable read-only anchors. Получивший role
+lock subagent не решает заново, является ли он caller, и не применяет caller
+branch даже при наличии team tools, parent metadata или собственных read-only
+calls. Отсутствующий, конфликтующий или смешанный role lock является invalid
+invocation.
 
 Допустимая задача provider-а ограничена созданием или явной редактурой одного
 реального предназначенного человеку explanation result в границах `SE-15`.
 Planning, decomposition, implementation, mutation, lifecycle/status/authority
 decision, broad research без конкретной publication unit, orchestration,
 маршрутизация, управление agents и просьба выполнить чужой workflow выходят за
-роль. Получив такую задачу, provider до discovery и любых task/source tool calls возвращает
-`STRATEGIC_EXPLAINER_INVOCATION_ERROR`, кратко называет точное нарушение,
-объясняет своё единственное назначение и даёт facade router исправимую инструкцию:
-создать новый clean built-in `default` subagent с `fork_turns="none"`, явным
-`model="gpt-5.6-luna"`, `reasoning_effort="max"`, provider role lock, одной
-user-facing formulation task, exact scope и resolvable read-only anchors.
-После отказа этот экземпляр останавливается; он не исправляет собственный вызов
-и не запускает замену самостоятельно.
+роль. Получив такую задачу, provider до discovery и любых source calls возвращает
+`STRATEGIC_EXPLAINER_INVOCATION_ERROR`, кратко называет точное нарушение и своё
+единственное назначение, после чего останавливается. Он не исправляет собственный
+вызов и не запускает замену; новый clean invocation при допустимой structural
+correction принадлежит facade по `SE-10`.
 
 ### `SE-18` — Техническая квитанция не входит в publication text
 
@@ -347,44 +345,40 @@ request/candidate identifier, внутренний ключ или полный 
 найти, выбрать или использовать для следующего действия. Наличие точных и
 верных значений не делает их релевантными автоматически.
 
-Новая lifecycle publication сообщает material delta относительно предыдущего
-пользовательского сообщения. Неизменившиеся доказательства, команды и общий
-checklist не повторяются, если не нужны для понимания нового результата, риска
-или решения. Найденный и исправленный дефект, новая граница знания либо новое
-следующее действие сохраняются явно и не растворяются в сокращении.
+Новая публикация об изменившихся фактах, состоянии или выводе сообщает material
+delta относительно предыдущего пользовательского сообщения. Неизменившиеся
+доказательства, команды и общий checklist не повторяются, если не нужны для
+понимания нового результата, риска или решения. Исправленный дефект, новая
+граница знания либо новое действие сохраняются явно и не растворяются в
+сокращении.
 
 Completion gate обязан обнаружить такие audit-only детали и повтор до возврата
 result. Provider удаляет их в source basis или заново строит объяснение из
 reader model; технически точный command dump, список идентификаторов либо копия
 прежнего отчёта не являются publication-ready result.
 
-### `SE-19` — Причинная полнота terminal blocker и незавершённого scope
+### `SE-19` — Причинная полнота незавершённого результата
 
-Если publication unit объясняет остановку незавершённого scope, её основной
-текст самодостаточно связывает каждое существенно отличающееся препятствие с
-конкретным объектом или критерием, текущей попыткой и наблюдаемым результатом,
-первичной причиной, владельцем оставшегося условия, минимальным следующим
-действием и наблюдаемым сигналом возобновления. Если sources содержат устойчивый
-human-facing Task ref, название критерия или другой идентификатор для materially
-distinct препятствий, publication text сохраняет его рядом с соответствующей
-причиной и действием. Provider не заменяет такой ref обезличенным «один
-сценарий» или «отдельная проверка»: exact ref является навигацией, а не
-технической квитанцией. Current attempt/result также сохраняется как
-установленный факт; общая формулировка о классе проверок не заменяет конкретное
-уже выполненное действие и его наблюдаемый результат.
+Если publication unit объясняет незавершённый результат или невозможность
+продолжить, основной текст связывает фактическое текущее состояние и наблюдаемый
+результат с первичной причиной или границей, оставшимся условием, доступным
+следующим действием и наблюдаемым сигналом продолжения. Устойчивое human-facing
+название или другой идентификатор сохраняется рядом с причиной и действием,
+только если он действительно нужен читателю для различения или навигации.
 
-Разные препятствия можно объединить только когда совпадают их критерий,
-первичная причина, владелец следующего условия и способ возобновления. Source
-basis не компенсирует исчезновение этой связи из publication text. Общая фраза
-о «не реализованных путях», «нескольких участниках», «ограниченных действиях»
-или «новых подтверждениях» не проходит completion gate, если по ней нельзя
-установить точный упор, уже выполненную попытку и следующее действие.
+Это требование не задаёт фиксированную схему ответа и не обязывает перечислять
+поля. Объяснение достаточно полно, когда читатель понимает, что фактически
+получилось, почему результата пока нет, какое условие осталось, кто или что
+может его изменить и можно ли продолжить доступным способом. Существенно разные
+препятствия нельзя объединять, если из-за этого исчезают разные причины,
+условия, действия или способы продолжения; отдельный source basis не компенсирует
+потерю этой причинной связи в publication text.
 
-Если current sources показывают доступное исправление, повторный выпуск,
+Если current sources показывают доступное исправление, повторную попытку,
 self-service path или другую безопасную работу caller-а, Explainer не утверждает,
-что автономная работа исчерпана. Он прямо сообщает, что terminal blocker не
-доказан и какую работу caller может продолжить. Это не решение о status или
-recovery, а честное отражение доступного пути по current evidence.
+что возможность продолжить исчерпана. Он прямо сообщает, что заявленная
+невозможность продолжить не доказана и какой доступный путь остаётся. Это не
+решение о status или recovery, а честное отражение current evidence.
 
 ## Изменение Level 1
 

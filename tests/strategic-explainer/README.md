@@ -1,10 +1,11 @@
 # Model-forward tests Strategic Explainer
 
 Эти fixtures проверяют не совпадение с эталонной фразой, а способность
-`$strategic-explainer:strategic-explainer` превратить сырой технический след в понятный
-человеку комментарий. Все продуктовые события здесь синтетические: они
-опираются на принятые ExampleNotes и Task Manager contracts, но не являются
-утверждением о фактическом состоянии Task, UAT или production.
+`$strategic-explainer:strategic-explainer` превратить сырой технический след в
+понятный человеку текст. Все продуктовые события здесь синтетические. Текущие
+fixtures используют две технические предметные области как сложный материал,
+но не задают границу общего skill и не являются утверждением о фактическом
+состоянии какой-либо системы.
 
 ## Структура case
 
@@ -23,9 +24,8 @@ Generating subagent не получает rubric, diagnosis, intended wording, �
 обозначенный source basis.
 
 Это white-box evaluation harness: он намеренно знает внутренний invocation
-recipe, чтобы проверить released implementation. ShipTask, Task Composer и
-обычный direct client этих параметров не получают и вызывают только semantic
-facade.
+recipe, чтобы проверить released implementation. Любой delegated или direct
+client этих параметров не получает и вызывает только semantic facade.
 
 ## Facade topology regression
 
@@ -56,18 +56,19 @@ comprehension check перед возвратом result.
 
 ## Cases
 
-Suite содержит ровно 25 materially different cases: четырнадцать из ExampleNotes и
-одиннадцать из Task Manager. ExampleNotes покрывает размер и тип файлов, persistence после
+Suite содержит ровно 25 materially different cases из двух реалистичных
+технических предметных областей. Они являются примерами применения общего
+контракта, а не специализацией Explainer. Первая группа покрывает размер и тип файлов, persistence после
 переиздания, concurrent edits, idempotent retry, current access к истории,
 write rebind, automatic capture, повторную выдачу приглашения и перенос
-ownership. Task Manager покрывает ACL комментариев, role ceiling, сохранённые и
-временные фильтры, recoverable deletion Project и Release, атомарный массовый
-перенос, hierarchy guards, idempotent comment edits, выпуск с открытыми Tasks и
+ownership. Вторая покрывает ACL комментариев, role ceiling, сохранённые и
+временные фильтры, recoverable deletion, атомарный массовый перенос, hierarchy
+guards, idempotent edits, выпуск с незавершённой работой и
 границу между зелёной локальной проверкой и провалившимся UAT. Два отдельных
 регрессионные случаи воспроизводят перегруженный closing comment с командами и
-повтор уже опубликованного доказательного следа после review, блокировку Goal
-без причинного отчёта, ложный blocker из устаревшего capability state и
-остановку незавершённого Release с расплывчатой категоризацией вместо точных
+повтор уже опубликованного доказательного следа после review, препятствие без
+причинного отчёта, ложный blocker из устаревшего capability state и
+остановку незавершённой работы с расплывчатой категоризацией вместо точных
 причин и доступного продолжения.
 
 Матрица намеренно содержит success, expected boundary, partial result,

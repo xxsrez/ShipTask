@@ -49,9 +49,11 @@ COMPOSER_SPEC = SKILL_SOURCES / "task-composer" / "architecture.md"
 STRATEGIC_REQUIREMENTS = (
     SKILL_SOURCES / "strategic-explainer" / "requirements.md"
 )
+STRATEGIC_OVERVIEW = SKILL_SOURCES / "strategic-explainer" / "overview.md"
 STRATEGIC_SPEC = SKILL_SOURCES / "strategic-explainer" / "architecture.md"
 OVERVIEW = ROOT / "docs" / "overview.md"
 DOCS_INDEX = ROOT / "docs" / "README.md"
+PHILOSOPHY = ROOT / "docs" / "philosophy.md"
 DEVELOPMENT = ROOT / "docs" / "guides" / "development.md"
 REVIEW_MATRIX = (
     ROOT / "docs" / "reference" / "shiptask-review-disposition-evaluation.md"
@@ -190,8 +192,10 @@ CORE_FILES = (
     SHIP_REQUIREMENTS,
     COMPOSER_REQUIREMENTS,
     STRATEGIC_REQUIREMENTS,
+    STRATEGIC_OVERVIEW,
     OVERVIEW,
     DOCS_INDEX,
+    PHILOSOPHY,
     DEVELOPMENT,
     REVIEW_MATRIX,
     COMPOSER_EVALUATION,
@@ -232,8 +236,10 @@ CURRENT_CONTRACT_FILES = (
     SHIP_REQUIREMENTS,
     COMPOSER_REQUIREMENTS,
     STRATEGIC_REQUIREMENTS,
+    STRATEGIC_OVERVIEW,
     OVERVIEW,
     DOCS_INDEX,
+    PHILOSOPHY,
     DEVELOPMENT,
     REVIEW_MATRIX,
     COMPOSER_EVALUATION,
@@ -940,9 +946,9 @@ def validate_strategic_skill(errors: list[str]) -> None:
         "Planning, decomposition, implementation, mutation",
         "STRATEGIC_EXPLAINER_INVOCATION_ERROR",
         "точный defect",
-        "model=\"gpt-5.6-luna\"",
-        "reasoning_effort=\"max\"",
-        "Не исправляй собственный\nвызов и не запускай замену",
+        "Facade\nсам владеет clean-call recipe",
+        "не исправляй собственный вызов",
+        "не запускай замену",
         "provider-contract.md",
     )
     require(
@@ -967,9 +973,9 @@ def validate_strategic_skill(errors: list[str]) -> None:
         "Английские слова не должны нести основную мысль",
         "Действие формулируй через наблюдаемую операцию человека",
         "Прежний `not_available`, старый report или список симптомов не доказывают её",
-        "эта dependency не установлена, общий blocker требует пересчёта",
-        "caller может продолжить соответствующий self-service step",
-        "current flow фактически дошёл до такого шага",
+        "dependency не установлена, вывод об остановке\nтребует пересчёта",
+        "caller может продолжить доступное действие",
+        "current\nsituation фактически дошла до такого условия",
         "переводи внутренние компоненты в\nописании результата или границы",
         "Проверь понимание",
         "своими словами назвать",
@@ -984,11 +990,15 @@ def validate_strategic_skill(errors: list[str]) -> None:
         "сырой командный\nблок",
         "абсолютный путь",
         "полный список тестовых файлов",
-        "Неизменившиеся доказательства из предыдущего пользовательского сообщения",
+        "предыдущим пользовательским сообщением",
+        "Неизменившиеся доказательства, команды и checklist не повторяются",
         "не проходит completion gate",
+        "не заполняй отчётный шаблон",
+        "Не превращай процесс подготовки объяснения в предмет публикации",
+        "Каждую material limitation, exception или uncertainty ставь рядом",
     )
     text = read(STRATEGIC_SKILL)
-    for coupling in ("Task Manager", "TM-123"):
+    for coupling in ("Issue Grinder", "ShipTask", "Task Manager", "Task Composer", "TM-123"):
         if coupling in text:
             fail(errors, f"Strategic Explainer runtime is coupled to {coupling!r}")
     forbid(
@@ -1674,7 +1684,7 @@ def validate_source_layers(errors: list[str]) -> None:
             )
         else:
             level_one_status = (
-                "Статус: current Level 1, 2026-08-28"
+                "Статус: current Level 1, 2026-08-30"
                 if requirements == STRATEGIC_REQUIREMENTS
                 else "Статус: current Level 1, 2026-08-27"
             )
@@ -1826,12 +1836,12 @@ def validate_source_layers(errors: list[str]) -> None:
         "сам собирает current facts",
         "одну главную причинную мысль",
         "прежний `not_available`, старый report или\nперечень симптомов не подтверждают dependency",
-        "Explainer не просит человека повторить её",
-        "текущий flow фактически дошёл до этого шага",
+        "Explainer не просит человека повторить\nего",
+        "текущая ситуация действительно дошла до этого условия",
         "Один пользовательский результат на fresh invocation",
         "Семантический facade и изоляция provider expertise",
         "публичный semantic contract",
-        "не попадают agent topology",
+        "Agent topology, profile, role lock, provider entrypoint и retry\nmechanics остаются внутри facade",
         "Внешний client только\nвызывает qualified skill с semantic request",
         "facade router знает\nвнутренний invocation/admission protocol",
         "не получает, не читает и не\nприменяет правила strategic discovery",
@@ -1841,25 +1851,50 @@ def validate_source_layers(errors: list[str]) -> None:
         "Provider не вызывает Strategic Explainer",
         "однозначный provider role lock",
         "STRATEGIC_EXPLAINER_INVOCATION_ERROR",
-        "не запускает замену самостоятельно",
+        "не запускает замену",
         "Publication text и source basis\nсемантически разделены",
-        "Причинная полнота terminal blocker и незавершённого scope",
-        "конкретным объектом или критерием, текущей попыткой",
-        "Source\nbasis не компенсирует исчезновение этой связи",
-        "доступное исправление, повторный выпуск",
-        "terminal blocker не\nдоказан",
+        "Причинная полнота незавершённого результата",
+        "фактическое текущее состояние и наблюдаемый\nрезультат",
+        "отдельный source basis не компенсирует\nпотерю этой причинной связи",
+        "доступное исправление, повторную попытку",
+        "невозможность продолжить не доказана",
+        "Внутренние названия самого Explainer и вызывающего workflow",
+        "Material limitation, exception или uncertainty располагается рядом",
+        "Результат является прямым ответом, а\nне отчётным шаблоном",
+    )
+    require(
+        errors,
+        STRATEGIC_OVERVIEW,
+        "Статус: действующий пользовательский Overview, 2026-08-30",
+        "принадлежит\nпользователю",
+        "независимый уточнитель общего назначения",
+        "Это не специализированная часть Issue Grinder",
+        "один общий читатель — пользователь",
+        "глубокий технический бэкграунд",
+        "не обязан быть глубоко погружён",
+        "не подстраивает результат под отдельную профессиональную\nроль",
+        "повышать его читабельность",
+        "лаконичным и понятным",
     )
     forbid(
         errors,
         STRATEGIC_REQUIREMENTS,
+        "[Overview]",
+        "overview.md",
         "отсутствие проверки — defect",
         "контекстный документ — completion evidence",
+        "Issue Grinder",
+        "ShipTask",
+        "Task Manager",
+        "Task Composer",
     )
     require(
         errors,
         SOURCE_INDEX,
         "Единица\nисходного кода — отдельный skill",
-        "требования и\nархитектура разных skills не объединяются",
+        "Overview,\nRequirements и Architecture разных skills не объединяются",
+        "Overview отвечает на вопросы «что это, для кого и зачем»",
+        "Это три независимых входа",
         "Компилятор здесь стохастический",
         "примерно тот\nже contract",
         "Каждый source package должен быть понятен и пригоден для пересборки",
@@ -1869,7 +1904,7 @@ def validate_source_layers(errors: list[str]) -> None:
         (ISSUE_SPEC, "IG-*", "Статус: current Level 2, 2026-08-29"),
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current Level 2 contract, 2026-08-27"),
-        (STRATEGIC_SPEC, "SE-*", "Статус: current Level 2 contract, 2026-08-29"),
+        (STRATEGIC_SPEC, "SE-*", "Статус: current agent-owned Architecture, 2026-08-30"),
     ):
         if architecture == ISSUE_SPEC:
             require(
@@ -1883,6 +1918,18 @@ def validate_source_layers(errors: list[str]) -> None:
                 "примерно эквивалентное наблюдаемое поведение",
             )
             continue
+        if architecture == STRATEGIC_SPEC:
+            require(
+                errors,
+                architecture,
+                status_marker,
+                "`SE-*` — в локальных",
+                "[Requirements](requirements.md)",
+                "## 0. Compilation contract",
+                "производная смысловая компиляция",
+                "примерно эквивалентными",
+            )
+            continue
         require(
             errors,
             architecture,
@@ -1893,6 +1940,14 @@ def validate_source_layers(errors: list[str]) -> None:
             "производная смысловая компиляция",
             "примерно\nэквивалентными",
         )
+    require(
+        errors,
+        STRATEGIC_SPEC,
+        "[Overview](overview.md)",
+        "тремя\nнезависимыми входами",
+        "компиляцией трёх самостоятельных документов",
+        "Overview независимо определяет Strategic Explainer как уточнитель общего\nназначения",
+    )
 
     for obsolete in (
         ROOT / "docs" / "requirements.md",
@@ -1907,23 +1962,49 @@ def validate_source_layers(errors: list[str]) -> None:
     require(
         errors,
         ROOT / "AGENTS.md",
+        "[`docs/philosophy.md`](docs/philosophy.md)",
         "Документация как исходный код",
-        "Единица source —\nотдельный skill",
-        "`docs/skills/<skill>/requirements.md`",
+        "Единица source — отдельная entity",
+        "три независимых\nдокумента",
+        "user-owned `docs/skills/<skill>/overview.md`",
+        "user-owned `docs/skills/<skill>/requirements.md`",
         "`docs/skills/<skill>/architecture.md`",
-        "Level 1 — требования пользователя",
-        "Level 2 — архитектура достижения",
-        "Level 3 — runtime skills",
-        "При конфликте всегда побеждает Level 1",
-        "Level 1 requirement → Level 2 design → runtime skill → observable evaluation",
-        "Компиляция стохастическая",
-        "не объединяют Requirements или Architecture разных skills",
+        "Overview и Requirements принадлежат пользователю",
+        "не\nредактируйте `overview.md` или `requirements.md` без явного указания",
+        "Конфликт двух пользовательских документов разрешает только\nпользователь",
+        "Architecture принадлежит агенту только в пределах разрешённой задачи",
+        "Overview | Requirements | Architecture → runtime entity → observable\nevaluation",
+        "не создают скрытую current policy",
+    )
+    require(
+        errors,
+        PHILOSOPHY,
+        "Результат важнее процедуры",
+        "Свобода относится к способу достижения результата",
+        "три независимых\nsource-документа",
+        "Requirements не должен\nссылаться на Overview",
+        "Overview: общее описание цели",
+        "Requirements: набор требований пользователя",
+        "Architecture: дополнительные инструкции агента",
+        "не создаётся, не дополняется и не\nредактируется без его явного разрешения",
+        "явного разрешения изменить именно\nRequirements",
+        "Agent-owned не означает право менять файл при read-only анализе",
+        "Это не механическая склейка документов",
+        "техническая инструкция не может незаметно добавить новый пользовательский",
+        "Architecture не должна меняться ради новизны",
+        "Стохастическая компиляция",
+        "semantic equivalence",
+        "Overview ─────┐",
+        "Requirements ├→ runtime entity → observable evaluation",
+        "Architecture ┘",
+        "Current policy\nнельзя прятать",
+        "При сомнении, меняется ли Overview",
     )
     require(
         errors,
         ROOT / "README.md",
         "[`docs/skills/<skill>/`](docs/skills/README.md)",
-        "требования\nчетырёх skills не объединяются",
+        "Документы четырёх skills не\nобъединяются",
         "Project, Release и\ncurrent scope остаются live selectors",
         "без повторного approval",
         "Browser switch допустим как диагностика",
@@ -1939,6 +2020,7 @@ def validate_source_layers(errors: list[str]) -> None:
         errors,
         DOCS_INDEX,
         "[Source model](skills/README.md)",
+        "[Overview](skills/strategic-explainer/overview.md)",
         "[Requirements](skills/ship-tasks/requirements.md)",
         "[Architecture](skills/ship-tasks/architecture.md)",
         "[0028: Интегрированная реализация удовлетворяет `blocked by`]",
@@ -1952,8 +2034,9 @@ def validate_source_layers(errors: list[str]) -> None:
     require(
         errors,
         VISION,
-        "Статус: current Level 2 strategic design, 2026-08-26",
-        "[требованиях пользователя](requirements.md)",
+        "Статус: current agent-owned strategic design, 2026-08-30",
+        "[Overview](overview.md)",
+        "[Requirements](requirements.md)",
     )
 
 
@@ -2531,15 +2614,22 @@ def validate_strategic_contract(errors: list[str]) -> None:
     require(
         errors,
         STRATEGIC_SPEC,
-        "Статус: current Level 2 contract, 2026-08-29",
-        "`SE-*` в локальных",
-        "[требованиях пользователя](requirements.md)",
+        "Статус: current agent-owned Architecture, 2026-08-30",
+        "[Overview](overview.md)",
+        "`SE-*` — в локальных",
+        "[Requirements](requirements.md)",
         "общего skill `$strategic-explainer`",
         "Конституционный принцип",
         "Продукт — понимание читателя",
         "publication text остаётся только то",
         "fresh stateless invocation",
         "Fresh API admission",
+        "сам способ управлять context Strategic Explainer",
+        "отсутствие унаследованного execution context",
+        "архитектурной регрессией",
+        "пользовательском слепом сравнении",
+        "не использует cache context вызывающего агента",
+        "заново обосновать и качество объяснения, и экономику чистого\nвызова",
         "fork_turns=\"none\"",
         "model=\"gpt-5.6-luna\"",
         "reasoning_effort=\"max\"",
@@ -2560,13 +2650,13 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Completion criteria",
         "Текст пишется на языке пользователя",
         "publication-ready result contract",
-        "Следующий lifecycle comment, scope-level blocker и final являются новыми units",
+        "Следующая публикация об изменившемся состоянии и итоговое объяснение являются\nновыми units",
         "raw shell/test commands",
         "неизменившиеся доказательства из предыдущего пользовательского сообщения",
         "старому `not_available`",
-        "эта user dependency\nне установлена, общий blocker требует пересчёта",
-        "caller может продолжить\nсоответствующий self-service step",
-        "flow фактически дошёл до соответствующего user-only шага",
+        "заявленная dependency не установлена, вывод об остановке требует\nпересчёта",
+        "caller может продолжить доступное действие",
+        "current situation\nфактически дошла до соответствующего условия",
         "private evidence map",
         "reader model",
         "публикует только text",
@@ -2578,9 +2668,12 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Редакторская реконструкция",
         "неизменяемое смысловое ядро",
         "обратная проверка покрытия",
-        "actionability projection",
-        "runnable repair, redeploy или self-service path",
+        "фактическое текущее состояние и наблюдаемый result",
+        "repair, retry или self-service path",
         "Наличие полного source basis не\nзакрывает пропуск",
+        "Названия самого Explainer, facade/provider-ролей, admission, orchestration",
+        "Material limitation, exception или uncertainty ставится рядом",
+        "прямой ответ, а не\nотчётный шаблон",
     )
     require(
         errors,
@@ -2590,13 +2683,13 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "сырой\nкомандный блок",
         "абсолютный путь",
         "полный список тестовых файлов",
-        "Новая lifecycle publication сообщает material delta",
+        "Новая публикация об изменившихся фактах, состоянии или выводе сообщает material",
         "не являются publication-ready result",
         "прежний `not_available`, старый report или\nперечень симптомов не подтверждают dependency",
-        "Explainer не просит человека повторить её",
-        "текущий flow фактически дошёл до этого шага",
-        "Source\nbasis не компенсирует исчезновение этой связи",
-        "terminal blocker не\nдоказан",
+        "Explainer не просит человека повторить\nего",
+        "текущая ситуация действительно дошла до этого условия",
+        "отдельный source basis не компенсирует\nпотерю этой причинной связи",
+        "невозможность продолжить не доказана",
     )
     require(
         errors,
@@ -2658,11 +2751,14 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Compact selector требует самостоятельного discovery",
         "Новый publication unit не продолжает старый candidate",
         "Completion comment не превращается в command dump",
-        "Следующий lifecycle comment сообщает изменение, а не повтор",
-        "Production regression: blocked Goal без причинного отчёта",
-        "Production regression: stale capability создаёт ложный blocker",
-        "старых `not_available` comments",
-        "reconnect flow\nещё не запускался до password/MFA/consent",
+        "Следующая публикация сообщает изменение, а не повтор",
+        "Неполный результат без причинного объяснения",
+        "Устаревшее состояние возможности создаёт ложное препятствие",
+        "старых `not_available` сообщений",
+        "самостоятельно доступный путь ещё не использован",
+        "Внутренний процесс не попадает к читателю",
+        "Оговорка находится рядом с утверждением",
+        "Свободная форма вместо отчётного шаблона",
     )
     require(
         errors,
@@ -2829,36 +2925,15 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "Definition of done для изменения skill",
         "origin/main",
         "byte-identical",
-        "installed cache",
+        "Installed cache",
         "installed/enabled",
-        "Standalone user-level каталоги",
-        "~/.codex/skills/task-composer",
-        "Два установленных Marketplace package",
-        "Srez Marketplace/plugins/strategic-explainer/skills/strategic-explainer",
-        "Srez Marketplace/plugins/issue-grinder/skills/strategic-explainer` отсутствует",
+        "standalone user-level",
+        "~/.codex/skills/{issue-grinder,ship-tasks,task-composer,strategic-explainer}",
+        "двух\n   установленных Marketplace packages",
+        "Srez Marketplace/plugins/strategic-explainer/skills/",
         "strategic-explainer@srez-marketplace",
-        "Issue Grinder использует\n  `$strategic-explainer:strategic-explainer`",
-        "task-manager@srez-marketplace` остаётся adapter-only",
-        "в начале run ShipTask\n  выбирает ordinary",
-        "выбирает ordinary при его наличии и разрешении, иначе native",
-        "failure provider-а переводит run прямо в native",
-        "ordinary publication unit вызывает semantic facade",
-        "никакие другие invocation parameters или provider instructions",
-        "provider expertise читает только terminal\n  subagent",
-        "не блокирует comment/status",
-        "`To Do → In Progress` комментария не создаёт",
-        "правило пользователя свободным языком — exact/relative count",
-        "root agent не входит в явно названное число",
-        "duration/complexity condition",
-        "собственные feature branch и Git worktree",
-        "не разделяемые с\n  другим writer",
-        "unfinished worktree/branch подхватывается",
-        "exclusive writer после проверки quiescence",
-        "`gpt-5.6-luna`/`max`",
-        "Luna retry loop",
-        "catalog placeholder при доступной host title capability",
-        "best-effort попытку `ShipTask · ...`",
-        "ambiguous candidate не\n  переименовываются",
+        "task-manager@srez-marketplace` остаётся отдельным adapter-only package",
+        "Для docs-only правки без изменения runtime payload переустановка не требуется",
     )
     require(
         errors,
@@ -2922,10 +2997,10 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         STRATEGIC_REQUIREMENTS,
         "самостоятельный plugin\n`strategic-explainer@srez-marketplace`",
         "$strategic-explainer:strategic-explainer",
-        "model=\"gpt-5.6-luna\"",
+        "моделью `gpt-5.6-luna`",
         "reasoning_effort=\"max\"",
         "не разрешает скрытую подмену SOL",
-        "не встраивается в\n`ship-tasks@srez-marketplace`",
+        "не встраивается в package\nвызывающего workflow или adapter",
     )
     require(
         errors,
@@ -2933,7 +3008,7 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "ADR-0031",
         "strategic-explainer@srez-marketplace` содержит только source\n`strategic-explainer/`",
         "strategic-explainer:strategic-explainer",
-        "не получают provider reference в собственный plugin",
+        "Package вызывающего workflow или\nadapter не получает provider reference",
     )
 
     current_distribution_files = (

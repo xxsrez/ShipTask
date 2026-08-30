@@ -1,50 +1,55 @@
 # Strategic Explainer
 
-Статус: current Level 2 contract, 2026-08-29. Применимые Level 1 requirements —
-`SE-*` в локальных
-[требованиях пользователя](requirements.md). Эта architecture описывает
-current архитектуру достижения и не может ослаблять Level 1. Problem-first
+Статус: current agent-owned Architecture, 2026-08-30. Независимые user-owned
+входы находятся в [Overview](overview.md), а `SE-*` — в локальных
+[Requirements](requirements.md). Эта Architecture является третьим
+самостоятельным source-документом: она задаёт дополнительные инструкции и
+решения достижения, но не может менять два пользовательских документа.
+Problem-first
 bounded discovery принято в
 [ADR-0014](../../decisions/0014-problem-first-bounded-strategic-discovery.md), а
-fresh stateless invocation и blocker reflection — в
+fresh stateless invocation — в
 [ADR-0029](../../decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md),
 а самостоятельная plugin distribution — в
 [ADR-0031](../../decisions/0031-standalone-strategic-explainer-plugin.md).
 Терминальная provider-роль и запрет рекурсивной маршрутизации приняты в
 [ADR-0033](../../decisions/0033-terminal-provider-and-optional-shiptask-routing.md).
 
-Продуктовая архитектура раскрыта в
-[стратегическом видении](product-vision.md). Эта architecture описывает
-наблюдаемый результат и границы общего skill `$strategic-explainer`; кроме явно
-заданного clean-invocation invariant она не предписывает внутреннюю организацию
-агента.
+Общий смысл сущности задаёт пользовательский [Overview](overview.md), а его
+agent-owned развитие раскрыто в [стратегическом видении](product-vision.md).
+Эта architecture описывает наблюдаемый результат и границы общего skill
+`$strategic-explainer`; кроме явно заданного clean-invocation invariant она не
+предписывает внутреннюю организацию агента.
 
 ## 0. Compilation contract
 
-Эта architecture вместе с локальным `requirements.md` является полным current
-source package `$strategic-explainer`. Runtime package — производная смысловая
-компиляция требований и architecture; он состоит из публичного semantic
+Локальные `overview.md`, `requirements.md` и `architecture.md` являются тремя
+независимыми входами current source package `$strategic-explainer`. Runtime
+package — их производная смысловая компиляция; он состоит из публичного semantic
 facade и role resolver в `strategic-explainer/SKILL.md`, provider-only admission
 `strategic-explainer/references/provider-entrypoint.md` и внутреннего
 `strategic-explainer/references/provider-contract.md`. Вместе они являются
-компиляцией этих двух документов: package можно удалить и
-собрать заново, сохранив все `SE-*` и выбранную здесь реализацию примерно
-эквивалентными по наблюдаемому поведению. `product-vision.md`, ADR, reports и
+компиляцией трёх самостоятельных документов: package можно удалить и собрать заново,
+сохранив определённое пользователем назначение, все `SE-*` и выбранную здесь
+реализацию примерно эквивалентными по наблюдаемому поведению.
+`product-vision.md`, ADR, reports и
 evaluations дают локальный design/rationale и evidence, но не становятся
 параллельным current contract.
 
-Marketplace компилирует этот package отдельно от ShipTask:
+Marketplace компилирует его как самостоятельный package:
 `strategic-explainer@srez-marketplace` содержит только source
 `strategic-explainer/` и регистрирует qualified skill
-`strategic-explainer:strategic-explainer`. ShipTask и Task Composer остаются
-внешними callers и не получают provider reference в собственный plugin.
+`strategic-explainer:strategic-explainer`. Package вызывающего workflow или
+adapter не получает provider reference.
 
 ## 1. Конституционный принцип
 
-Provider следует одной product instruction: глубоко разберись, но объясни только
-главное. Продукт — понимание читателя, а не отчёт об исследовании; evidence
-подтверждает сообщение, но не заменяет его. Технически правильный, но непонятный
-текст не проходит contract.
+Overview независимо определяет Strategic Explainer как уточнитель общего
+назначения для одного универсального технически сильного пользователя. Provider
+следует одной product instruction: глубоко разберись, но объясни только главное.
+Продукт — понимание читателя, а не отчёт об исследовании; evidence подтверждает
+сообщение, но не заменяет его. Технически правильный, но непонятный текст не
+проходит contract.
 
 В publication text остаётся только то, что меняет понимание проблемы или
 результата, решение, действие, риск либо честную уверенность читателя. Полный
@@ -66,6 +71,33 @@ Provider profile является ещё одним внутренним routing
 current model/effort. Если exact profile недоступен, invocation не подменяется
 SOL или другой моделью; facade возвращает provider unavailability, после чего
 внешний client следует собственной policy.
+
+Fresh subagent и его пустой относительно caller-а context — не заменяемая
+техническая подробность, а сам способ управлять context Strategic Explainer.
+Цель отдельного subagent состоит не в делегации как таковой: `fork_turns="none"`
+исключает унаследованный диалог, tool transcript, process diary, рассуждения и
+candidate вызывающего агента. В новый context допускаются только обычные
+system/developer/skill instructions и одна короткая задача высокого уровня с
+разрешимыми anchors; нужную конкретику provider добывает самостоятельно из
+authoritative read-only sources. Поэтому «пустой context» здесь означает
+отсутствие унаследованного execution context, а не отсутствие системных правил,
+provider contract или самой publication task.
+
+Исполнение provider method в текущем conversational agent, наследование turns,
+передача подробного хода работы либо готовой интерпретации считаются
+архитектурной регрессией, даже если отдельный текст выглядит удачно. Такие
+варианты уничтожают контролируемую границу context, подменяют независимое
+понимание редактурой версии caller-а и загружают в provider низкоуровневую
+конкретику, от которой эта архитектура его намеренно изолирует.
+
+Профиль `gpt-5.6-luna`/`max` решает две связанные задачи. В принятом
+пользовательском слепом сравнении Luna дала для этой роли лучший результат, чем
+SOL. Одновременно fresh subagent не использует cache context вызывающего агента
+и поэтому создаёт дополнительную стоимость; Luna компенсирует её, а `max`
+сохраняет требуемую глубину рассуждения. Предлагать другой профиль или отказаться
+от отдельного subagent нельзя как от обычной оптимизации реализации: такое
+изменение должно заново обосновать и качество объяснения, и экономику чистого
+вызова, не ослабляя context isolation.
 
 За этой границей provider-subagent выбирает tool sequence, форму source note,
 внутренний reasoning, длину и визуальную форму. Caller не знает и не применяет
@@ -147,7 +179,7 @@ facade возвращает operational unavailability по caller contract. О�
 
 ## 2. Результат и граница роли
 
-Strategic Explainer превращает локальную техническую ситуацию в problem-first
+Strategic Explainer превращает локальную ситуацию в problem-first
 объяснение на уровне цели, пользовательского эффекта, ограничений, границы
 знания и следующего понятного state. По явному запросу на редактуру он также
 перестраивает плотный технический или нормативный текст в естественную
@@ -214,12 +246,13 @@ impact и dependencies. Форма такого представления вы�
 
 После admission Explainer обязательно использует доступные read-only sources,
 чтобы независимо собрать current facts и проверить strategic meaning. Поиск
-начинается с exact target/session/task и поднимается через применимые relations,
-parent/Epic, Release, Project, product goal, vision, current specification и
-accepted decisions. Не каждый уровень обязан существовать, но Explainer должен
-установить, зачем выполняется локальная работа и что current result означает для
-исходного outcome. Поиск ограничен declared scope и заканчивается, когда более
-высокий source уже не меняет problem, outcome, impact/risk, action или confidence.
+начинается с exact target или scope и поднимается через применимые связи,
+родительский контекст, текущую цель, продуктовый замысел, current specification
+и accepted decisions. Не каждый уровень обязан существовать, но Explainer
+должен установить, зачем выполняется локальная работа и что current result
+означает для исходного outcome. Поиск ограничен declared scope и заканчивается,
+когда более высокий source уже не меняет problem, outcome, impact/risk, action
+или confidence.
 
 - `current/accepted`, `proposed` и `historical` sources различаются;
 - live execution evidence определяет current outcome, а design объясняет его
@@ -256,8 +289,10 @@ result: позднее наблюдение не заменяет более р�
 смыслового покрытия, а не обязательная структура, заголовки, полная process
 chronology или checklist публикации.
 
-Свободная форма даёт читателю одну согласованную модель. Перечень ниже — возможные
-смысловые измерения, а не обязательные поля ответа:
+Свободная форма даёт читателю одну согласованную модель и прямой ответ, а не
+отчётный шаблон. Структура и длина следуют содержанию; заголовки, поля, списки и
+таблицы появляются только когда действительно улучшают понимание. Перечень ниже
+— возможные смысловые измерения, а не обязательные поля ответа:
 
 - какую проблему и для кого решаем;
 - какой strategic intent или constraint определяет смысл;
@@ -286,19 +321,29 @@ impact/risk, action или confidence читателя. Verification-only identi
 грамматическая рамка с английским смысловым ядром не считается понятным
 объяснением.
 
+Названия самого Explainer, facade/provider-ролей, admission, orchestration,
+gates и других частей процесса подготовки не становятся пользовательским
+сюжетом. Они остаются за publication text, кроме случая, когда читателю нужно
+найти, проверить или использовать именно это название. Так runtime не объясняет
+собственную работу вместо исходного предмета.
+
+Material limitation, exception или uncertainty ставится рядом с ограничиваемым
+утверждением. Общая оговорка в конце не исправляет текст, если предыдущее
+предложение без неё звучит шире или увереннее, чем позволяют sources.
+
 Если есть реальный material choice, Explainer сравнивает столько доступных
 вариантов, сколько нужно для решения: что каждый доказывает, prerequisites,
 tradeoff и success signal. Он не придумывает alternatives ради количества и не
 выдаёт рекомендацию за принятое действие или новую authority.
 
-В blocker/action unit каждая объявленная prerequisite остаётся material claim.
-Provider проверяет её по current sources, а не по старому `not_available`,
-прежнему report или списку симптомов. Уже существующий capability, выполненная
-prerequisite либо безопасный self-service path означают, что эта user dependency
-не установлена, общий blocker требует пересчёта, а caller может продолжить
-соответствующий self-service step. Пароль, MFA, consent или access grant
-описываются как действие человека только если evidence подтверждает, что current
-flow фактически дошёл до соответствующего user-only шага.
+В объяснении препятствия или нужного действия каждая объявленная prerequisite
+остаётся material claim. Provider проверяет её по current sources, а не по
+старому `not_available`, прежнему report или списку симптомов. Уже существующая
+возможность, выполненное условие либо безопасный самостоятельно доступный путь
+означают, что заявленная dependency не установлена, вывод об остановке требует
+пересчёта, а caller может продолжить доступное действие. Действие человека
+называется необходимым только когда evidence подтверждает, что current situation
+фактически дошла до соответствующего условия.
 
 Direct и delegated caller получают один publication-ready result contract.
 Готовый текст самодостаточен без source basis. Полезные direct links могут стоять
@@ -307,11 +352,11 @@ Direct и delegated caller получают один publication-ready result co
 Фиксированный output envelope не нужен, но caller не должен принять basis за
 продолжение publication text.
 
-Один invocation обслуживает один самостоятельный user-facing result: Task
-comment/report, material decision/state explanation, blocker report или final.
-Следующий lifecycle comment, scope-level blocker и final являются новыми units,
-даже если используют те же facts: прежний Task provider не продолжается, не
-переименовывается и не получает новое назначение. Routine chat, progress
+Один invocation обслуживает один самостоятельный user-facing result: комментарий,
+отчёт, объяснение решения, состояния или препятствия, final либо явную редактуру.
+Следующая публикация об изменившемся состоянии и итоговое объяснение являются
+новыми units, даже если используют те же facts: прежний provider не продолжается,
+не переименовывается и не получает новое назначение. Routine chat, progress
 commentary и внутренний draft не являются publication unit. Новый вопрос,
 changed facts/scope либо correction получают новый clean subagent; старый
 candidate не передаётся как framing.
@@ -352,25 +397,22 @@ publication text: из естественной формулировки дол�
 не потеряны; наличие полного source basis или позднего наблюдаемого результата
 не компенсирует их исчезновение из пользовательского объяснения.
 
-Для terminal blocker либо отчёта о незавершённом scope scenario coverage map
-получает дополнительную actionability projection. Для каждой materially
-distinct blocker-группы она сохраняет exact object/criterion, current
-attempt/result, primary cause, owner оставшегося условия, minimum next action и
-observable resume signal. Две строки объединяются только при совпадении
-criterion, cause, owner и resume path. Устойчивые human-facing Task refs и
-названия критериев из sources остаются в publication body рядом с materially
-distinct действиями: их нельзя заменить обезличенным описанием сценария.
-Current attempt/result переносится как отдельная causal link и не считается
-покрытым общей фразой о проверенном классе способов.
+Для объяснения незавершённого результата или невозможности продолжить scenario
+coverage map сохраняет фактическое текущее состояние и наблюдаемый result,
+primary cause или boundary, оставшееся условие, доступное next action и
+observable continuation signal. Существенно разные препятствия объединяются
+только без потери разных причин, условий, действий и способов продолжения.
+Устойчивое human-facing название или identifier остаётся в publication body
+только когда нужно читателю для различения или навигации.
 
-Перед completion provider восстанавливает эту projection только из готового
+Перед completion provider восстанавливает эти causal links только из готового
 publication body и сравнивает с evidence map. Наличие полного source basis не
-закрывает пропуск. Категориальная сводка о «не реализованных путях», «нескольких
-участниках» или «ограниченных действиях» отклоняется, если скрывает exact
-attempt, cause, owner/action либо resume signal. Если evidence map содержит
-runnable repair, redeploy или self-service path, формулировка об исчерпанной
-автономной работе также отклоняется; result сообщает caller-у, какой путь ещё
-доступен, не принимая recovery decision за него.
+закрывает пропуск. Объяснение отклоняется, если из него нельзя понять, что
+фактически получилось, почему результата пока нет, какое условие осталось и
+можно ли продолжить доступным способом. Если evidence map содержит current
+repair, retry или self-service path, формулировка об исчерпанной возможности
+продолжить также отклоняется; result сообщает caller-у, какой путь ещё доступен,
+не принимая решение за него.
 
 ## 7. Редакторская реконструкция
 
@@ -438,8 +480,12 @@ runnable repair, redeploy или self-service path, формулировка о�
   остаётся понятным без идентификаторов и внутренней терминологии;
 - читатель может своими словами восстановить проблему, результат или
   препятствие, влияние и следующий шаг без process diary;
-- blocker/action text не просит человека повторить уже выполненную prerequisite
-  и не превращает старый `not_available` или ещё не достигнутый user-only шаг в
+- названия Explainer, agents, ролей, маршрутизации и процесса подготовки не
+  подменяют объяснение исходного предмета;
+- material limitation, exception и uncertainty находятся рядом с ограничиваемым
+  утверждением;
+- explanation нужного действия не просит человека повторить уже выполненное
+  условие и не превращает старый `not_available` или ещё не достигнутый шаг в
   current dependency;
 - первый слой передаёт одну главную причинную мысль без необязательной воды, а
   второй существует только при material need;
@@ -447,7 +493,7 @@ runnable repair, redeploy или self-service path, формулировка о�
   raw shell/test commands, абсолютные пути, полный список тестовых файлов,
   неприменимые SHA/IDs или другую техническую квитанцию; эти сведения остаются в
   source basis;
-- следующий lifecycle result сообщает material delta и не повторяет
+- новая публикация об изменившемся состоянии сообщает material delta и не повторяет
   неизменившиеся доказательства из предыдущего пользовательского сообщения;
   исправленный incident, новая граница либо новое действие при этом не теряются;
 - publication text самодостаточен, source basis отделён и не опубликован как его
@@ -457,9 +503,9 @@ runnable repair, redeploy или self-service path, формулировка о�
   структура читается естественно, а обратная проверка подтверждает сохранность
   смыслового ядра без новых решений;
 - source basis и material uncertainty остаются проверяемыми.
-- terminal blocker или unfinished-scope body покрывает actionability projection
-  каждого materially distinct препятствия, не заменяет её общей категорией и не
-  заявляет исчерпанную frontier при наличии current runnable path.
+- объяснение незавершённого результата сохраняет причинные различия между
+  препятствиями и не заявляет исчерпанную возможность продолжить при наличии
+  current runnable path.
 
 Regression scenarios проверяются реальным model-forward запуском по observable
 behavior в [evaluation contract](../../reference/strategic-explainer-evaluation.md).
@@ -474,7 +520,7 @@ behavior в [evaluation contract](../../reference/strategic-explainer-evaluation
 касается отдельно возвращаемого source basis.
 
 После нормализации языка provider делает audit-redaction pass: сравнивает
-publication body с raw facts и по умолчанию выносит служебные Task refs, SHA,
+publication body с raw facts и по умолчанию выносит служебные refs, SHA,
 run/deployment/request IDs, версии, ревизии, retry keys и внутренние номера в
 source basis независимо от исходного раздела fixture. Исключение остаётся только
 для точного значения, нужного самому читателю для различения materially distinct

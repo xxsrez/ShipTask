@@ -31,11 +31,13 @@ contract в exact integration candidate, даже если blocking Task ещё 
 из-за собственной проверки. Relation и attribution сохраняются; поздний defect
 инвалидирует только доказанно затронутые downstream results.
 
-Документация здесь является исходным кодом, причём source unit — отдельный
-skill. В [`docs/skills/<skill>/`](docs/skills/README.md) у каждого skill есть
-собственные `requirements.md` (Level 1) и `architecture.md` (Level 2); требования
-четырёх skills не объединяются. Runtime является компактной стохастической
-компиляцией этих двух локальных документов. Strategic Explainer предоставляет
+Документация здесь является исходным кодом. Общая модель и разделение
+ответственности заданы в [философии проекта](docs/philosophy.md), а source unit —
+отдельная entity. В [`docs/skills/<skill>/`](docs/skills/README.md) у неё есть
+три независимых source-документа: user-owned `overview.md`, user-owned
+`requirements.md` и agent-owned `architecture.md`. Документы четырёх skills не
+объединяются. Runtime является компактной стохастической компиляцией локального
+source package. Strategic Explainer предоставляет
 semantic facade: callers передают только назначение, scope и source anchors,
 facade владеет invocation/admission, а provider expertise находится в reference,
 который читает только admitted fresh subagent. Удаление и повторная сборка
@@ -148,7 +150,8 @@ context в каждой child Task. При delivery ShipTask перечитыв�
   отдельный provider-only admission и только затем загружает внутренний
   text-improvement contract.
 - [`docs/skills/README.md`](docs/skills/README.md) — source model и независимые
-  Requirements/Architecture packages для каждого skill.
+  Overview/Requirements/Architecture packages для каждого skill; Overview
+  появляется только после явного определения пользователем.
 - [`docs/skills/issue-grinder/requirements.md`](docs/skills/issue-grinder/requirements.md)
   и [Architecture](docs/skills/issue-grinder/architecture.md) — source
   `$issue-grinder`; [Evaluation](docs/skills/issue-grinder/evaluation.md) хранит
@@ -157,8 +160,9 @@ context в каждой child Task. При delivery ShipTask перечитыв�
   и [Architecture](docs/skills/ship-tasks/architecture.md) — source `$ship-tasks`.
 - [`docs/skills/task-composer/requirements.md`](docs/skills/task-composer/requirements.md)
   и [Architecture](docs/skills/task-composer/architecture.md) — source Task Composer.
-- [`docs/skills/strategic-explainer/requirements.md`](docs/skills/strategic-explainer/requirements.md)
-  и [Architecture](docs/skills/strategic-explainer/architecture.md) — source
+- [`docs/skills/strategic-explainer/overview.md`](docs/skills/strategic-explainer/overview.md),
+  [Requirements](docs/skills/strategic-explainer/requirements.md) и
+  [Architecture](docs/skills/strategic-explainer/architecture.md) — source
   Strategic Explainer.
 - [`ship-tasks/references/project-memory.md`](ship-tasks/references/project-memory.md)
   — runtime contract project scope/profile memory.

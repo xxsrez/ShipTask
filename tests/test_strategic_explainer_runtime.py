@@ -18,31 +18,32 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
             "сырой командный блок",
             "абсолютный путь",
             "список тестовых файлов",
-            "неизменившиеся доказательства из предыдущего пользовательского сообщения",
+            "неизменившиеся доказательства",
+            "предыдущим пользовательским сообщением",
             "не проходит completion gate",
         ):
             self.assertIn(marker, text)
 
-    def test_terminal_handoff_body_cannot_hide_actionability_in_source_basis(self) -> None:
+    def test_incomplete_result_cannot_hide_causality_in_source_basis(self) -> None:
         text = " ".join(CONTRACT.read_text().split()).lower()
         for marker in (
-            "actionability projection",
-            "current attempt/result",
-            "minimum next action",
-            "observable resume signal",
+            "какой результат или условие не достигнуты",
+            "какова основная причина",
+            "какое минимальное действие нужно",
+            "наблюдаемому признаку",
             "полный source basis не исправляет пропуск",
-            "runnable repair, redeploy или self-service path",
-            "не заявляй, что автономная работа исчерпана",
+            "доступное безопасное исправление",
+            "не заявляй, что продолжение исчерпано",
         ):
             self.assertIn(marker, text)
 
-    def test_terminal_handoff_preserves_refs_and_exact_attempts(self) -> None:
+    def test_incomplete_result_keeps_only_useful_navigation_names(self) -> None:
         text = " ".join(CONTRACT.read_text().split()).lower()
         for marker in (
-            "human-facing task refs",
-            "не заменяй `md-x`/`task-x` обезличенным",
-            "точный current attempt/result",
-            "повторное использование и проверка owner session",
+            "точное имя объекта или критерия",
+            "оставь имя в публикации как навигацию",
+            "существенно отличающейся группы",
+            "различающиеся результаты, причины, зависимости, действия",
         ):
             self.assertIn(marker, text)
 
@@ -72,7 +73,8 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
             "lifecycle/status/authority",
             "STRATEGIC_EXPLAINER_INVOCATION_ERROR",
             "точный defect",
-            "Не исправляй собственный\nвызов и не запускай замену",
+            "не исправляй собственный вызов",
+            "не запускай замену",
         ):
             self.assertIn(marker, text)
 
@@ -152,12 +154,26 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
             self.assertNotIn(marker, metadata)
 
     def test_clean_call_recipe_uses_luna_max(self) -> None:
-        for path in (SKILL, ENTRYPOINT):
-            with self.subTest(path=path.name):
-                text = path.read_text()
-                self.assertIn('fork_turns="none"', text)
-                self.assertIn('model="gpt-5.6-luna"', text)
-                self.assertIn('reasoning_effort="max"', text)
+        text = SKILL.read_text()
+        self.assertIn('fork_turns="none"', text)
+        self.assertIn('model="gpt-5.6-luna"', text)
+        self.assertIn('reasoning_effort="max"', text)
+
+        entrypoint = ENTRYPOINT.read_text()
+        self.assertNotIn('fork_turns="none"', entrypoint)
+        self.assertNotIn('model="gpt-5.6-luna"', entrypoint)
+        self.assertNotIn('reasoning_effort="max"', entrypoint)
+        self.assertIn("Facade\nсам владеет clean-call recipe", entrypoint)
+
+    def test_provider_contract_enforces_generic_human_output(self) -> None:
+        text = " ".join(CONTRACT.read_text().split()).lower()
+        for marker in (
+            "дай прямой ответ, а не заполняй отчётный шаблон",
+            "структура и длина следуют содержанию",
+            "не превращай процесс подготовки объяснения в предмет публикации",
+            "каждую material limitation, exception или uncertainty ставь рядом",
+        ):
+            self.assertIn(marker, text)
 
 
 if __name__ == "__main__":

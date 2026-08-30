@@ -1,14 +1,16 @@
 # Strategic Explainer: стратегическое видение
 
-Статус: current Level 2 strategic design, 2026-08-26. Нормативный Level 1 для
-общего skill — `SE-*` в локальных
-[требованиях пользователя](requirements.md). Этот документ раскрывает current
-product concept и может развиваться без изменения Level 1.
+Статус: current agent-owned strategic design, 2026-08-30. Независимые
+user-owned источники общего skill находятся в [Overview](overview.md) и
+[Requirements](requirements.md). Этот документ развивает current product
+concept и может меняться только пока сохраняет оба пользовательских документа.
 
-Этот документ фиксирует устойчивую цель Strategic Explainer независимо от
-модели и plugin packaging. Clean stateless invocation является явным
-пользовательским invariant, а не сменной topology detail. Нормативный contract
-находится в [architecture](architecture.md), решение — в
+Пользовательский [Overview](overview.md) фиксирует устойчивую цель Strategic
+Explainer независимо от модели и plugin packaging, а
+[Requirements](requirements.md) — конкретные обязательства. Clean stateless
+invocation является явным пользовательским invariant, а не сменной topology
+detail. Current способ достижения находится в [Architecture](architecture.md),
+историческое решение — в
 [ADR-0029](../../decisions/0029-fresh-strategic-explainer-and-blocker-reflection.md).
 
 ## Проблема
@@ -106,19 +108,21 @@ Beneficiary, desired observable outcome и exact scope должны быть у�
 ### Grounded strategic view
 
 После admission Explainer сам читает bounded read-only sources: exact target,
-применимые Task/parent/Epic, Release, Project, product goal, vision/specification
-и accepted decisions. Он останавливается, когда higher context больше не меняет
-понимание результата. `Current/accepted`, `proposed` и `historical` sources не
-смешиваются. Live execution evidence определяет, что происходит; design
-объясняет, зачем это важно, и не переписывает наблюдаемый outcome.
+применимые связи и родительский контекст, текущую цель, продуктовый замысел,
+current specification и accepted decisions. Он останавливается, когда higher
+context больше не меняет понимание результата. `Current/accepted`, `proposed` и
+`historical` sources не смешиваются. Live execution evidence определяет, что
+происходит; design объясняет, зачем это важно, и не переписывает наблюдаемый
+outcome.
 
 ### Stateless invocation и publication unit
 
 Explainer до discovery отклоняет inherited conversation, tool transcript,
 process diary, caller rationale, прежний candidate и несколько смешанных задач,
-объясняя точное исправление. Каждый Task comment/report, blocker explanation,
-scope final или другой самостоятельный user-facing result получает новый clean
-invocation. Routine chat и progress update не являются единицей этого API.
+объясняя точное исправление. Каждый самостоятельный комментарий, отчёт,
+объяснение решения, состояния или препятствия и финальный ответ получают новый
+clean invocation. Routine chat и progress update не являются единицей этого
+API.
 
 ### Lossless by relevance
 
@@ -133,7 +137,9 @@ confidence. Verification-only evidence сохраняется отдельно �
 
 `Работает`, `не работает`, `не проверено`, `неизвестно` и `не относится` —
 разные состояния. Hypothesis не превращается в факт, отсутствие проверки — в
-defect, а contextual document — в completion evidence.
+defect, а contextual document — в completion evidence. Существенное ограничение,
+исключение или uncertainty ставится рядом с тем утверждением, которое оно
+ограничивает, чтобы читатель не успел понять результат шире доказанного.
 
 ### Human language и причинность
 
@@ -147,6 +153,11 @@ action или confidence; точная опора только для аудит
 формально русской фразы. При delegated use результат должен быть готов для
 публикации без повторной стилистической переработки основным агентом.
 
+Названия самого Explainer, его внутренних ролей, admission, orchestration и
+процесса подготовки текста не становятся предметом публикации. Они остаются
+только тогда, когда человеку нужно найти, проверить или использовать именно эту
+внутреннюю сущность.
+
 ### Уровень исходного вопроса
 
 Объяснение отвечает на вопрос человека с той глубиной, с которой он был задан,
@@ -155,6 +166,10 @@ action или confidence; точная опора только для аудит
 проверяется обратным пересказом: читатель, знающий только исходный вопрос, может
 своими словами назвать проблему, результат или препятствие, влияние и следующий
 шаг.
+
+Ответ имеет естественную свободную форму. Он не заполняет отчётный шаблон:
+структура и длина следуют содержанию, а заголовки, поля, списки и таблицы нужны
+только когда действительно улучшают понимание.
 
 ### Независимые сценарии
 
