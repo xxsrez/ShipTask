@@ -15,6 +15,7 @@ ISSUE_FLOW = ROOT / "issue-grinder" / "references" / "task-manager-flow.md"
 ISSUE_AUTONOMY = (
     ROOT / "issue-grinder" / "references" / "autonomy-and-environments.md"
 )
+ISSUE_MODES = ROOT / "issue-grinder" / "references" / "execution-modes.md"
 ISSUE_MULTI_AGENT = (
     ROOT / "issue-grinder" / "references" / "multi-agent-execution.md"
 )
@@ -169,6 +170,7 @@ CORE_FILES = (
     ISSUE_METADATA,
     ISSUE_FLOW,
     ISSUE_AUTONOMY,
+    ISSUE_MODES,
     ISSUE_MULTI_AGENT,
     ISSUE_EXPLAINER,
     ISSUE_TITLE,
@@ -389,12 +391,18 @@ def validate_issue_skill(errors: list[str]) -> None:
         "[Task Manager flow](references/task-manager-flow.md)",
         "[title contract](references/thread-title.md)",
         "[Autonomy and environments](references/autonomy-and-environments.md)",
+        "[Execution modes](references/execution-modes.md)",
         "[multi-agent execution](references/multi-agent-execution.md)",
         "двухфазного worktree admission",
         "[Strategic Explainer routing](references/strategic-explainer.md)",
         "всей publication unit",
         "не поручай им формулировать comment",
         "Semantic facade вызывает сам основной coordinator",
+        "Классический",
+        "Баланс",
+        "`Рое`",
+        "Экономичный",
+        "resumable checkpoint",
     )
     require(
         errors,
@@ -426,6 +434,23 @@ def validate_issue_skill(errors: list[str]) -> None:
     )
     require(
         errors,
+        ISSUE_MODES,
+        "explicit user mode → automatic model rule",
+        "любая другая модель",
+        "`classic`",
+        "`gpt-5.6-luna`",
+        "`economical`",
+        "Не пересчитывай automatic mode",
+        "controller_profile = worker_profile = Luna Max",
+        "## Классический",
+        "## Баланс",
+        "## Рой",
+        "## Экономичный",
+        "resumable checkpoint",
+        "mode_origin=explicit",
+    )
+    require(
+        errors,
         ISSUE_MULTI_AGENT,
         "Только coordinator владеет Goal",
         "собственные feature branch и Git worktree",
@@ -441,6 +466,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "gpt-5.6-luna",
         "`max`",
         "contract/context conflict",
+        "mode envelope",
+        "intentional candidates",
         "Worker, reviewer\nили scout не формулирует готовый comment",
         "`create_thread`, отдельная projectless task",
     )
@@ -492,6 +519,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         *(f"IG-SCOPE-{number:02d}" for number in range(1, 4)),
         "IG-UI-01",
         *(f"IG-AUTO-{number:02d}" for number in range(1, 6)),
+        *(f"IG-MODE-{number:02d}" for number in range(1, 11)),
         *(f"IG-MA-{number:02d}" for number in range(1, 19)),
     ]
     if requirement_ids != expected_ids:
@@ -514,7 +542,7 @@ def validate_issue_skill(errors: list[str]) -> None:
     require(
         errors,
         ISSUE_REQUIREMENTS,
-        "Статус: current Level 1, 2026-08-29",
+        "Статус: current Level 1, 2026-08-30",
         "полный current-набор явно сформулированных пользователем",
         "Изменение смысла Level 1 требует явного решения пользователя",
         "Если scope вырос с одного issue до нескольких",
@@ -524,11 +552,15 @@ def validate_issue_skill(errors: list[str]) -> None:
         "Issue Grinder ·",
         "Production",
         "Luna",
+        "### `IG-MODE-03` — Классический режим",
+        "Прогон продолжается до терминального результата",
+        "### `IG-MODE-06` — Экономичный режим",
+        "достаточного возобновляемого кандидата",
     )
     require(
         errors,
         ISSUE_SPEC,
-        "Статус: current Level 2, 2026-08-29",
+        "Статус: current Level 2, 2026-08-30",
         "## 0. Compilation contract",
         "issue-grinder@srez-marketplace",
         "`issue-grinder:issue-grinder`, `issue-grinder:task-composer`",
@@ -542,6 +574,10 @@ def validate_issue_skill(errors: list[str]) -> None:
         "`collaboration.spawn_agent`",
         "как его прямой built-in child",
         "наблюдаемым evaluation scenario",
+        "## 4. Режимы исполнения и профильный resolver",
+        "mode record",
+        "Luna Max supervisor",
+        "resumable checkpoint",
     )
 
 
@@ -1907,7 +1943,7 @@ def validate_source_layers(errors: list[str]) -> None:
         "Plugin — общий distribution artifact",
     )
     for architecture, prefix, status_marker in (
-        (ISSUE_SPEC, "IG-*", "Статус: current Level 2, 2026-08-29"),
+        (ISSUE_SPEC, "IG-*", "Статус: current Level 2, 2026-08-30"),
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current Level 2 contract, 2026-08-27"),
         (STRATEGIC_SPEC, "SE-*", "Статус: current agent-owned Architecture, 2026-08-30"),

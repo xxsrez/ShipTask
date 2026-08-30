@@ -1,6 +1,6 @@
 # Issue Grinder: архитектура
 
-Статус: current Level 2, 2026-08-29. Применимые Level 1 requirements — `IG-*`
+Статус: current Level 2, 2026-08-30. Применимые Level 1 requirements — `IG-*`
 в локальных [требованиях пользователя](requirements.md).
 
 Этот документ описывает одно текущее инженерное решение для `$issue-grinder`.
@@ -45,6 +45,7 @@ plugins/issue-grinder/
         └── references/
             ├── task-manager-flow.md
             ├── autonomy-and-environments.md
+            ├── execution-modes.md
             ├── multi-agent-execution.md
             └── strategic-explainer.md
     └── task-composer/
@@ -77,6 +78,9 @@ plugin может содержать только skills, а MCP server, UI и l
 
 - `task-manager-flow.md` — live scope, lifecycle, blocked-by, comment/status
   transaction, read-back и recovery;
+- `execution-modes.md` — после однократного выбора режима и перед
+  декомпозицией: mode resolver, profile normalization, mode-specific delivery
+  promise, review и checkpoint;
 - `autonomy-and-environments.md` — только для явно вызванного автономного run и
   действий со средами;
 - `multi-agent-execution.md` — только когда существует полезная независимая
@@ -241,18 +245,23 @@ pagination, versioned write, comment/read-back или Goal operation — отс�
 
 ## 3. Режим прогона и ранний context gate
 
-В начале нового run coordinator фиксирует два разных факта:
+В начале нового run coordinator фиксирует три разных факта:
 
 - `explicit invocation` — пользователь назвал `$issue-grinder` в prompt,
   запустившем именно этот run;
 - `run mode` — является ли уже начатый run явно вызванным и поэтому автономным.
+- `execution mode` — один из `Классический`, `Баланс`, `Рой` или
+  `Экономичный`, его origin `explicit|automatic` и применённая нормализация
+  профилей.
 
 Прошлый `$issue-grinder` не разрешает начинать новый явный run или новый Goal.
 Однако `run mode` не теряется посреди того же незавершённого прогона из-за
 следующего turn, compaction, автоматического продолжения или восстановления
 контекста. Непрерывность доказывается не одним совпадением selector-а: checkpoint
-связывает origin `explicit|implicit`, identity Project/selector, terminal flag,
-Goal ref при его наличии и task-owned implementation/effect receipts. Для
+связывает origin `explicit|implicit`, identity Project/selector, canonical
+execution mode, mode origin, исходный main profile, нормализованные role
+profiles, terminal flag, Goal ref при его наличии и task-owned
+implementation/effect receipts. Для
 single-issue run отсутствие Goal не уничтожает origin: тот же thread lineage и
 согласованные checkpoints сохраняют его отдельно. Совместимый активный Goal
 является одним из anchors, но сам по себе не доказывает тот же run и не переносит
@@ -371,7 +380,120 @@ details. Полный operational contract находится в
 `issue-grinder/references/thread-title.md` и читается только когда first-turn
 eligibility действительно возможна.
 
-## 4. Scope и стратегическая модель
+## 4. Режимы исполнения и профильный resolver
+
+Режим выбирается после доказательства нового либо продолжающегося run и до
+стратегической декомпозиции. Runtime читает
+`issue-grinder/references/execution-modes.md` ровно тогда, когда mode record ещё
+не создан либо пользователь явно меняет режим. Во время обычных последующих
+итераций canonical mode берётся из run checkpoint и не проектируется заново.
+
+### 4.1 Однократное разрешение режима
+
+Resolver применяет приоритет `explicit user mode → automatic model rule`:
+
+1. Текущий prompt проверяется на явное намерение выбрать `Классический`,
+   `Баланс`, `Рой` или `Экономичный`. Свободная формулировка допустима, но слово
+   из обычного описания стоимости или баланса не считается выбором без
+   намерения управлять режимом Issue Grinder.
+2. Если явного выбора нет, exact effective top-level model identity берётся из
+   runtime context текущего агента. Семейство `gpt-5.6-luna` при любом effort
+   даёт `Экономичный`; любая другая модель даёт `Классический`.
+3. Фиксируются canonical mode, origin `explicit|automatic`, исходный main
+   profile и результат profile normalization.
+
+`По умолчанию` означает выполнить этот resolver, а не выбрать отдельный режим.
+При доказанном продолжении mode record восстанавливается до применения правил:
+сменившаяся модель, новый turn или восстановленная квота не пересчитывают уже
+выбранный режим. Если continuity не доказана, это новый run и resolver
+исполняется заново.
+
+### 4.2 Нормализация профилей
+
+Current economical baseline — `gpt-5.6-luna` с `reasoning_effort=max`.
+Профильный resolver работает отдельно от выбора режима:
+
+- точная команда пользователя в prompt о профиле конкретной роли либо всех
+  subagents применяется первой;
+- если main profile не относится к Luna и нет доказанного правила, что он не
+  сильнее baseline, controller/reviewer сохраняет main profile, а economical
+  lanes получают Luna Max;
+- если main profile — Luna с любым effort до `max` включительно, substantive
+  controller/reviewer и worker roles получают Luna Max;
+- сравнение другого семейства с Luna Max добавляется в resolver только после
+  representative evaluation; имя, цена или один anecdotal run не создают
+  capability ordering.
+
+Выбор Luna в UI является входом resolver-а, но не user override всех ролей.
+Override существует только когда пользователь явно распорядился профилями в
+prompt.
+
+Уже запущенный root нельзя считать автоматически заменившим собственную модель.
+Если его profile слабее нормализованного, он остаётся узкой transport/authority
+оболочкой и вызывает direct Luna Max supervisor для стратегического анализа,
+dispatch decisions и review. Root сохраняет единственное владение Goal, Task
+Manager mutations, fan-in и publication unit; supervisor возвращает только
+решения, facts, evidence и anchors и не создаёт новую Codex task. Так логическое
+управление выполняется нормализованным профилем без второго effect owner.
+
+### 4.3 Режимные workflow
+
+`Классический` строит полную карту scope, dependencies, acceptance и risk
+surfaces на controller/reviewer profile. Только строго простые пакеты из
+`IG-MA-14` уходят в economical lane; material judgment, integration и final
+review остаются controller/reviewer. Обычная delegation разделяет независимую
+работу, но не создаёт competing full implementations без user override. Loop
+заканчивается terminal result либо принятым blocker handoff.
+
+`Баланс` сначала использует controller/reviewer для стратегического анализа и
+явного выделения high-judgment work. Остальные bounded implementation,
+research, tests и preliminary critique направляются economical workers.
+Integration owner собирает содержательные партии; economical critics атакуют
+candidate до review. Reviewer читает exact integrated candidate и может вернуть
+material rework в новую economical wave. Любой изменённый candidate проходит
+final gate заново.
+
+`Рой` задаёт конечный compute envelope как явный budget пользователя либо
+bounded последовательность волн, выбранную coordinator-ом. Candidate identity
+содержит purpose, base, owned worktree/branch и отличающий подход. Разные
+candidates могут менять те же surfaces только в полной Git-изоляции. Waves
+могут включать designs, implementations, critics, test authors и economical
+judges; одинаковый prompt множеству agents не считается достаточным
+разнообразием. Детерминированные checks и judges сокращают множество до одного
+recommended candidate и максимум одного material runner-up. Integration и
+final review применяются только к точному выбранному кандидату.
+
+`Экономичный` использует economical controller/supervisor и workers для
+максимального безопасного продвижения. Он сворачивает работу к одному
+recommended candidate, выполняет доступные deterministic и aggregate checks и
+сохраняет defects, unknowns и deferred gates. Когда дальнейшие дешёвые попытки
+не дают существенного ожидаемого улучшения либо остался недоступный review
+gate, текущая попытка формирует resumable checkpoint вместо blocker-а или
+ложного completion. `In Progress`/`In Review` и активный Goal сохраняются. Если
+обычный acceptance всё же доказан, применяется normal terminal path.
+
+### 4.4 Review packet и переключение
+
+Expensive review packet содержит exact scope/base/candidate identity,
+acceptance, integrated diff и source anchors, выполненные checks, material
+решения, rejected alternatives, unresolved objections, known defects, negative
+evidence и внешние эффекты. Summary служит навигацией; reviewer самостоятельно
+читает существенный код и evidence, но не получает сырой transcript всех waves.
+
+Явное переключение режима является barrier между dispatch waves:
+
+1. новые writers не запускаются, active writers доводятся до task-owned commit
+   либо честного checkpoint;
+2. integration checkout проходит `assert-unchanged`, candidate identities и
+   ownership reconciled;
+3. mode record получает новый canonical mode и origin `explicit`;
+4. новая policy применяется только к следующей dispatch/review итерации.
+
+Scope, environment и authority при переключении не меняются. Automatic switch
+по проценту квоты, имени новой модели или факту доступности reviewer-а не
+выполняется.
+
+## 5. Scope и стратегическая модель
 
 Scope хранится как правило отбора, а не как замороженный список issue. Его
 runtime-представление содержит источник выбора, canonical Project/Release или
@@ -397,7 +519,7 @@ Coordinator перечитывает scope:
 полезности для оставшегося scope. Автоматический rollback или включение такой
 работы в интеграцию только по инерции не выполняется.
 
-### 4.1 Создание Goal
+### 5.1 Создание Goal
 
 После live scope resolution coordinator изучает весь текущий фронт, общие
 требования и связи issue и формулирует проблему верхнего уровня. Goal objective
@@ -435,14 +557,14 @@ reflection coordinator заново соотносит frontier с этим outc
 packet получает только применимую к нему проекцию общей цели вместе с exact
 issue contract; стратегический контекст не расширяет owned scope.
 
-## 5. Основной delivery loop
+## 6. Основной delivery loop
 
 Одна итерация цикла состоит из следующих смысловых фаз; конкретные tool calls
 могут объединяться или переставляться, если сохраняются инварианты:
 
 1. Перечитать live scope и фактические статусы.
-2. Определить dependency-ready frontier и выбрать следующий issue или
-   независимые рабочие пакеты.
+2. Применить сохранённый execution mode, определить dependency-ready frontier,
+   role profiles и следующий issue, пакет либо candidate wave.
 3. Перевести начинаемое `To Do` в `In Progress` и подтвердить изменение.
 4. Реализовать результат локально либо через изолированных субагентов.
 5. Проверить точную интегрированную версию пропорционально изменению и
@@ -451,6 +573,12 @@ issue contract; стратегический контекст не расшир�
    reflection gate.
 7. Опубликовать комментарий, изменить статус и перечитать issue.
 8. Заново оценить scope, frontier и необходимость следующей итерации.
+
+Режим не создаёт четыре разных lifecycle. Все варианты используют один loop,
+а отличаются dispatch policy, reviewer gates и допустимым выходом. В
+`Экономичном` режиме восьмая фаза может сохранить `IG-MODE-06` checkpoint и
+закончить текущую попытку без terminal claim; остальные режимы продолжают до
+terminal path либо настоящего blocker-а.
 
 Issue, уже находящееся в `In Progress` или `In Review`, сначала проходит
 recovery фактической target branch, task-owned implementation и доступного
@@ -465,7 +593,7 @@ evidence. Один старый status не доказывает наличие 
 допускается в frontier; поздний reopen блокирующего issue добавляет повторную
 проверку затронутой части, но не восстанавливает блокировку автоматически.
 
-## 6. Комментарий и status transition как публикационная операция
+## 7. Комментарий и status transition как публикационная операция
 
 Для каждого перехода, кроме `To Do → In Progress`, coordinator сначала собирает
 проверенные факты и формирует semantic request к доступному
@@ -537,7 +665,7 @@ ref или idempotency key adapter-а, exact target issue/version и digest го
 подготовить обязательную публикацию либо выявил более широкую техническую
 неисправность, которая реально препятствует продолжению.
 
-## 7. Verification и прозрачное исключение
+## 8. Verification и прозрачное исключение
 
 Обычный путь в `Done` требует evidence по acceptance issue на точной
 интегрированной версии. Размер diff или успешный отчёт отдельного субагента не
@@ -555,7 +683,7 @@ ref или idempotency key adapter-а, exact target issue/version и digest го
 финальный комментарий. Формулировка «проверено успешно» для пропущенной проверки
 запрещена.
 
-## 8. Blocker reflection и завершение
+## 9. Blocker reflection и завершение
 
 Candidate blocker сначала становится входом новой итерации осознанности:
 coordinator перечитывает scope, зависимости, доступные инструменты, локальные
@@ -602,6 +730,14 @@ terminal `blocked`, Goal остаётся активным, а report честн
 расхождение; audit не задерживает объяснение пользователю и не запускает
 внутренний бесконечный цикл.
 
+Нетерминальный checkpoint `Экономичного` режима проходит отдельную проверку и
+не маскируется под blocker. Он допустим, когда рекомендуемый candidate,
+ownership, checks, defects, deferred gates и resume point уже сохранены, а
+дальнейшее существенное продвижение требует отложенного review либо недоступной
+неэкономичной capacity. Такой выход не публикует blocker handoff и не переводит
+Goal в `blocked`; он сообщает пользователю фактический checkpoint и оставляет
+Goal активным.
+
 Каждая recovery-ветка имеет наблюдаемую границу прогресса. Coordinator сравнивает
 scope/frontier, object versions, attempted effect, result/error class, available
 authority и новый evidence. Повтор допустим, когда изменился хотя бы один из этих
@@ -620,7 +756,11 @@ live reconciliation, а исчерпанный safe path — к candidate blocke
 цикл сами по себе. Только после чистой переоценки Goal завершается, а
 пользователь получает причинный итоговый отчёт.
 
-## 9. Автономность и среды
+Наличие `In Progress` или `In Review` запрещает terminal completion, но не
+запрещает экономичную контрольную точку. После неё тот же run восстанавливает
+mode record и checkpoint до нового dispatch.
+
+## 10. Автономность и среды
 
 В явно вызванном run coordinator самостоятельно выполняет все доступные действия
 в scope. Target по умолчанию — подтверждённый UAT; staging и другие доказанно
@@ -671,14 +811,17 @@ UAT target определяется и подтверждается перед �
 нужна. До environment mutation target должен быть однозначно подтверждён как
 UAT либо другая непроизводственная среда; неизвестный target не угадывается.
 
-## 10. Multi-agent orchestration
+## 11. Multi-agent orchestration
 
 Делегация применяется при наличии минимум двух независимых полезных пакетов
-независимо от явного или неявного способа загрузки skill. Это решение не
-включает максимальную автономность в неявном run и не расширяет authority.
-Если subagent capability или изолированная writable capacity недоступны,
-coordinator выполняет frontier последовательно на текущем профиле. Отсутствие
-multi-agent surface само по себе не является blocker-ом.
+либо когда выбранный режим оправдывает независимого critic/verifier или
+намеренно различимые candidates одной работы. Это решение не включает
+максимальную автономность в неявном run и не расширяет authority. Если subagent
+capability или изолированная writable capacity недоступны, coordinator
+адаптирует работу по mode contract: `Классический` может выполнить frontier
+последовательно, а экономичные режимы используют доступную serial economical
+lane либо сохраняют честный checkpoint. Отсутствие multi-agent surface само по
+себе не является blocker-ом.
 
 Рабочая делегация и provider invocation — разные уровни. Coordinator не
 делегирует publication unit рабочему subagent-у: тот возвращает только
@@ -697,16 +840,18 @@ delegation не отключает отдельный Strategic Explainer interf
 1. разрешает live integration target и не подменяет его текущей случайной
    веткой либо dirty root checkout;
 2. строит dependency graph и карту поверхностей записи;
-3. выделяет только conflict-free dependency-ready packets;
+3. выделяет conflict-free dependency-ready packets, а в `Рое` отдельно
+   регистрирует intentional candidates с purpose и candidate identity;
 4. создаёт branches от подтверждённой integration base и выдаёт каждому writer
    отдельные feature branch и Git worktree;
 5. оставляет read-only исследователей без worktree;
-6. запускает столько пакетов, сколько оправдано шириной frontier;
+6. запускает столько пакетов, critics или candidates, сколько оправдано
+   режимом, доступной capacity и ожидаемой ценностью;
 7. принимает отчёты, но сам объединяет изменения;
 8. проверяет exact integrated result;
 9. после каждого результата или изменения scope пересчитывает frontier.
 
-### 10.1 Двухфазный writer admission
+### 11.1 Двухфазный writer admission
 
 Прямой dispatch implementation writer-а запрещён. Для каждой параллельной wave
 coordinator исполняет fail-closed protocol:
@@ -755,29 +900,43 @@ coordinator исполняет fail-closed protocol:
 worktree является checkpoint: после доказанной остановки прежнего владельца он
 передаётся новому exclusive writer, а не дублируется.
 
+Intentional candidate `Роя` не является replacement checkpoint. До `prepare`
+coordinator фиксирует найденный existing work, отличающий purpose нового
+варианта, candidate identity и общую base. Новый writer получает отдельную
+branch/worktree и не присваивает историю существующего кандидата. Без этой
+разницы startup recovery запрещает свежую параллельную реализацию.
+
 Изоляция writer-а подтверждается фактическими `git worktree` и branch refs до
 первой записи. Указание пути только в prompt субагента не является evidence.
 Coordinator не интегрирует исключённый из dynamic scope packet по инерции:
 такой checkpoint попадает в fan-in лишь когда его результат независимо нужен
 оставшемуся scope, что подтверждено повторной оценкой поверхностей и acceptance.
 
-`gpt-5.6-luna` с `max` получает только строго простые пакеты по `IG-MA-14`.
-Material uncertainty немедленно возвращает тот же checkpoint coordinator-у,
-который продолжает его на current profile без Luna retry loop. Остальные
-пакеты сразу наследуют текущий профиль. Недоступность Luna означает обычное
-выполнение на current profile, а не blocker.
+Profile routing берётся из mode record. В `Классическом` `gpt-5.6-luna` с
+`max` получает только строго простые пакеты по `IG-MA-14`; остальные выполняет
+controller/reviewer profile. `Баланс`, `Рой` и `Экономичный` используют Luna
+Max по правилам раздела 4 и runtime reference, включая normalized single-profile
+topology.
 
-## 11. Integrity и восстановление
+Material uncertainty создаёт evidence handoff, а не бесконечный Luna retry
+loop. В `Классическом` и `Балансе` checkpoint может перейти reviewer-у; в `Рое`
+допустим намеренно иной candidate; в `Экономичном` — resumable non-terminal
+checkpoint. Недоступность Luna сначала ищет mode-compatible economical lane и
+не разрешает молча расходовать неограниченную дефицитную квоту.
+
+## 12. Integrity и восстановление
 
 Каждая Task Manager mutation использует текущую версию объекта, а её результат
 подтверждается read-back. Unknown write outcome сначала reconciles через live
 read; повторять mutation вслепую нельзя.
 
 Run checkpoint хранит только проверяемую continuity: origin, Project/selector
-identity, terminal state, Goal ref при наличии, task-owned Git identity,
-publication/status receipts и незавершённые effects. Формат и место хранения
-выбираются по доступной platform capability; Architecture не требует
-несуществующий durable store. Возобновление сверяет checkpoint с live state и не
+identity, canonical execution mode и его origin, исходный main profile,
+нормализованные role profiles, terminal state, Goal ref при наличии, task-owned
+Git identity, publication/status receipts и незавершённые effects. Формат и
+место хранения выбираются по доступной platform capability; Architecture не
+требует несуществующий durable store. Возобновление сначала восстанавливает mode
+record, затем сверяет checkpoint с live state и не
 принимает совместимый Goal либо тот же Release за достаточную lineage. Даже при
 отсутствующем durable run checkpoint startup recovery заново ищет Git-artifacts
 по `IG-MA-12`: отсутствие записи прошлой сессии не разрешает игнорировать
@@ -794,7 +953,7 @@ Git integration принимает только task-owned изменения с
 состояние, но не выдаёт отменённый run за `complete` или `blocked` и не меняет
 Task Manager cancellation statuses от имени Issue Grinder.
 
-## 12. Трассировка и наблюдаемая проверка
+## 13. Трассировка и наблюдаемая проверка
 
 | Level 1 | Архитектурный механизм | Наблюдаемое evidence |
 |---|---|---|
@@ -802,6 +961,7 @@ Task Manager cancellation statuses от имени Issue Grinder.
 | `IG-GOAL-*` | strategic synthesis, Goal lifecycle, blocker/final reflection | Goal отражает общую проблему и завершается только после fresh empty active scope |
 | `IG-SCOPE-*` | selector-as-predicate и контрольные refresh points | новые и исключённые issue учитываются до terminal result |
 | `IG-AUTO-*` | explicit-mode gate, UAT resolver и узкий security selector | нет Production access; разрешённая UAT работа не ждёт рутинного approval |
+| `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint | Luna default выбирает `Экономичный`, иной default — `Классический`; выбранный mode не дрейфует; каждый режим выполняет своё обещание |
 | `IG-MA-*` | dependency-ready packets, isolated writers, integration owner и profile routing | параллельные writers изолированы, а acceptance относится к объединённой версии |
 
 Группированная таблица является только обзором. Точная coverage map связывает
@@ -834,6 +994,15 @@ ID само по себе не доказывает поведение.
 
 - direct explicit, indirect implicit с selector-ом, implicit без selector-а,
   follow-up, negative routing и boundary prompts;
+- explicit natural-language mode override, Luna при каждом effort,
+  non-Luna automatic `Классический`, persistence через continuation/model
+  change и safe explicit switch;
+- конкретный `Классический` с full-scope analysis, high-judgment ownership,
+  exact integration и final review; `Баланс` с economical implementation и
+  reviewer gates; `Рой` с intentional candidate identity, reduction и bounded
+  stop; `Экономичный` с одним resumable candidate без ложного Done/Goal close;
+- Luna profile normalization, root-shell supervisor, explicit role override и
+  неизвестное cross-family ordering без догадки;
 - zero/one/multiple issue, рост и сокращение scope, late matching issue,
   pagination и concurrent status change;
 - недоступный Task Manager adapter и навязанный платформой approval, который не

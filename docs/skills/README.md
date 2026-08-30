@@ -103,7 +103,7 @@ level, однако plugin packaging не объединяет source contracts 
 
 ## Current packages
 
-- [`$issue-grinder`](issue-grinder/requirements.md) —
+- [`$issue-grinder`](issue-grinder/overview.md) —
   [Requirements](issue-grinder/requirements.md),
   [Architecture](issue-grinder/architecture.md) и
   [Evaluation](issue-grinder/evaluation.md); source package и repository runtime

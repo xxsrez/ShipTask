@@ -1,6 +1,6 @@
 # Issue Grinder: observable evaluation
 
-Статус: current Level 2 evaluation, 2026-08-29. Документ проверяет компиляцию
+Статус: current Level 2 evaluation, 2026-08-30. Документ проверяет компиляцию
 локальных [Requirements](requirements.md) и [Architecture](architecture.md), но
 не создаёт новый policy contract.
 
@@ -32,10 +32,10 @@
 | `IG-FLOW-03` | `SKILL.md` §3; `strategic-explainer.md` | trivial-start; required-comment; native-fallback |
 | `IG-FLOW-04` | `SKILL.md` §3; `strategic-explainer.md` | comment-reveals-work; optional-follow-up |
 | `IG-FLOW-05` | `SKILL.md` §2; `task-manager-flow.md` | integrated-blocked-by; late-reopen-recheck |
-| `IG-FLOW-06` | `SKILL.md` §5; trace harness | active-scope-prevents-completion |
-| `IG-GOAL-01` | `SKILL.md` §1; trace harness | explicit-multi-create; implicit-no-goal; grow-and-keep |
+| `IG-FLOW-06` | `SKILL.md` §5; `execution-modes.md` | active-scope-prevents-completion; economical-checkpoint-is-nonterminal |
+| `IG-GOAL-01` | `SKILL.md` §1; `execution-modes.md`; trace harness | explicit-multi-create; implicit-no-goal; grow-and-keep; economical-checkpoint-keeps-goal |
 | `IG-GOAL-02` | `SKILL.md` §1 | strategic-release-objective; issue-list-rejected |
-| `IG-GOAL-03` | `SKILL.md` §5; trace harness | empty-scope-complete; active-scope-continue |
+| `IG-GOAL-03` | `SKILL.md` §5; `execution-modes.md`; trace harness | empty-scope-complete; active-scope-continue; checkpoint-goal-not-complete |
 | `IG-GOAL-04` | `SKILL.md` §3; blocker harness | explanation-unlocks; true-external-blocker |
 | `IG-GOAL-05` | `SKILL.md` §3 | final-reflection-continues; chat-only-final |
 | `IG-GOAL-06` | `SKILL.md` §2; `task-manager-flow.md` | nonmaterial-gap-transparent; material-gap-blocks |
@@ -45,14 +45,24 @@
 | `IG-SCOPE-03` | `SKILL.md` §1; `task-manager-flow.md` | late-member; excluded-member; final-refresh |
 | `IG-UI-01` | `SKILL.md` §1; `thread-title.md` | fresh-placeholder-renamed; meaningful-title-preserved; ambiguous-candidate-preserved; title-capability-failure-nonblocking |
 | `IG-AUTO-01` | `SKILL.md` §4; `autonomy-and-environments.md` | explicit-persistence; implicit-no-extra-authority |
-| `IG-AUTO-02` | `SKILL.md` §3; blocker harness | preflight-unlock; explanation-unlock |
+| `IG-AUTO-02` | `SKILL.md` §3; `execution-modes.md`; blocker harness | preflight-unlock; explanation-unlock; sufficient-economical-checkpoint-stops-boundedly |
 | `IG-AUTO-03` | `SKILL.md` §4; environment harness | production-rejected; public-uat-allowed |
 | `IG-AUTO-04` | `SKILL.md` §4; environment harness | default-uat; unknown-uat-before-effect |
 | `IG-AUTO-05` | `autonomy-and-environments.md` | security-selector; narrow-always-readback |
-| `IG-MA-01` | `SKILL.md` §2; `multi-agent-execution.md` | two-independent-packets; one-lane-no-delegation |
-| `IG-MA-02` | `multi-agent-execution.md` | disjoint-surfaces; conflicting-surfaces |
+| `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | four-canonical-modes; mode-does-not-expand-authority |
+| `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md` | explicit-freeform-wins; luna-any-effort-economical; non-luna-classic; mode-persists-after-model-change |
+| `IG-MODE-03` | `execution-modes.md`; `multi-agent-execution.md` | classic-full-scope-analysis; classic-high-judgment-owner; classic-final-review-terminal |
+| `IG-MODE-04` | `execution-modes.md`; `multi-agent-execution.md` | balance-controller-plans; balance-economical-bulk; balance-rework-redispatch; balance-final-gate |
+| `IG-MODE-05` | `execution-modes.md`; `multi-agent-execution.md` | swarm-intentional-candidates; swarm-isolated-overlap; swarm-reduction; swarm-bounded-stop; swarm-final-gate |
+| `IG-MODE-06` | `SKILL.md` §5; `execution-modes.md` | economical-terminal-when-proven; economical-resumable-candidate; no-false-done; no-false-blocked |
+| `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md` | luna-profile-collapse; luna-low-root-luna-max-supervisor; non-luna-two-profile; unknown-family-no-guess; role-override-wins |
+| `IG-MODE-08` | `execution-modes.md`; `multi-agent-execution.md` | economical-handoff-preserves-evidence; swarm-alternative-approach; same-retry-rejected |
+| `IG-MODE-09` | `execution-modes.md` | one-review-candidate; dissent-preserved; raw-swarm-transcript-not-required; rework-reviewed-again |
+| `IG-MODE-10` | `execution-modes.md`; `multi-agent-execution.md` | explicit-switch-barrier; automatic-no-switch; switch-preserves-candidates-and-scope |
+| `IG-MA-01` | `SKILL.md` §2; `multi-agent-execution.md` | two-independent-packets; useful-critic; intentional-candidate; one-lane-no-filler |
+| `IG-MA-02` | `multi-agent-execution.md` | disjoint-surfaces; ordinary-conflicting-surfaces; isolated-intentional-overlap |
 | `IG-MA-03` | `multi-agent-execution.md` | dependency-ready-frontier |
-| `IG-MA-04` | `multi-agent-execution.md` | adaptive-width; no-filler-packet |
+| `IG-MA-04` | `multi-agent-execution.md` | adaptive-width; swarm-useful-width; no-filler-packet |
 | `IG-MA-05` | `SKILL.md` §2; `multi-agent-execution.md` | coordinator-only-fan-in-and-writes |
 | `IG-MA-06` | `multi-agent-execution.md`; `writer_worktree_guard.py` | two-phase-admission; shared-main-rejected; integration-canary |
 | `IG-MA-07` | `multi-agent-execution.md`; `writer_worktree_guard.py` | exclusive-writable-owner; duplicate-branch-and-path-rejected |
@@ -60,12 +70,12 @@
 | `IG-MA-09` | `multi-agent-execution.md` | complete-packet-contract |
 | `IG-MA-10` | `SKILL.md` §2; `multi-agent-execution.md` | exact-integrated-verification |
 | `IG-MA-11` | `multi-agent-execution.md` | redispatch-after-return-and-scope-change |
-| `IG-MA-12` | `SKILL.md` §2; `multi-agent-execution.md`; `writer_worktree_guard.py`; trace harness | startup-inventory-before-fresh-work; branch-only-restored; dirty-checkpoint-resumed; active-owner-rejected; ambiguous-preserved |
+| `IG-MA-12` | `SKILL.md` §2; `multi-agent-execution.md`; `writer_worktree_guard.py`; trace harness | startup-inventory-before-fresh-work; branch-only-restored; dirty-checkpoint-resumed; active-owner-rejected; ambiguous-preserved; intentional-candidate-not-replacement |
 | `IG-MA-13` | `multi-agent-execution.md` | explicit-profile-preserved |
-| `IG-MA-14` | `multi-agent-execution.md` | simple-luna-max; small-diff-not-simple |
-| `IG-MA-15` | `multi-agent-execution.md` | material-packet-current-profile |
-| `IG-MA-16` | `multi-agent-execution.md` | luna-uncertainty-handoff-no-retry |
-| `IG-MA-17` | `multi-agent-execution.md` | luna-unavailable-current-profile |
+| `IG-MA-14` | `execution-modes.md`; `multi-agent-execution.md` | classic-simple-luna-max; classic-small-diff-not-simple |
+| `IG-MA-15` | `execution-modes.md`; `multi-agent-execution.md` | classic-material-controller; balance-economical-bulk; swarm-economical-waves; economical-economical-controller |
+| `IG-MA-16` | `execution-modes.md`; `multi-agent-execution.md` | luna-uncertainty-evidence-handoff; mode-specific-next-route; same-luna-retry-rejected |
+| `IG-MA-17` | `execution-modes.md`; `multi-agent-execution.md` | classic-luna-unavailable-controller; economical-fallback-no-silent-expensive-spend |
 | `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing; worker-evidence-coordinator-facade; nested-facade-no-new-task |
 
 ## Быстрый blocker corpus
@@ -156,6 +166,14 @@ fresh model-forward smoke.
 - видеть Task Manager dependency и optional Strategic Explainer;
 - правильно различать explicit delivery, implicit exact selector, implicit
   missing selector и read/status/planning negative prompts;
+- на новых synthetic runs выбрать `Экономичный` для Luna при `none`, `low`,
+  `medium`, `high`, `xhigh` и `max`, а для non-Luna — `Классический`; любой явно
+  выбранный канонический режим должен победить automatic rule, а продолжение
+  после смены модели — сохранить ранее выбранный mode;
+- наблюдаемо различить режимы: `Классический` удерживает high-judgment и final
+  review у controller-а; `Баланс` передаёт economical bulk; `Рой` создаёт
+  isolated intentional candidates и сокращает их до одного; `Экономичный`
+  сохраняет один resumable candidate без ложного `Done`/Goal completion;
 - на scope с двумя независимыми write packets сначала получить от каждого
   admission-only receipt отдельного linked worktree, разрешить implementation
   только follow-up turn-ом и сохранить integration checkout неизменным до

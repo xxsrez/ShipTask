@@ -4,9 +4,10 @@
 planning-only `$issue-grinder:task-composer`, общий
 `$strategic-explainer:strategic-explainer` и legacy source `$ship-tasks`.
 Issue Grinder доводит выбранный scope из `To Do`, `In Progress`, `In Review` до
-проверенного результата, создаёт стратегический Goal только для явно вызванного
-multi-issue run и использует blocker explanation как обязательную reflection
-точку для автоматического продолжения. Если пути вперёд нет, общий blocker-report
+проверенного результата либо, только в `Экономичном` режиме, до честной
+возобновляемой контрольной точки. Он создаёт стратегический Goal только для явно
+вызванного multi-issue run и использует blocker explanation как обязательную
+reflection-точку для автоматического продолжения. Если пути вперёд нет, общий blocker-report
 перечисляет все причины, а отдельный ответ по каждой из них объясняет её влияние на
 цель, границу самостоятельного устранения и ценность заблокированного шага.
 
@@ -54,21 +55,28 @@ rule ShipTask сам решает, где
 может свободным языком задать exact/relative count, role scope, общий или узкий
 запрет и условие вроде «используй субагентов только для работы дольше получаса»;
 coordinator обязан сохранить смысл правила, а не вернуть topology к default.
-Root agent не входит в явно названное число субагентов. Каждый
-одновременно пишущий implementation subagent получает отдельные feature branch
-и Git worktree; read-only роли могут работать без worktree. Без отдельного user
-override только genuinely simple bounded packets используют Luna Max; остальные
-наследуют current model/effort, а ambiguity или unexpected environment переводят
-Luna packet integration owner на current profile без повторного Luna loop.
+Root agent не входит в явно названное число субагентов. Каждый одновременно
+пишущий implementation subagent получает отдельные feature branch и Git
+worktree; read-only роли могут работать без worktree.
+
+Current Issue Grinder имеет четыре режима: `Классический`, `Баланс`, `Рой` и
+`Экономичный`. Явный выбор свободным языком сильнее автоматики; иначе любая
+top-level Luna выбирает `Экономичный`, а другая модель — `Классический`.
+Resolver срабатывает один раз, и смена модели внутри того же run режим не
+меняет. В `Классическом` Luna Max получает только strict-simple packets,
+`Баланс` переносит на неё основную массу ограниченной работы, `Рой` разрешает
+изолированные конкурирующие волны, а `Экономичный` может оставить один
+непринятый resumable candidate без ложного `Done` или blocker-а.
 
 После ошибки или смены Codex-сессии ShipTask сначала ищет существующий
 task-owned checkpoint. Если прежний writer остановлен, незавершённый worktree и
 feature branch безопасно переходят новому exclusive owner, и работа продолжается
 там, а не начинается с нуля; active или ambiguous ownership не перехватывается.
-Ожидаемое пользовательское tiering: простое — Luna Max, большинство — выбранный
-current profile (обычно Sol Extra High), ультрасложное — выбранный пользователем
-Sol Ultra; ShipTask не повышает модель скрыто. Перед любым
-существенным status transition сначала
+Профили Issue Grinder нормализуются отдельно от режима: Luna любого effort
+схлопывает содержательные controller и worker roles в Luna Max; более сильный
+main profile остаётся controller/reviewer, а Luna Max — экономичным worker.
+Неизвестное отношение разных семейств не угадывается, а явный role profile
+пользователя имеет приоритет. Перед любым существенным status transition сначала
 публикуется и перечитывается понятный native Task comment; обычный старт
 `To Do → In Progress` комментария не создаёт. Task description и ответ в Codex
 комментарий не заменяют. Native comments являются гарантированной частью Task

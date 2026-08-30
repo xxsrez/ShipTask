@@ -12,13 +12,15 @@
 остаются только repository build и plugin distribution rules.
 
 - `$issue-grinder`:
+  [Overview](skills/issue-grinder/overview.md),
   [Requirements](skills/issue-grinder/requirements.md),
   [Architecture](skills/issue-grinder/architecture.md),
   [Evaluation](skills/issue-grinder/evaluation.md) — current source package
   нового Task Manager-only delivery skill со стратегическим Goal,
   максимальной автономностью явного run, blocker reflection и изолированной
-  multi-agent работой. Runtime source создан; публикация подтверждается только
-  отдельной distribution проверкой.
+  multi-agent работой. Четыре execution mode управляют долей экономичной
+  работы, избыточностью и финальной проверкой; runtime publication
+  подтверждается distribution проверкой.
 - `$ship-tasks`: [Requirements](skills/ship-tasks/requirements.md) и
   [Architecture](skills/ship-tasks/architecture.md) — канонический Task
   Manager-only workflow
@@ -57,6 +59,13 @@
 Документация является исходным кодом. Локальный Level 1 отвечает за «что обязано
 быть истинно», локальный Level 2 — за agent-owned «как сейчас этого достигать»,
 а соответствующий `SKILL.md` — компактная исполнимая проекция обоих уровней.
+
+## Specifications
+
+- [Режимы исполнения Issue Grinder](specs/issue-grinder-execution-modes.md) —
+  rationale и сравнительная модель четырёх устойчивых режимов `Классический`,
+  `Баланс`, `Рой` и `Экономичный`. Действующая policy остаётся только в
+  локальных Requirements, Architecture и runtime-проекции.
 
 ## Decisions
 
