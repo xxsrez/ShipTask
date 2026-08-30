@@ -175,6 +175,17 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
         ):
             self.assertIn(marker, text)
 
+    def test_editing_preserves_audit_facts_in_basis_not_publication(self) -> None:
+        text = " ".join(CONTRACT.read_text().split()).lower()
+        for marker in (
+            "сохранение исходника относится ко всему двухчастному result contract",
+            "audit-only identifiers, внутренний процесс подготовки",
+            "такой перенос не является потерей содержания",
+            "само присутствие детали в target text не доказывает её пользовательскую релевантность",
+            "явная просьба «не менять факты» не является просьбой опубликовать технический доказательный след",
+        ):
+            self.assertIn(marker, text)
+
 
 if __name__ == "__main__":
     unittest.main()
