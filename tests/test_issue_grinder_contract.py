@@ -79,7 +79,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertEqual(len(rows), len(set(rows)), "duplicate coverage rows")
         self.assertEqual(set(rows), requirement_ids)
-        self.assertEqual(len(requirement_ids), 50)
+        self.assertEqual(len(requirement_ids), 51)
 
     def test_architecture_runtime_layout_exists(self) -> None:
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
@@ -107,11 +107,23 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertEqual(
             re.findall(
-                r"^## (Классический|Баланс|Рой|Экономичный)$",
+                r"^## (Соло|Классический|Баланс|Рой|Экономичный)$",
                 execution_modes,
                 re.MULTILINE,
             ),
-            ["Классический", "Баланс", "Рой", "Экономичный"],
+            ["Соло", "Классический", "Баланс", "Рой", "Экономичный"],
+        )
+        self.assertIn(
+            "число subagents и\nодновременных execution lanes равно `0` и `1`",
+            (SKILL_ROOT / "references" / "multi-agent-execution.md").read_text(
+                encoding="utf-8"
+            ),
+        )
+        self.assertIn(
+            "execution mode — `Соло`",
+            (SKILL_ROOT / "references" / "strategic-explainer.md").read_text(
+                encoding="utf-8"
+            ),
         )
         self.assertIn("[Execution modes](references/execution-modes.md)", skill)
         self.assertIn("scripts/issue_grinder_mode_harness.py", architecture)

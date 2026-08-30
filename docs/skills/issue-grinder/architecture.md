@@ -392,10 +392,12 @@ eligibility действительно возможна.
 
 Resolver применяет приоритет `explicit user mode → automatic model rule`:
 
-1. Текущий prompt проверяется на явное намерение выбрать `Классический`,
-   `Баланс`, `Рой` или `Экономичный`. Свободная формулировка допустима, но слово
-   из обычного описания стоимости или баланса не считается выбором без
-   намерения управлять режимом Issue Grinder.
+1. Текущий prompt проверяется на явное намерение выбрать `Соло`,
+   `Классический`, `Баланс`, `Рой` или `Экономичный`. Для `Соло` принимаются
+   также однозначные формулировки `single`, `сингл`, «одним агентом» и «без
+   субагентов». Свободная формулировка допустима, но случайное слово из обычного
+   описания продукта не считается выбором без намерения управлять режимом Issue
+   Grinder.
 2. Если явного выбора нет, exact effective top-level model identity берётся из
    runtime context текущего агента. Семейство `gpt-5.6-luna` при любом effort
    даёт `Экономичный`; любая другая модель даёт `Классический`.
@@ -413,6 +415,11 @@ Resolver применяет приоритет `explicit user mode → automatic
 Current economical baseline — `gpt-5.6-luna` с `reasoning_effort=max`.
 Профильный resolver работает отдельно от выбора режима:
 
+- в `Соло` execution profile на каждом turn берётся как exact effective current
+  top-level model и effort; нормализованные controller/worker profiles не
+  применяются, а direct supervisor не создаётся. Смена current profile не
+  пересчитывает canonical mode;
+
 - точная команда пользователя в prompt о профиле конкретной роли либо всех
   subagents применяется первой;
 - если main profile не относится к Luna и нет доказанного правила, что он не
@@ -428,15 +435,24 @@ Current economical baseline — `gpt-5.6-luna` с `reasoning_effort=max`.
 Override существует только когда пользователь явно распорядился профилями в
 prompt.
 
-Уже запущенный root нельзя считать автоматически заменившим собственную модель.
-Если его profile слабее нормализованного, он остаётся узкой transport/authority
-оболочкой и вызывает direct Luna Max supervisor для стратегического анализа,
-dispatch decisions и review. Root сохраняет единственное владение Goal, Task
-Manager mutations, fan-in и publication unit; supervisor возвращает только
-решения, facts, evidence и anchors и не создаёт новую Codex task. Так логическое
-управление выполняется нормализованным профилем без второго effect owner.
+В режимах кроме `Соло` уже запущенный root нельзя считать автоматически
+заменившим собственную модель. Если его profile слабее нормализованного, он
+остаётся узкой transport/authority оболочкой и вызывает direct Luna Max
+supervisor для стратегического анализа, dispatch decisions и review. Root
+сохраняет единственное владение Goal, Task Manager mutations, fan-in и
+publication unit; supervisor возвращает только решения, facts, evidence и
+anchors и не создаёт новую Codex task. Так логическое управление выполняется
+нормализованным профилем без второго effect owner.
 
 ### 4.3 Режимные workflow
+
+`Соло` использует exact current main profile единственным исполнителем. Он
+полностью анализирует live scope, выбирает один dependency-ready issue или
+пакет, самостоятельно реализует, проверяет и проводит self-review точного
+результата, затем только после read-back переходит к следующему. Никакие
+supervisor, worker, scout, critic, verifier, candidate, reducer или отдельный
+Strategic Explainer не вызываются; publication работает в native mode. Режим
+сохраняет terminal promise и не получает economical checkpoint.
 
 `Классический` строит полную карту scope, dependencies, acceptance и risk
 surfaces на controller/reviewer profile. Только строго простые пакеты из
@@ -487,7 +503,9 @@ evidence и внешние эффекты. Summary служит навигаци
 2. integration checkout проходит `assert-unchanged`, candidate identities и
    ownership reconciled;
 3. mode record получает новый canonical mode и origin `explicit`;
-4. новая policy применяется только к следующей dispatch/review итерации.
+4. новая policy применяется только к следующей dispatch/review итерации; при
+   переходе в `Соло` новые subagents запрещены, а сохранённые пакеты ставятся в
+   последовательную очередь текущей модели.
 
 Scope, environment и authority при переключении не меняются. Automatic switch
 по проценту квоты, имени новой модели или факту доступности reviewer-а не
@@ -574,11 +592,13 @@ issue contract; стратегический контекст не расшир�
 7. Опубликовать комментарий, изменить статус и перечитать issue.
 8. Заново оценить scope, frontier и необходимость следующей итерации.
 
-Режим не создаёт четыре разных lifecycle. Все варианты используют один loop,
+Режим не создаёт пять разных lifecycle. Все варианты используют один loop,
 а отличаются dispatch policy, reviewer gates и допустимым выходом. В
 `Экономичном` режиме восьмая фаза может сохранить `IG-MODE-06` checkpoint и
 закончить текущую попытку без terminal claim; остальные режимы продолжают до
-terminal path либо настоящего blocker-а.
+terminal path либо настоящего blocker-а. В `Соло` четвёртая фаза всегда
+исполняется текущей моделью, а следующий issue или пакет выбирается только после
+завершения текущей итерации.
 
 Issue, уже находящееся в `In Progress` или `In Review`, сначала проходит
 recovery фактической target branch, task-owned implementation и доступного
@@ -821,19 +841,24 @@ capability или изолированная writable capacity недоступ�
 адаптирует работу по mode contract: `Классический` может выполнить frontier
 последовательно, а экономичные режимы используют доступную serial economical
 lane либо сохраняют честный checkpoint. Отсутствие multi-agent surface само по
-себе не является blocker-ом.
+себе не является blocker-ом. `Соло` не входит в этот resolver: он всегда имеет
+ноль subagents, одну активную execution lane и последовательно выполняет весь
+scope на current main profile независимо от доступной capacity.
 
 Рабочая делегация и provider invocation — разные уровни. Coordinator не
 делегирует publication unit рабочему subagent-у: тот возвращает только
 проверяемый evidence handoff, после чего coordinator отдельно вызывает
 Strategic Explainer. Так worker topology не определяет и не ломает внутренний
-provider transport.
+provider transport. В `Соло` действует более сильный mode contract: provider
+subagent также не вызывается, а publication unit формулируется native текущей
+моделью.
 
 Явное правило пользователя о topology — точное или относительное число
 субагентов, роли, условие делегации либо opt-out — имеет приоритет. Основной
 coordinator не входит в названное число субагентов. Общий opt-out worker
 delegation не отключает отдельный Strategic Explainer interface, если
-пользователь прямо не запретил и его.
+пользователь прямо не запретил и его. Выбор `Соло` является таким общим и
+полным запретом, включая Strategic Explainer.
 
 Без user override coordinator:
 
@@ -961,7 +986,7 @@ Task Manager cancellation statuses от имени Issue Grinder.
 | `IG-GOAL-*` | strategic synthesis, Goal lifecycle, blocker/final reflection | Goal отражает общую проблему и завершается только после fresh empty active scope |
 | `IG-SCOPE-*` | selector-as-predicate и контрольные refresh points | новые и исключённые issue учитываются до terminal result |
 | `IG-AUTO-*` | explicit-mode gate, UAT resolver и узкий security selector | нет Production access; разрешённая UAT работа не ждёт рутинного approval |
-| `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint | Luna default выбирает `Экономичный`, иной default — `Классический`; выбранный mode не дрейфует; каждый режим выполняет своё обещание |
+| `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint | Luna default выбирает `Экономичный`, иной default — `Классический`; `Соло` сохраняет current profile и ноль subagents; выбранный mode не дрейфует; каждый режим выполняет своё обещание |
 | `IG-MA-*` | dependency-ready packets, isolated writers, integration owner и profile routing | параллельные writers изолированы, а acceptance относится к объединённой версии |
 
 Группированная таблица является только обзором. Точная coverage map связывает
@@ -1000,7 +1025,9 @@ ID само по себе не доказывает поведение.
 - explicit natural-language mode override, Luna при каждом effort,
   non-Luna automatic `Классический`, persistence через continuation/model
   change и safe explicit switch;
-- конкретный `Классический` с full-scope analysis, high-judgment ownership,
+- `Соло` для одного и нескольких issue с exact current profile, одной
+  последовательной execution lane, native publication и полным отсутствием
+  subagents; конкретный `Классический` с full-scope analysis, high-judgment ownership,
   exact integration и final review; `Баланс` с economical implementation и
   reviewer gates; `Рой` с intentional candidate identity, reduction и bounded
   stop; `Экономичный` с одним resumable candidate без ложного Done/Goal close;

@@ -1,9 +1,9 @@
 """Deterministic oracle for the mechanical Issue Grinder mode decisions.
 
-The oracle covers the parts of IG-MODE-02, IG-MODE-06, IG-MODE-07 and
-IG-MODE-10 that can be decided from structured state.  It deliberately does
-not parse natural language, orchestrate agents or stand in for a model-forward
-run of the skill.
+The oracle covers the parts of IG-MODE-02, IG-MODE-06, IG-MODE-07,
+IG-MODE-10 and IG-MODE-11 that can be decided from structured state.  It
+deliberately does not parse natural language, orchestrate agents or stand in for
+a model-forward run of the skill.
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ ACTIVE_TASK_STATUSES = frozenset({"In Progress", "In Review"})
 
 
 class ExecutionMode(str, Enum):
+    SOLO = "solo"
     CLASSIC = "classic"
     BALANCE = "balance"
     SWARM = "swarm"
@@ -60,6 +61,36 @@ class ModeRecord:
     mode_origin: ModeOrigin
     initial_main_profile: Profile
     role_profiles: RoleProfiles
+
+
+@dataclass(frozen=True)
+class ModeDispatchPolicy:
+    subagents_allowed: bool
+    max_active_execution_lanes: int | None
+    execution_profile: Profile | None
+    native_publication_required: bool
+
+
+def mode_dispatch_policy(
+    record: ModeRecord,
+    *,
+    current_main_profile: Profile,
+) -> ModeDispatchPolicy:
+    """Return the mechanical topology constraints of the selected mode."""
+
+    if record.canonical_mode is ExecutionMode.SOLO:
+        return ModeDispatchPolicy(
+            subagents_allowed=False,
+            max_active_execution_lanes=1,
+            execution_profile=current_main_profile,
+            native_publication_required=True,
+        )
+    return ModeDispatchPolicy(
+        subagents_allowed=True,
+        max_active_execution_lanes=None,
+        execution_profile=None,
+        native_publication_required=False,
+    )
 
 
 def normalize_profiles(

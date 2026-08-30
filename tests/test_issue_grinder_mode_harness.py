@@ -11,6 +11,7 @@ from scripts.issue_grinder_mode_harness import (
     Profile,
     decide_mode_switch,
     decide_run_exit,
+    mode_dispatch_policy,
     normalize_profiles,
     resolve_mode,
 )
@@ -57,6 +58,41 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                 self.assertEqual(record.mode_origin, ModeOrigin.AUTOMATIC)
                 self.assertEqual(record.role_profiles.controller, LUNA_MAX)
                 self.assertEqual(record.role_profiles.worker, LUNA_MAX)
+
+    def test_solo_uses_current_profile_one_lane_and_no_subagents(self) -> None:
+        for main_profile in (Profile("gpt-5.6-luna", "low"), SOL):
+            with self.subTest(main=main_profile):
+                record = resolve_mode(
+                    main_profile,
+                    explicit_mode=ExecutionMode.SOLO,
+                )
+                policy = mode_dispatch_policy(
+                    record,
+                    current_main_profile=main_profile,
+                )
+
+                self.assertEqual(record.canonical_mode, ExecutionMode.SOLO)
+                self.assertEqual(policy.execution_profile, main_profile)
+                self.assertFalse(policy.subagents_allowed)
+                self.assertEqual(policy.max_active_execution_lanes, 1)
+                self.assertTrue(policy.native_publication_required)
+
+    def test_other_modes_do_not_inherit_solo_topology(self) -> None:
+        for mode in (
+            ExecutionMode.CLASSIC,
+            ExecutionMode.BALANCE,
+            ExecutionMode.SWARM,
+            ExecutionMode.ECONOMICAL,
+        ):
+            with self.subTest(mode=mode):
+                policy = mode_dispatch_policy(
+                    resolve_mode(SOL, explicit_mode=mode),
+                    current_main_profile=SOL,
+                )
+                self.assertTrue(policy.subagents_allowed)
+                self.assertIsNone(policy.max_active_execution_lanes)
+                self.assertIsNone(policy.execution_profile)
+                self.assertFalse(policy.native_publication_required)
 
     def test_automatic_luna_match_is_exact_not_fuzzy(self) -> None:
         for model in ("gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna-preview"):
@@ -107,6 +143,24 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
 
         self.assertEqual(new_record.canonical_mode, ExecutionMode.ECONOMICAL)
         self.assertEqual(new_record.mode_origin, ModeOrigin.AUTOMATIC)
+
+    def test_solo_continuation_uses_new_current_profile_without_mode_drift(self) -> None:
+        original = resolve_mode(SOL, explicit_mode=ExecutionMode.SOLO)
+        new_current = Profile("gpt-5.6-luna", "low")
+        resumed = resolve_mode(
+            new_current,
+            saved_record=original,
+            continuity_proven=True,
+        )
+        policy = mode_dispatch_policy(
+            resumed,
+            current_main_profile=new_current,
+        )
+
+        self.assertIs(resumed, original)
+        self.assertEqual(resumed.canonical_mode, ExecutionMode.SOLO)
+        self.assertEqual(policy.execution_profile, new_current)
+        self.assertFalse(policy.subagents_allowed)
 
     def test_proven_continuity_requires_a_record_and_switch_barrier(self) -> None:
         with self.assertRaisesRegex(ValueError, "saved mode record"):
@@ -179,6 +233,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
 
     def test_other_modes_cannot_exit_through_checkpoint(self) -> None:
         for mode in (
+            ExecutionMode.SOLO,
             ExecutionMode.CLASSIC,
             ExecutionMode.BALANCE,
             ExecutionMode.SWARM,

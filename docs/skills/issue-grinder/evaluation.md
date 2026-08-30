@@ -50,7 +50,7 @@
 | `IG-AUTO-03` | `SKILL.md` §4; environment harness | production-rejected; public-uat-allowed |
 | `IG-AUTO-04` | `SKILL.md` §4; environment harness | default-uat; unknown-uat-before-effect |
 | `IG-AUTO-05` | `autonomy-and-environments.md` | security-selector; narrow-always-readback |
-| `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | four-canonical-modes; mode-does-not-expand-authority |
+| `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | five-canonical-modes; mode-does-not-expand-authority |
 | `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; luna-any-effort-economical; non-luna-classic; mode-persists-after-model-change |
 | `IG-MODE-03` | `execution-modes.md`; `multi-agent-execution.md` | classic-full-scope-analysis; classic-high-judgment-owner; classic-final-review-terminal |
 | `IG-MODE-04` | `execution-modes.md`; `multi-agent-execution.md` | balance-controller-plans; balance-economical-bulk; balance-rework-redispatch; balance-final-gate |
@@ -60,7 +60,8 @@
 | `IG-MODE-08` | `execution-modes.md`; `multi-agent-execution.md` | economical-handoff-preserves-evidence; swarm-alternative-approach; same-retry-rejected |
 | `IG-MODE-09` | `execution-modes.md` | one-review-candidate; dissent-preserved; raw-swarm-transcript-not-required; rework-reviewed-again |
 | `IG-MODE-10` | `execution-modes.md`; `multi-agent-execution.md`; mode harness | explicit-switch-barrier; automatic-no-switch; switch-preserves-candidates-and-scope |
-| `IG-MA-01` | `SKILL.md` §2; `multi-agent-execution.md` | two-independent-packets; useful-critic; intentional-candidate; one-lane-no-filler |
+| `IG-MODE-11` | `SKILL.md` §1-3; `execution-modes.md`; `strategic-explainer.md`; mode harness | solo-one-issue; solo-many-issues-sequential; solo-current-profile-after-model-change; solo-zero-subagents; solo-native-publication; solo-terminal-only |
+| `IG-MA-01` | `SKILL.md` §2; `multi-agent-execution.md` | two-independent-packets; useful-critic; intentional-candidate; one-lane-no-filler; solo-delegation-forbidden |
 | `IG-MA-02` | `multi-agent-execution.md` | disjoint-surfaces; ordinary-conflicting-surfaces; isolated-intentional-overlap |
 | `IG-MA-03` | `multi-agent-execution.md` | dependency-ready-frontier |
 | `IG-MA-04` | `multi-agent-execution.md` | adaptive-width; swarm-useful-width; no-filler-packet |
@@ -74,10 +75,10 @@
 | `IG-MA-12` | `SKILL.md` §2; `multi-agent-execution.md`; `writer_worktree_guard.py`; trace harness | startup-inventory-before-fresh-work; branch-only-restored; dirty-checkpoint-resumed; active-owner-rejected; ambiguous-preserved; intentional-candidate-not-replacement |
 | `IG-MA-13` | `multi-agent-execution.md` | explicit-profile-preserved |
 | `IG-MA-14` | `execution-modes.md`; `multi-agent-execution.md` | classic-simple-luna-max; classic-small-diff-not-simple |
-| `IG-MA-15` | `execution-modes.md`; `multi-agent-execution.md` | classic-material-controller; balance-economical-bulk; swarm-economical-waves; economical-economical-controller |
+| `IG-MA-15` | `execution-modes.md`; `multi-agent-execution.md` | solo-current-main-only; classic-material-controller; balance-economical-bulk; swarm-economical-waves; economical-economical-controller |
 | `IG-MA-16` | `execution-modes.md`; `multi-agent-execution.md` | luna-uncertainty-evidence-handoff; mode-specific-next-route; same-luna-retry-rejected |
 | `IG-MA-17` | `execution-modes.md`; `multi-agent-execution.md` | classic-luna-unavailable-controller; economical-fallback-no-silent-expensive-spend |
-| `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing; worker-evidence-coordinator-facade; nested-facade-no-new-task |
+| `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing; worker-evidence-coordinator-facade; nested-facade-no-new-task; solo-native-no-provider |
 
 ## Быстрый mode corpus
 
@@ -91,6 +92,9 @@ python3 -B -m unittest discover -s tests -p 'test_issue_grinder_mode_harness.py'
 Corpus доказывает:
 
 - приоритет явного канонического режима над automatic rule;
+- `Соло` как явный пятый mode, который использует фактически current main
+  profile каждого turn, запрещает subagents и ограничивает исполнение одной
+  последовательной lane;
 - `Экономичный` для exact `gpt-5.6-luna` при каждом доступном effort и
   `Классический` для другого family identity без fuzzy match;
 - сохранение mode record при доказанной continuity и отсутствие переноса
@@ -219,7 +223,8 @@ fresh model-forward smoke.
   выбранный канонический режим должен победить automatic rule, а продолжение
   после смены модели — сохранить ранее выбранный mode;
 - наблюдаемо различить режимы: `Классический` удерживает high-judgment и final
-  review у controller-а; `Баланс` передаёт economical bulk; `Рой` создаёт
+  review у controller-а; `Соло` сохраняет current model, ноль subagents и native
+  publication для одного и нескольких issue; `Баланс` передаёт economical bulk; `Рой` создаёт
   isolated intentional candidates и сокращает их до одного; `Экономичный`
   сохраняет один resumable candidate без ложного `Done`/Goal completion;
 - на scope с двумя независимыми write packets сначала получить от каждого
