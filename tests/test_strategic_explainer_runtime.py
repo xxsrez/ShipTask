@@ -111,6 +111,10 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
         self.assertIn('reasoning_effort="max"', internal)
         self.assertIn("Не передавай inherited turns", internal)
         self.assertIn("facade исправляет", internal)
+        self.assertIn("обе части provider result", internal)
+        self.assertIn("не сокращай и не реконструируй basis", internal)
+        self.assertIn("source basis — вторая opaque-часть provider result", public.lower())
+        self.assertIn("не строят собственный basis", public)
         for provider_recipe in (
             "одну главную причинную мысль",
             "первый смысловой слой",
