@@ -11,6 +11,9 @@
 [Architecture](../skills/issue-grinder/architecture.md) и скомпилированный из
 них runtime skill.
 
+Для практического выбора без инженерных деталей используйте
+[пользовательский мануал](../guides/issue-grinder-modes.md).
+
 ## 1. Зачем нужны режимы
 
 Уверенный терминальный путь Issue Grinder способен доводить большой scope до
@@ -481,13 +484,14 @@ Summary помогает навигации, но reviewer самостояте�
 ## 15. Трасса внедрения
 
 - Пользовательский outcome и boundaries закреплены в
-  [Requirements](../skills/issue-grinder/requirements.md) как `IG-MODE-01..10`
-  и уточнённые `IG-MA-*`.
+  [Requirements](../skills/issue-grinder/requirements.md) как `IG-MODE-01..11`,
+  `IG-HELP-01` и уточнённые `IG-MA-*`.
 - Один current workflow выбора, нормализации, переключения, fan-in и deferred
   review описан в
   [Architecture](../skills/issue-grinder/architecture.md).
 - Runtime проекция находится в `issue-grinder/SKILL.md`,
-  `references/execution-modes.md` и `references/multi-agent-execution.md`.
+  `references/mode-help.md`, `references/execution-modes.md` и
+  `references/multi-agent-execution.md`.
 - Observable coverage и обязательный fresh-plugin smoke описаны в
   [Evaluation](../skills/issue-grinder/evaluation.md).
 - Этот документ сохраняет rationale и сравнительную модель, но не добавляет

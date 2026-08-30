@@ -39,24 +39,29 @@ plugins/issue-grinder/
 │   └── plugin.json
 └── skills/
     ├── issue-grinder/
-        ├── SKILL.md
-        ├── agents/
-        │   └── openai.yaml
-        └── references/
-            ├── task-manager-flow.md
-            ├── autonomy-and-environments.md
-            ├── execution-modes.md
-            ├── multi-agent-execution.md
-            └── strategic-explainer.md
+    │   ├── SKILL.md
+    │   ├── agents/
+    │   │   └── openai.yaml
+    │   ├── references/
+    │   │   ├── mode-help.md
+    │   │   ├── run-and-goal.md
+    │   │   ├── task-manager-flow.md
+    │   │   ├── thread-title.md
+    │   │   ├── autonomy-and-environments.md
+    │   │   ├── execution-modes.md
+    │   │   ├── multi-agent-execution.md
+    │   │   └── strategic-explainer.md
+    │   └── scripts/
+    │       └── writer_worktree_guard.py
     └── task-composer/
         ├── SKILL.md
         └── agents/openai.yaml
 ```
 
-Plugin не содержит собственный MCP server, UI, assets, hooks или runtime
-scripts в первой версии. Task Manager уже предоставляет live data,
-authentication, authorization и controlled mutations; Issue Grinder остаётся
-workflow- и orchestration-слоем вокруг этого adapter-а.
+Plugin не содержит собственный MCP server, UI, assets или hooks. Единственный
+runtime script механически обеспечивает writer admission; Task Manager уже
+предоставляет live data, authentication, authorization и controlled mutations;
+Issue Grinder остаётся workflow- и orchestration-слоем вокруг этого adapter-а.
 
 Такая форма следует принципу минимального plugin из
 [официальной архитектуры OpenAI](https://developers.openai.com/plugins/concepts/plugins):
@@ -69,13 +74,18 @@ plugin может содержать только skills, а MCP server, UI и l
 
 - trigger и граница между явным и неявным invocation;
 - стратегический смысл и обязательные terminal conditions;
-- основной scope/Goal/delivery loop;
+- ранняя развилка между чистой справкой и delivery;
+- общий delivery loop и terminal conditions;
 - routing к условным references;
 - жёсткие authority и truth boundaries, которые нельзя потерять при
   progressive disclosure.
 
 Подробности загружаются только тогда, когда меняют текущие решения:
 
+- `mode-help.md` — только для чистого вопроса о режимах, default resolver-е,
+  различиях или выборе; этот fast path не загружает delivery protocol;
+- `run-and-goal.md` — после подтверждённого delivery intent: invocation
+  continuity, selector, title routing и Goal lifecycle;
 - `task-manager-flow.md` — live scope, lifecycle, blocked-by, comment/status
   transaction, read-back и recovery;
 - `execution-modes.md` — после однократного выбора режима и перед
@@ -109,8 +119,10 @@ Requirements или Architecture. Весь применимый смысл `IG-*
   пользовательский prompt.
 
 Skill description должна привлекать запросы реализовать, исправить, проверить
-или доставить существующий Task Manager scope. Read/status/audit и
-planning-only запросы не должны маршрутизироваться в Issue Grinder.
+или доставить существующий Task Manager scope, а также вопросы о собственных
+режимах Issue Grinder. Чистая справка является недоставочным fast path;
+read/status/audit, иные объяснения и planning-only запросы не должны
+маршрутизироваться в Issue Grinder.
 
 Task Manager остаётся отдельно установленным adapter plugin и не копируется в
 Issue Grinder package. Task Composer копируется только из канонического
@@ -176,7 +188,10 @@ hooks. Writer isolation не реализуется hook-ом: admission отн�
 issue-grinder/
 ├── SKILL.md
 ├── agents/openai.yaml
-├── references/...
+├── references/
+│   ├── mode-help.md
+│   ├── run-and-goal.md
+│   └── ...
 └── scripts/writer_worktree_guard.py
 ```
 
@@ -245,12 +260,26 @@ pagination, versioned write, comment/read-back или Goal operation — отс�
 
 ## 3. Режим прогона и ранний context gate
 
+### 3.0 Справочный fast path
+
+До разрешения run coordinator классифицирует запрос. Если пользователь только
+спрашивает о канонических режимах, default resolver-е, различиях или выборе,
+runtime читает только `issue-grinder/references/mode-help.md` и отвечает без
+Task Manager reads/writes, Goal, title mutation, recovery, environment
+resolution, subagents и Strategic Explainer. Это observable negative-effects
+contract `IG-HELP-01`, а не укороченный delivery run.
+
+Если один prompt одновременно просит справку и явно поручает delivery,
+coordinator сначала кратко отвечает или называет выбранный mode, затем отдельно
+проходит обычный delivery gate. Наличие справочного вопроса не создаёт scope и
+не расширяет authority delivery-части.
+
 В начале нового run coordinator фиксирует три разных факта:
 
 - `explicit invocation` — пользователь назвал `$issue-grinder` в prompt,
   запустившем именно этот run;
 - `run mode` — является ли уже начатый run явно вызванным и поэтому автономным.
-- `execution mode` — один из `Классический`, `Баланс`, `Рой` или
+- `execution mode` — один из `Соло`, `Классический`, `Баланс`, `Рой` или
   `Экономичный`, его origin `explicit|automatic` и применённая нормализация
   профилей.
 
@@ -987,6 +1016,7 @@ Task Manager cancellation statuses от имени Issue Grinder.
 | `IG-SCOPE-*` | selector-as-predicate и контрольные refresh points | новые и исключённые issue учитываются до terminal result |
 | `IG-AUTO-*` | explicit-mode gate, UAT resolver и узкий security selector | нет Production access; разрешённая UAT работа не ждёт рутинного approval |
 | `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint | Luna default выбирает `Экономичный`, иной default — `Классический`; `Соло` сохраняет current profile и ноль subagents; выбранный mode не дрейфует; каждый режим выполняет своё обещание |
+| `IG-HELP-*` | ранний fast path и компактный `mode-help.md` | чистая справка объясняет пять режимов и default без Task Manager, Goal, title mutations или subagents |
 | `IG-MA-*` | dependency-ready packets, isolated writers, integration owner и profile routing | параллельные writers изолированы, а acceptance относится к объединённой версии |
 
 Группированная таблица является только обзором. Точная coverage map связывает
@@ -1022,6 +1052,9 @@ ID само по себе не доказывает поведение.
 
 - direct explicit, indirect implicit с selector-ом, implicit без selector-а,
   follow-up, negative routing и boundary prompts;
+- чистая и узкая справка о режимах/default/различиях без Task Manager, Goal,
+  title mutations, delivery refs и subagents; смешанный help+delivery prompt
+  сохраняет обычные scope и authority gates;
 - explicit natural-language mode override, Luna при каждом effort,
   non-Luna automatic `Классический`, persistence через continuation/model
   change и safe explicit switch;

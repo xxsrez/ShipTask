@@ -587,6 +587,16 @@ Goal, Task Manager lifecycle, startup recovery, scope, authority, environment и
 включает ordinary-вызов Strategic Explainer: publication units формулирует и
 проверяет текущая модель в native communication mode.
 
+## Справка
+
+### `IG-HELP-01` — Краткая справка о режимах
+
+По запросу пользователя Issue Grinder кратко объясняет пять канонических
+режимов, правило выбора режима по умолчанию и существенные различия, достаточные
+для осознанного выбора. Чистый справочный запрос не запускает delivery, не
+разрешает Task Manager scope, не создаёт Goal, не обращается к Task Manager и не
+вызывает субагентов.
+
 ## Multi-agent
 
 ### `IG-MA-01` — Делегация только полезной независимой работы

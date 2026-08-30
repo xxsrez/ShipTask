@@ -34,18 +34,18 @@
 | `IG-FLOW-04` | `SKILL.md` §3; `strategic-explainer.md` | comment-reveals-work; optional-follow-up |
 | `IG-FLOW-05` | `SKILL.md` §2; `task-manager-flow.md` | integrated-blocked-by; late-reopen-recheck |
 | `IG-FLOW-06` | `SKILL.md` §5; `execution-modes.md`; mode harness | active-scope-prevents-completion; economical-checkpoint-is-nonterminal |
-| `IG-GOAL-01` | `SKILL.md` §1; `execution-modes.md`; trace harness | explicit-multi-create; implicit-no-goal; grow-and-keep; economical-checkpoint-keeps-goal |
-| `IG-GOAL-02` | `SKILL.md` §1 | strategic-release-objective; issue-list-rejected |
-| `IG-GOAL-03` | `SKILL.md` §5; `execution-modes.md`; trace harness | empty-scope-complete; active-scope-continue; checkpoint-goal-not-complete |
+| `IG-GOAL-01` | `run-and-goal.md`; `execution-modes.md`; trace harness | explicit-multi-create; implicit-no-goal; grow-and-keep; economical-checkpoint-keeps-goal |
+| `IG-GOAL-02` | `run-and-goal.md` | strategic-release-objective; issue-list-rejected |
+| `IG-GOAL-03` | `SKILL.md` §5; `run-and-goal.md`; `execution-modes.md`; trace harness | empty-scope-complete; active-scope-continue; checkpoint-goal-not-complete |
 | `IG-GOAL-04` | `SKILL.md` §3; blocker harness | explanation-unlocks; true-external-blocker |
 | `IG-GOAL-05` | `SKILL.md` §3 | final-reflection-continues; chat-only-final |
 | `IG-GOAL-06` | `SKILL.md` §2; `task-manager-flow.md` | nonmaterial-gap-transparent; material-gap-blocks |
 | `IG-GOAL-07` | `SKILL.md` §3; `strategic-explainer.md`; blocker harness | all-causes-overview; one-separate-answer-per-cause; three-lens-completeness; reason-reflection-unlocks |
-| `IG-SCOPE-01` | `SKILL.md` §1; `task-manager-flow.md` | prompt-selector-precedence |
-| `IG-SCOPE-02` | `SKILL.md` §1 | explicit-default-release; implicit-missing-selector |
-| `IG-SCOPE-03` | `SKILL.md` §1; `task-manager-flow.md` | late-member; excluded-member; final-refresh |
-| `IG-UI-01` | `SKILL.md` §1; `thread-title.md` | fresh-placeholder-renamed; meaningful-title-preserved; ambiguous-candidate-preserved; title-capability-failure-nonblocking |
-| `IG-AUTO-01` | `SKILL.md` §4; `autonomy-and-environments.md` | explicit-persistence; implicit-no-extra-authority |
+| `IG-SCOPE-01` | `run-and-goal.md`; `task-manager-flow.md` | prompt-selector-precedence |
+| `IG-SCOPE-02` | `run-and-goal.md` | explicit-default-release; implicit-missing-selector |
+| `IG-SCOPE-03` | `run-and-goal.md`; `task-manager-flow.md` | late-member; excluded-member; final-refresh |
+| `IG-UI-01` | `run-and-goal.md`; `thread-title.md` | fresh-placeholder-renamed; meaningful-title-preserved; ambiguous-candidate-preserved; title-capability-failure-nonblocking |
+| `IG-AUTO-01` | `SKILL.md` §4; `run-and-goal.md`; `autonomy-and-environments.md` | explicit-persistence; implicit-no-extra-authority |
 | `IG-AUTO-02` | `SKILL.md` §3; `execution-modes.md`; blocker harness | preflight-unlock; explanation-unlock; sufficient-economical-checkpoint-stops-boundedly |
 | `IG-AUTO-03` | `SKILL.md` §4; environment harness | production-rejected; public-uat-allowed |
 | `IG-AUTO-04` | `SKILL.md` §4; environment harness | default-uat; unknown-uat-before-effect |
@@ -61,6 +61,7 @@
 | `IG-MODE-09` | `execution-modes.md` | one-review-candidate; dissent-preserved; raw-swarm-transcript-not-required; rework-reviewed-again |
 | `IG-MODE-10` | `execution-modes.md`; `multi-agent-execution.md`; mode harness | explicit-switch-barrier; automatic-no-switch; switch-preserves-candidates-and-scope |
 | `IG-MODE-11` | `SKILL.md` §1-3; `execution-modes.md`; `strategic-explainer.md`; mode harness | solo-one-issue; solo-many-issues-sequential; solo-current-profile-after-model-change; solo-zero-subagents; solo-native-publication; solo-terminal-only |
+| `IG-HELP-01` | `SKILL.md` §0; `mode-help.md` | all-five-modes-brief; default-is-resolver; narrow-difference-answer; help-has-no-task-manager-goal-title-or-subagents; mixed-help-delivery-preserves-gates |
 | `IG-MA-01` | `SKILL.md` §2; `multi-agent-execution.md` | two-independent-packets; useful-critic; intentional-candidate; one-lane-no-filler; solo-delegation-forbidden |
 | `IG-MA-02` | `multi-agent-execution.md` | disjoint-surfaces; ordinary-conflicting-surfaces; isolated-intentional-overlap |
 | `IG-MA-03` | `multi-agent-execution.md` | dependency-ready-frontier |
@@ -216,6 +217,8 @@ fresh model-forward smoke.
 - видеть `issue-grinder:issue-grinder` и `issue-grinder:task-composer`;
 - не видеть установленный `ship-tasks:ship-tasks`;
 - видеть Task Manager dependency и optional Strategic Explainer;
+- на чистый вопрос о режимах/default/различиях дать краткую справку о пяти
+  режимах без Task Manager, Goal, title mutation, delivery loop и subagents;
 - правильно различать explicit delivery, implicit exact selector, implicit
   missing selector и read/status/planning negative prompts;
 - на новых synthetic runs выбрать `Экономичный` для Luna при `none`, `low`,

@@ -16,6 +16,8 @@ ISSUE_AUTONOMY = (
     ROOT / "issue-grinder" / "references" / "autonomy-and-environments.md"
 )
 ISSUE_MODES = ROOT / "issue-grinder" / "references" / "execution-modes.md"
+ISSUE_HELP = ROOT / "issue-grinder" / "references" / "mode-help.md"
+ISSUE_RUN = ROOT / "issue-grinder" / "references" / "run-and-goal.md"
 ISSUE_MULTI_AGENT = (
     ROOT / "issue-grinder" / "references" / "multi-agent-execution.md"
 )
@@ -58,6 +60,7 @@ OVERVIEW = ROOT / "docs" / "overview.md"
 DOCS_INDEX = ROOT / "docs" / "README.md"
 PHILOSOPHY = ROOT / "docs" / "philosophy.md"
 DEVELOPMENT = ROOT / "docs" / "guides" / "development.md"
+ISSUE_MODE_GUIDE = ROOT / "docs" / "guides" / "issue-grinder-modes.md"
 REVIEW_MATRIX = (
     ROOT / "docs" / "reference" / "shiptask-review-disposition-evaluation.md"
 )
@@ -190,6 +193,9 @@ CORE_FILES = (
     TERMINAL_ROUTING_REPORT,
     ISSUE_SPEC,
     ISSUE_EVALUATION,
+    ISSUE_HELP,
+    ISSUE_RUN,
+    ISSUE_MODE_GUIDE,
     SPEC,
     COMPOSER_SPEC,
     STRATEGIC_SPEC,
@@ -229,6 +235,9 @@ CURRENT_CONTRACT_FILES = (
     ISSUE_EVALUATION,
     ISSUE_REQUIREMENTS,
     ISSUE_WORKTREE_GUARD,
+    ISSUE_HELP,
+    ISSUE_RUN,
+    ISSUE_MODE_GUIDE,
     SHIP_SKILL,
     SHIP_METADATA,
     COMPOSER_SKILL,
@@ -376,24 +385,21 @@ def validate_issue_skill(errors: list[str]) -> None:
         ISSUE_SKILL,
         "Task Manager-only coordinator",
         "$issue-grinder",
-        "current Release",
-        "current Release по памяти не подставляй",
-        "Перед первой mutation",
-        "`Backlog` не реализуй и не меняй",
-        "create_goal",
-        "стратегический outcome",
+        "[краткую справку](references/mode-help.md)",
+        "[Run, scope и Goal](references/run-and-goal.md)",
+        "не обращайся к\nTask Manager",
+        "не вызывай subagents либо Strategic Explainer",
         "комментарий для этого тривиального перехода не нужен",
         "`blocked by` ограничивает доступность требуемой реализации",
         "candidate blocker → причинное объяснение → reflection по current primary sources → continue | terminal blocker",
-        "для каждой из них дай отдельный ответ",
+        "для каждой причины дай отдельный\nответ",
         "почему она блокирует цель",
         "почему Issue Grinder не может устранить её сам",
         "зачем нужен заблокированный шаг",
         "platform blocker audit",
-        "финальный комментарий только пользователю в чате",
+        "Финальный Goal\ncomment возвращай только пользователю в чате",
         "Production запрещён полностью",
         "[Task Manager flow](references/task-manager-flow.md)",
-        "[title contract](references/thread-title.md)",
         "[Autonomy and environments](references/autonomy-and-environments.md)",
         "[Execution modes](references/execution-modes.md)",
         "[multi-agent execution](references/multi-agent-execution.md)",
@@ -401,13 +407,37 @@ def validate_issue_skill(errors: list[str]) -> None:
         "[Strategic Explainer routing](references/strategic-explainer.md)",
         "всей publication unit",
         "не поручай им формулировать comment",
-        "Semantic facade вызывает сам основной coordinator",
         "`Соло`",
         "Классический",
         "Баланс",
-        "`Рое`",
+        "`Рой`",
         "Экономичный",
         "resumable checkpoint",
+    )
+    require(
+        errors,
+        ISSUE_HELP,
+        "Применяет `IG-HELP-01`",
+        "## Пять режимов",
+        "`Соло`",
+        "`Классический`",
+        "`Баланс`",
+        "`Рой`",
+        "`Экономичный`",
+        "`По умолчанию` — не шестой режим",
+        "не обращается к Task Manager",
+        "не вызывает subagents либо\nStrategic Explainer",
+    )
+    require(
+        errors,
+        ISSUE_RUN,
+        "одного совпадения selector-а для\ncontinuity недостаточно",
+        "current Release по памяти не подставляй",
+        "`Backlog` не реализуй и не меняй",
+        "[title contract](thread-title.md)",
+        "`create_goal`",
+        "стратегический outcome",
+        "Нетерминальный\ncheckpoint `Экономичного` режима сохраняет Goal активным",
     )
     require(
         errors,
@@ -529,6 +559,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         "IG-UI-01",
         *(f"IG-AUTO-{number:02d}" for number in range(1, 6)),
         *(f"IG-MODE-{number:02d}" for number in range(1, 12)),
+        "IG-HELP-01",
         *(f"IG-MA-{number:02d}" for number in range(1, 19)),
     ]
     if requirement_ids != expected_ids:
@@ -563,6 +594,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "Luna",
         "### `IG-MODE-01` — Пять канонических режимов",
         "### `IG-MODE-11` — Режим «Соло»",
+        "### `IG-HELP-01` — Краткая справка о режимах",
+        "Чистый справочный запрос не запускает delivery",
         "Один issue сам по себе не\nвыбирает `Соло` автоматически",
         "обычный terminal\nblocker gate",
         "### `IG-MODE-03` — Классический режим",
@@ -2068,6 +2101,7 @@ def validate_source_layers(errors: list[str]) -> None:
         "не как repair",
         "`blocked by` управляет доступностью реализации",
         "поздний defect\nинвалидирует только доказанно затронутые downstream results",
+        "[Мануал по режимам](docs/guides/issue-grinder-modes.md)",
         "сохраняя применимый strategic\ncontext в каждой child Task",
         "ShipTask перечитывает current Epic",
         "не расширяет exact child scope",
@@ -2086,7 +2120,21 @@ def validate_source_layers(errors: list[str]) -> None:
         "[0033: Terminal ordinary provider и optional routing ShipTask]",
         "[0034: Luna Max для ordinary Strategic Explainer]",
         "[0035: Semantic facade владеет invocation Strategic Explainer]",
+        "[Режимы Issue Grinder](guides/issue-grinder-modes.md)",
         "[Terminal Strategic Explainer и ShipTask routing: evaluation]",
+    )
+    require(
+        errors,
+        ISSUE_MODE_GUIDE,
+        "# Режимы Issue Grinder",
+        "## Короткое сравнение",
+        "## Как работает режим по умолчанию",
+        "## `Соло`",
+        "## `Классический`",
+        "## `Баланс`",
+        "## `Рой`",
+        "## `Экономичный`",
+        "## Справка без запуска работы",
     )
     require(
         errors,

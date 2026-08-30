@@ -41,16 +41,16 @@ class IssueGrinderContractTest(unittest.TestCase):
         runtime = re.sub(r"\s+", " ", runtime)
         for invariant in (
             "candidate blocker → причинное объяснение → reflection",
-            "для каждой из них дай отдельный ответ",
+            "для каждой причины дай отдельный ответ",
             "почему она блокирует цель",
             "почему Issue Grinder не может устранить её сам",
             "зачем нужен заблокированный шаг",
             "post-explanation reflection",
             "update_goal(status=blocked)",
-            "одного совпадения selector-а недостаточно",
-            "report не задерживается",
+            "одного совпадения selector-а для continuity недостаточно",
+            "не сам report",
             "будущих run",
-            "одинаковая попытка с тем же результатом",
+            "Одинаковая попытка без нового evidence",
             "Issue Grinder ·",
             "не более одного раза без",
             "Meaningful title",
@@ -58,7 +58,7 @@ class IssueGrinderContractTest(unittest.TestCase):
             "comment committed / status failed",
             "Blind retry",
             "Production запрещён",
-            "публичного UAT",
+            "публичный UAT",
             "Да всегда",
             "собственные feature branch и Git worktree",
             "Writer admission — hard gate",
@@ -79,7 +79,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertEqual(len(rows), len(set(rows)), "duplicate coverage rows")
         self.assertEqual(set(rows), requirement_ids)
-        self.assertEqual(len(requirement_ids), 51)
+        self.assertEqual(len(requirement_ids), 52)
 
     def test_architecture_runtime_layout_exists(self) -> None:
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
@@ -89,6 +89,8 @@ class IssueGrinderContractTest(unittest.TestCase):
             "references/task-manager-flow.md",
             "references/thread-title.md",
             "references/autonomy-and-environments.md",
+            "references/mode-help.md",
+            "references/run-and-goal.md",
             "references/execution-modes.md",
             "references/multi-agent-execution.md",
             "references/strategic-explainer.md",
@@ -128,6 +130,28 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("[Execution modes](references/execution-modes.md)", skill)
         self.assertIn("scripts/issue_grinder_mode_harness.py", architecture)
         self.assertIn("scripts/issue_grinder_mode_harness.py", evaluation)
+
+    def test_mode_help_is_a_delivery_free_progressive_disclosure_path(self) -> None:
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        mode_help = (SKILL_ROOT / "references" / "mode-help.md").read_text(
+            encoding="utf-8"
+        )
+        architecture = ARCHITECTURE.read_text(encoding="utf-8")
+
+        self.assertIn("[краткую справку](references/mode-help.md)", skill)
+        self.assertIn("[Run, scope и Goal](references/run-and-goal.md)", skill)
+        self.assertLess(len(skill.splitlines()), 180)
+        for mode in ("Соло", "Классический", "Баланс", "Рой", "Экономичный"):
+            self.assertIn(f"`{mode}`", mode_help)
+        for forbidden_effect in (
+            "не разрешает Task Manager scope",
+            "не создаёт Goal",
+            "не обращается к Task Manager",
+            "не вызывает subagents",
+        ):
+            self.assertIn(forbidden_effect, mode_help)
+        self.assertIn("`По умолчанию` — не шестой режим", mode_help)
+        self.assertIn("observable negative-effects\ncontract `IG-HELP-01`", architecture)
 
     def test_writer_guard_is_fail_closed_and_part_of_runtime(self) -> None:
         guard = WRITER_GUARD.read_text(encoding="utf-8")

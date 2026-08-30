@@ -20,7 +20,8 @@
   максимальной автономностью явного run, blocker reflection и изолированной
   multi-agent работой. Пять execution mode включают `Соло` без субагентов и
   четыре стратегии с разной долей экономичной работы, избыточностью и финальной
-  проверкой; runtime publication подтверждается distribution проверкой.
+  проверкой; чистая справка о режимах не запускает delivery, а runtime
+  publication подтверждается distribution проверкой.
 - `$ship-tasks`: [Requirements](skills/ship-tasks/requirements.md) и
   [Architecture](skills/ship-tasks/architecture.md) — канонический Task
   Manager-only workflow
@@ -202,6 +203,9 @@
 
 ## Guides
 
+- [Режимы Issue Grinder](guides/issue-grinder-modes.md) — пользовательский
+  мануал по пяти режимам, default resolver-у, различиям и выбору без запуска
+  delivery.
 - [Разработка и проверка](guides/development.md) — безопасный цикл изменения
   skill и локальные проверки.
 
