@@ -52,8 +52,8 @@
 | `IG-AUTO-05` | `autonomy-and-environments.md` | security-selector; narrow-always-readback |
 | `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | five-canonical-modes; mode-does-not-expand-authority |
 | `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; luna-any-effort-economical; non-luna-classic; mode-persists-after-model-change |
-| `IG-MODE-03` | `execution-modes.md`; `multi-agent-execution.md` | classic-full-scope-analysis; classic-high-judgment-owner; classic-final-review-terminal |
-| `IG-MODE-04` | `execution-modes.md`; `multi-agent-execution.md` | balance-controller-plans; balance-economical-bulk; balance-rework-redispatch; balance-final-gate |
+| `IG-MODE-03` | `execution-modes.md`; `multi-agent-execution.md` | classic-sol-does-almost-all; classic-luna-trivial-only; classic-high-judgment-owner; classic-final-review-terminal |
+| `IG-MODE-04` | `execution-modes.md`; `multi-agent-execution.md` | balance-controller-plans; balance-luna-light-and-medium-first; balance-problem-fallback-to-sol; balance-rework-redispatch; balance-final-gate |
 | `IG-MODE-05` | `execution-modes.md`; `multi-agent-execution.md` | swarm-intentional-candidates; swarm-isolated-overlap; swarm-reduction; swarm-bounded-stop; swarm-final-gate |
 | `IG-MODE-06` | `SKILL.md` §5; `execution-modes.md`; mode harness | economical-terminal-when-proven; economical-resumable-candidate; no-false-done; no-false-blocked |
 | `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md`; mode harness | luna-profile-collapse; luna-low-root-luna-max-supervisor; non-luna-two-profile; unknown-family-no-guess; role-override-wins |
@@ -225,10 +225,12 @@ fresh model-forward smoke.
   `medium`, `high`, `xhigh` и `max`, а для non-Luna — `Классический`; любой явно
   выбранный канонический режим должен победить automatic rule, а продолжение
   после смены модели — сохранить ранее выбранный mode;
-- наблюдаемо различить режимы: `Классический` удерживает high-judgment и final
-  review у controller-а; `Соло` сохраняет current model, ноль subagents и native
-  publication для одного и нескольких issue; `Баланс` передаёт economical bulk; `Рой` создаёт
-  isolated intentional candidates и сокращает их до одного; `Экономичный`
+- наблюдаемо различить режимы: в `Классическом` Sol/controller делает почти
+  всё, а Luna получает только тривиальные packets; `Соло` сохраняет current
+  model, ноль subagents и native publication для одного и нескольких issue; в
+  `Балансе` Luna сначала пытается выполнить лёгкие и средние bounded tasks и при
+  существенной проблеме возвращает evidence fallback Sol/controller-у; `Рой`
+  создаёт isolated intentional candidates и сокращает их до одного; `Экономичный`
   сохраняет один resumable candidate без ложного `Done`/Goal completion;
 - на scope с двумя независимыми write packets сначала получить от каждого
   admission-only receipt отдельного linked worktree, разрешить implementation

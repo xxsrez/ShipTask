@@ -16,8 +16,8 @@ scope, полномочия, Task Manager lifecycle, запрет Production и 
 | Режим | Кто выполняет работу | Проверка | Когда заканчивается |
 |---|---|---|---|
 | `Соло` | Текущая основная модель, последовательно, без субагентов | Self-review текущей модели плюс объективные checks | Только terminal result или настоящий blocker |
-| `Классический` | Controller/reviewer; экономичный worker только для простых ограниченных пакетов | Полная итоговая проверка exact result | Только terminal result или настоящий blocker |
-| `Баланс` | Экономичные agents делают основную массу ограниченной работы; сложные решения остаются controller/reviewer | Сильный final review exact candidate | Только terminal result или настоящий blocker |
+| `Классический` | Sol/controller делает почти всё; Luna получает только тривиальные пакеты | Полная итоговая проверка exact result | Только terminal result или настоящий blocker |
+| `Баланс` | Luna пытается выполнить лёгкие и средние ограниченные задачи; сложные решения и fallback остаются Sol/controller | Сильный final review exact candidate | Только terminal result или настоящий blocker |
 | `Рой` | Ограниченные волны разных candidates, critics, test authors и judges | Результаты сокращаются до одного candidate и проходят final review | Только terminal result или настоящий blocker |
 | `Экономичный` | Экономичные controller и workers с минимальным расходом дефицитного профиля | Все доступные checks; дорогой gate может быть отложен | Terminal result либо честный resumable checkpoint |
 
@@ -52,8 +52,9 @@ candidates или Strategic Explainer. Для scope с несколькими is
 `Классический` — обычный выбор для уверенного терминального результата.
 Controller/reviewer изучает весь live scope, принимает существенные продуктовые,
 архитектурные, миграционные, security и другие плохо проверяемые решения.
-Экономичный worker получает только ограниченные самодостаточные пакеты с ясным
-oracle и низким риском.
+Он же остаётся основным исполнителем и делает почти всю работу сам. Luna
+получает только действительно тривиальные, самодостаточные пакеты с ясным oracle
+и низким риском.
 
 После fan-in controller/reviewer читает точную интегрированную версию и проводит
 итоговую проверку. Конкурирующие полные реализации по умолчанию не создаются.
@@ -62,12 +63,19 @@ oracle и низким риском.
 
 `Баланс` подходит, когда нужно сократить расход проверяющего профиля без отказа
 от сильного final gate. Controller/reviewer задаёт стратегию, acceptance и risk
-classification, а экономичные agents выполняют основную массу ограниченной
-implementation, research, tests, preliminary critique и rework.
+classification, а Luna становится предпочтительным исполнителем лёгких и
+средних ограниченных задач и выполняет основную массу implementation, research,
+tests, preliminary critique и rework.
 
 Если сложное решение можно отделить от исполнения, controller принимает
 решение, а worker реализует уже заданный contract. После material rework exact
 candidate снова проходит final review.
+
+Если Luna встречает существенную неопределённость, конфликт contract/context,
+слабый oracle или проблему за границами пакета, она сохраняет изменения,
+проверки, evidence и причину остановки и возвращает работу Sol/controller-у.
+Sol уточняет contract, продолжает сам либо формирует новый безопасный пакет;
+Luna не должна бесконечно повторять ту же попытку.
 
 ## `Рой`
 

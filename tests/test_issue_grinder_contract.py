@@ -151,6 +151,13 @@ class IssueGrinderContractTest(unittest.TestCase):
         ):
             self.assertIn(forbidden_effect, mode_help)
         self.assertIn("`По умолчанию` — не шестой режим", mode_help)
+        self.assertIn("## Главное различие Классического и Баланса", mode_help)
+        self.assertIn("Sol/controller: он делает почти всё", mode_help)
+        self.assertIn(
+            "основной объём лёгкой и средней ограниченной implementation",
+            mode_help,
+        )
+        self.assertIn("возвращает пакет Sol/controller-у", mode_help)
         self.assertIn("observable negative-effects\ncontract `IG-HELP-01`", architecture)
 
     def test_writer_guard_is_fail_closed_and_part_of_runtime(self) -> None:

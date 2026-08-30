@@ -484,19 +484,25 @@ Strategic Explainer не вызываются; publication работает в n
 сохраняет terminal promise и не получает economical checkpoint.
 
 `Классический` строит полную карту scope, dependencies, acceptance и risk
-surfaces на controller/reviewer profile. Только строго простые пакеты из
-`IG-MA-14` уходят в economical lane; material judgment, integration и final
-review остаются controller/reviewer. Обычная delegation разделяет независимую
-работу, но не создаёт competing full implementations без user override. Loop
-заканчивается terminal result либо принятым blocker handoff.
+surfaces на controller/reviewer profile и оставляет его основным исполнителем:
+Sol/controller делает почти всю implementation сам. Только действительно
+тривиальные strict-simple пакеты из `IG-MA-14` уходят Luna Max; material
+judgment, integration и final review остаются controller/reviewer. Обычная
+delegation разделяет независимую работу, но не создаёт competing full
+implementations без user override. Loop заканчивается terminal result либо
+принятым blocker handoff.
 
 `Баланс` сначала использует controller/reviewer для стратегического анализа и
-явного выделения high-judgment work. Остальные bounded implementation,
-research, tests и preliminary critique направляются economical workers.
+явного выделения high-judgment work. Luna Max становится предпочтительным
+исполнителем лёгких и средних bounded implementation, research, tests и
+preliminary critique с ясным contract и oracle. При существенной
+неопределённости, contract/context conflict или проблеме за границами packet-а
+Luna сохраняет checkpoint и evidence и возвращает fallback Sol/controller-у,
+который уточняет contract, продолжает сам либо создаёт новый безопасный packet.
 Integration owner собирает содержательные партии; economical critics атакуют
 candidate до review. Reviewer читает exact integrated candidate и может вернуть
-material rework в новую economical wave. Любой изменённый candidate проходит
-final gate заново.
+bounded material rework в новую economical wave. Любой изменённый candidate
+проходит final gate заново.
 
 `Рой` задаёт конечный compute envelope как явный budget пользователя либо
 bounded последовательность волн, выбранную coordinator-ом. Candidate identity
@@ -967,10 +973,12 @@ Coordinator не интегрирует исключённый из dynamic scop
 оставшемуся scope, что подтверждено повторной оценкой поверхностей и acceptance.
 
 Profile routing берётся из mode record. В `Классическом` `gpt-5.6-luna` с
-`max` получает только строго простые пакеты по `IG-MA-14`; остальные выполняет
-controller/reviewer profile. `Баланс`, `Рой` и `Экономичный` используют Luna
-Max по правилам раздела 4 и runtime reference, включая normalized single-profile
-topology.
+`max` получает только тривиальные strict-simple пакеты по `IG-MA-14`; почти всю
+остальную работу выполняет controller/reviewer profile. В `Балансе` Luna Max
+сначала получает лёгкие и средние bounded packets, а их problem handoff
+возвращается controller/reviewer profile. `Рой` и `Экономичный` используют Luna
+Max по правилам раздела 4 и runtime reference, включая normalized
+single-profile topology.
 
 Material uncertainty создаёт evidence handoff, а не бесконечный Luna retry
 loop. В `Классическом` и `Балансе` checkpoint может перейти reviewer-у; в `Рое`
@@ -1060,10 +1068,12 @@ ID само по себе не доказывает поведение.
   change и safe explicit switch;
 - `Соло` для одного и нескольких issue с exact current profile, одной
   последовательной execution lane, native publication и полным отсутствием
-  subagents; конкретный `Классический` с full-scope analysis, high-judgment ownership,
-  exact integration и final review; `Баланс` с economical implementation и
-  reviewer gates; `Рой` с intentional candidate identity, reduction и bounded
-  stop; `Экономичный` с одним resumable candidate без ложного Done/Goal close;
+  subagents; конкретный `Классический`, где Sol/controller делает почти всё, а
+  Luna получает только тривиальные packets; `Баланс`, где Luna пытается
+  выполнить лёгкие и средние bounded tasks и при problem/contract conflict
+  возвращает evidence fallback Sol/controller-у; оба сохраняют exact final
+  review; `Рой` с intentional candidate identity, reduction и bounded stop;
+  `Экономичный` с одним resumable candidate без ложного Done/Goal close;
 - Luna profile normalization, root-shell supervisor, explicit role override и
   неизвестное cross-family ordering без догадки;
 - zero/one/multiple issue, рост и сокращение scope, late matching issue,
