@@ -1,0 +1,260 @@
+"""Deterministic oracle for the mechanical Issue Grinder mode decisions.
+
+The oracle covers the parts of IG-MODE-02, IG-MODE-06, IG-MODE-07 and
+IG-MODE-10 that can be decided from structured state.  It deliberately does
+not parse natural language, orchestrate agents or stand in for a model-forward
+run of the skill.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, replace
+from enum import Enum
+
+
+LUNA_MODEL = "gpt-5.6-luna"
+LUNA_MAX_EFFORT = "max"
+ACTIVE_TASK_STATUSES = frozenset({"In Progress", "In Review"})
+
+
+class ExecutionMode(str, Enum):
+    CLASSIC = "classic"
+    BALANCE = "balance"
+    SWARM = "swarm"
+    ECONOMICAL = "economical"
+
+
+class ModeOrigin(str, Enum):
+    EXPLICIT = "explicit"
+    AUTOMATIC = "automatic"
+
+
+@dataclass(frozen=True)
+class Profile:
+    model: str
+    effort: str | None
+
+    def __post_init__(self) -> None:
+        if not self.model.strip():
+            raise ValueError("profile model must not be blank")
+        if self.effort is not None and not self.effort.strip():
+            raise ValueError("profile effort must not be blank")
+
+    @property
+    def is_luna(self) -> bool:
+        return self.model.strip().casefold() == LUNA_MODEL
+
+
+LUNA_MAX = Profile(LUNA_MODEL, LUNA_MAX_EFFORT)
+
+
+@dataclass(frozen=True)
+class RoleProfiles:
+    controller: Profile
+    worker: Profile
+
+
+@dataclass(frozen=True)
+class ModeRecord:
+    canonical_mode: ExecutionMode
+    mode_origin: ModeOrigin
+    initial_main_profile: Profile
+    role_profiles: RoleProfiles
+
+
+def normalize_profiles(
+    main_profile: Profile,
+    *,
+    controller_override: Profile | None = None,
+    worker_override: Profile | None = None,
+) -> RoleProfiles:
+    """Apply the Luna Max baseline without guessing cross-family ordering."""
+
+    default_controller = LUNA_MAX if main_profile.is_luna else main_profile
+    return RoleProfiles(
+        controller=controller_override or default_controller,
+        worker=worker_override or LUNA_MAX,
+    )
+
+
+def resolve_mode(
+    main_profile: Profile,
+    *,
+    explicit_mode: ExecutionMode | None = None,
+    saved_record: ModeRecord | None = None,
+    continuity_proven: bool = False,
+    controller_override: Profile | None = None,
+    worker_override: Profile | None = None,
+) -> ModeRecord:
+    """Resolve a new run or restore a proven continuation without mode drift."""
+
+    if continuity_proven:
+        if saved_record is None:
+            raise ValueError("proven continuity requires a saved mode record")
+        if explicit_mode is not None:
+            raise ValueError("an explicit mode switch must pass the switch barrier")
+        return saved_record
+
+    canonical_mode = explicit_mode
+    if canonical_mode is None:
+        canonical_mode = (
+            ExecutionMode.ECONOMICAL
+            if main_profile.is_luna
+            else ExecutionMode.CLASSIC
+        )
+    origin = (
+        ModeOrigin.EXPLICIT
+        if explicit_mode is not None
+        else ModeOrigin.AUTOMATIC
+    )
+    return ModeRecord(
+        canonical_mode=canonical_mode,
+        mode_origin=origin,
+        initial_main_profile=main_profile,
+        role_profiles=normalize_profiles(
+            main_profile,
+            controller_override=controller_override,
+            worker_override=worker_override,
+        ),
+    )
+
+
+@dataclass(frozen=True)
+class EconomicalCheckpoint:
+    exact_candidate: str = ""
+    saved_change_identity: str = ""
+    task_ownership_evidence: str = ""
+    base_identity: str = ""
+    branch_or_worktree_identity: str = ""
+    integration_identity: str = ""
+    checks: tuple[str, ...] = ()
+    raw_results: tuple[str, ...] = ()
+    known_defects: tuple[str, ...] | None = None
+    unknowns: tuple[str, ...] | None = None
+    deferred_gates: tuple[str, ...] | None = None
+    next_step: str = ""
+    resume_condition: str = ""
+    task_manager_status: str = ""
+    goal_active: bool = False
+
+    def missing_fields(self) -> tuple[str, ...]:
+        missing = [
+            field_name
+            for field_name in (
+                "exact_candidate",
+                "saved_change_identity",
+                "task_ownership_evidence",
+                "base_identity",
+                "branch_or_worktree_identity",
+                "integration_identity",
+                "next_step",
+                "resume_condition",
+                "task_manager_status",
+            )
+            if not getattr(self, field_name).strip()
+        ]
+        for field_name in ("checks", "raw_results"):
+            values = getattr(self, field_name)
+            if not values or any(not value.strip() for value in values):
+                missing.append(field_name)
+        for field_name in ("known_defects", "unknowns", "deferred_gates"):
+            values = getattr(self, field_name)
+            if values is None or any(not value.strip() for value in values):
+                missing.append(field_name)
+        if (
+            self.task_manager_status
+            and self.task_manager_status not in ACTIVE_TASK_STATUSES
+        ):
+            missing.append("active_task_manager_status")
+        if not self.goal_active:
+            missing.append("goal_active")
+        return tuple(missing)
+
+
+@dataclass(frozen=True)
+class RunExitDecision:
+    action: str
+    may_complete: bool
+    may_block: bool
+    may_checkpoint: bool
+    defects: tuple[str, ...] = ()
+
+
+def decide_run_exit(
+    mode: ExecutionMode,
+    *,
+    active_scope_count: int,
+    terminal_acceptance_proven: bool = False,
+    terminal_blocker_accepted: bool = False,
+    checkpoint: EconomicalCheckpoint | None = None,
+) -> RunExitDecision:
+    """Separate terminal completion/blocking from an economical checkpoint."""
+
+    if active_scope_count < 0:
+        raise ValueError("active_scope_count must not be negative")
+    if terminal_acceptance_proven and terminal_blocker_accepted:
+        raise ValueError("a run cannot be both accepted and blocked")
+    if terminal_acceptance_proven and active_scope_count == 0:
+        return RunExitDecision("complete", True, False, False)
+    if terminal_blocker_accepted:
+        return RunExitDecision("blocked", False, True, False)
+
+    defects: tuple[str, ...] = ()
+    if terminal_acceptance_proven:
+        defects = ("active_scope_prevents_completion",)
+    if mode is ExecutionMode.ECONOMICAL and checkpoint is not None:
+        missing = checkpoint.missing_fields()
+        if not missing:
+            return RunExitDecision("checkpoint", False, False, True, defects)
+        defects = (*defects, *(f"checkpoint_missing:{field}" for field in missing))
+    return RunExitDecision("continue", False, False, False, defects)
+
+
+@dataclass(frozen=True)
+class ModeSwitchDecision:
+    action: str
+    mode_record: ModeRecord
+    may_apply_next_wave: bool
+    defects: tuple[str, ...] = ()
+
+
+def decide_mode_switch(
+    current_record: ModeRecord,
+    target_mode: ExecutionMode,
+    *,
+    explicit_request: bool,
+    active_writer_count: int = 0,
+    active_writers_checkpointed: bool = False,
+    integration_unchanged: bool = True,
+    ownership_reconciled: bool = True,
+    evidence_preserved: bool = True,
+) -> ModeSwitchDecision:
+    """Apply an explicit mode change only after the dispatch-wave barrier."""
+
+    if active_writer_count < 0:
+        raise ValueError("active_writer_count must not be negative")
+    if not explicit_request:
+        return ModeSwitchDecision("keep_mode", current_record, False)
+    if target_mode is current_record.canonical_mode:
+        return ModeSwitchDecision("already_selected", current_record, False)
+
+    defects = []
+    if active_writer_count and not active_writers_checkpointed:
+        defects.append("active_writers_not_checkpointed")
+    if not integration_unchanged:
+        defects.append("integration_checkout_changed")
+    if not ownership_reconciled:
+        defects.append("ownership_not_reconciled")
+    if not evidence_preserved:
+        defects.append("candidate_evidence_not_preserved")
+    if defects:
+        return ModeSwitchDecision(
+            "await_switch_barrier", current_record, False, tuple(defects)
+        )
+
+    switched_record = replace(
+        current_record,
+        canonical_mode=target_mode,
+        mode_origin=ModeOrigin.EXPLICIT,
+    )
+    return ModeSwitchDecision("switch_next_wave", switched_record, True)

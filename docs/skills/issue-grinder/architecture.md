@@ -977,10 +977,13 @@ ID само по себе не доказывает поведение.
 1. **Static contract.** Проверяет frontmatter, manifest, ссылки, уникальность и
    полноту `IG-*`, разрешимость references, отсутствие скрытой второй policy и
    byte identity source → Marketplace → installed cache.
-2. **Deterministic trace harness.** Получает синтетическое начальное состояние,
-   scripted tool results и fault injection, затем проверяет required/forbidden
-   decisions и их порядок. Текущий harness является oracle отдельных hard
-   invariants и не доказывает, что Markdown runtime вызовет те же effects.
+2. **Deterministic harnesses.** Получают структурированное синтетическое
+   состояние, scripted tool results и fault injection, затем проверяют
+   required/forbidden decisions и их порядок. Blocker/writer trace остаётся в
+   `scripts/issue_grinder_trace_harness.py`, а mode resolver, profile
+   normalization, economical exit и switch barrier — в
+   `scripts/issue_grinder_mode_harness.py`. Оба являются oracle отдельных hard
+   invariants и не доказывают, что Markdown runtime вызовет те же effects.
 3. **Independent model-forward evaluation.** Запускает реальный skill на
    синтетическом Task Manager и временном Git repository. Детерминированные
    assertions проверяют effects, а отдельный evaluator — стратегический смысл,
@@ -1035,4 +1038,7 @@ Hard invariants — отсутствие Production access и Backlog mutations,
 Goal gate, обязательный comment, exclusive writable worktree, отсутствие blind
 retry и task lifecycle только от coordinator-а — имеют нулевую терпимость.
 Semantic quality оценивается отдельно и не может компенсировать нарушение hard
-invariant. Проверка наличия терминов в файлах не заменяет model-forward run.
+invariant. Механический regression из реального прогона сводится к минимальному
+синтетическому deterministic case; ошибка strategy, language understanding или
+review остаётся model-forward case, а не имитируется fake state machine.
+Проверка наличия терминов в файлах не заменяет model-forward run.

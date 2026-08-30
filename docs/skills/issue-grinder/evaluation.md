@@ -9,9 +9,10 @@
 1. Static contract связывает каждый `IG-*` с runtime surface и required
    сценарием, проверяет metadata, references и отсутствие незавершённых
    placeholders. Этот слой исполняется repository validators.
-2. Детерминированные harness-ы проверяют отдельные внешние решения, порядок
-   effects и механические Git-инварианты writer admission. Они не симулируют
-   reasoning и поэтому являются oracle hard invariants, а не полным тестом skill.
+2. Детерминированные harness-ы проверяют отдельные внешние решения, mode
+   resolver, нетерминальный checkpoint, порядок effects и механические
+   Git-инварианты writer admission. Они не симулируют reasoning и поэтому
+   являются oracle hard invariants, а не полным тестом skill.
 3. Model-forward cases должны запускать установленный skill в новой сессии на
    синтетическом Task Manager scope; generator не получает rubric или expected
    answer. Repository-executable harness этого слоя пока отсутствует, поэтому
@@ -32,7 +33,7 @@
 | `IG-FLOW-03` | `SKILL.md` §3; `strategic-explainer.md` | trivial-start; required-comment; native-fallback |
 | `IG-FLOW-04` | `SKILL.md` §3; `strategic-explainer.md` | comment-reveals-work; optional-follow-up |
 | `IG-FLOW-05` | `SKILL.md` §2; `task-manager-flow.md` | integrated-blocked-by; late-reopen-recheck |
-| `IG-FLOW-06` | `SKILL.md` §5; `execution-modes.md` | active-scope-prevents-completion; economical-checkpoint-is-nonterminal |
+| `IG-FLOW-06` | `SKILL.md` §5; `execution-modes.md`; mode harness | active-scope-prevents-completion; economical-checkpoint-is-nonterminal |
 | `IG-GOAL-01` | `SKILL.md` §1; `execution-modes.md`; trace harness | explicit-multi-create; implicit-no-goal; grow-and-keep; economical-checkpoint-keeps-goal |
 | `IG-GOAL-02` | `SKILL.md` §1 | strategic-release-objective; issue-list-rejected |
 | `IG-GOAL-03` | `SKILL.md` §5; `execution-modes.md`; trace harness | empty-scope-complete; active-scope-continue; checkpoint-goal-not-complete |
@@ -50,15 +51,15 @@
 | `IG-AUTO-04` | `SKILL.md` §4; environment harness | default-uat; unknown-uat-before-effect |
 | `IG-AUTO-05` | `autonomy-and-environments.md` | security-selector; narrow-always-readback |
 | `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | four-canonical-modes; mode-does-not-expand-authority |
-| `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md` | explicit-freeform-wins; luna-any-effort-economical; non-luna-classic; mode-persists-after-model-change |
+| `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; luna-any-effort-economical; non-luna-classic; mode-persists-after-model-change |
 | `IG-MODE-03` | `execution-modes.md`; `multi-agent-execution.md` | classic-full-scope-analysis; classic-high-judgment-owner; classic-final-review-terminal |
 | `IG-MODE-04` | `execution-modes.md`; `multi-agent-execution.md` | balance-controller-plans; balance-economical-bulk; balance-rework-redispatch; balance-final-gate |
 | `IG-MODE-05` | `execution-modes.md`; `multi-agent-execution.md` | swarm-intentional-candidates; swarm-isolated-overlap; swarm-reduction; swarm-bounded-stop; swarm-final-gate |
-| `IG-MODE-06` | `SKILL.md` §5; `execution-modes.md` | economical-terminal-when-proven; economical-resumable-candidate; no-false-done; no-false-blocked |
-| `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md` | luna-profile-collapse; luna-low-root-luna-max-supervisor; non-luna-two-profile; unknown-family-no-guess; role-override-wins |
+| `IG-MODE-06` | `SKILL.md` §5; `execution-modes.md`; mode harness | economical-terminal-when-proven; economical-resumable-candidate; no-false-done; no-false-blocked |
+| `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md`; mode harness | luna-profile-collapse; luna-low-root-luna-max-supervisor; non-luna-two-profile; unknown-family-no-guess; role-override-wins |
 | `IG-MODE-08` | `execution-modes.md`; `multi-agent-execution.md` | economical-handoff-preserves-evidence; swarm-alternative-approach; same-retry-rejected |
 | `IG-MODE-09` | `execution-modes.md` | one-review-candidate; dissent-preserved; raw-swarm-transcript-not-required; rework-reviewed-again |
-| `IG-MODE-10` | `execution-modes.md`; `multi-agent-execution.md` | explicit-switch-barrier; automatic-no-switch; switch-preserves-candidates-and-scope |
+| `IG-MODE-10` | `execution-modes.md`; `multi-agent-execution.md`; mode harness | explicit-switch-barrier; automatic-no-switch; switch-preserves-candidates-and-scope |
 | `IG-MA-01` | `SKILL.md` §2; `multi-agent-execution.md` | two-independent-packets; useful-critic; intentional-candidate; one-lane-no-filler |
 | `IG-MA-02` | `multi-agent-execution.md` | disjoint-surfaces; ordinary-conflicting-surfaces; isolated-intentional-overlap |
 | `IG-MA-03` | `multi-agent-execution.md` | dependency-ready-frontier |
@@ -77,6 +78,35 @@
 | `IG-MA-16` | `execution-modes.md`; `multi-agent-execution.md` | luna-uncertainty-evidence-handoff; mode-specific-next-route; same-luna-retry-rejected |
 | `IG-MA-17` | `execution-modes.md`; `multi-agent-execution.md` | classic-luna-unavailable-controller; economical-fallback-no-silent-expensive-spend |
 | `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing; worker-evidence-coordinator-facade; nested-facade-no-new-task |
+
+## Быстрый mode corpus
+
+`scripts/issue_grinder_mode_harness.py` является исполнимой таблицей только для
+механически разрешимых частей mode contract. Он проверяется командой:
+
+```bash
+python3 -B -m unittest discover -s tests -p 'test_issue_grinder_mode_harness.py'
+```
+
+Corpus доказывает:
+
+- приоритет явного канонического режима над automatic rule;
+- `Экономичный` для exact `gpt-5.6-luna` при каждом доступном effort и
+  `Классический` для другого family identity без fuzzy match;
+- сохранение mode record при доказанной continuity и отсутствие переноса
+  старого record в новый run;
+- схлопывание Luna-профилей в Luna Max, сохранение non-Luna controller-а и
+  независимый приоритет role overrides;
+- полноту resumable checkpoint, запрет ложного `complete`/`blocked` и
+  обязательный активный Task Manager status/Goal;
+- явный switch только после quiescent writers, неизменного integration checkout,
+  reconciliation ownership и сохранения evidence.
+
+Harness принимает уже распознанный канонический mode. Он не доказывает качество
+понимания свободной пользовательской формулировки, декомпозиции, выбора
+полезного агента, различия подходов `Роя`, code review или фактического
+исполнения Markdown runtime. Эти свойства остаются model-forward cases и
+наблюдаемым результатом реальных прогонов.
 
 ## Быстрый blocker corpus
 
@@ -156,6 +186,24 @@ Corpus доказывает, что:
 Это проверка enforcement-механизма, а не решения coordinator-а разделить работу,
 не полнота packet contract и не качество fan-in. Эти части остаются предметом
 fresh model-forward smoke.
+
+## Обратная связь из реальных прогонов
+
+Реальный запуск Issue Grinder является основным дешёвым источником поведенческих
+сигналов, но не превращает случайный результат одного стохастического прогона в
+новое универсальное правило. Подтверждённый дефект сначала сводится к
+минимальному синтетическому примеру:
+
+- если решение механическое и не требует reasoning, пример добавляется в
+  соответствующий deterministic harness;
+- если дефект относится к пониманию запроса, стратегии, делегированию, review
+  или качеству текста, он добавляется в model-forward corpus с наблюдаемым
+  outcome и минимальным source fixture;
+- приватные production-данные, реальные recipients и подписанные URLs в fixture
+  не копируются.
+
+Так feedback постепенно увеличивает покрытие доказанных failure modes, не
+создавая тяжёлый fake Task Manager и не закрепляя случайные формулировки output.
 
 ## Fresh smoke acceptance
 

@@ -26,6 +26,8 @@ ISSUE_TITLE = ROOT / "issue-grinder" / "references" / "thread-title.md"
 ISSUE_WORKTREE_GUARD = (
     ROOT / "issue-grinder" / "scripts" / "writer_worktree_guard.py"
 )
+ISSUE_MODE_HARNESS = ROOT / "scripts" / "issue_grinder_mode_harness.py"
+ISSUE_MODE_HARNESS_TEST = ROOT / "tests" / "test_issue_grinder_mode_harness.py"
 SHIP_SKILL = ROOT / "ship-tasks" / "SKILL.md"
 SHIP_METADATA = ROOT / "ship-tasks" / "agents" / "openai.yaml"
 COMPOSER_SKILL = ROOT / "task-composer" / "SKILL.md"
@@ -175,6 +177,8 @@ CORE_FILES = (
     ISSUE_EXPLAINER,
     ISSUE_TITLE,
     ISSUE_WORKTREE_GUARD,
+    ISSUE_MODE_HARNESS,
+    ISSUE_MODE_HARNESS_TEST,
     SHIP_SKILL,
     SHIP_METADATA,
     COMPOSER_SKILL,

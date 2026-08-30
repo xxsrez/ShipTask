@@ -66,12 +66,6 @@ class IssueGrinderContractTest(unittest.TestCase):
             "integration checkout read-only",
             "assert-unchanged",
             "Luna retry loop",
-            "Классический",
-            "Баланс",
-            "Рой",
-            "Экономичный",
-            "gpt-5.6-luna",
-            "resumable checkpoint",
             "$strategic-explainer:strategic-explainer",
             "только пользователю в чате",
         ):
@@ -103,45 +97,25 @@ class IssueGrinderContractTest(unittest.TestCase):
             self.assertTrue((SKILL_ROOT / relative).is_file(), relative)
             self.assertIn(Path(relative).name, architecture)
 
-    def test_execution_modes_have_stable_observable_contracts(self) -> None:
-        requirements = REQUIREMENTS.read_text(encoding="utf-8")
-        execution_modes = re.sub(
-            r"\s+",
-            " ",
-            (SKILL_ROOT / "references" / "execution-modes.md").read_text(
-                encoding="utf-8"
-            ),
-        )
+    def test_execution_mode_runtime_and_evaluation_surfaces_are_wired(self) -> None:
+        execution_modes = (
+            SKILL_ROOT / "references" / "execution-modes.md"
+        ).read_text(encoding="utf-8")
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        architecture = ARCHITECTURE.read_text(encoding="utf-8")
+        evaluation = EVALUATION.read_text(encoding="utf-8")
 
-        classic = requirements.split(
-            "### `IG-MODE-03` — Классический режим", 1
-        )[1].split("### `IG-MODE-04`", 1)[0]
-        self.assertNotIn("текущее поведение", classic.lower())
-        for invariant in (
-            "изучает весь live scope",
-            "Существенные продуктовые, архитектурные",
-            "итоговое code review",
-            "Прогон продолжается до терминального результата",
-        ):
-            self.assertIn(invariant, classic)
-
-        for invariant in (
-            "explicit user mode → automatic model rule",
-            "gpt-5.6-luna",
-            "любая другая модель — `classic`",
-            "не применяй automatic resolver снова",
-            "controller_profile = worker_profile = Luna Max",
-            "один exact recommended candidate",
-            "mode_origin=explicit",
-        ):
-            self.assertIn(invariant, execution_modes)
-
-        self.assertIn(
-            "Без неё top-level `gpt-5.6-luna` при любом effort выбирает",
-            skill,
+        self.assertEqual(
+            re.findall(
+                r"^## (Классический|Баланс|Рой|Экономичный)$",
+                execution_modes,
+                re.MULTILINE,
+            ),
+            ["Классический", "Баланс", "Рой", "Экономичный"],
         )
-        self.assertIn("не вычисляй их заново", skill)
+        self.assertIn("[Execution modes](references/execution-modes.md)", skill)
+        self.assertIn("scripts/issue_grinder_mode_harness.py", architecture)
+        self.assertIn("scripts/issue_grinder_mode_harness.py", evaluation)
 
     def test_writer_guard_is_fail_closed_and_part_of_runtime(self) -> None:
         guard = WRITER_GUARD.read_text(encoding="utf-8")
