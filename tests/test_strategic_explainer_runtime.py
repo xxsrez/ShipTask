@@ -181,6 +181,8 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
             "структура и длина следуют содержанию",
             "не превращай процесс подготовки объяснения в предмет публикации",
             "каждую material limitation, exception или uncertainty ставь рядом",
+            "сохрани в basis доступные точные значения и их смысл",
+            "не заменяй их общей фразой о том, что технические детали исключены",
         ):
             self.assertIn(marker, text)
 
