@@ -12,6 +12,7 @@ COMMON_RUBRIC = SUITE / "common-rubric.md"
 SOURCE_PATTERN = r"(?m)^Source project: (General|ExampleNotes|Task Manager)$"
 
 EXPECTED_CASES = {
+    "analogy-boundary-and-exact-term",
     "automatic-capture-safe-boundary",
     "blocked-goal-causal-report",
     "bulk-cross-project-rollback",
@@ -25,6 +26,7 @@ EXPECTED_CASES = {
     "idempotent-retry-with-authorization",
     "invitation-reissue-single-pending",
     "large-file-boundary",
+    "mechanism-scale-and-missing-visual",
     "manager-role-ceiling",
     "mixed-preview-boundary",
     "ownership-transfer-one-owner",
@@ -41,7 +43,7 @@ EXPECTED_CASES = {
 }
 
 EXPECTED_SOURCE_MIX = {
-    "General": 1,
+    "General": 3,
     "ExampleNotes": 14,
     "Task Manager": 11,
 }

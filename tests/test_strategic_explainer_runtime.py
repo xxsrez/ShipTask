@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / "strategic-explainer" / "SKILL.md"
 ENTRYPOINT = ROOT / "strategic-explainer" / "references" / "provider-entrypoint.md"
 CONTRACT = ROOT / "strategic-explainer" / "references" / "provider-contract.md"
+REQUIREMENTS = ROOT / "docs" / "skills" / "strategic-explainer" / "requirements.md"
 ARCHITECTURE = ROOT / "docs" / "skills" / "strategic-explainer" / "architecture.md"
 EVALUATION = ROOT / "docs" / "reference" / "strategic-explainer-evaluation.md"
 HARNESS = ROOT / "tests" / "strategic-explainer" / "README.md"
@@ -189,6 +190,26 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
             "не заменяй их общей фразой о том, что технические детали исключены",
         ):
             self.assertIn(marker, text)
+
+    def test_explanatory_bridge_is_outcome_driven_and_not_evidence(self) -> None:
+        requirements = normalized(REQUIREMENTS)
+        architecture = normalized(ARCHITECTURE)
+        contract = normalized(CONTRACT)
+        evaluation = normalized(EVALUATION)
+
+        for text in (requirements, architecture, contract, evaluation):
+            self.assertIn("незнакомого механизма", text)
+            self.assertIn("величины", text)
+            self.assertIn("визуального", text)
+            self.assertIn("причин", text)
+            self.assertIn("масштаб", text)
+            self.assertIn("границ", text)
+
+        self.assertIn("не превращай эти приёмы в порядок или шаблон", contract)
+        self.assertIn("простой или точный экспертный ответ не расширяй", contract)
+        self.assertIn("недоступный график", contract)
+        self.assertIn("не восстанавливай догадкой", contract)
+        self.assertIn("не являются его доказательством", requirements)
 
     def test_editing_reuses_the_common_publication_filter(self) -> None:
         text = normalized(CONTRACT)

@@ -1093,6 +1093,10 @@ def validate_strategic_skill(errors: list[str]) -> None:
         "Не маскируй утечку переводом",
         "обезличенный внутренний процесс остаётся\nвнутренним процессом",
         "Каждую material limitation, exception или uncertainty ставь рядом",
+        "построй минимальный\nобъяснительный мост",
+        "Не превращай эти приёмы в порядок или шаблон",
+        "Недоступный график\nили иллюстрацию не восстанавливай догадкой",
+        "Простой или точный\nэкспертный ответ не расширяй",
     )
     text = read(STRATEGIC_SKILL)
     for coupling in ("Issue Grinder", "ShipTask", "Task Manager", "Task Composer", "TM-123"):
@@ -1781,7 +1785,7 @@ def validate_source_layers(errors: list[str]) -> None:
             )
         else:
             level_one_status = (
-                "Статус: current Level 1, 2026-08-30"
+                "Статус: current Level 1, 2026-08-31"
                 if requirements == STRATEGIC_REQUIREMENTS
                 else "Статус: current Level 1, 2026-08-27"
             )
@@ -2001,7 +2005,7 @@ def validate_source_layers(errors: list[str]) -> None:
         (ISSUE_SPEC, "IG-*", "Статус: current Level 2, 2026-08-30"),
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current Level 2 contract, 2026-08-27"),
-        (STRATEGIC_SPEC, "SE-*", "Статус: current agent-owned Architecture, 2026-08-30"),
+        (STRATEGIC_SPEC, "SE-*", "Статус: current agent-owned Architecture, 2026-08-31"),
     ):
         if architecture == ISSUE_SPEC:
             require(
@@ -2729,7 +2733,7 @@ def validate_strategic_contract(errors: list[str]) -> None:
     require(
         errors,
         STRATEGIC_SPEC,
-        "Статус: current agent-owned Architecture, 2026-08-30",
+        "Статус: current agent-owned Architecture, 2026-08-31",
         "[Overview](overview.md)",
         "`SE-*` — в локальных",
         "[Requirements](requirements.md)",
@@ -2794,6 +2798,9 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Названия самого Explainer, facade/provider-ролей, admission, orchestration",
         "Material limitation, exception или uncertainty ставится рядом",
         "прямой ответ, а не\nотчётный шаблон",
+        "минимальный\nобъяснительный мост",
+        "не обязательная последовательность",
+        "не восстанавливаются догадкой",
     )
     require(
         errors,
@@ -2810,6 +2817,9 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "текущая ситуация действительно дошла до этого условия",
         "отдельный source basis не компенсирует\nпотерю этой причинной связи",
         "невозможность продолжить не доказана",
+        "Аналогия, визуализация и приблизительный расчёт",
+        "не являются его доказательством",
+        "простой или точный\nэкспертный вопрос не расширяется",
     )
     require(
         errors,
@@ -2881,6 +2891,8 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Обезличивание не проходит gate",
         "Оговорка находится рядом с утверждением",
         "Свободная форма вместо отчётного шаблона",
+        "Незнакомый механизм, «голое» число и недоступный график",
+        "Аналогия с границей и точный экспертный вопрос",
     )
     require(
         errors,

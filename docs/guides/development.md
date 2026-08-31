@@ -76,9 +76,9 @@ evaluation, retired loopholes, documentation navigation и distribution
 boundaries. Unit suite проверяет изоляцию model-forward fixtures: ordinary
 generating subagent получает только raw facts, а semantic rubric остаётся у
 evaluator-а.
-Current Strategic Explainer suite содержит 24 cases: тринадцать из ExampleNotes и
-одиннадцать из Task Manager; behavior change прогоняет всю матрицу, а не
-удобную выборку.
+Current Strategic Explainer suite содержит 28 cases: четырнадцать из ExampleNotes,
+одиннадцать из Task Manager и три общих; behavior change прогоняет всю матрицу,
+а не удобную выборку.
 Проверка не должна требовать конкретных необязательных слов или
 числа tool calls вместо observable behavior. Evals проверяют automatic default,
 сохранение natural-language exact/relative/role/conditional rules,
