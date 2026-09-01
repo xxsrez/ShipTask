@@ -36,9 +36,9 @@ best-effort title и Goal lifecycle. Перед первой mutation полно
 effort выбирает `Экономичный`, любая другая модель — `Классический`; число issue
 не выбирает `Соло`. `По умолчанию` запускает это же правило, а не шестой режим.
 Полностью прочитай [Execution modes](references/execution-modes.md), сохрани mode
-record в continuity, затем полностью прочитай ровно один связанный там файл
-выбранного режима. Не пересчитывай mode после compaction, interruption или смены
-модели. Режим меняется только явной командой через safe switch barrier.
+record в continuity и не пересчитывай его после compaction, interruption или
+смены модели. Затем полностью прочитай ровно один связанный там файл выбранного
+режима. Режим меняется только явной командой через safe switch barrier.
 
 ## 2. Веди delivery loop по обещанию режима
 
