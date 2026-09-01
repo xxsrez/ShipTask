@@ -16,6 +16,14 @@ ISSUE_AUTONOMY = (
     ROOT / "issue-grinder" / "references" / "autonomy-and-environments.md"
 )
 ISSUE_MODES = ROOT / "issue-grinder" / "references" / "execution-modes.md"
+ISSUE_MODE_DIR = ROOT / "issue-grinder" / "references" / "modes"
+ISSUE_MODE_FILES = {
+    "solo": ISSUE_MODE_DIR / "solo.md",
+    "classic": ISSUE_MODE_DIR / "classic.md",
+    "balance": ISSUE_MODE_DIR / "balance.md",
+    "swarm": ISSUE_MODE_DIR / "swarm.md",
+    "economical": ISSUE_MODE_DIR / "economical.md",
+}
 ISSUE_HELP = ROOT / "issue-grinder" / "references" / "mode-help.md"
 ISSUE_RUN = ROOT / "issue-grinder" / "references" / "run-and-goal.md"
 ISSUE_MULTI_AGENT = (
@@ -176,6 +184,7 @@ CORE_FILES = (
     ISSUE_FLOW,
     ISSUE_AUTONOMY,
     ISSUE_MODES,
+    *ISSUE_MODE_FILES.values(),
     ISSUE_MULTI_AGENT,
     ISSUE_EXPLAINER,
     ISSUE_TITLE,
@@ -481,17 +490,68 @@ def validate_issue_skill(errors: list[str]) -> None:
         "`economical`",
         "Не пересчитывай automatic mode",
         "controller_profile = worker_profile = Luna Max",
-        "## Соло",
-        "единственный execution profile",
-        "## Классический",
-        "Luna Max получает только действительно тривиальный",
-        "## Баланс",
-        "предпочтительным исполнителем лёгких и средних bounded",
-        "возвращает fallback controller/reviewer-у",
-        "## Рой",
-        "## Экономичный",
-        "resumable checkpoint",
+        "## Выбранный режим — обязательная загрузка",
+        "[Соло](modes/solo.md)",
+        "[Классический](modes/classic.md)",
+        "[Баланс](modes/balance.md)",
+        "[Рой](modes/swarm.md)",
+        "[Экономичный](modes/economical.md)",
+        "ровно один соответствующий\nфайл",
         "mode_origin=explicit",
+    )
+    require(
+        errors,
+        ISSUE_MODE_FILES["solo"],
+        "# Соло",
+        "canonical_mode=solo",
+        "Единственный execution profile",
+        "Число subagents и одновременных execution lanes всегда равно `0` и `1`",
+        "Strategic Explainer не вызывается",
+        "Resumable checkpoint `Экономичного` режима недоступен",
+    )
+    require(
+        errors,
+        ISSUE_MODE_FILES["classic"],
+        "# Классический",
+        "canonical_mode=classic",
+        "делает почти всю\n   implementation сам",
+        "Luna Max получает только действительно тривиальный",
+        "Маленький diff\n   сам по себе не simple",
+        "Problem fallback получает controller/reviewer",
+        "проводит final code/result review",
+    )
+    require(
+        errors,
+        ISSUE_MODE_FILES["balance"],
+        "# Баланс",
+        "canonical_mode=balance",
+        "предпочтительным исполнителем лёгких и средних bounded",
+        "основную массу implementation",
+        "возвращает fallback controller/reviewer-у",
+        "bounded material rework в новую economical wave",
+        "Без final gate",
+    )
+    require(
+        errors,
+        ISSUE_MODE_FILES["swarm"],
+        "# Рой",
+        "canonical_mode=swarm",
+        "большой объём дешёвого поиска",
+        "множество одинаковых prompts",
+        "один recommended candidate",
+        "намеренно иной\ncandidate",
+        "Без final review",
+    )
+    require(
+        errors,
+        ISSUE_MODE_FILES["economical"],
+        "# Экономичный",
+        "canonical_mode=economical",
+        "почти без расхода более дефицитного",
+        "один exact recommended candidate",
+        "resumable checkpoint",
+        "update_goal(complete|blocked)",
+        "активный Goal",
     )
     require(
         errors,
@@ -507,11 +567,11 @@ def validate_issue_skill(errors: list[str]) -> None:
         "integration checkout read-only",
         "assert-unchanged",
         "task-owned commit",
-        "gpt-5.6-luna",
-        "`max`",
+        "выбранного mode-файла",
+        "Допустимые topology, роли и envelope",
         "contract/context conflict",
-        "`Соло` является полным opt-out",
-        "mode envelope",
+        "Luna retry loop",
+        "mode-compatible путь",
         "intentional candidates",
         "Worker, reviewer\nили scout не формулирует готовый comment",
         "`create_thread`, отдельная projectless task",
@@ -630,8 +690,9 @@ def validate_issue_skill(errors: list[str]) -> None:
         "## 4. Режимы исполнения и профильный resolver",
         "mode record",
         "Luna Max supervisor",
-        "`Соло` использует exact current main profile",
-        "publication работает в native mode",
+        "`modes/{solo,classic,balance,swarm,economical}.md`",
+        "mode-specific topology",
+        "единственного runtime owner-а режима",
         "resumable checkpoint",
     )
 

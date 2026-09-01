@@ -49,6 +49,12 @@ plugins/issue-grinder/
     │   │   ├── thread-title.md
     │   │   ├── autonomy-and-environments.md
     │   │   ├── execution-modes.md
+    │   │   ├── modes/
+    │   │   │   ├── solo.md
+    │   │   │   ├── classic.md
+    │   │   │   ├── balance.md
+    │   │   │   ├── swarm.md
+    │   │   │   └── economical.md
     │   │   ├── multi-agent-execution.md
     │   │   └── strategic-explainer.md
     │   └── scripts/
@@ -89,8 +95,11 @@ plugin может содержать только skills, а MCP server, UI и l
 - `task-manager-flow.md` — live scope, lifecycle, blocked-by, comment/status
   transaction, read-back и recovery;
 - `execution-modes.md` — после однократного выбора режима и перед
-  декомпозицией: mode resolver, profile normalization, mode-specific delivery
-  promise, review и checkpoint;
+  декомпозицией: общий mode resolver, profile normalization, invariants, switch
+  barrier и review packet;
+- `modes/{solo,classic,balance,swarm,economical}.md` — ровно один файл после
+  сохранения canonical mode; в нём целиком находятся mode-specific topology,
+  role/profile routing, fallback, review и stop promise;
 - `autonomy-and-environments.md` — только для явно вызванного автономного run и
   действий со средами;
 - `multi-agent-execution.md` — только когда существует полезная независимая
@@ -99,8 +108,11 @@ plugin может содержать только skills, а MCP server, UI и l
   пользовательским текстом.
 
 Reference не создаёт собственную политику и не становится параллельным
-Requirements или Architecture. Весь применимый смысл `IG-*` должен оставаться
-восстановимым из `SKILL.md` и адресно подключаемых references. Такой способ
+Requirements или Architecture. Один режим не должен собираться из фрагментов
+нескольких mode-файлов: общая механика загружается отдельно, а выбранная
+mode-specific policy имеет ровно одного runtime-владельца. Весь применимый смысл
+`IG-*` должен оставаться восстановимым из `SKILL.md` и адресно подключаемых
+references. Такой способ
 разделения соответствует
 [официальной модели skills](https://developers.openai.com/plugins/build/skills),
 где `SKILL.md` задаёт workflow, а supporting resources выносят только нужную
@@ -412,10 +424,12 @@ eligibility действительно возможна.
 ## 4. Режимы исполнения и профильный resolver
 
 Режим выбирается после доказательства нового либо продолжающегося run и до
-стратегической декомпозиции. Runtime читает
-`issue-grinder/references/execution-modes.md` ровно тогда, когда mode record ещё
-не создан либо пользователь явно меняет режим. Во время обычных последующих
-итераций canonical mode берётся из run checkpoint и не проектируется заново.
+стратегической декомпозиции. Runtime читает общий
+`issue-grinder/references/execution-modes.md`, создаёт либо восстанавливает mode
+record, а затем полностью читает ровно один файл из
+`issue-grinder/references/modes/`. Во время обычных последующих итераций
+canonical mode берётся из run checkpoint и не проектируется заново; повторно
+загружается тот же выбранный mode-файл, а не все пять спецификаций.
 
 ### 4.1 Однократное разрешение режима
 
@@ -475,53 +489,24 @@ anchors и не создаёт новую Codex task. Так логическо�
 
 ### 4.3 Режимные workflow
 
-`Соло` использует exact current main profile единственным исполнителем. Он
-полностью анализирует live scope, выбирает один dependency-ready issue или
-пакет, самостоятельно реализует, проверяет и проводит self-review точного
-результата, затем только после read-back переходит к следующему. Никакие
-supervisor, worker, scout, critic, verifier, candidate, reducer или отдельный
-Strategic Explainer не вызываются; publication работает в native mode. Режим
-сохраняет terminal promise и не получает economical checkpoint.
+Каждый canonical mode компилируется в отдельный runtime-файл и только там
+владеет своими topology, role/profile routing, problem fallback, review и stop
+promise:
 
-`Классический` строит полную карту scope, dependencies, acceptance и risk
-surfaces на controller/reviewer profile и оставляет его основным исполнителем:
-Sol/controller делает почти всю implementation сам. Только действительно
-тривиальные strict-simple пакеты из `IG-MA-14` уходят Luna Max; material
-judgment, integration и final review остаются controller/reviewer. Обычная
-delegation разделяет независимую работу, но не создаёт competing full
-implementations без user override. Loop заканчивается terminal result либо
-принятым blocker handoff.
+| Mode | Runtime owner | Основные Requirement projections |
+|---|---|---|
+| `solo` | `modes/solo.md` | `IG-MODE-11`, один current profile, terminal-only |
+| `classic` | `modes/classic.md` | `IG-MODE-03`, `IG-MA-14..17`, controller-led terminal result |
+| `balance` | `modes/balance.md` | `IG-MODE-04`, части `IG-MODE-08..09`, economical bulk и final gate |
+| `swarm` | `modes/swarm.md` | `IG-MODE-05`, части `IG-MODE-08..09`, bounded candidate waves |
+| `economical` | `modes/economical.md` | `IG-MODE-06`, части `IG-MODE-08..09`, resumable checkpoint |
 
-`Баланс` сначала использует controller/reviewer для стратегического анализа и
-явного выделения high-judgment work. Luna Max становится предпочтительным
-исполнителем лёгких и средних bounded implementation, research, tests и
-preliminary critique с ясным contract и oracle. При существенной
-неопределённости, contract/context conflict или проблеме за границами packet-а
-Luna сохраняет checkpoint и evidence и возвращает fallback Sol/controller-у,
-который уточняет contract, продолжает сам либо создаёт новый безопасный packet.
-Integration owner собирает содержательные партии; economical critics атакуют
-candidate до review. Reviewer читает exact integrated candidate и может вернуть
-bounded material rework в новую economical wave. Любой изменённый candidate
-проходит final gate заново.
-
-`Рой` задаёт конечный compute envelope как явный budget пользователя либо
-bounded последовательность волн, выбранную coordinator-ом. Candidate identity
-содержит purpose, base, owned worktree/branch и отличающий подход. Разные
-candidates могут менять те же surfaces только в полной Git-изоляции. Waves
-могут включать designs, implementations, critics, test authors и economical
-judges; одинаковый prompt множеству agents не считается достаточным
-разнообразием. Детерминированные checks и judges сокращают множество до одного
-recommended candidate и максимум одного material runner-up. Integration и
-final review применяются только к точному выбранному кандидату.
-
-`Экономичный` использует economical controller/supervisor и workers для
-максимального безопасного продвижения. Он сворачивает работу к одному
-recommended candidate, выполняет доступные deterministic и aggregate checks и
-сохраняет defects, unknowns и deferred gates. Когда дальнейшие дешёвые попытки
-не дают существенного ожидаемого улучшения либо остался недоступный review
-gate, текущая попытка формирует resumable checkpoint вместо blocker-а или
-ложного completion. `In Progress`/`In Review` и активный Goal сохраняются. Если
-обычный acceptance всё же доказан, применяется normal terminal path.
+Общие resolver, normalized profiles, authority и evidence invariants остаются в
+`execution-modes.md`; Git isolation и fan-in mechanics — в
+`multi-agent-execution.md`. Эти общие references не повторяют решения
+конкретного режима и не выбирают за него допустимую роль, fallback или точку
+остановки. `mode-help.md` остаётся только delivery-free справкой и не является
+источником runtime policy.
 
 ### 4.4 Review packet и переключение
 
@@ -972,19 +957,12 @@ Coordinator не интегрирует исключённый из dynamic scop
 такой checkpoint попадает в fan-in лишь когда его результат независимо нужен
 оставшемуся scope, что подтверждено повторной оценкой поверхностей и acceptance.
 
-Profile routing берётся из mode record. В `Классическом` `gpt-5.6-luna` с
-`max` получает только тривиальные strict-simple пакеты по `IG-MA-14`; почти всю
-остальную работу выполняет controller/reviewer profile. В `Балансе` Luna Max
-сначала получает лёгкие и средние bounded packets, а их problem handoff
-возвращается controller/reviewer profile. `Рой` и `Экономичный` используют Luna
-Max по правилам раздела 4 и runtime reference, включая normalized
-single-profile topology.
-
-Material uncertainty создаёт evidence handoff, а не бесконечный Luna retry
-loop. В `Классическом` и `Балансе` checkpoint может перейти reviewer-у; в `Рое`
-допустим намеренно иной candidate; в `Экономичном` — resumable non-terminal
-checkpoint. Недоступность Luna сначала ищет mode-compatible economical lane и
-не разрешает молча расходовать неограниченную дефицитную квоту.
+Profile routing начинается с mode record и заканчивается выбранным mode-файлом:
+общая multi-agent mechanics не решает, какая роль получает конкретный packet,
+куда уходит problem handoff и какой fallback допустим при недоступной Luna.
+Material uncertainty всегда создаёт evidence handoff, а не бесконечный Luna
+retry loop; точный следующий маршрут и допустимый расход дефицитного profile
+берутся из единственного runtime owner-а режима, описанного в разделе 4.3.
 
 ## 12. Integrity и восстановление
 

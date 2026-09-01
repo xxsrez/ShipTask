@@ -92,6 +92,11 @@ class IssueGrinderContractTest(unittest.TestCase):
             "references/mode-help.md",
             "references/run-and-goal.md",
             "references/execution-modes.md",
+            "references/modes/solo.md",
+            "references/modes/classic.md",
+            "references/modes/balance.md",
+            "references/modes/swarm.md",
+            "references/modes/economical.md",
             "references/multi-agent-execution.md",
             "references/strategic-explainer.md",
             "scripts/writer_worktree_guard.py",
@@ -107,17 +112,39 @@ class IssueGrinderContractTest(unittest.TestCase):
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
         evaluation = EVALUATION.read_text(encoding="utf-8")
 
+        mode_files = {
+            "Соло": "solo.md",
+            "Классический": "classic.md",
+            "Баланс": "balance.md",
+            "Рой": "swarm.md",
+            "Экономичный": "economical.md",
+        }
         self.assertEqual(
             re.findall(
                 r"^## (Соло|Классический|Баланс|Рой|Экономичный)$",
                 execution_modes,
                 re.MULTILINE,
             ),
-            ["Соло", "Классический", "Баланс", "Рой", "Экономичный"],
+            [],
         )
+        for mode, filename in mode_files.items():
+            mode_runtime = (
+                SKILL_ROOT / "references" / "modes" / filename
+            ).read_text(encoding="utf-8")
+            self.assertEqual(
+                re.findall(
+                    r"^# (Соло|Классический|Баланс|Рой|Экономичный)$",
+                    mode_runtime,
+                    re.MULTILINE,
+                ),
+                [mode],
+            )
+            self.assertIn(f"modes/{filename}", execution_modes)
+            self.assertIn(filename, architecture)
+            self.assertIn(filename, evaluation)
         self.assertIn(
-            "число subagents и\nодновременных execution lanes равно `0` и `1`",
-            (SKILL_ROOT / "references" / "multi-agent-execution.md").read_text(
+            "Число subagents и одновременных execution lanes всегда равно `0` и `1`",
+            (SKILL_ROOT / "references" / "modes" / "solo.md").read_text(
                 encoding="utf-8"
             ),
         )
@@ -128,6 +155,7 @@ class IssueGrinderContractTest(unittest.TestCase):
             ),
         )
         self.assertIn("[Execution modes](references/execution-modes.md)", skill)
+        self.assertIn("ровно один связанный там файл", skill)
         self.assertIn("scripts/issue_grinder_mode_harness.py", architecture)
         self.assertIn("scripts/issue_grinder_mode_harness.py", evaluation)
 
