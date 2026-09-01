@@ -189,3 +189,10 @@ read-back подтверждает `teams=0`, `team_memberships=0`, `team_grants
 Access policy осталась `custom`: один owner, ноль групп и external visitors.
 `TM-336` в Release 0.3 завершена. Product Production не читался, не изменялся и
 не публиковался.
+
+Пять candidate branches намеренно сохранены как evidence и не вливались в
+`main`: `codex/issue-grinder-04-economical-f700`,
+`codex/ig-solo-release-0.4-0792`, `codex/ig-balance-release-0.4-e1c1`,
+`codex/ig-swarm-release-0.4-87f5`, `codex/release-0.4-classic-7e71`.
+Для A, B и E зафиксирован exact remote branch; C и D сохранены локально с exact
+candidate SHA. Рабочие деревья всех пяти кандидатов были чистыми на capture.
