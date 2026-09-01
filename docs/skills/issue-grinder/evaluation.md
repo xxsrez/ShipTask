@@ -248,3 +248,20 @@ fresh model-forward smoke.
 Static, deterministic и registration checks не заменяют этот model-forward
 smoke; если live synthetic run не выполнен, это указывается как непроверенная
 часть, а не считается автоматически пройденной.
+
+Узкий smoke прогрессивной загрузки запускается отдельно:
+
+```bash
+python3 scripts/issue_grinder_mode_loading_smoke.py \
+  --model gpt-5.6-luna \
+  --reasoning-effort low
+```
+
+Runner создаёт по одной fresh ephemeral read-only Codex-сессии для каждого из
+пяти explicit mode. По наблюдаемым command-execution events case проходит,
+только если агент полностью открыл installed `SKILL.md`, общий
+`execution-modes.md` и ровно один выбранный файл из `references/modes/`.
+Открытие соседнего mode-файла, broad access ко всему каталогу, отсутствие
+обязательного чтения или расходящийся итоговый receipt закрывают case. Этот
+smoke проверяет progressive disclosure, но не доказывает соблюдение model
+routing и topology во время полноценной delivery.

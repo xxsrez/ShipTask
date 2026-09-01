@@ -38,6 +38,12 @@ ISSUE_WORKTREE_GUARD = (
 )
 ISSUE_MODE_HARNESS = ROOT / "scripts" / "issue_grinder_mode_harness.py"
 ISSUE_MODE_HARNESS_TEST = ROOT / "tests" / "test_issue_grinder_mode_harness.py"
+ISSUE_MODE_LOADING_SMOKE = (
+    ROOT / "scripts" / "issue_grinder_mode_loading_smoke.py"
+)
+ISSUE_MODE_LOADING_SMOKE_TEST = (
+    ROOT / "tests" / "test_issue_grinder_mode_loading_smoke.py"
+)
 SHIP_SKILL = ROOT / "ship-tasks" / "SKILL.md"
 SHIP_METADATA = ROOT / "ship-tasks" / "agents" / "openai.yaml"
 COMPOSER_SKILL = ROOT / "task-composer" / "SKILL.md"
@@ -191,6 +197,8 @@ CORE_FILES = (
     ISSUE_WORKTREE_GUARD,
     ISSUE_MODE_HARNESS,
     ISSUE_MODE_HARNESS_TEST,
+    ISSUE_MODE_LOADING_SMOKE,
+    ISSUE_MODE_LOADING_SMOKE_TEST,
     SHIP_SKILL,
     SHIP_METADATA,
     COMPOSER_SKILL,
@@ -694,6 +702,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         "mode-specific topology",
         "единственного runtime owner-а режима",
         "resumable checkpoint",
+        "scripts/issue_grinder_mode_loading_smoke.py",
     )
 
 

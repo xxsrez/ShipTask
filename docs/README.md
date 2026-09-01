@@ -218,9 +218,9 @@
 
 ## Reports
 
-- [Issue Grinder: сравнение пяти режимов](reports/2026-09-01-issue-grinder-five-mode-benchmark.md)
-  — результаты пяти последовательных прогонов, слепой quality ranking,
-  токены, стоимость, время, дефекты, ограничения протокола и финальная очистка.
+- [Issue Grinder: аудит пяти режимов и маршрутизации моделей](reports/2026-09-01-issue-grinder-five-mode-benchmark.md)
+  — исправленный tree-only расход, отзыв прежнего ranking, фактические роли
+  Sol/Luna/GPT-5.4, protocol defects и требования к повторному benchmark.
 - [Strategic Explainer: сравнение SOL и Luna](reports/2026-08-27-strategic-explainer-luna-comparison.md)
   — paired 20-case blind evaluation, человеческий blind vote и решение
   закрепить ordinary provider на `gpt-5.6-luna` с `max`.

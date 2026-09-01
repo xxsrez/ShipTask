@@ -158,6 +158,12 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("ровно один связанный там файл", skill)
         self.assertIn("scripts/issue_grinder_mode_harness.py", architecture)
         self.assertIn("scripts/issue_grinder_mode_harness.py", evaluation)
+        self.assertIn(
+            "scripts/issue_grinder_mode_loading_smoke.py", architecture
+        )
+        self.assertIn(
+            "scripts/issue_grinder_mode_loading_smoke.py", evaluation
+        )
 
     def test_mode_help_is_a_delivery_free_progressive_disclosure_path(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")

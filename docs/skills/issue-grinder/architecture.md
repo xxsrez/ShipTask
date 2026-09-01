@@ -1029,7 +1029,11 @@ ID само по себе не доказывает поведение.
    синтетическом Task Manager и временном Git repository. Детерминированные
    assertions проверяют effects, а отдельный evaluator — стратегический смысл,
    фактологичность и понятность публикационного текста. Generator не получает
-   expected answer или rubric с подсказкой нужного решения.
+   expected answer или rubric с подсказкой нужного решения. Узкий repository
+   runner `scripts/issue_grinder_mode_loading_smoke.py` отдельно запускает пять
+   fresh read-only сессий и по command-execution trace доказывает, что после
+   общего resolver-а агент читает только выбранный mode-файл; обращение к
+   соседнему файлу либо всему каталогу закрывает case.
 4. **Fresh installed-plugin smoke.** После упаковки plugin проверяется в новой
    Codex-сессии с live synthetic UAT: activation, dependencies, полный workflow,
    Marketplace/cache identity и отсутствие второй implicit delivery authority.
