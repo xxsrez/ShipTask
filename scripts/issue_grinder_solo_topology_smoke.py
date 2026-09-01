@@ -300,7 +300,6 @@ def run_case(
         command = [
             codex_bin,
             "exec",
-            "--ephemeral",
             "--json",
             "--skip-git-repo-check",
             "--sandbox",
