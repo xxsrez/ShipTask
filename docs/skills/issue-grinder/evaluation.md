@@ -56,7 +56,7 @@
 | `IG-MODE-04` | `modes/balance.md`; `multi-agent-execution.md`; routing guard | balance-controller-plans; balance-first-wave-luna; balance-luna-bulk; balance-material-only-controller; balance-rework-redispatch; balance-final-gate |
 | `IG-MODE-05` | `modes/swarm.md`; `multi-agent-execution.md`; routing guard | swarm-all-child-work-luna; swarm-material-best-of-m; swarm-isolated-overlap; swarm-reduction; swarm-bounded-stop; swarm-final-gate |
 | `IG-MODE-06` | `SKILL.md` §5; `modes/economical.md`; mode/routing guards | economical-all-substantive-luna; non-luna-root-shell-only; economical-terminal-when-proven; economical-resumable-candidate; no-false-done; no-false-blocked |
-| `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md`; mode/routing guards | luna-profile-collapse; explicit-luna-max-child; bounded-fork; observed-profile-match; forced-reviewer-profile-rejected; luna-low-root-luna-max-supervisor; role-override-wins |
+| `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md`; mode/routing guards | luna-profile-collapse; explicit-luna-max-child; bounded-fork; observed-profile-match; agent-label-neutral; luna-low-root-luna-max-supervisor; role-override-wins |
 | `IG-MODE-08` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | economical-handoff-preserves-evidence; swarm-alternative-approach; same-retry-rejected |
 | `IG-MODE-09` | `modes/{balance,swarm,economical}.md` | one-review-candidate; dissent-preserved; raw-swarm-transcript-not-required; rework-reviewed-again |
 | `IG-MODE-10` | `execution-modes.md`; `multi-agent-execution.md`; mode harness | explicit-switch-barrier; automatic-no-switch; switch-preserves-candidates-and-scope |
@@ -124,8 +124,8 @@ python3 -B -m unittest discover -s tests -p 'test_model_routing_guard.py'
 
 Corpus механически доказывает, что `Баланс`, `Рой` и `Экономичный` принимают
 substantive Luna Max child только с explicit model/effort и bounded fork,
-отвергают inherited Sol, `fork_turns=all`, встроенные platform-типы
-`critic`/`reviewer` и observed GPT-5.4 mismatch. Для `Баланса` отдельно
+отвергают inherited Sol, `fork_turns=all` и observed profile mismatch, но не
+выводят model/effort из имени либо типа агента. Для `Баланса` отдельно
 сохраняются узкие controller roles material judgment/integration/final review;
 явный пользовательский role override сохраняется и сверяется с observed
 profile. Guard не доказывает честность semantic label или фактический вызов
@@ -255,8 +255,8 @@ fresh model-forward smoke.
   candidate без ложного `Done`/Goal completion;
 - для всех child в `Балансе`, `Рое` и `Экономичном` сохранить pre-dispatch и
   observed `issue-grinder/model-routing/v1` receipts; ни один substantive child
-  не наследует Sol, не использует GPT-5.4 и не запускается через platform
-  `critic`/`reviewer` без явного пользовательского profile override;
+  не наследует несовместимый profile, а agent name/type не используется как
+  источник model/effort policy;
 - на scope с двумя независимыми write packets сначала получить от каждого
   admission-only receipt отдельного linked worktree, разрешить implementation
   только follow-up turn-ом и сохранить integration checkout неизменным до

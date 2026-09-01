@@ -224,10 +224,11 @@ class IssueGrinderContractTest(unittest.TestCase):
         for marker in (
             "issue-grinder/model-routing/v1",
             "gpt-5.6-luna",
-            "platform_agent_type_bypasses_mode_profile",
             "actual_luna_model_mismatch",
         ):
             self.assertIn(marker, guard)
+        self.assertNotIn("FORCED_PROFILE_AGENT_TYPES", guard)
+        self.assertNotIn("platform_agent_type_bypasses_mode_profile", guard)
         self.assertIn("Model routing — hard gate", execution_modes)
         self.assertIn("Model routing admission — hard gate", multi_agent)
 

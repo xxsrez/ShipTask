@@ -157,8 +157,8 @@ Goal, lifecycle, verification, reflection и multi-agent dispatch зависят
 операции. В первых delivery coordinator прочитал hard invariant worktree, но
 несколько writers всё равно начали запись в общий checkout. Позднее `Баланс`,
 `Рой` и `Экономичный` называли Luna предпочтительной, однако substantive agents
-наследовали Sol, а platform-типы `critic`/`reviewer` включали GPT-5.4. Поэтому
-runtime содержит два узких guard-а.
+получали профиль, несовместимый с выбранным режимом. Поэтому runtime содержит
+два узких guard-а.
 
 `scripts/model_routing_guard.py`:
 
@@ -166,8 +166,7 @@ runtime содержит два узких guard-а.
 - требует explicit model, effort и bounded `fork_turns` для каждого child;
 - в `Балансе`, `Рое` и `Экономичном` fail-closed требует Luna Max для
   substantive economical lane;
-- отвергает встроенные `critic`/`reviewer`, когда их фиксированный platform
-  profile обходит mode routing;
+- не выводит model/effort из имени либо типа агента;
 - сравнивает requested и observed child profile и выдаёт стабильный receipt
   `issue-grinder/model-routing/v1`.
 
@@ -532,18 +531,18 @@ exact spawn args для внешней recursive telemetry проверки. М�
 
 Каждая Luna-lane явно задаёт `gpt-5.6-luna`, `max` и `fork_turns="none"` либо
 положительное bounded значение. Молчаливое наследование root запрещено.
-Встроенные platform-типы `critic`/`reviewer` имеют фиксированный GPT-5.4 profile
-и поэтому в этих режимах без явного пользовательского override не применяются:
-semantic critic/reviewer создаётся как `default`, `explorer` или `worker` с
-явным mode profile. Недоступность Luna уменьшает capacity, но не разрешает
-скрытую Sol/GPT-5.4 implementation: `Баланс` сохраняет material controller lane,
-а `Рой`/`Экономичный` сохраняют evidence/checkpoint до совместимой capacity.
+Имя и тип агента не кодируют profile policy: coordinator использует effective
+profile текущего dispatch, явно передаёт требуемый режимом model/effort и
+проверяет observed profile. Недоступность Luna уменьшает capacity, но не
+разрешает скрытую дорогую implementation: `Баланс` сохраняет material controller
+lane, а `Рой`/`Экономичный` сохраняют evidence/checkpoint до совместимой
+capacity.
 
 Receipt не доверяет названию роли. Coordinator должен доказать, что
 `material_judgment` действительно содержит неделимое решение, а не ordinary
 implementation, и сверить фактическую модель по telemetry. Это устраняет
 наблюдённый failure mode, где Luna использовалась только для комментариев, а
-режимы фактически выполнялись Sol и GPT-5.4.
+содержательная работа выполнялась несовместимыми с режимом профилями.
 
 ### 4.4 Режимные workflow
 

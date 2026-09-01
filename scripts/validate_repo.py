@@ -503,7 +503,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         "controller_profile = worker_profile = Luna Max",
         "## Model routing — hard gate",
         "model_routing_guard.py",
-        "Platform-типы `critic` и `reviewer`",
+        "Имя или тип агента не выбирает профиль режима",
         "## Выбранный режим — обязательная загрузка",
         "[Соло](modes/solo.md)",
         "[Классический](modes/classic.md)",
@@ -602,10 +602,15 @@ def validate_issue_skill(errors: list[str]) -> None:
         'SCHEMA = "issue-grinder/model-routing/v1"',
         'LUNA_MODEL = "gpt-5.6-luna"',
         'LUNA_EFFORT = "max"',
-        'FORCED_PROFILE_AGENT_TYPES = frozenset({"critic", "reviewer"})',
-        '"platform_agent_type_bypasses_mode_profile"',
+        '"incomplete_actual_profile"',
         '"actual_luna_model_mismatch"',
         "return 0 if receipt.allowed else 2",
+    )
+    forbid(
+        errors,
+        ISSUE_ROUTING_GUARD,
+        "FORCED_PROFILE_AGENT_TYPES",
+        "platform_agent_type_bypasses_mode_profile",
     )
     require(
         errors,

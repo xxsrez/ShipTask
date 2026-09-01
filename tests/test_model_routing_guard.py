@@ -51,21 +51,25 @@ class ModelRoutingGuardTest(unittest.TestCase):
                 self.assertIn("luna_max_effort_required", receipt.defects)
                 self.assertIn("unbounded_or_missing_fork_turns", receipt.defects)
 
-    def test_platform_critic_and_reviewer_types_are_rejected(self) -> None:
-        for agent_type in ("critic", "reviewer"):
+    def test_agent_type_label_does_not_override_explicit_profile(self) -> None:
+        for agent_type in ("default", "worker", "explorer", "custom-quality"):
             with self.subTest(agent_type=agent_type):
                 receipt = validate_route(
                     mode="swarm",
-                    semantic_role=agent_type,
+                    semantic_role="quality_check",
                     agent_type=agent_type,
                     model="gpt-5.6-luna",
                     effort="max",
                     fork_turns="none",
+                    actual_model="gpt-5.6-luna",
+                    actual_effort="max",
                 )
-                self.assertFalse(receipt.allowed)
-                self.assertIn(
-                    "platform_agent_type_bypasses_mode_profile", receipt.defects
-                )
+                self.assertTrue(receipt.allowed, receipt.defects)
+                self.assertEqual(receipt.agent_type, agent_type)
+
+        guard = SCRIPT.read_text(encoding="utf-8")
+        self.assertNotIn("FORCED_PROFILE_AGENT_TYPES", guard)
+        self.assertNotIn("platform_agent_type_bypasses_mode_profile", guard)
 
     def test_balance_keeps_material_judgment_on_controller_profile(self) -> None:
         receipt = validate_route(
