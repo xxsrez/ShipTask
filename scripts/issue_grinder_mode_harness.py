@@ -65,10 +65,10 @@ class ModeRecord:
 
 @dataclass(frozen=True)
 class ModeDispatchPolicy:
-    subagents_allowed: bool
+    issue_grinder_execution_subagents_allowed: bool
     max_active_execution_lanes: int | None
     execution_profile: Profile | None
-    native_publication_required: bool
+    service_provider_agents_allowed: bool
 
 
 def mode_dispatch_policy(
@@ -80,16 +80,16 @@ def mode_dispatch_policy(
 
     if record.canonical_mode is ExecutionMode.SOLO:
         return ModeDispatchPolicy(
-            subagents_allowed=False,
+            issue_grinder_execution_subagents_allowed=False,
             max_active_execution_lanes=1,
             execution_profile=current_main_profile,
-            native_publication_required=True,
+            service_provider_agents_allowed=True,
         )
     return ModeDispatchPolicy(
-        subagents_allowed=True,
+        issue_grinder_execution_subagents_allowed=True,
         max_active_execution_lanes=None,
         execution_profile=None,
-        native_publication_required=False,
+        service_provider_agents_allowed=True,
     )
 
 

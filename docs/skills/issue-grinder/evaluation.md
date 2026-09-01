@@ -15,8 +15,9 @@
    являются oracle hard invariants, а не полным тестом skill.
 3. Model-forward cases должны запускать установленный skill в новой сессии на
    синтетическом Task Manager scope; generator не получает rubric или expected
-   answer. Repository-executable harness этого слоя пока отсутствует, поэтому
-   coverage names ниже являются обязательным corpus, а не доказанными PASS.
+   answer. Полный repository-executable harness этого слоя пока отсутствует;
+   доступны узкие mode-loading и Solo-topology smoke. Остальные coverage names
+   ниже являются обязательным corpus, а не доказанными PASS.
 4. Distribution smoke проверяет source → Marketplace → installed cache,
    activation и отсутствие одновременно установленного ShipTask. Его evidence
    относится к конкретному snapshot и не переносится на следующую версию.
@@ -60,7 +61,8 @@
 | `IG-MODE-08` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | economical-handoff-preserves-evidence; swarm-alternative-approach; same-retry-rejected |
 | `IG-MODE-09` | `modes/{balance,swarm,economical}.md` | one-review-candidate; dissent-preserved; raw-swarm-transcript-not-required; rework-reviewed-again |
 | `IG-MODE-10` | `execution-modes.md`; `multi-agent-execution.md`; mode harness | explicit-switch-barrier; automatic-no-switch; switch-preserves-candidates-and-scope |
-| `IG-MODE-11` | `SKILL.md` §1-3; `modes/solo.md`; `strategic-explainer.md`; mode harness | solo-one-issue; solo-many-issues-sequential; solo-current-profile-after-model-change; solo-zero-subagents; solo-native-publication; solo-terminal-only |
+| `IG-MODE-11` | `SKILL.md` §1-3; `modes/solo.md`; `strategic-explainer.md`; mode/solo-topology harnesses | solo-one-issue; solo-many-issues-sequential; solo-current-profile-after-model-change; solo-no-execution-delegation; solo-provider-allowed; solo-terminal-only |
+| `IG-MODE-12` | `execution-modes.md`; `multi-agent-execution.md`; `strategic-explainer.md`; solo-topology harness | outer-controller-not-counted; provider-transport-not-counted; provider-doing-delivery-becomes-execution-agent; explicit-global-opt-out-wins; topology-boundary-all-modes |
 | `IG-HELP-01` | `SKILL.md` §0; `mode-help.md` | all-five-modes-brief; default-is-resolver; narrow-difference-answer; help-has-no-task-manager-goal-title-or-subagents; mixed-help-delivery-preserves-gates |
 | `IG-MA-01` | `SKILL.md` §2; `multi-agent-execution.md` | two-independent-packets; useful-critic; intentional-candidate; one-lane-no-filler; solo-delegation-forbidden |
 | `IG-MA-02` | `multi-agent-execution.md` | disjoint-surfaces; ordinary-conflicting-surfaces; isolated-intentional-overlap |
@@ -79,7 +81,7 @@
 | `IG-MA-15` | `modes/*.md`; `multi-agent-execution.md`; routing guard | solo-current-main-only; classic-material-controller; balance-economical-bulk; swarm-economical-waves; economical-economical-controller; no-inherited-sol-child |
 | `IG-MA-16` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | luna-uncertainty-evidence-handoff; mode-specific-next-route; same-luna-retry-rejected |
 | `IG-MA-17` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; routing guard | classic-luna-unavailable-controller; economical-capacity-loss-no-sol-substitution; routing-failure-stops-wave |
-| `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing; worker-evidence-coordinator-facade; nested-facade-no-new-task; solo-native-no-provider |
+| `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing; worker-evidence-coordinator-facade; nested-facade-no-new-task; solo-provider-outside-execution-topology |
 
 ## Быстрый mode corpus
 
@@ -94,7 +96,8 @@ Corpus доказывает:
 
 - приоритет явного канонического режима над automatic rule;
 - `Соло` как явный пятый mode, который использует фактически current main
-  profile каждого turn, запрещает subagents и ограничивает исполнение одной
+  profile каждого turn, запрещает рабочую делегацию Issue Grinder, допускает
+  отдельный service/provider agent и ограничивает исполнение одной
   последовательной lane;
 - `Экономичный` для exact `gpt-5.6-luna` при каждом доступном effort и
   `Классический` для другого family identity без fuzzy match;
@@ -244,8 +247,9 @@ fresh model-forward smoke.
   выбранный канонический режим должен победить automatic rule, а продолжение
   после смены модели — сохранить ранее выбранный mode;
 - наблюдаемо различить режимы: в `Классическом` Sol/controller делает почти
-  всё, а Luna получает только тривиальные packets; `Соло` сохраняет current
-  model, ноль subagents и native publication для одного и нескольких issue; в
+   всё, а Luna получает только тривиальные packets; `Соло` сохраняет current
+  model, ноль Issue Grinder execution-subagents и допускает отдельный
+  Strategic Explainer provider для одного и нескольких issue; в
   `Балансе` до source mutation появляется observed Luna Max child для обычного
   research/implementation/test packet, а Sol остаётся на material decision и
   final gate; `Рой` запускает на Luna минимум два isolated intentional candidate
@@ -290,3 +294,23 @@ Runner создаёт по одной fresh ephemeral read-only Codex-сесси
 обязательного чтения или расходящийся итоговый receipt закрывают case. Этот
 smoke проверяет progressive disclosure, но не доказывает соблюдение model
 routing и topology во время полноценной delivery.
+
+Отдельный synthetic Solo topology smoke запускается после установки plugin:
+
+```bash
+python3 scripts/issue_grinder_solo_topology_smoke.py \
+  --model gpt-5.6-sol \
+  --reasoning-effort low
+```
+
+Runner создаёт временный локальный scope с анализом, реализацией, проверкой и
+self-review, запускает fresh explicit `Соло` без Task Manager и внешних
+publication units и проверяет root trace. Case проходит, только если exact
+result создан и проверен основной сессией, загружен ровно `solo.md`, а
+`spawn_agent`, `create_thread`, `fork_thread` или иной execution-child dispatch
+не наблюдался. В этом synthetic scope provider не нужен, поэтому любой child
+означает рабочую делегацию Issue Grinder. Разрешение отдельного Strategic
+Explainer provider и его исключение из mode topology проверяются
+детерминированным mode corpus и contract tests; provider, которому передали
+delivery source/tests/review, должен считаться execution-agent и закрывать
+соответствующий model-forward case.

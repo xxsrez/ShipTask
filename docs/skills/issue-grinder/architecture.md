@@ -478,8 +478,9 @@ Current economical baseline — `gpt-5.6-luna` с `reasoning_effort=max`.
 
 - в `Соло` execution profile на каждом turn берётся как exact effective current
   top-level model и effort; нормализованные controller/worker profiles не
-  применяются, а direct supervisor не создаётся. Смена current profile не
-  пересчитывает canonical mode;
+  применяются, а Issue Grinder не создаёт direct supervisor или worker для
+  собственной delivery-работы. Внешний semantic provider не относится к этим
+  ролям. Смена current profile не пересчитывает canonical mode;
 
 - точная команда пользователя в prompt о профиле конкретной роли либо всех
   subagents применяется первой;
@@ -581,8 +582,8 @@ evidence и внешние эффекты. Summary служит навигаци
    ownership reconciled;
 3. mode record получает новый canonical mode и origin `explicit`;
 4. новая policy применяется только к следующей dispatch/review итерации; при
-   переходе в `Соло` новые subagents запрещены, а сохранённые пакеты ставятся в
-   последовательную очередь текущей модели.
+   переходе в `Соло` новые Issue Grinder execution-subagents не создаются, а
+   сохранённые пакеты ставятся в последовательную очередь текущей модели.
 
 Scope, environment и authority при переключении не меняются. Automatic switch
 по проценту квоты, имени новой модели или факту доступности reviewer-а не
@@ -910,7 +911,7 @@ UAT либо другая непроизводственная среда; не�
 
 ## 11. Multi-agent orchestration
 
-Делегация применяется при наличии минимум двух независимых полезных пакетов
+Делегация работы Issue Grinder применяется при наличии минимум двух независимых полезных пакетов
 либо когда выбранный режим оправдывает независимого critic/verifier или
 намеренно различимые candidates одной работы. Это решение не включает
 максимальную автономность в неявном run и не расширяет authority. Если subagent
@@ -919,23 +920,35 @@ capability или изолированная writable capacity недоступ�
 последовательно, а экономичные режимы используют доступную serial economical
 lane либо сохраняют честный checkpoint. Отсутствие multi-agent surface само по
 себе не является blocker-ом. `Соло` не входит в этот resolver: он всегда имеет
-ноль subagents, одну активную execution lane и последовательно выполняет весь
-scope на current main profile независимо от доступной capacity.
+ноль execution-subagents Issue Grinder, одну активную execution lane и
+последовательно выполняет весь scope на current main profile независимо от
+доступной capacity.
+
+Граница topology определяется семантикой и эффектами, а не положением в
+физическом дереве сессий. Агент, на котором загружен Issue Grinder, является
+execution owner даже когда его создал внешний controller; этот предок не входит
+в mode topology. Потомок становится execution-agent режима, если получает
+анализ scope, source research, implementation, tests, technical review,
+candidate/reduction, integration decision или другую работу, определяющую
+delivery-result. Имя, `agent_type` или технический transport этого не меняют.
 
 Рабочая делегация и provider invocation — разные уровни. Coordinator не
 делегирует publication unit рабочему subagent-у: тот возвращает только
 проверяемый evidence handoff, после чего coordinator отдельно вызывает
 Strategic Explainer. Так worker topology не определяет и не ломает внутренний
-provider transport. В `Соло` действует более сильный mode contract: provider
-subagent также не вызывается, а publication unit формулируется native текущей
-моделью.
+provider transport. Strategic Explainer и другие agent-backed semantic
+interfaces находятся вне mode topology, пока получают только собственный
+ограниченный request и не анализируют, не реализуют и не проверяют delivery
+scope. Если provider фактически получает такую работу, он классифицируется по
+эффектам как execution-agent и обязан соответствовать mode contract.
 
 Явное правило пользователя о topology — точное или относительное число
 субагентов, роли, условие делегации либо opt-out — имеет приоритет. Основной
-coordinator не входит в названное число субагентов. Общий opt-out worker
-delegation не отключает отдельный Strategic Explainer interface, если
-пользователь прямо не запретил и его. Выбор `Соло` является таким общим и
-полным запретом, включая Strategic Explainer.
+execution owner не входит в названное число execution-субагентов. Выбор `Соло`
+отключает только рабочую делегацию Issue Grinder и не отключает Strategic
+Explainer либо другой внешний semantic interface. Только отдельная явная
+команда пользователя вообще не создавать никаких субагентов запрещает также
+service/provider transport.
 
 Без user override coordinator:
 
@@ -1064,7 +1077,7 @@ Task Manager cancellation statuses от имени Issue Grinder.
 | `IG-GOAL-*` | strategic synthesis, Goal lifecycle, blocker/final reflection | Goal отражает общую проблему и завершается только после fresh empty active scope |
 | `IG-SCOPE-*` | selector-as-predicate и контрольные refresh points | новые и исключённые issue учитываются до terminal result |
 | `IG-AUTO-*` | explicit-mode gate, UAT resolver и узкий security selector | нет Production access; разрешённая UAT работа не ждёт рутинного approval |
-| `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint | Luna default выбирает `Экономичный`, иной default — `Классический`; `Соло` сохраняет current profile и ноль subagents; выбранный mode не дрейфует; каждый режим выполняет своё обещание |
+| `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint и semantic topology boundary | Luna default выбирает `Экономичный`, иной default — `Классический`; `Соло` сохраняет current profile и ноль Issue Grinder execution-subagents, но допускает отдельный service provider; выбранный mode не дрейфует; каждый режим выполняет своё обещание |
 | `IG-HELP-*` | ранний fast path и компактный `mode-help.md` | чистая справка объясняет пять режимов и default без Task Manager, Goal, title mutations или subagents |
 | `IG-MA-*` | dependency-ready packets, isolated writers, integration owner и profile routing | параллельные writers изолированы, а acceptance относится к объединённой версии |
 
@@ -1097,6 +1110,13 @@ ID само по себе не доказывает поведение.
    fresh read-only сессий и по command-execution trace доказывает, что после
    общего resolver-а агент читает только выбранный mode-файл; обращение к
    соседнему файлу либо всему каталогу закрывает case.
+   `scripts/issue_grinder_solo_topology_smoke.py` создаёт локальный synthetic
+   scope без Task Manager и publication unit, затем доказывает по root trace,
+   что одна Solo-сессия сама выполнила анализ, изменение, тест и self-review без
+   `spawn_agent`, `create_thread`, `fork_thread` или другого execution-child
+   dispatch. Отдельный provider разрешён общим contract, но намеренно не нужен
+   этому case, поэтому любой потомок в нём однозначно является лишней рабочей
+   делегацией.
 4. **Fresh installed-plugin smoke.** После упаковки plugin проверяется в новой
    Codex-сессии с live synthetic UAT: activation, dependencies, полный workflow,
    Marketplace/cache identity и отсутствие второй implicit delivery authority.
@@ -1112,8 +1132,9 @@ ID само по себе не доказывает поведение.
   non-Luna automatic `Классический`, persistence через continuation/model
   change и safe explicit switch;
 - `Соло` для одного и нескольких issue с exact current profile, одной
-  последовательной execution lane, native publication и полным отсутствием
-  subagents; конкретный `Классический`, где Sol/controller делает почти всё, а
+  последовательной execution lane, отсутствием Issue Grinder worker delegation
+  и допустимым отдельным Strategic Explainer provider; конкретный
+  `Классический`, где Sol/controller делает почти всё, а
   Luna получает только тривиальные packets; `Баланс`, где Luna пытается
   выполнить лёгкие и средние bounded tasks и при problem/contract conflict
   возвращает evidence fallback Sol/controller-у; оба сохраняют exact final

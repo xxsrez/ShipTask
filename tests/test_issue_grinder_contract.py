@@ -80,7 +80,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertEqual(len(rows), len(set(rows)), "duplicate coverage rows")
         self.assertEqual(set(rows), requirement_ids)
-        self.assertEqual(len(requirement_ids), 52)
+        self.assertEqual(len(requirement_ids), 53)
 
     def test_architecture_runtime_layout_exists(self) -> None:
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
@@ -145,13 +145,14 @@ class IssueGrinderContractTest(unittest.TestCase):
             self.assertIn(filename, architecture)
             self.assertIn(filename, evaluation)
         self.assertIn(
-            "Число subagents и одновременных execution lanes всегда равно `0` и `1`",
+            "Число Issue Grinder execution-subagents и одновременных\n"
+            "   содержательных execution lanes всегда равно `0` и `1`",
             (SKILL_ROOT / "references" / "modes" / "solo.md").read_text(
                 encoding="utf-8"
             ),
         )
         self.assertIn(
-            "execution mode — `Соло`",
+            "Это правило одинаково для всех пяти execution modes",
             (SKILL_ROOT / "references" / "strategic-explainer.md").read_text(
                 encoding="utf-8"
             ),
@@ -165,6 +166,12 @@ class IssueGrinderContractTest(unittest.TestCase):
         )
         self.assertIn(
             "scripts/issue_grinder_mode_loading_smoke.py", evaluation
+        )
+        self.assertIn(
+            "scripts/issue_grinder_solo_topology_smoke.py", architecture
+        )
+        self.assertIn(
+            "scripts/issue_grinder_solo_topology_smoke.py", evaluation
         )
 
     def test_mode_help_is_a_delivery_free_progressive_disclosure_path(self) -> None:

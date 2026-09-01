@@ -5,6 +5,11 @@ Issue Grinder поддерживает пять режимов. Они меня�
 scope, полномочия, Task Manager lifecycle, запрет Production и требования к
 доказательствам.
 
+Во всех режимах topology относится только к агентам, которым Issue Grinder
+передаёт содержательную delivery-работу. Внешний controller, Strategic
+Explainer и другие ограниченные service/provider agents в неё не входят, пока
+не анализируют, не реализуют и не проверяют сам scope.
+
 Эта страница помогает выбрать режим. Действующий пользовательский контракт
 находится в [Requirements](../skills/issue-grinder/requirements.md), инженерный
 способ исполнения — в
@@ -15,7 +20,7 @@ scope, полномочия, Task Manager lifecycle, запрет Production и 
 
 | Режим | Кто выполняет работу | Проверка | Когда заканчивается |
 |---|---|---|---|
-| `Соло` | Текущая основная модель, последовательно, без субагентов | Self-review текущей модели плюс объективные checks | Только terminal result или настоящий blocker |
+| `Соло` | Текущая основная модель последовательно выполняет всю delivery-работу без рабочих субагентов Issue Grinder | Self-review текущей модели плюс объективные checks | Только terminal result или настоящий blocker |
 | `Классический` | Sol/controller делает почти всё; Luna получает только тривиальные пакеты | Полная итоговая проверка exact result | Только terminal result или настоящий blocker |
 | `Баланс` | Luna выполняет bulk research/implementation/tests; Sol/controller оставляет material decisions и integration | Сильный final review exact candidate | Только terminal result или настоящий blocker |
 | `Рой` | Luna-волны разных candidates, critics, test authors и judges | Результаты сокращаются до одного candidate и проходят final review | Только terminal result или настоящий blocker |
@@ -38,14 +43,16 @@ interruption и смену основной модели. Автоматичес
 
 ## `Соло`
 
-Выбирайте `Соло`, когда принципиальны ноль субагентов и исполнение именно
-текущей моделью. Она сама анализирует весь scope, затем последовательно берёт по
-одному dependency-ready issue или пакету, реализует, интегрирует, проверяет и
-проводит self-review.
+Выбирайте `Соло`, когда принципиальны один исполнитель Issue Grinder и
+исполнение именно текущей моделью. Она сама анализирует весь scope, затем
+последовательно берёт по одному dependency-ready issue или пакету, реализует,
+интегрирует, проверяет и проводит self-review.
 
-`Соло` не вызывает supervisor, worker, scout, critic, verifier, альтернативных
-candidates или Strategic Explainer. Для scope с несколькими issue всё равно
-может понадобиться Goal: режим меняет topology, но не общие правила run.
+`Соло` не передаёт эту работу supervisor, worker, scout, critic, verifier или
+альтернативным candidates. Strategic Explainer может быть отдельным
+provider-agent для публикационного текста: он не считается вторым исполнителем,
+пока не получает delivery scope. Для scope с несколькими issue всё равно может
+понадобиться Goal: режим меняет рабочую topology, но не общие правила run.
 
 ## `Классический`
 
@@ -117,7 +124,8 @@ terminal результата. Такой выход оставляет `In Prog
 
 ## Как выбрать
 
-- Нужна строго текущая модель и никаких субагентов — `Соло`.
+- Нужна строго текущая модель и никаких рабочих субагентов Issue Grinder —
+  `Соло`.
 - Нужен самый прямой уверенный процесс с одной основной реализацией —
   `Классический`.
 - Нужно перенести bulk work на экономичные profiles, сохранив сильный review —

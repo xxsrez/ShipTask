@@ -47,6 +47,12 @@ ISSUE_MODE_LOADING_SMOKE = (
 ISSUE_MODE_LOADING_SMOKE_TEST = (
     ROOT / "tests" / "test_issue_grinder_mode_loading_smoke.py"
 )
+ISSUE_SOLO_TOPOLOGY_SMOKE = (
+    ROOT / "scripts" / "issue_grinder_solo_topology_smoke.py"
+)
+ISSUE_SOLO_TOPOLOGY_SMOKE_TEST = (
+    ROOT / "tests" / "test_issue_grinder_solo_topology_smoke.py"
+)
 SHIP_SKILL = ROOT / "ship-tasks" / "SKILL.md"
 SHIP_METADATA = ROOT / "ship-tasks" / "agents" / "openai.yaml"
 COMPOSER_SKILL = ROOT / "task-composer" / "SKILL.md"
@@ -202,6 +208,8 @@ CORE_FILES = (
     ISSUE_MODE_HARNESS_TEST,
     ISSUE_MODE_LOADING_SMOKE,
     ISSUE_MODE_LOADING_SMOKE_TEST,
+    ISSUE_SOLO_TOPOLOGY_SMOKE,
+    ISSUE_SOLO_TOPOLOGY_SMOKE_TEST,
     SHIP_SKILL,
     SHIP_METADATA,
     COMPOSER_SKILL,
@@ -519,8 +527,9 @@ def validate_issue_skill(errors: list[str]) -> None:
         "# Соло",
         "canonical_mode=solo",
         "Единственный execution profile",
-        "Число subagents и одновременных execution lanes всегда равно `0` и `1`",
-        "Strategic Explainer не вызывается",
+        "Число Issue Grinder execution-subagents и одновременных\n   содержательных execution lanes всегда равно `0` и `1`",
+        "Для publication используй общий Strategic Explainer routing",
+        "provider-agent не входит в execution topology `Соло`",
         "Resumable checkpoint `Экономичного` режима недоступен",
     )
     require(
@@ -632,7 +641,9 @@ def validate_issue_skill(errors: list[str]) -> None:
         "post-explanation reflection",
         "Caller error",
         "technical/unavailability error",
-        "execution mode — `Соло`",
+        "одинаково для всех пяти execution modes",
+        "не входит в Issue Grinder execution topology",
+        "отдельно запретил вообще любых subagents",
         "Всю ordinary publication unit исполняет основной coordinator",
         "facts, evidence и resolvable\nread-only anchors",
         "отдельная Codex task/session не создаётся",
@@ -661,7 +672,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         *(f"IG-SCOPE-{number:02d}" for number in range(1, 4)),
         "IG-UI-01",
         *(f"IG-AUTO-{number:02d}" for number in range(1, 6)),
-        *(f"IG-MODE-{number:02d}" for number in range(1, 12)),
+        *(f"IG-MODE-{number:02d}" for number in range(1, 13)),
         "IG-HELP-01",
         *(f"IG-MA-{number:02d}" for number in range(1, 19)),
     ]
@@ -697,6 +708,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "Luna",
         "### `IG-MODE-01` — Пять канонических режимов",
         "### `IG-MODE-11` — Режим «Соло»",
+        "### `IG-MODE-12` — Граница execution topology режима",
+        "Сервисные агенты в этот счёт не входят",
         "### `IG-HELP-01` — Краткая справка о режимах",
         "Чистый справочный запрос не запускает delivery",
         "Один issue сам по себе не\nвыбирает `Соло` автоматически",
@@ -733,6 +746,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         "единственного runtime owner-а режима",
         "resumable checkpoint",
         "scripts/issue_grinder_mode_loading_smoke.py",
+        "scripts/issue_grinder_solo_topology_smoke.py",
     )
 
 

@@ -59,7 +59,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                 self.assertEqual(record.role_profiles.controller, LUNA_MAX)
                 self.assertEqual(record.role_profiles.worker, LUNA_MAX)
 
-    def test_solo_uses_current_profile_one_lane_and_no_subagents(self) -> None:
+    def test_solo_uses_current_profile_one_lane_without_execution_delegation(self) -> None:
         for main_profile in (Profile("gpt-5.6-luna", "low"), SOL):
             with self.subTest(main=main_profile):
                 record = resolve_mode(
@@ -73,9 +73,11 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
 
                 self.assertEqual(record.canonical_mode, ExecutionMode.SOLO)
                 self.assertEqual(policy.execution_profile, main_profile)
-                self.assertFalse(policy.subagents_allowed)
+                self.assertFalse(
+                    policy.issue_grinder_execution_subagents_allowed
+                )
                 self.assertEqual(policy.max_active_execution_lanes, 1)
-                self.assertTrue(policy.native_publication_required)
+                self.assertTrue(policy.service_provider_agents_allowed)
 
     def test_other_modes_do_not_inherit_solo_topology(self) -> None:
         for mode in (
@@ -89,10 +91,12 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                     resolve_mode(SOL, explicit_mode=mode),
                     current_main_profile=SOL,
                 )
-                self.assertTrue(policy.subagents_allowed)
+                self.assertTrue(
+                    policy.issue_grinder_execution_subagents_allowed
+                )
                 self.assertIsNone(policy.max_active_execution_lanes)
                 self.assertIsNone(policy.execution_profile)
-                self.assertFalse(policy.native_publication_required)
+                self.assertTrue(policy.service_provider_agents_allowed)
 
     def test_automatic_luna_match_is_exact_not_fuzzy(self) -> None:
         for model in ("gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna-preview"):
@@ -160,7 +164,8 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         self.assertIs(resumed, original)
         self.assertEqual(resumed.canonical_mode, ExecutionMode.SOLO)
         self.assertEqual(policy.execution_profile, new_current)
-        self.assertFalse(policy.subagents_allowed)
+        self.assertFalse(policy.issue_grinder_execution_subagents_allowed)
+        self.assertTrue(policy.service_provider_agents_allowed)
 
     def test_proven_continuity_requires_a_record_and_switch_barrier(self) -> None:
         with self.assertRaisesRegex(ValueError, "saved mode record"):

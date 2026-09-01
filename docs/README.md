@@ -18,9 +18,10 @@
   [Evaluation](skills/issue-grinder/evaluation.md) — current source package
   нового Task Manager-only delivery skill со стратегическим Goal,
   максимальной автономностью явного run, blocker reflection и изолированной
-  multi-agent работой. Пять execution mode включают `Соло` без субагентов и
-  четыре стратегии с разной долей экономичной работы, избыточностью и финальной
-  проверкой; чистая справка о режимах не запускает delivery, а runtime
+  multi-agent работой. Пять execution mode включают `Соло` без рабочей
+  делегации Issue Grinder и четыре стратегии с разной долей экономичной работы,
+  избыточностью и финальной проверкой; внешние semantic providers не входят в
+  mode topology, чистая справка о режимах не запускает delivery, а runtime
   publication подтверждается distribution проверкой.
 - `$ship-tasks`: [Requirements](skills/ship-tasks/requirements.md) и
   [Architecture](skills/ship-tasks/architecture.md) — канонический Task
