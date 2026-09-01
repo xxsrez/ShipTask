@@ -68,6 +68,13 @@
   `Классический`, `Баланс`, `Рой` и `Экономичный`. Действующая policy остаётся только в
   локальных Requirements, Architecture и runtime-проекции.
 
+## Experiments
+
+- [Сравнение пяти режимов Issue Grinder](tasks/issue-grinder-five-mode-benchmark.md)
+  — завершённый протокол пяти строго последовательных model-forward прогонов,
+  Team-only reset, доказуемого восстановления Task Manager/Git/UAT и слепой
+  итоговой оценки.
+
 ## Decisions
 
 - [0001: Task Manager-only skill](decisions/0001-task-manager-only.md) —
@@ -211,6 +218,9 @@
 
 ## Reports
 
+- [Issue Grinder: сравнение пяти режимов](reports/2026-09-01-issue-grinder-five-mode-benchmark.md)
+  — результаты пяти последовательных прогонов, слепой quality ranking,
+  токены, стоимость, время, дефекты, ограничения протокола и финальная очистка.
 - [Strategic Explainer: сравнение SOL и Luna](reports/2026-08-27-strategic-explainer-luna-comparison.md)
   — paired 20-case blind evaluation, человеческий blind vote и решение
   закрепить ordinary provider на `gpt-5.6-luna` с `max`.
