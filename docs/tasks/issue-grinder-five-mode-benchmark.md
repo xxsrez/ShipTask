@@ -24,6 +24,15 @@ migration journal, Git/UAT code baseline и видимое состояние ш
 Task, новое рабочее дерево и новую ветку строго от заново замороженного
 `baseline_sha`.
 
+Уточнение протокола проверки сессий от 2026-09-01: слова контроллера «я создал
+сессию», его JSON/self-report, внутренний subagent и появление отдельного JSONL
+сами по себе ничего не доказывают. Для каждого измеряемого прогона обязательны
+raw receipt успешного `create_thread`, новый user-visible Codex Project Task,
+обязательный клиентский указатель `created-thread`, независимый read-back этой
+Task и совпадающая локальная session/worktree telemetry. При отсутствии любого
+из этих свидетельств контроллер не вправе считать прогон созданным или
+выполнять Release в собственной сессии.
+
 Это экспериментальный runbook, а не новый источник действующей policy Issue
 Grinder. Канонические значения режимов описаны в
 [пользовательском руководстве](../guides/issue-grinder-modes.md), а граница
@@ -160,6 +169,7 @@ baseline не входит.
 | Task Manager visible-state reset | Ready | Обычные versioned mutations; history/version не откатываются |
 | `TM-329`/`TM-334` handoff semantics | Ready | Task versions `36`/`32`: baseline deploy идёт до Team-only очистки, candidate остаётся до capture |
 | Mode top-level profiles и wall-time ceiling | Требует повторной проверки | Sol/xhigh для Соло/Классического/Баланса/Роя, Luna/max для Экономичного; standard Task, максимум 8 часов |
+| Identity каждой measured delivery Task | Требует live proof для каждого run | Raw `create_thread` receipt + `list_threads` + `read_thread` + root `session_meta` + новый worktree на frozen SHA; self-report запрещён как proof |
 | Model routing canary | Ready | 2026-09-01 live canaries: `Баланс` передал research/test в Luna Max; `Рой` создал двух независимых Luna Max candidates и Luna Max critic/reducer; Luna Max top-level автоматически выбрал `Экономичный` и выполнил substantive serial packet. Для `Соло` добавлена отдельная проверка: вся substantive delivery остаётся у одного execution owner, а service-provider agent сам по себе не считается нарушением. Перед серией повторить четыре canary на её frozen installed snapshot |
 | Самопроверка delivery и независимая приёмка | Ready | Каждый режим свободно запускает безопасные локальные тесты; controller после handoff повторно выполняет одинаковый frozen acceptance suite exact candidate |
 | Action-time access policy | Ready | Живая Browser ACL mutation исключена из unattended acceptance; Team-grant доказывается exact-candidate server/UI tests, а optional attended smoke не входит в ranking |
@@ -191,7 +201,8 @@ Product Production не изменяется.
 
 - разрешает точные Project, Release, repository, UAT и baseline;
 - фиксирует mode profile matrix, общий prompt, rubric и порядок прогонов;
-- создаёт ровно одну верхнеуровневую delivery-сессию за раз;
+- создаёт ровно одну верхнеуровневую delivery-сессию за раз только через
+  `create_thread` как новую обычную Codex Project Task в новом worktree;
 - явно задаёт `gpt-5.6-sol`/`xhigh` для `Соло`, `Классического`, `Баланса` и
   `Роя`, `gpt-5.6-luna`/`max` для `Экономичного`, обычную Project Task и
   одинаковый ceiling 8 часов;
@@ -207,12 +218,32 @@ Product Production не изменяется.
 подготовки, отката и оценки учитываются отдельно как стоимость benchmark
 infrastructure.
 
+В этом документе различаются четыре сущности:
+
+1. **Controller Task** — текущая центральная пользовательская Codex Task. Она
+   управляет экспериментом, но не реализует Release.
+2. **Measured delivery Task** — отдельная user-visible Codex Project Task,
+   созданная через `create_thread` в новом project worktree. Только она считается
+   одним из прогонов `A..E`.
+3. **Execution child** — внутренний subagent внутри measured delivery Task.
+   Он учитывается в topology режима, но не заменяет measured delivery Task.
+4. **Routing canary Task** — отдельный короткий projectless thread для
+   предстартовой синтетической проверки. Он не считается прогоном `A..E` и
+   не обязан выглядеть как Project Task; контроллер всё равно сразу публикует
+   его клиентский указатель `created-thread`, а существование доказывает raw
+   `create_thread` receipt, `read_thread` и session telemetry.
+
+`spawn_agent`, `fork_thread`, внутренний child, projectless canary, работа в
+Controller Task или простое создание нового worktree не выполняют требование
+отдельной measured delivery Task.
+
 ### Delivery-сессия
 
-Каждая delivery-сессия получает новый Codex thread и отдельный Git worktree от
-одного frozen baseline. Она выполняет Release через Issue Grinder в явно
-указанном режиме. Внутренние subagents разрешаются либо запрещаются самим
-контрактом выбранного режима.
+Каждая delivery-сессия является новой user-visible Codex Project Task с новым
+`threadId` и отдельным Git worktree от одного frozen baseline. Она выполняет
+Release через Issue Grinder в явно указанном режиме. Внутренние subagents
+разрешаются либо запрещаются самим контрактом выбранного режима, но ни один из
+них не может подменить эту верхнеуровневую Task.
 
 Старые benchmark worktrees и branches доступны контроллеру только как
 неизменяемые исторические артефакты. Delivery-сессия не получает их пути,
@@ -287,6 +318,7 @@ expected_external_codex_activity: zero until final report
 prompt_sha256: <hash of the frozen template>
 rubric_sha256: <hash of the frozen acceptance rubric>
 routing_oracle_sha256: <hash of expected semantic-role/model matrix>
+session_identity_policy_sha256: <hash of measured Project Task identity gates>
 controller_acceptance_sha256: <hash of exact controller checks and working directories>
 access_effect_policy: unattended-no-live-browser-acl
 metrics_schema_version: 4
@@ -334,11 +366,11 @@ Raw evidence не следует складывать в target repository ил�
 │   ├── data-manifest.json
 │   └── data.sha256
 ├── runs/
-│   ├── A/
-│   ├── B/
-│   ├── C/
-│   ├── D/
-│   └── E/
+│   ├── A/  # включая session-creation.json и thread-tree.json
+│   ├── B/  # включая session-creation.json и thread-tree.json
+│   ├── C/  # включая session-creation.json и thread-tree.json
+│   ├── D/  # включая session-creation.json и thread-tree.json
+│   └── E/  # включая session-creation.json и thread-tree.json
 ├── resets/
 ├── overhead/
 └── final/
@@ -377,8 +409,11 @@ mode/process metadata packets `A..E`. Этот путь не является д
    tables. Доказывает, что schema и migration `0038` уже входят в baseline,
    таблицы пусты, а controller умеет независимо удалить только Team rows без
    schema rollback. Product Production не читать и не изменять.
-6. Проверяет доступность tool contract для создания fresh Project Task в
-   отдельном worktree от frozen SHA и ожидания результата.
+6. Проверяет доступность именно `create_thread` для создания fresh Codex
+   Project Task с `target.type=project`, точным `projectId` Task Manager и
+   `environment.type=worktree`, а также `list_threads`, `read_thread` и
+   локальной session telemetry для независимого read-back. `spawn_agent`,
+   `fork_thread` и projectless target не считаются заменой этого contract.
 7. Проверяет доступность локальной token telemetry и account usage/reset
    evidence, включая `rate_limits.primary.used_percent` и `resets_at` для
    недельного окна. Если точное распределение по thread tree невозможно,
@@ -393,10 +428,16 @@ mode/process metadata packets `A..E`. Этот путь не является д
    считаются overhead и не выдаются за токены delivery thread tree.
 10. На установленном snapshot запускает mode-loading smoke для всех пяти
     режимов и четыре fresh routing canary: `Соло`, `Баланс`, `Рой`,
-    `Экономичный`. Canaries не читают Task Manager и не меняют repository. Для
-    каждого созданного child они сохраняют requested/observed model, effort,
-    `agent_type`, semantic role и `fork_turns`; для top-level дополнительно
-    сохраняют фактически выбранный canonical mode. В `Соло` один execution
+    `Экономичный`. Каждый canary создаётся отдельным projectless
+    `create_thread`, а controller сохраняет raw tool arguments/result,
+    возвращённые `threadId`/`hostId`, опубликованный клиентский указатель
+    `created-thread`, `read_thread` result и совпадающий `session_meta.id`;
+    фраза canary «я отдельная сессия» доказательством не является. Canaries не
+    читают Task Manager и не меняют repository. Для
+    каждого созданного child controller сохраняет локальный `session_meta` с
+    `parent_thread_id`, requested/observed model, effort, `agent_type`, semantic
+    role и `fork_turns`; для top-level дополнительно сохраняет фактически
+    выбранный canonical mode. В `Соло` один execution
     owner обязан сам выполнить анализ, реализацию, тест и self-review; child,
     которому передана любая из этих обязанностей, блокирует серию. Внешний
     Strategic Explainer или другой bounded service-provider не считается
@@ -432,6 +473,7 @@ mode/process metadata packets `A..E`. Этот путь не является д
 - одинаковый prompt template;
 - mode profile matrix и общий permission profile;
 - routing oracle и правила mode-fidelity gate;
+- session-identity policy для отдельной measured Project Task;
 - независимый controller acceptance suite;
 - один access-effect policy для всех пяти прогонов;
 - максимальное время прогона;
@@ -521,6 +563,59 @@ oracle по semantic role, `agent_type`, requested/observed model, effort и
 `mode_routing_invalid`. Такой candidate можно сохранить для диагностики, но он
 не получает quality/efficiency rank и не доказывает свойства режима. Отсутствие
 recursive telemetry также делает mode fidelity непроверяемой и блокирует серию.
+
+Mode-fidelity gate начинается с **session-identity gate**. До оценки child
+topology controller независимо доказывает, что root является именно новой
+measured delivery Task, а не Controller Task, canary или внутренним child. Для
+этого обязаны одновременно совпасть raw `create_thread` receipt, Project Task
+read-back, опубликованный клиентский указатель `created-thread`, root
+`threadId`, root `session_meta.id`, unique worktree path и `baseline_sha`.
+Self-report root или controller ни одно из этих полей не заменяет.
+
+Для каждого `A..E` файл `session-creation.json` содержит как минимум:
+
+```json
+{
+  "run": "A",
+  "controller_thread_id": "<controller>",
+  "create_thread_call_id": "<raw call id>",
+  "create_thread_arguments": {
+    "target_type": "project",
+    "project_id": "<Task Manager project id>",
+    "environment_type": "worktree"
+  },
+  "create_thread_result": {
+    "thread_id": "<measured root>",
+    "host_id": "<host>"
+  },
+  "created_thread_directive_emitted": true,
+  "list_threads_readback": {
+    "id": "<same measured root>",
+    "kind": "codex",
+    "project_id": "<same project>",
+    "cwd": "<new worktree>"
+  },
+  "read_thread_readback": {
+    "id": "<same measured root>",
+    "initial_prompt_sha256": "<frozen prompt hash>"
+  },
+  "root_session_meta": {
+    "id": "<same measured root>",
+    "cwd": "<same new worktree>"
+  },
+  "git": {
+    "head": "<baseline sha>",
+    "clean": true
+  },
+  "verdict": "pass"
+}
+```
+
+Все пять measured root `thread_id`, cwd и branch обязаны быть попарно разными,
+не равняться controller/canary IDs и не совпадать со старым pilot. Отсутствующее
+поле, несовпадение или `verdict != pass` блокирует substantive работу. Итоговый
+отчёт публикует отдельную таблицу `A..E → root thread ID → worktree → baseline
+SHA`; красивые названия и количество внутренних agents её не заменяют.
 
 ### Два независимых уровня тестирования
 
@@ -759,10 +854,8 @@ Task Manager versions `TM-329@36` и `TM-334@32` уже содержат то ж
 
 1. Убедиться, что ни одна другая Codex/ChatGPT Work задача не активна на этом
    account, кроме контроллера.
-2. Подтвердить clean frozen `main`, создать именно новый worktree от
-   `baseline_sha` и доказать, что его path, branch и Task identity не совпадают
-   ни с одним сохранённым benchmark artifact. Старые worktrees остаются на
-   месте и не считаются загрязнением сами по себе.
+2. Подтвердить clean frozen `main`. Старые worktrees остаются на месте и не
+   считаются загрязнением сами по себе.
 3. Сверить Task Manager visible-content fingerprint с baseline; монотонные
    versions, timestamps и Activity не сравнивать и не читать как context.
 4. Сверить UAT baseline version, protected-schema hash, migration identity,
@@ -771,19 +864,39 @@ Task Manager versions `TM-329@36` и `TM-334@32` уже содержат то ж
 5. Снять account usage/reset snapshot, включая raw `used_percent`, вычисленный
    `usage_remaining_percent = 100 - used_percent`, `resets_at`, текущую
    UTC/Madeira time и telemetry boundary.
-6. Создать новую обычную Project Task в новом отдельном worktree строго от
-   `baseline_sha`, задав exact top-level profile из mode matrix, общие
-   permissions и prompt для текущего mode. Возобновление прежней Task или
-   повторное использование её worktree запрещено. Ceiling этой Task — 8 часов.
-7. Сохранить thread ID, host ID, worktree/branch identity и фактический
-   стартовый SHA.
+6. Вызвать `create_thread` с `target.type=project`, точным Project ID Task
+   Manager и `environment.type=worktree`, задав exact top-level profile из mode
+   matrix, общие permissions и frozen prompt текущего mode. Возобновление
+   прежней Task, `fork_thread`, `spawn_agent`, projectless target или выполнение
+   prompt самим controller запрещены. Ceiling этой Task — 8 часов.
+7. Сохранить неизменённый raw tool event: arguments, успешный result,
+   `threadId`, `hostId` и, если setup сначала вернул только `clientThreadId`,
+   дождаться появления настоящего `threadId`; до этого run не считается
+   созданным.
+8. Немедленно опубликовать структурированный клиентский указатель
+   `::created-thread` для возвращённого `threadId` либо ожидающего setup
+   `clientThreadId`. Обычный текст с идентификатором не является заменой.
+9. Через `list_threads` доказать появление новой user-visible Codex Project Task
+   с тем же `threadId`, точным `projectId` и новым worktree. Если Project Task
+   не появляется в обычном списке, это fail-closed `session_identity_missing`,
+   даже если controller или child утверждают обратное.
+10. Через `read_thread` независимо подтвердить тот же `threadId`, начальный
+   frozen prompt и фактический top-level status. Затем найти root
+   `session_meta`: его `id` обязан равняться `threadId`, а cwd — новому worktree.
+11. В новом worktree подтвердить clean `HEAD == baseline_sha`, уникальные path и
+    branch, не совпадающие ни с одним сохранённым benchmark artifact. Записать
+    всё перечисленное в `runs/<A..E>/session-creation.json` вместе с SHA-256.
 
 Любое несовпадение останавливает state machine до восстановления. Таймер режима
-не запускается на грязном baseline.
+не запускается на грязном baseline. Никакие Task Manager writes, анализ Release,
+implementation, tests или UAT действия, выполненные controller до зелёного
+session-identity gate, не могут быть задним числом приписаны режиму.
 
 ### 4.2 Active run
 
-1. Зафиксировать `started_at` непосредственно перед dispatch.
+1. Зафиксировать `started_at` по timestamp успешного `create_thread` dispatch;
+   продолжать измеряемую работу разрешено только после зелёного
+   session-identity gate.
 2. Дождаться результата через thread wait/status mechanism. Внутренние workers
    выбранного режима могут работать параллельно; пять верхнеуровневых прогонов
    — никогда.
@@ -817,6 +930,7 @@ result и quiescence всех descendants; иначе поздние worker toke
   наблюдаем;
 - terminal outcome: `accepted | failed | blocked | resumable_checkpoint |
   timed_out | mode_routing_invalid | protocol_invalid | infrastructure_invalid`;
+- raw `create_thread` event и независимый session-identity read-back;
 - recursive thread tree, requested/observed модели/efforts, semantic roles,
   routing receipts и число фактически запущенных agents;
 - exact branch, base SHA, candidate SHA, dirty state и diff summary;
@@ -1126,6 +1240,15 @@ artifacts, delivery threads и остальные benchmark worktrees; он чи
 ### Невалидный прогон инфраструктуры
 
 - старт не от frozen baseline;
+- measured delivery выполнялась в Controller Task, projectless canary,
+  `fork_thread`, внутреннем subagent или другой сущности вместо новой
+  user-visible Project Task;
+- отсутствует raw `create_thread` receipt либо не совпадают `threadId`,
+  `list_threads`, `read_thread`, root `session_meta`, worktree или baseline SHA;
+- не опубликован структурированный клиентский указатель `created-thread`, из-за
+  чего Task существует по ID, но не передана клиенту как созданная сессия;
+- controller заявил о создании Task, но она не появилась в независимом
+  `list_threads` read-back;
 - не восстановленный Task Manager/UAT state;
 - потеря связи с thread или worktree из-за controller failure;
 - недоступность общего для всех обязательного tool/service;
