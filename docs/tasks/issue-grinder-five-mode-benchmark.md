@@ -17,6 +17,13 @@ gate, не сравниваются с baseline и не восстанавлив
 migration journal, Git/UAT code baseline и видимое состояние шести Tasks
 по-прежнему восстанавливаются и проверяются.
 
+Рабочие деревья и ветки первого пилота намеренно сохраняются как исторические
+артефакты и evidence того запуска. Их наличие не является ошибкой готовности,
+но ни один новый прогон не продолжает и не переиспользует их. Каждый новый
+измеряемый или диагностический запуск получает новую верхнеуровневую Project
+Task, новое рабочее дерево и новую ветку строго от заново замороженного
+`baseline_sha`.
+
 Это экспериментальный runbook, а не новый источник действующей policy Issue
 Grinder. Канонические значения режимов описаны в
 [пользовательском руководстве](../guides/issue-grinder-modes.md), а граница
@@ -53,27 +60,43 @@ infrastructure blocker оформляет как точный возобновл
 явное название режима. Внутренняя topology и intended top-level profile,
 определённые контрактом режима, являются частью измеряемого поведения.
 
-Основная серия проверяет end-user режимы: `Соло`, `Классический`, `Баланс` и
-`Рой` стартуют на Sol/xhigh, `Экономичный` — на Luna/max. Это единственный способ
-проверить обещание `Экономичного` без Sol. Отдельный fixed-Sol-root diagnostic
-можно провести после основной серии, но его нельзя смешивать с ranking: он
-измеряет overhead transport/authority оболочки, а не обычный пользовательский
-`Экономичный`.
+В основной серии каждая верхнеуровневая delivery-сессия запускает skill Issue
+Grinder сразу с явно заданным profile выбранного режима:
 
-Один комплект из пяти прогонов является пилотным сравнением, а не
-статистическим доказательством. Для устойчивого вывода эксперимент позднее
-следует повторить минимум три раза с новым случайным порядком режимов.
+- `Экономичный` — Luna Max (`gpt-5.6-luna`, reasoning effort `max`);
+- `Соло`, `Классический`, `Баланс` и `Рой` — Sol Extra High
+  (`gpt-5.6-sol`, reasoning effort `xhigh`).
+
+Controller обязан передать model и effort явно при создании delivery thread;
+default или inherited profile не считается выполнением протокола. Это
+единственный способ проверить обещание `Экономичного` без Sol. Отдельный
+fixed-Sol-root diagnostic можно провести после основной серии, но его нельзя
+смешивать с ranking: он измеряет overhead transport/authority оболочки, а не
+обычный пользовательский `Экономичный`.
+
+Эксперимент состоит ровно из одного комплекта пяти прогонов: по одному запуску
+каждого режима. Повторные комплекты не планируются. Итог описывает эти пять
+наблюдаемых запусков и не выдаётся за статистически устойчивый рейтинг режимов.
+
+Перед полной серией разрешена отдельная короткая диагностическая перепроверка
+одного режима, в том числе выбранного пользователем `Роя`. Она проходит те же
+предстартовые проверки маршрутизации, тестирования и изоляции, всегда создаётся
+в новом рабочем дереве и не становится шестой строкой сравнения. Её нельзя
+ранжировать вместе со старым пилотом или использовать как продолжение старой
+ветки.
 
 Исправленный протокол прямо учитывает три ранних провала первого pilot:
 
 - `Экономичный` прошёл с substantive Sol вместо Luna — теперь до дорогой работы
   обязателен actual routing canary и ранний mode-fidelity gate;
 - `Соло` остановился на action-time Team-grant confirmation — unattended серия
-  больше не выполняет реальный access effect, а attended вариант подтверждает
-  его симметрично во всех пяти runs;
-- `Баланс` трижды запустил запрещённый `attachments-integration.test.ts` — теперь
-  тесты проходят только через frozen command guard с exact allowlist/denylist и
-  reasoned rerun receipt.
+  больше не считает живую Browser ACL mutation обязательной проверкой:
+  Team-grant доказывается на exact candidate автоматическими тестами, а
+  отсутствие живого access effect фиксируется как предел evidence, не blocker;
+- локальный `attachments-integration.test.ts` ошибочно сочли запрещённым из-за
+  содержащихся в нём backup/restore-проверок. Это безопасный локальный тест на
+  временных D1/R2, поэтому delivery-сессии вправе запускать его и любые другие
+  безопасные локальные проверки; их время и токены входят в стоимость режима.
 
 Если любой из этих preconditions не доказан, новая серия не стартует. Это
 важнее получения пяти строк результата любой ценой.
@@ -82,7 +105,7 @@ infrastructure blocker оформляет как точный возобновл
 
 - Task Manager Project: `Task Manager`
   (`00000000-0000-4000-8000-2c774e3f0238`).
-- Release: `0.4` (`00000000-0000-4000-8000-923bce110ea6`), version `1`,
+- Release: `0.4` (`00000000-0000-4000-8000-923bce110ea6`), version `3`,
   lifecycle `planned`.
 - Постоянная schema baseline: `TM-330` «Подготовить постоянную schema baseline
   для Teams», `Done` в Release 0.3. Она не входит в измеряемый функциональный
@@ -96,6 +119,11 @@ infrastructure blocker оформляет как точный возобновл
 и `TM-332`; `TM-331` блокирует `TM-333`; `TM-331`, `TM-332` и `TM-333`
 блокируют финальный `TM-334`.
 
+Этот Release уже выбран пользователем как задача для проверки `Роя`. Отдельный
+поиск другой candidate-friendly задачи не выполняется. `Рой` сам определяет,
+для каких существенных частей этого scope полезны независимые варианты, и
+стоимость таких вариантов является частью измеряемого поведения режима.
+
 На 2026-08-31 Release содержит ровно шесть Tasks: `TM-329`, `TM-331`–`TM-335`.
 Все шесть находятся в `Todo`, pagination завершена, незаявленных Tasks в
 Release нет. Непосредственно перед первым run controller всё равно перечитывает
@@ -104,16 +132,16 @@ scope и сохраняет current versions, потому что этот snaps
 Текущий Git/D1 baseline уже материализован:
 
 - clean local `main`, `origin/main` и live remote `main` совпадают на
-  `33249e346ea58416b0d0d58a1a83b1505dfd8834`;
+  `c4db10844ef509a97f2d833939a1d6874b12ec7a`;
 - migration `drizzle/0038_purple_the_call.sql` и Drizzle journal создают
   `teams`, `team_memberships` и `team_grants`;
-- UAT Sites version `58` сохранена из того же SHA;
+- UAT Sites version `69` сохранена из того же SHA;
 - UAT D1 binding `DB` содержит 48 user tables, включая три Team tables;
 - все три Team tables существуют с ожидаемыми columns и содержат `0` rows;
 - targeted schema tests, typecheck, lint и build прошли.
 - observed Issue Grinder package —
-  `0.1.0+codex.20260830180910`, runtime `SKILL.md` SHA-256
-  `a9fb58d79a549bf529f699960e716219a14b2b9a270ab6a9bb8fcd21d2c437fc`;
+  `0.1.0+codex.20260901202349`, runtime `SKILL.md` SHA-256
+  `8b34027e20d0d2d668489f2a1d7ed9f0e9c1cbc3001e793266508bda5ff436b8`;
   Task Manager adapter — `0.7.6+codex.20260827141835`.
 
 Эти значения — проверенный кандидат на baseline, но controller повторно
@@ -130,18 +158,20 @@ baseline не входит.
 | Local build и targeted schema checks | Ready | Повторить на frozen SHA |
 | Независимый UAT Team-data cleanup | Ready | После capture развернуть frozen `main`, удалить rows через временный authenticated UAT endpoint и подтвердить `0/0/0` |
 | Task Manager visible-state reset | Ready | Обычные versioned mutations; history/version не откатываются |
-| `TM-329`/`TM-334` handoff semantics | Ready | Task versions `13`/`6`: baseline deploy идёт до Team-only очистки, candidate остаётся до capture |
+| `TM-329`/`TM-334` handoff semantics | Ready | Task versions `36`/`32`: baseline deploy идёт до Team-only очистки, candidate остаётся до capture |
 | Mode top-level profiles и wall-time ceiling | Требует повторной проверки | Sol/xhigh для Соло/Классического/Баланса/Роя, Luna/max для Экономичного; standard Task, максимум 8 часов |
-| Model routing canary | Требует выполнения | Fresh synthetic canaries для Баланса/Роя/Экономичного с actual child telemetry |
-| Test policy | Требует заморозки | Exact allowlist/denylist и один общий command guard до run 1 |
-| Action-time access policy | Требует выбора | По умолчанию synthetic ACL fixture без реального access effect; live ACL — только отдельная attended серия |
+| Model routing canary | Ready | 2026-09-01 live canaries: `Баланс` передал research/test в Luna Max; `Рой` создал двух независимых Luna Max candidates и Luna Max critic/reducer; Luna Max top-level автоматически выбрал `Экономичный` и выполнил substantive serial packet. Для `Соло` добавлена отдельная проверка: вся substantive delivery остаётся у одного execution owner, а service-provider agent сам по себе не считается нарушением. Перед серией повторить четыре canary на её frozen installed snapshot |
+| Самопроверка delivery и независимая приёмка | Ready | Каждый режим свободно запускает безопасные локальные тесты; controller после handoff повторно выполняет одинаковый frozen acceptance suite exact candidate |
+| Action-time access policy | Ready | Живая Browser ACL mutation исключена из unattended acceptance; Team-grant доказывается exact-candidate server/UI tests, а optional attended smoke не входит в ranking |
 | Blind evaluator | Ready | Отдельная шестая `gpt-5.6-sol`/`xhigh` сессия после пяти delivery-runs |
 
 UAT сейчас содержит одного registered User и не имеет direct access grants.
 Поэтому multi-user membership, strongest-role и no-existence-leak допускается
-доказывать server integration tests и/или обычными синтетическими UAT fixtures.
-Изменения строк в existing tables разрешены и не требуют симметричного cleanup;
-контроллер между прогонами очищает только три Team-таблицы.
+доказывать обязательными server integration и UI/component tests exact
+candidate. Специальная benchmark authorization fixture, фиксированное число
+Teams и живая выдача доступа через Browser не требуются. Изменения строк в
+existing tables разрешены и не требуют симметричного cleanup; контроллер между
+прогонами очищает только три Team-таблицы.
 
 ## Роли и границы
 
@@ -184,6 +214,13 @@ infrastructure.
 указанном режиме. Внутренние subagents разрешаются либо запрещаются самим
 контрактом выбранного режима.
 
+Старые benchmark worktrees и branches доступны контроллеру только как
+неизменяемые исторические артефакты. Delivery-сессия не получает их пути,
+названия или содержимое во frozen packet. Если платформа предлагает продолжить
+старую Task, ветку или рабочее дерево, контроллер отклоняет такой запуск и
+создаёт новую Project Task с новым worktree; удалять старые артефакты ради этого
+не нужно.
+
 Delivery-сессия не должна:
 
 - читать ветки, worktrees, отчёты, session logs или результаты других
@@ -205,10 +242,12 @@ timestamps, Activity history и обычные row-level изменения пр
 контекста для последующих delivery-сессий. Product effects разрешены только в
 подтверждённом UAT.
 
-Backup/export/restore не являются частью benchmark и не используются ни для
-подготовки, ни для reset, ни для проверки. Контроллер их не вызывает, не
-изменяет и не включает в acceptance. Полный fingerprint строк existing tables
-также не снимается: он не относится к межпрогонному reset.
+Backup/export/restore не являются частью controller setup, reset или
+независимого acceptance suite. Контроллер их не вызывает и не изменяет. Это не
+ограничивает самопроверку delivery-сессии: она вправе запускать безопасные
+локальные export/backup/import/restore tests на временных D1/R2, и их стоимость
+входит в измеряемый прогон. Полный fingerprint строк existing tables также не
+снимается: он не относится к межпрогонному reset.
 
 ## Зафиксированная конфигурация и run manifest
 
@@ -218,14 +257,14 @@ Backup/export/restore не являются частью benchmark и не ис�
 ```yaml
 benchmark_id: <stable id>
 task_manager_project: Task Manager / 00000000-0000-4000-8000-2c774e3f0238
-target_release: 0.4 / 00000000-0000-4000-8000-923bce110ea6 / version 1
+target_release: 0.4 / 00000000-0000-4000-8000-923bce110ea6 / version 3
 schema_baseline_task: TM-330 / Done / not measured
 target_tasks: [TM-329, TM-331, TM-332, TM-333, TM-334, TM-335]
 repository: /workspace/Task Manager
 baseline_ref: main
-baseline_sha: <freeze immediately before benchmark; observed candidate 33249e346ea58416b0d0d58a1a83b1505dfd8834>
+baseline_sha: <freeze immediately before benchmark; observed candidate c4db10844ef509a97f2d833939a1d6874b12ec7a>
 uat_target: task-manager-uat / Sites project appgprj_6a8215f500cc8191988eb7bf0564f573 / D1 binding DB
-uat_baseline_version: <freeze; observed saved version 58>
+uat_baseline_version: <freeze; observed saved version 69>
 teams_migration: drizzle/0038_purple_the_call.sql
 protected_schema_paths: [db/schema.ts, drizzle/**]
 team_tables: [teams, team_memberships, team_grants]
@@ -248,8 +287,8 @@ expected_external_codex_activity: zero until final report
 prompt_sha256: <hash of the frozen template>
 rubric_sha256: <hash of the frozen acceptance rubric>
 routing_oracle_sha256: <hash of expected semantic-role/model matrix>
-test_policy_sha256: <hash of exact allowlist, denylist and rerun rules>
-access_effect_policy: synthetic-no-real-acl | attended-action-time-confirmation
+controller_acceptance_sha256: <hash of exact controller checks and working directories>
+access_effect_policy: unattended-no-live-browser-acl
 metrics_schema_version: 4
 issue_grinder_source: <installed package id/version and content hash>
 task_manager_adapter: <installed package id/version>
@@ -272,9 +311,10 @@ Raw evidence не следует складывать в target repository ил�
 ├── acceptance-rubric.md
 ├── metrics-definition.json
 ├── routing-oracle.json
-├── test-policy.yaml
+├── controller-acceptance.yaml
 ├── readiness.json
 ├── canaries/
+│   ├── solo.json
 │   ├── balance.json
 │   ├── swarm.json
 │   └── economical.json
@@ -352,20 +392,30 @@ mode/process metadata packets `A..E`. Этот путь не является д
    выполняет только минимальные wait/status и измерительные calls; их токены
    считаются overhead и не выдаются за токены delivery thread tree.
 10. На установленном snapshot запускает mode-loading smoke для всех пяти
-    режимов и три fresh routing canary: `Баланс`, `Рой`, `Экономичный`. Canaries
-    не читают Task Manager и не меняют repository; они фактически создают
-    bounded child agents и сохраняют requested/observed model, effort,
-    `agent_type`, semantic role и `fork_turns`. `Баланс` обязан показать Luna
-    research/test packet до root implementation; `Рой` — минимум два разных
-    Luna candidates и Luna critic/reducer; `Экономичный` — Luna supervisor и
-    Luna substantive worker без Sol/GPT-5.4 child. Любое несовпадение блокирует
+    режимов и четыре fresh routing canary: `Соло`, `Баланс`, `Рой`,
+    `Экономичный`. Canaries не читают Task Manager и не меняют repository. Для
+    каждого созданного child они сохраняют requested/observed model, effort,
+    `agent_type`, semantic role и `fork_turns`; для top-level дополнительно
+    сохраняют фактически выбранный canonical mode. В `Соло` один execution
+    owner обязан сам выполнить анализ, реализацию, тест и self-review; child,
+    которому передана любая из этих обязанностей, блокирует серию. Внешний
+    Strategic Explainer или другой bounded service-provider не считается
+    execution-child, пока не выполняет delivery-работу. `Баланс` обязан
+    показать Luna research/test packet до root implementation; `Рой` — минимум
+    два разных Luna candidates и Luna critic/reducer. В `Экономичном` Luna Max
+    top-level должна автоматически выбрать canonical mode и выполнить
+    substantive serial packet. Создание отдельного child там не обязательно;
+    если режим всё же создаёт child, его observed model также должна быть Luna
+    Max. Sol или GPT-5.4 в substantive дереве любого из этих canaries блокирует
     дорогую серию до исправления runtime.
-11. Компилирует exact test policy: разрешённые команды и test files, явный
-    denylist, правила повторного запуска и общий fail-closed wrapper. Wrapper
-    проверяется положительным и отрицательным synthetic command до run 1.
-12. Проверяет, что предыдущие benchmark branches/worktrees не доступны через
-    frozen packet, а audit rule признаёт чтение чужой ветки, worktree или thread
-    contamination incident.
+11. Замораживает независимый controller acceptance suite: одинаковые команды,
+    test files и working directories, которые controller повторно запускает на
+    exact candidate каждого режима после handoff. Этот suite не ограничивает
+    собственные безопасные локальные тесты delivery-сессии.
+12. Сохраняет предыдущие benchmark branches/worktrees как read-only
+    исторические артефакты, не удаляет и не продолжает их. Проверяет, что их
+    identity и содержимое не доступны через frozen packet, а audit rule
+    признаёт чтение чужой ветки, worktree или thread contamination incident.
 
 Любая неизвестная environment mapping, недоступная прямая Team cleanup или
 неустранимая конкурирующая активность являются ошибкой подготовки. Они не
@@ -382,7 +432,7 @@ mode/process metadata packets `A..E`. Этот путь не является д
 - одинаковый prompt template;
 - mode profile matrix и общий permission profile;
 - routing oracle и правила mode-fidelity gate;
-- test allowlist/denylist, rerun policy и command guard;
+- независимый controller acceptance suite;
 - один access-effect policy для всех пяти прогонов;
 - максимальное время прогона;
 - acceptance oracle и правила оценки;
@@ -417,13 +467,21 @@ Hard gates применяются до числового score:
    неизменный migration journal;
 2. build/typecheck/lint и обязательные targeted tests проходят на exact
    candidate;
-3. UAT version собрана из exact candidate SHA и проходит baseline плюс Teams
-   smoke;
-4. authorization выполняется server-side, Viewer не мутирует, Project
-   inheritance и no-existence-leak подтверждены;
+3. UAT version собрана из exact candidate SHA и проходит baseline плюс
+   Teams/People & Teams smoke; обычные UAT-действия разрешены, но создание,
+   изменение и отзыв живого доступа через Browser в этот smoke не входят;
+4. обязательные server integration и UI/component tests exact candidate
+   подтверждают server-side authorization, Team-grant create/update/revoke,
+   Viewer denial, Project inheritance и no-existence-leak;
 5. post-run candidate снят до reset, затем три Team-таблицы очищены и
    ограниченный baseline gate снова зелёный;
 6. Task Manager lifecycle и комментарии правдиво соответствуют evidence.
+
+Отсутствие живой `team_grants` строки в UAT unattended-прогона не является
+hard-gate failure и не запрещает terminal completion. Оно явно записывается как
+предел live evidence; соответствующая функциональность обязана быть доказана
+автоматическими тестами exact candidate. Rubric не может требовать Browser
+submit, который меняет permissions/access.
 
 Hard-gate failure даёт `accepted=false`, но diagnostic score всё равно
 сохраняется. Слепой score имеет 100 баллов и замораживается до run 1:
@@ -464,22 +522,26 @@ oracle по semantic role, `agent_type`, requested/observed model, effort и
 не получает quality/efficiency rank и не доказывает свойства режима. Отсутствие
 recursive telemetry также делает mode fidelity непроверяемой и блокирует серию.
 
-### Замороженная test policy
+### Два независимых уровня тестирования
 
-До run 1 controller создаёт `test-policy.yaml` с exact argv/working directory
-для каждого разрешённого check, allowed test-file globs, явным denylist и
-правилами повторов. `attachments-integration.test.ts` входит в denylist, пока
-frozen acceptance прямо не изменит это решение до первого запуска.
+Каждая delivery-сессия сама отвечает за реализацию и самопроверку результата.
+Она обязана запустить достаточные проверки exact candidate и вправе выбирать
+любые безопасные локальные unit, integration, component, build и другие тесты,
+включая полный набор и повтор после исправления. Controller не выдаёт ей
+allowlist, denylist или command guard. Все выбранные режимом проверки, повторы,
+время и токены остаются внутри его измерительного окна.
 
-Delivery и все children запускают проверки только через один read-only
-controller-provided command guard. Прямой вызов `npm test`, `tsx --test`, другого
-test runner или файла вне allowlist является protocol violation и немедленно
-останавливает прогон; prompt-просьба сама по себе не считается enforcement.
-Повтор разрешён только после material candidate change, затрагивающего причину
-предыдущего failure, либо один раз для заранее классифицированного flaky check.
-Receipt повтора содержит исходный run, failure, новый candidate SHA и reason.
-Три одинаковых запуска запрещённого теста больше не могут быть учтены как
-обычный rework режима.
+После terminal handoff controller независимо запускает на exact candidate один
+и тот же заранее замороженный acceptance suite. Только этот общий повторный
+набор является сопоставимым внешним доказательством качества пяти кандидатов;
+self-report и логи delivery его не заменяют. Controller checks учитываются
+отдельно как одинаковая инфраструктурная стоимость benchmark и не приписываются
+режиму.
+
+Жёсткие ограничения относятся не к названиям тестов, а к реальным эффектам:
+delivery по-прежнему не получает права на Product Production, живое изменение
+permissions/access через Browser, внешних получателей или другие запрещённые
+действия. Локальные проверки на временных D1/R2 такими эффектами не являются.
 
 ## Фаза 2. Снять baseline и зафиксировать reset
 
@@ -527,7 +589,9 @@ blind evaluator. Перед новым run видимый comment list снов�
 3. Сохранить read-only smoke baseline.
 4. Каждый прогон получает новый opaque worktree/branch `A..E` от того же
    `baseline_sha`. Ветки сохраняются до окончания слепой оценки и не вливаются
-   друг в друга.
+   друг в друга. Ни одна ветка или рабочее дерево первого пилота не может быть
+   base, recovery point или местом выполнения нового прогона; старые артефакты
+   при этом не удаляются.
 
 ### D1 schema, migration ledger и data
 
@@ -595,20 +659,26 @@ resources, такой effect запрещается во всех пяти пр�
 
 ### Action-time access policy
 
-Предварительное разрешение в frozen prompt не заменяет обязательное
-подтверждение непосредственно перед реальным изменением permissions/access.
-Поэтому полностью безнадзорная и сравнимая серия по умолчанию не выполняет
-реальный Team-grant для существующего пользователя: authorization доказывается
-local/server integration tests и изолированным synthetic fixture, который не
-меняет доступ реального account. Browser/UI может проверить подготовленное
-состояние и отсутствие утечки, но не нажимает финальную ACL mutation.
+Основная сравнимая серия всегда unattended. Создание, изменение и отзыв
+реального доступа через Browser заранее исключены из её acceptance и hard
+gates. Browser/UI проверяет, что Teams и People & Teams открываются, показывают
+правильные controls, роли, inheritance explanations и текущее состояние, но не
+нажимает кнопку, создающую, меняющую или отзывающую ACL route.
 
-Если quality rubric требует именно реальный access effect, benchmark становится
-attended. Все пять прогонов останавливаются в одной и той же заранее
-определённой точке, пользователь даёт action-time confirmation каждому прогону
-одинаковой формулировкой, а intervention учитывается отдельно. Нельзя одному
-режиму подтверждать действие, а отсутствие ответа другому классифицировать как
-mode failure. Смешанная unattended/attended серия не ранжируется.
+Team-grant create/update/revoke, strongest-role, Viewer denial,
+no-existence-leak и несколько пересекающихся Team routes доказываются
+обязательными server integration и UI/component tests exact candidate. Эти
+тесты не ограничиваются одной Team и не требуют отдельной benchmark fixture.
+
+Если Browser или другой interactive surface всё же сообщает о необходимом
+action-time confirmation для исключённого live ACL smoke, режим прекращает
+только эту проверку, записывает точный предел live evidence и продолжает
+terminal reconciliation. Он не вызывает `request_user_input`, не ждёт ответа и
+не превращает пропущенный live effect в blocker либо defect реализации.
+
+Настоящий live access smoke можно провести один раз отдельно после завершения
+всей серии. Он является attended продуктовой проверкой вне пяти measured runs,
+не влияет на ranking и не меняет их outcomes.
 
 ## Фаза 3. Заморозить prompt delivery-сессии
 
@@ -645,17 +715,24 @@ D1 schema или migration journal и не выполняй runtime DDL. До UA
 с blocker.
 
 Заверши handoff с exact candidate, доступным для post-run capture. Для TM-334
-докажи rows и read-back в таблицах teams, team_memberships и team_grants.
-Обычные row-level изменения в прочих UAT D1 tables разрешены, не являются
-delivery/reset gate и не требуют доказательства полного non-Team zero diff.
-Не трать время на такой fingerprint или ремонт. Не реализуй и не запускай
-межпрогонный cleanup; его после capture выполняет центральный controller только
-для трёх Team-таблиц.
+докажи изоляцию, rows и read-back таблиц teams, team_memberships и team_grants
+обязательными автоматическими тестами exact candidate; live UAT read-back
+фиксирует фактически созданные строки, но наличие живой team_grants строки не
+является hard gate unattended-прогона. Обычные row-level изменения в прочих UAT
+D1 tables разрешены, не являются delivery/reset gate и не требуют доказательства
+полного non-Team zero diff. Не трать время на такой fingerprint или ремонт. Не
+реализуй и не запускай межпрогонный cleanup; его после capture выполняет
+центральный controller только для трёх Team-таблиц.
 
-Запускай проверки только через указанный во frozen packet test command guard.
-Не вызывай test runner или test file напрямую; соблюдай exact allowlist,
-denylist и правила повторного запуска. В measured run не изменяй permissions или
-access реального пользователя: используй frozen synthetic authorization fixture.
+Самостоятельно выбери и запусти достаточные безопасные локальные проверки exact
+candidate. Можно использовать любые test files, test runners, полный набор и
+обоснованные повторы; не рассчитывай, что последующая независимая проверка
+контроллера заменит твою самопроверку. В measured run не создавай, не меняй и не
+отзывай permissions/access через Browser. Такой live submit не входит в
+acceptance: докажи Team-grant автоматическими server integration и UI/component
+tests exact candidate. Если interactive surface требует action-time
+confirmation, пропусти только этот live check, запиши предел evidence и
+продолжай до terminal результата без вопроса пользователю и без blocker.
 
 <FROZEN_RELEASE_AND_ENVIRONMENT_PACKET>
 ```
@@ -668,7 +745,7 @@ access реального пользователя: используй frozen sy
 Не добавлять mode-specific советы, лимиты агентов, способы декомпозиции или
 подсказки по реализации. Это изменило бы предмет эксперимента.
 
-Task Manager versions `TM-329@13` и `TM-334@6` уже содержат то же явное
+Task Manager versions `TM-329@36` и `TM-334@32` уже содержат то же явное
 разделение ответственности. Перед run 1 controller перечитывает их и
 останавливается при смысловом drift.
 
@@ -682,8 +759,10 @@ Task Manager versions `TM-329@13` и `TM-334@6` уже содержат то ж�
 
 1. Убедиться, что ни одна другая Codex/ChatGPT Work задача не активна на этом
    account, кроме контроллера.
-2. Подтвердить clean frozen `main` и отсутствие связи нового worktree с
-   предыдущими benchmark branches.
+2. Подтвердить clean frozen `main`, создать именно новый worktree от
+   `baseline_sha` и доказать, что его path, branch и Task identity не совпадают
+   ни с одним сохранённым benchmark artifact. Старые worktrees остаются на
+   месте и не считаются загрязнением сами по себе.
 3. Сверить Task Manager visible-content fingerprint с baseline; монотонные
    versions, timestamps и Activity не сравнивать и не читать как context.
 4. Сверить UAT baseline version, protected-schema hash, migration identity,
@@ -692,9 +771,10 @@ Task Manager versions `TM-329@13` и `TM-334@6` уже содержат то ж�
 5. Снять account usage/reset snapshot, включая raw `used_percent`, вычисленный
    `usage_remaining_percent = 100 - used_percent`, `resets_at`, текущую
    UTC/Madeira time и telemetry boundary.
-6. Создать новую обычную Project Task в отдельном worktree строго от
-   `baseline_sha`, задав exact top-level profile из mode matrix, общие permissions
-   и prompt для текущего mode. Ceiling этой Task — 8 часов.
+6. Создать новую обычную Project Task в новом отдельном worktree строго от
+   `baseline_sha`, задав exact top-level profile из mode matrix, общие
+   permissions и prompt для текущего mode. Возобновление прежней Task или
+   повторное использование её worktree запрещено. Ceiling этой Task — 8 часов.
 7. Сохранить thread ID, host ID, worktree/branch identity и фактический
    стартовый SHA.
 
@@ -712,8 +792,9 @@ Task Manager versions `TM-329@13` и `TM-334@6` уже содержат то ж�
    переходит к основной implementation wave. Любой inherited Sol, GPT-5.4 или
    отсутствие обязательной Luna topology останавливает run как
    `mode_routing_invalid` и экономит оставшийся budget.
-4. Наблюдать command events и останавливать run при обходе frozen test guard,
-   denylisted test либо повторе без допустимого receipt.
+4. Наблюдать command events и останавливать run только при попытке запрещённого
+   реального эффекта, включая создание, изменение или отзыв live ACL через
+   Browser. Безопасные локальные тесты и их повторы не являются нарушением.
 5. Контроллер во время ожидания не анализирует код, не запускает другую модель
    и не помогает delivery-сессии.
 6. Не посылать discretionary follow-up. Вопрос, ответ на который уже содержится
@@ -742,8 +823,8 @@ result и quiescence всех descendants; иначе поздние worker toke
 - protected-schema diff и поиск runtime DDL;
 - commits, attempts, candidate waves, retries и rejected candidates, насколько
   это объективно извлекается из evidence;
-- test guard receipts, exact executed checks, denylist violations и допустимые
-  rerun receipts;
+- все самостоятельно выполненные delivery checks и повторы с их результатами;
+- результаты отдельного controller acceptance suite exact candidate;
 - Task Manager statuses, versions, comments и fresh Release inventory;
 - UAT deployment identity, schema/data/migration fingerprints, R2/background
   state и logs/smoke evidence;
@@ -1060,11 +1141,12 @@ artifacts, delivery threads и остальные benchmark worktrees; он чи
   унаследовал Sol, включился GPT-5.4 через platform `critic`/`reviewer`, observed
   profile разошёлся с receipt либо `Рой` не создал требуемую material Best-of-M
   wave;
-- `protocol_invalid`: delivery обошла frozen test guard, запустила denylisted
-  test, сделала недопустимый rerun, прочитала чужой run либо выполнила реальный
-  access effect вопреки выбранной unattended policy;
-- action-time confirmation была дана несимметрично либо отсутствие ответа
-  ошибочно классифицировано как defect режима.
+- `protocol_invalid`: delivery прочитала чужой run либо выполнила запрещённый
+  реальный effect вопреки выбранной unattended policy; дополнительные или
+  повторные безопасные локальные тесты к protocol violation не относятся;
+- режим вызвал `request_user_input`, ожидал action-time confirmation или
+  заблокировался только из-за live ACL smoke, заранее исключённого из
+  unattended acceptance.
 
 Эти outcomes доказывают дефект runtime или экспериментального протокола, но не
 получают quality/efficiency rank. Controller сохраняет ранний trace и не даёт
@@ -1086,15 +1168,18 @@ reset gates — включая reset после последнего режим�
 содержит:
 
 1. benchmark ID, дату, цель и точный Release;
-2. common model/effort/permissions, runtime versions и baseline SHA;
+2. per-mode top-level model/effort, общие permissions, runtime versions и
+   baseline SHA;
 3. frozen prompt/rubric hashes и фактический порядок;
 4. доказательство начального baseline и каждого reset;
-5. таблицу outcomes и blind quality по `A..E`;
+5. обязательную единую итоговую таблицу по пяти режимам в зафиксированном ниже
+   формате;
 6. раскрытое отображение `A..E → mode`;
-7. полную token table каждого режима с model rows, cache share и run position;
-8. weekly usage remaining до/после, наблюдаемую quota delta, `resets_at`,
-   точность замера, timing milestones, agents, attempts, interventions, rework
-   и defects;
+7. подробное приложение с token categories, model rows, cache share и run
+   position, необходимое для проверки сумм итоговой таблицы;
+8. подробное приложение с weekly usage remaining до/после, наблюдаемой quota
+   delta, `resets_at`, точностью замера, timing milestones, agents, attempts,
+   interventions, rework и defects;
 9. отдельно controller/setup/reset/evaluation overhead;
 10. сравнение accepted-result efficiency и checkpoint utility;
 11. infrastructure incidents, deviations и limitations;
@@ -1104,31 +1189,56 @@ reset gates — включая reset после последнего режим�
 14. вывод, какой режим оказался сильнее для каких ограничений, без объявления
     одного пилотного прогона универсальной истиной.
 
-Минимальные итоговые таблицы:
+### Обязательная итоговая таблица
 
-| Режим | Position | Outcome | Hard gates | Blind score | Major+ defects | Rework |
-|---|---:|---|---:|---:|---:|---:|
-| Соло |  |  |  |  |  |  |
-| Классический |  |  |  |  |  |  |
-| Баланс |  |  |  |  |  |  |
-| Рой |  |  |  |  |  |  |
-| Экономичный |  |  |  |  |  |  |
+В начале итогового отчёта приводится ровно одна компактная сравнительная
+таблица. Она отвечает на вопрос о результате и цене каждого режима, а не
+заменяет raw artifacts и подробные evidence-приложения.
 
-| Режим | Cached input | Input | Output | Scarce tokens | Cache share | Wall time | Agents peak | Interventions |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Соло |  |  |  |  |  |  |  |  |
-| Классический |  |  |  |  |  |  |  |  |
-| Баланс |  |  |  |  |  |  |  |  |
-| Рой |  |  |  |  |  |  |  |  |
-| Экономичный |  |  |  |  |  |  |  |  |
+| Режим | Итог | Качество, баллы | Sol, токены | Luna, токены | GPT-5.4, токены | Время | Объём работы | API-equivalent, USD | Weekly use, п.п. |
+|---|---|---:|---:|---:|---:|---:|---|---:|---:|
+| Соло |  |  |  |  |  |  |  |  |  |
+| Классический |  |  |  |  |  |  |  |  |  |
+| Баланс |  |  |  |  |  |  |  |  |  |
+| Рой |  |  |  |  |  |  |  |  |  |
+| Экономичный |  |  |  |  |  |  |  |  |  |
 
-| Режим | Remaining before | Remaining after | Consumed, п.п. | Resets at | Quota verdict |
-|---|---:|---:|---:|---|---|
-| Соло |  |  |  |  |  |
-| Классический |  |  |  |  |  |
-| Баланс |  |  |  |  |  |
-| Рой |  |  |  |  |  |
-| Экономичный |  |  |  |  |  |
+Правила заполнения:
+
+- `Итог` использует короткий нормализованный verdict: `PASS`,
+  `FAIL — <gate>`, `BLOCKED — <reason>`, `CHECKPOINT` или
+  `INVALID — infrastructure|routing|protocol`. Отдельные UAT version, список
+  gates и lifecycle-detail в эту таблицу не входят;
+- `Качество, баллы` содержит только blind score `0..100`. Для неоцениваемого
+  прогона указывается `n/a`; counters вида `High+`, `Major+` и defect severity
+  в итоговой таблице запрещены;
+- набор model-columns строится после telemetry reconciliation как объединение
+  всех точных model IDs, фактически наблюдавшихся хотя бы в одном из пяти
+  delivery trees. Одинаковый полный набор этих колонок показывается для всех
+  режимов; Sol, Luna и GPT-5.4 в шаблоне выше — текущий ожидаемый набор, а не
+  закрытый список;
+- каждая model-column содержит полный расход delivery tree именно этой модели:
+  `cached input + uncached input + output`. Расход разных моделей нельзя
+  объединять, показывать только общим total или скрывать в `Other`;
+  отсутствие расхода конкретной модели записывается как `0`, а не как прочерк;
+- `Время` — wall-clock от dispatch до terminal outcome/checkpoint без
+  setup/reset/evaluation overhead;
+- `Объём работы` записывается в одном стабильном формате:
+  `<agents> аг. · <tool calls> выз. · <commits> ком. · <tests> тест.`. Agents
+  считаются рекурсивно по delivery tree; остальные величины берутся из того же
+  run interval и не используются как замена quality score;
+- `API-equivalent, USD` — сумма model-by-model по тем же delivery-tree token
+  totals и действующим публичным list prices. Это оценка стоимости через API,
+  а не фактический subscription charge;
+- `Weekly use, п.п.` — `weekly_quota_consumed_percentage_points` для полного
+  измерительного окна режима. Если разрешения счётчика недостаточно, пишется
+  `<resolution`; при reset или несовместимых snapshots — `invalid`. Значение
+  включает неизбежный controller observation overhead и поэтому не подменяет
+  точные model token totals.
+
+UAT version, run position, cache share, quota snapshots, defect list и
+подробные hard-gate evidence остаются в проверяемом приложении к отчёту, но не
+добавляются в эту итоговую таблицу.
 
 ## Условие завершения центральной сессии
 
