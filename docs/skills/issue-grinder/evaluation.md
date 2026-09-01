@@ -10,8 +10,8 @@
    сценарием, проверяет metadata, references и отсутствие незавершённых
    placeholders. Этот слой исполняется repository validators.
 2. Детерминированные harness-ы проверяют отдельные внешние решения, mode
-   resolver, нетерминальный checkpoint, порядок effects и механические
-   Git-инварианты writer admission. Они не симулируют reasoning и поэтому
+   resolver, model-routing receipts, нетерминальный checkpoint, порядок effects
+   и механические Git-инварианты writer admission. Они не симулируют reasoning и поэтому
    являются oracle hard invariants, а не полным тестом skill.
 3. Model-forward cases должны запускать установленный skill в новой сессии на
    синтетическом Task Manager scope; generator не получает rubric или expected
@@ -53,10 +53,10 @@
 | `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | five-canonical-modes; mode-does-not-expand-authority |
 | `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; luna-any-effort-economical; non-luna-classic; mode-persists-after-model-change |
 | `IG-MODE-03` | `modes/classic.md`; `multi-agent-execution.md` | classic-sol-does-almost-all; classic-luna-trivial-only; classic-high-judgment-owner; classic-final-review-terminal |
-| `IG-MODE-04` | `modes/balance.md`; `multi-agent-execution.md` | balance-controller-plans; balance-luna-light-and-medium-first; balance-problem-fallback-to-sol; balance-rework-redispatch; balance-final-gate |
-| `IG-MODE-05` | `modes/swarm.md`; `multi-agent-execution.md` | swarm-intentional-candidates; swarm-isolated-overlap; swarm-reduction; swarm-bounded-stop; swarm-final-gate |
-| `IG-MODE-06` | `SKILL.md` §5; `modes/economical.md`; mode harness | economical-terminal-when-proven; economical-resumable-candidate; no-false-done; no-false-blocked |
-| `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md`; mode harness | luna-profile-collapse; luna-low-root-luna-max-supervisor; non-luna-two-profile; unknown-family-no-guess; role-override-wins |
+| `IG-MODE-04` | `modes/balance.md`; `multi-agent-execution.md`; routing guard | balance-controller-plans; balance-first-wave-luna; balance-luna-bulk; balance-material-only-controller; balance-rework-redispatch; balance-final-gate |
+| `IG-MODE-05` | `modes/swarm.md`; `multi-agent-execution.md`; routing guard | swarm-all-child-work-luna; swarm-material-best-of-m; swarm-isolated-overlap; swarm-reduction; swarm-bounded-stop; swarm-final-gate |
+| `IG-MODE-06` | `SKILL.md` §5; `modes/economical.md`; mode/routing guards | economical-all-substantive-luna; non-luna-root-shell-only; economical-terminal-when-proven; economical-resumable-candidate; no-false-done; no-false-blocked |
+| `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md`; mode/routing guards | luna-profile-collapse; explicit-luna-max-child; bounded-fork; observed-profile-match; forced-reviewer-profile-rejected; luna-low-root-luna-max-supervisor; role-override-wins |
 | `IG-MODE-08` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | economical-handoff-preserves-evidence; swarm-alternative-approach; same-retry-rejected |
 | `IG-MODE-09` | `modes/{balance,swarm,economical}.md` | one-review-candidate; dissent-preserved; raw-swarm-transcript-not-required; rework-reviewed-again |
 | `IG-MODE-10` | `execution-modes.md`; `multi-agent-execution.md`; mode harness | explicit-switch-barrier; automatic-no-switch; switch-preserves-candidates-and-scope |
@@ -76,9 +76,9 @@
 | `IG-MA-12` | `SKILL.md` §2; `multi-agent-execution.md`; `writer_worktree_guard.py`; trace harness | startup-inventory-before-fresh-work; branch-only-restored; dirty-checkpoint-resumed; active-owner-rejected; ambiguous-preserved; intentional-candidate-not-replacement |
 | `IG-MA-13` | `multi-agent-execution.md` | explicit-profile-preserved |
 | `IG-MA-14` | `modes/classic.md`; `multi-agent-execution.md` | classic-simple-luna-max; classic-small-diff-not-simple |
-| `IG-MA-15` | `modes/*.md`; `multi-agent-execution.md` | solo-current-main-only; classic-material-controller; balance-economical-bulk; swarm-economical-waves; economical-economical-controller |
+| `IG-MA-15` | `modes/*.md`; `multi-agent-execution.md`; routing guard | solo-current-main-only; classic-material-controller; balance-economical-bulk; swarm-economical-waves; economical-economical-controller; no-inherited-sol-child |
 | `IG-MA-16` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | luna-uncertainty-evidence-handoff; mode-specific-next-route; same-luna-retry-rejected |
-| `IG-MA-17` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | classic-luna-unavailable-controller; economical-fallback-no-silent-expensive-spend |
+| `IG-MA-17` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; routing guard | classic-luna-unavailable-controller; economical-capacity-loss-no-sol-substitution; routing-failure-stops-wave |
 | `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing; worker-evidence-coordinator-facade; nested-facade-no-new-task; solo-native-no-provider |
 
 ## Быстрый mode corpus
@@ -112,6 +112,24 @@ Harness принимает уже распознанный каноническ�
 полезного агента, различия подходов `Роя`, code review или фактического
 исполнения Markdown runtime. Эти свойства остаются model-forward cases и
 наблюдаемым результатом реальных прогонов.
+
+## Быстрый model-routing corpus
+
+Bundled `issue-grinder/scripts/model_routing_guard.py` и его unit corpus
+проверяются командой:
+
+```bash
+python3 -B -m unittest discover -s tests -p 'test_model_routing_guard.py'
+```
+
+Corpus механически доказывает, что `Баланс`, `Рой` и `Экономичный` принимают
+substantive Luna Max child только с explicit model/effort и bounded fork,
+отвергают inherited Sol, `fork_turns=all`, встроенные platform-типы
+`critic`/`reviewer` и observed GPT-5.4 mismatch. Для `Баланса` отдельно
+сохраняются узкие controller roles material judgment/integration/final review;
+явный пользовательский role override сохраняется и сверяется с observed
+profile. Guard не доказывает честность semantic label или фактический вызов
+child — это проверяет model-forward canary и recursive thread-tree telemetry.
 
 ## Быстрый blocker corpus
 
@@ -228,10 +246,17 @@ fresh model-forward smoke.
 - наблюдаемо различить режимы: в `Классическом` Sol/controller делает почти
   всё, а Luna получает только тривиальные packets; `Соло` сохраняет current
   model, ноль subagents и native publication для одного и нескольких issue; в
-  `Балансе` Luna сначала пытается выполнить лёгкие и средние bounded tasks и при
-  существенной проблеме возвращает evidence fallback Sol/controller-у; `Рой`
-  создаёт isolated intentional candidates и сокращает их до одного; `Экономичный`
-  сохраняет один resumable candidate без ложного `Done`/Goal completion;
+  `Балансе` до source mutation появляется observed Luna Max child для обычного
+  research/implementation/test packet, а Sol остаётся на material decision и
+  final gate; `Рой` запускает на Luna минимум два isolated intentional candidate
+  для material fork, Luna critics/reducer и сокращает wave до одного result;
+  `Экономичный` выполняет весь substantive packet и review на Luna Max, оставляя
+  non-Luna root только transport/authority shell, и сохраняет один resumable
+  candidate без ложного `Done`/Goal completion;
+- для всех child в `Балансе`, `Рое` и `Экономичном` сохранить pre-dispatch и
+  observed `issue-grinder/model-routing/v1` receipts; ни один substantive child
+  не наследует Sol, не использует GPT-5.4 и не запускается через platform
+  `critic`/`reviewer` без явного пользовательского profile override;
 - на scope с двумя независимыми write packets сначала получить от каждого
   admission-only receipt отдельного linked worktree, разрешить implementation
   только follow-up turn-ом и сохранить integration checkout неизменным до

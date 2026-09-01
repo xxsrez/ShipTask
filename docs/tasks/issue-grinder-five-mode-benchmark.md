@@ -1,7 +1,10 @@
 # Сравнение пяти режимов Issue Grinder
 
-Статус: эксперимент завершён 2026-09-01; итог зафиксирован в
+Статус: первый пилот завершён 2026-09-01 и признан непригодным для ранжирования;
+итог зафиксирован в
 [сравнительном отчёте](../reports/2026-09-01-issue-grinder-five-mode-benchmark.md).
+Текущая редакция — исправленный runbook для следующей полной серии. Она не
+переоценивает результаты первого пилота.
 Delivery оставляла candidate до post-run capture, а очистку Team-данных и
 возврат UAT baseline выполняла центральная сессия через временный узкий UAT
 endpoint. После пяти прогонов и слепой оценки endpoint, flag, secret, тесты и
@@ -47,12 +50,33 @@ infrastructure blocker оформляет как точный возобновл
 
 `По умолчанию` не участвует: это resolver, а не шестой режим. Единственным
 содержательным различием входного prompt пяти delivery-сессий должно быть
-явное название режима. Внутренняя topology, выбранная самим режимом, является
-частью измеряемого поведения.
+явное название режима. Внутренняя topology и intended top-level profile,
+определённые контрактом режима, являются частью измеряемого поведения.
+
+Основная серия проверяет end-user режимы: `Соло`, `Классический`, `Баланс` и
+`Рой` стартуют на Sol/xhigh, `Экономичный` — на Luna/max. Это единственный способ
+проверить обещание `Экономичного` без Sol. Отдельный fixed-Sol-root diagnostic
+можно провести после основной серии, но его нельзя смешивать с ranking: он
+измеряет overhead transport/authority оболочки, а не обычный пользовательский
+`Экономичный`.
 
 Один комплект из пяти прогонов является пилотным сравнением, а не
 статистическим доказательством. Для устойчивого вывода эксперимент позднее
 следует повторить минимум три раза с новым случайным порядком режимов.
+
+Исправленный протокол прямо учитывает три ранних провала первого pilot:
+
+- `Экономичный` прошёл с substantive Sol вместо Luna — теперь до дорогой работы
+  обязателен actual routing canary и ранний mode-fidelity gate;
+- `Соло` остановился на action-time Team-grant confirmation — unattended серия
+  больше не выполняет реальный access effect, а attended вариант подтверждает
+  его симметрично во всех пяти runs;
+- `Баланс` трижды запустил запрещённый `attachments-integration.test.ts` — теперь
+  тесты проходят только через frozen command guard с exact allowlist/denylist и
+  reasoned rerun receipt.
+
+Если любой из этих preconditions не доказан, новая серия не стартует. Это
+важнее получения пяти строк результата любой ценой.
 
 ## Текущий целевой scope
 
@@ -107,7 +131,10 @@ baseline не входит.
 | Независимый UAT Team-data cleanup | Ready | После capture развернуть frozen `main`, удалить rows через временный authenticated UAT endpoint и подтвердить `0/0/0` |
 | Task Manager visible-state reset | Ready | Обычные versioned mutations; history/version не откатываются |
 | `TM-329`/`TM-334` handoff semantics | Ready | Task versions `13`/`6`: baseline deploy идёт до Team-only очистки, candidate остаётся до capture |
-| Общий model/effort и wall-time ceiling | Ready | `gpt-5.6-sol`, `xhigh`, standard Task, максимум 8 часов на delivery-run |
+| Mode top-level profiles и wall-time ceiling | Требует повторной проверки | Sol/xhigh для Соло/Классического/Баланса/Роя, Luna/max для Экономичного; standard Task, максимум 8 часов |
+| Model routing canary | Требует выполнения | Fresh synthetic canaries для Баланса/Роя/Экономичного с actual child telemetry |
+| Test policy | Требует заморозки | Exact allowlist/denylist и один общий command guard до run 1 |
+| Action-time access policy | Требует выбора | По умолчанию synthetic ACL fixture без реального access effect; live ACL — только отдельная attended серия |
 | Blind evaluator | Ready | Отдельная шестая `gpt-5.6-sol`/`xhigh` сессия после пяти delivery-runs |
 
 UAT сейчас содержит одного registered User и не имеет direct access grants.
@@ -133,10 +160,11 @@ Product Production не изменяется.
 Центральная сессия является контроллером эксперимента. Она:
 
 - разрешает точные Project, Release, repository, UAT и baseline;
-- фиксирует общий профиль, prompt, rubric и порядок прогонов;
+- фиксирует mode profile matrix, общий prompt, rubric и порядок прогонов;
 - создаёт ровно одну верхнеуровневую delivery-сессию за раз;
-- явно задаёт каждой из пяти delivery-сессий `gpt-5.6-sol` и `xhigh`, обычную
-  Project Task и одинаковый ceiling 8 часов;
+- явно задаёт `gpt-5.6-sol`/`xhigh` для `Соло`, `Классического`, `Баланса` и
+  `Роя`, `gpt-5.6-luna`/`max` для `Экономичного`, обычную Project Task и
+  одинаковый ceiling 8 часов;
 - во время активного прогона не занимается другой содержательной работой;
 - независимо собирает метрики и evidence, не полагаясь только на self-report;
 - возвращает видимое состояние Tasks, Git и UAT к baseline между прогонами;
@@ -206,8 +234,12 @@ controller_cleanup_surface: POST /api/admin/benchmark/teams/reset
 controller_cleanup_sql_sha256: <hash of the frozen three-statement SQL>
 task_manager_reset_policy: visible-content-reset-without-history-rollback
 controller_session_mode: standard project task
-common_model: gpt-5.6-sol
-common_reasoning_effort: xhigh
+mode_top_level_profiles:
+  solo: gpt-5.6-sol/xhigh
+  classic: gpt-5.6-sol/xhigh
+  balance: gpt-5.6-sol/xhigh
+  swarm: gpt-5.6-sol/xhigh
+  economical: gpt-5.6-luna/max
 permission_profile: <exact effective profile>
 maximum_wall_time_per_run: PT8H
 mode_order_policy: randomized-once-before-run-1
@@ -215,15 +247,18 @@ blind_evaluator: separate sixth gpt-5.6-sol/xhigh session after final reset
 expected_external_codex_activity: zero until final report
 prompt_sha256: <hash of the frozen template>
 rubric_sha256: <hash of the frozen acceptance rubric>
-metrics_schema_version: 3
+routing_oracle_sha256: <hash of expected semantic-role/model matrix>
+test_policy_sha256: <hash of exact allowlist, denylist and rerun rules>
+access_effect_policy: synthetic-no-real-acl | attended-action-time-confirmation
+metrics_schema_version: 4
 issue_grinder_source: <installed package id/version and content hash>
 task_manager_adapter: <installed package id/version>
 ```
 
-`common_model`, `common_reasoning_effort`, permission profile, tools and
-authority должны быть одинаковыми во всех пяти верхнеуровневых сессиях. Если
-контроллер не может явно закрепить значение, он фиксирует фактически
-наблюдаемое значение и не начинает эксперимент, пока не доказана одинаковость.
+Prompt, permission profile, tools, authority и ceiling должны быть одинаковыми
+во всех пяти верхнеуровневых сессиях. Model/effort должны точно соответствовать
+замороженной mode profile matrix. Если контроллер не может явно закрепить либо
+наблюдаемо подтвердить значение, эксперимент не начинается.
 
 ## Артефакты эксперимента
 
@@ -236,7 +271,13 @@ Raw evidence не следует складывать в target repository ил�
 ├── frozen-prompt.txt
 ├── acceptance-rubric.md
 ├── metrics-definition.json
+├── routing-oracle.json
+├── test-policy.yaml
 ├── readiness.json
+├── canaries/
+│   ├── balance.json
+│   ├── swarm.json
+│   └── economical.json
 ├── order.json
 ├── baseline/
 │   ├── git.json
@@ -297,9 +338,7 @@ mode/process metadata packets `A..E`. Этот путь не является д
    таблицы пусты, а controller умеет независимо удалить только Team rows без
    schema rollback. Product Production не читать и не изменять.
 6. Проверяет доступность tool contract для создания fresh Project Task в
-   отдельном worktree от frozen SHA и ожидания результата. Отдельную пробную
-   сессию не создаёт: центральная сессия порождает ровно пять измеряемых
-   delivery-сессий и только после них одну отдельную blind evaluator-сессию.
+   отдельном worktree от frozen SHA и ожидания результата.
 7. Проверяет доступность локальной token telemetry и account usage/reset
    evidence, включая `rate_limits.primary.used_percent` и `resets_at` для
    недельного окна. Если точное распределение по thread tree невозможно,
@@ -312,7 +351,19 @@ mode/process metadata packets `A..E`. Этот путь не является д
    model-forward или пользовательской Codex/ChatGPT Work активности. Контроллер
    выполняет только минимальные wait/status и измерительные calls; их токены
    считаются overhead и не выдаются за токены delivery thread tree.
-10. Проверяет, что предыдущие benchmark branches/worktrees не доступны через
+10. На установленном snapshot запускает mode-loading smoke для всех пяти
+    режимов и три fresh routing canary: `Баланс`, `Рой`, `Экономичный`. Canaries
+    не читают Task Manager и не меняют repository; они фактически создают
+    bounded child agents и сохраняют requested/observed model, effort,
+    `agent_type`, semantic role и `fork_turns`. `Баланс` обязан показать Luna
+    research/test packet до root implementation; `Рой` — минимум два разных
+    Luna candidates и Luna critic/reducer; `Экономичный` — Luna supervisor и
+    Luna substantive worker без Sol/GPT-5.4 child. Любое несовпадение блокирует
+    дорогую серию до исправления runtime.
+11. Компилирует exact test policy: разрешённые команды и test files, явный
+    denylist, правила повторного запуска и общий fail-closed wrapper. Wrapper
+    проверяется положительным и отрицательным synthetic command до run 1.
+12. Проверяет, что предыдущие benchmark branches/worktrees не доступны через
     frozen packet, а audit rule признаёт чтение чужой ветки, worktree или thread
     contamination incident.
 
@@ -329,7 +380,10 @@ mode/process metadata packets `A..E`. Этот путь не является д
 - UAT deployment и весь восстанавливаемый state;
 - installed Issue Grinder payload;
 - одинаковый prompt template;
-- model, reasoning effort и permission profile;
+- mode profile matrix и общий permission profile;
+- routing oracle и правила mode-fidelity gate;
+- test allowlist/denylist, rerun policy и command guard;
+- один access-effect policy для всех пяти прогонов;
 - максимальное время прогона;
 - acceptance oracle и правила оценки;
 - перечень обязательных и вторичных метрик;
@@ -390,6 +444,42 @@ Hard-gate failure даёт `accepted=false`, но diagnostic score всё рав
 После первого старта rubric разрешено менять только из-за доказанной ошибки
 самого oracle. В таком случае текущий pilot останавливается, изменение
 документируется, а уже выполненные прогоны не сравниваются с последующими.
+
+### Mode-fidelity gate
+
+Quality rubric применяется только после отдельного process gate. Controller
+рекурсивно читает delivery thread tree и сверяет каждый child с frozen routing
+oracle по semantic role, `agent_type`, requested/observed model, effort и
+`fork_turns`. Для трёх исправленных режимов обязательны:
+
+- `Баланс`: Luna Max выполняет обычные research/implementation/tests/critique;
+  Sol допускается только для material decision, integration owner и final gate;
+- `Рой`: все scouts/candidates/critics/test authors/judges/reducers — Luna Max,
+  а candidate-friendly scope содержит хотя бы одну wave `M >= 2`;
+- `Экономичный`: top-level и вся substantive работа — Luna Max, Sol/GPT-5.4
+  отсутствуют в delivery tree.
+
+Первое нарушение останавливает run до следующей дорогой wave с outcome
+`mode_routing_invalid`. Такой candidate можно сохранить для диагностики, но он
+не получает quality/efficiency rank и не доказывает свойства режима. Отсутствие
+recursive telemetry также делает mode fidelity непроверяемой и блокирует серию.
+
+### Замороженная test policy
+
+До run 1 controller создаёт `test-policy.yaml` с exact argv/working directory
+для каждого разрешённого check, allowed test-file globs, явным denylist и
+правилами повторов. `attachments-integration.test.ts` входит в denylist, пока
+frozen acceptance прямо не изменит это решение до первого запуска.
+
+Delivery и все children запускают проверки только через один read-only
+controller-provided command guard. Прямой вызов `npm test`, `tsx --test`, другого
+test runner или файла вне allowlist является protocol violation и немедленно
+останавливает прогон; prompt-просьба сама по себе не считается enforcement.
+Повтор разрешён только после material candidate change, затрагивающего причину
+предыдущего failure, либо один раз для заранее классифицированного flaky check.
+Receipt повтора содержит исходный run, failure, новый candidate SHA и reason.
+Три одинаковых запуска запрещённого теста больше не могут быть учтены как
+обычный rework режима.
 
 ## Фаза 2. Снять baseline и зафиксировать reset
 
@@ -503,6 +593,23 @@ Dedicated Team, membership и Team-grant rows должны жить в трёх 
 resources, такой effect запрещается во всех пяти прогонах, пока для него не
 зафиксирован отдельный симметричный cleanup.
 
+### Action-time access policy
+
+Предварительное разрешение в frozen prompt не заменяет обязательное
+подтверждение непосредственно перед реальным изменением permissions/access.
+Поэтому полностью безнадзорная и сравнимая серия по умолчанию не выполняет
+реальный Team-grant для существующего пользователя: authorization доказывается
+local/server integration tests и изолированным synthetic fixture, который не
+меняет доступ реального account. Browser/UI может проверить подготовленное
+состояние и отсутствие утечки, но не нажимает финальную ACL mutation.
+
+Если quality rubric требует именно реальный access effect, benchmark становится
+attended. Все пять прогонов останавливаются в одной и той же заранее
+определённой точке, пользователь даёт action-time confirmation каждому прогону
+одинаковой формулировкой, а intervention учитывается отдельно. Нельзя одному
+режиму подтверждать действие, а отсутствие ответа другому классифицировать как
+mode failure. Смешанная unattended/attended серия не ранжируется.
+
 ## Фаза 3. Заморозить prompt delivery-сессии
 
 Создать один текстовый шаблон. Пять фактических prompt должны быть
@@ -523,6 +630,11 @@ worktrees, сессии, отчёты или результаты других �
 сливай результат в него. Внутреннюю topology выбирай только по контракту
 указанного режима.
 
+До содержательной child-work соблюдай model-routing gate установленного Issue
+Grinder: сохрани requested и observed profile receipts. Несовпадение model,
+effort, platform agent type или semantic role не исправляй дорогой root-работой;
+останови wave и верни evidence контроллеру.
+
 Не читай Task Manager Activity. Monotonic Task versions и timestamps являются
 только transport metadata, а не контекстом задачи; используй current Task
 descriptions, hierarchy, relations и видимый comment list.
@@ -539,6 +651,11 @@ delivery/reset gate и не требуют доказательства полн
 Не трать время на такой fingerprint или ремонт. Не реализуй и не запускай
 межпрогонный cleanup; его после capture выполняет центральный controller только
 для трёх Team-таблиц.
+
+Запускай проверки только через указанный во frozen packet test command guard.
+Не вызывай test runner или test file напрямую; соблюдай exact allowlist,
+denylist и правила повторного запуска. В measured run не изменяй permissions или
+access реального пользователя: используй frozen synthetic authorization fixture.
 
 <FROZEN_RELEASE_AND_ENVIRONMENT_PACKET>
 ```
@@ -576,8 +693,8 @@ Task Manager versions `TM-329@13` и `TM-334@6` уже содержат то ж�
    `usage_remaining_percent = 100 - used_percent`, `resets_at`, текущую
    UTC/Madeira time и telemetry boundary.
 6. Создать новую обычную Project Task в отдельном worktree строго от
-   `baseline_sha`, явно задав `gpt-5.6-sol`, `xhigh`, общие permissions и prompt
-   для текущего mode. Ceiling этой Task — 8 часов.
+   `baseline_sha`, задав exact top-level profile из mode matrix, общие permissions
+   и prompt для текущего mode. Ceiling этой Task — 8 часов.
 7. Сохранить thread ID, host ID, worktree/branch identity и фактический
    стартовый SHA.
 
@@ -590,15 +707,22 @@ Task Manager versions `TM-329@13` и `TM-334@6` уже содержат то ж�
 2. Дождаться результата через thread wait/status mechanism. Внутренние workers
    выбранного режима могут работать параллельно; пять верхнеуровневых прогонов
    — никогда.
-3. Контроллер во время ожидания не анализирует код, не запускает другую модель
+3. Сразу после первой dispatch wave снять recursive thread-tree snapshot и
+   применить mode-fidelity gate. Пока exact child routing не подтверждён, run не
+   переходит к основной implementation wave. Любой inherited Sol, GPT-5.4 или
+   отсутствие обязательной Luna topology останавливает run как
+   `mode_routing_invalid` и экономит оставшийся budget.
+4. Наблюдать command events и останавливать run при обходе frozen test guard,
+   denylisted test либо повторе без допустимого receipt.
+5. Контроллер во время ожидания не анализирует код, не запускает другую модель
    и не помогает delivery-сессии.
-4. Не посылать discretionary follow-up. Вопрос, ответ на который уже содержится
+6. Не посылать discretionary follow-up. Вопрос, ответ на который уже содержится
    в frozen packet, является дефектом самостоятельности прогона, а не поводом
    выдавать одному mode дополнительный context.
-5. Если выявился общий отсутствующий факт или authority, без которого не мог бы
+7. Если выявился общий отсутствующий факт или authority, без которого не мог бы
    честно продолжить ни один режим, остановить весь pilot. После исправления
    общего packet начать сравнимую серию заново.
-6. Если достигнут одинаковый frozen wall-time ceiling, остановить только
+8. Если достигнут одинаковый frozen wall-time ceiling, остановить только
    безопасным способом, сохранить checkpoint и классифицировать outcome по
    заранее заданным правилам.
 
@@ -611,12 +735,15 @@ result и quiescence всех descendants; иначе поздние worker toke
 - `finished_at`, wall time и time to first reviewable candidate, если он
   наблюдаем;
 - terminal outcome: `accepted | failed | blocked | resumable_checkpoint |
-  timed_out | infrastructure_invalid`;
-- thread tree, модели/efforts и число фактически запущенных agents;
+  timed_out | mode_routing_invalid | protocol_invalid | infrastructure_invalid`;
+- recursive thread tree, requested/observed модели/efforts, semantic roles,
+  routing receipts и число фактически запущенных agents;
 - exact branch, base SHA, candidate SHA, dirty state и diff summary;
 - protected-schema diff и поиск runtime DDL;
 - commits, attempts, candidate waves, retries и rejected candidates, насколько
   это объективно извлекается из evidence;
+- test guard receipts, exact executed checks, denylist violations и допустимые
+  rerun receipts;
 - Task Manager statuses, versions, comments и fresh Release inventory;
 - UAT deployment identity, schema/data/migration fingerprints, R2/background
   state и logs/smoke evidence;
@@ -927,7 +1054,24 @@ artifacts, delivery threads и остальные benchmark worktrees; он чи
 - общий prompt/acceptance defect, который одинаково лишил бы все режимы
   необходимого факта.
 
-Infrastructure-invalid run не превращать в плохой score режима. В этом pilot
+### Невалидный по mode/protocol прогон
+
+- `mode_routing_invalid`: обязательная Luna topology не появилась, child
+  унаследовал Sol, включился GPT-5.4 через platform `critic`/`reviewer`, observed
+  profile разошёлся с receipt либо `Рой` не создал требуемую material Best-of-M
+  wave;
+- `protocol_invalid`: delivery обошла frozen test guard, запустила denylisted
+  test, сделала недопустимый rerun, прочитала чужой run либо выполнила реальный
+  access effect вопреки выбранной unattended policy;
+- action-time confirmation была дана несимметрично либо отсутствие ответа
+  ошибочно классифицировано как defect режима.
+
+Эти outcomes доказывают дефект runtime или экспериментального протокола, но не
+получают quality/efficiency rank. Controller сохраняет ранний trace и не даёт
+нарушившему gate run тратить оставшийся восьмичасовой budget.
+
+Infrastructure-, routing- или protocol-invalid run не превращать в плохой score
+качества кандидата. В этом pilot
 ровно пять delivery-сессий, поэтому replacement run автоматически не создаётся:
 после доказанного reset контроллер продолжает к следующему `A..E`, а невалидную
 строку исключает из quality/efficiency ranking и оставляет в итоговом отчёте с

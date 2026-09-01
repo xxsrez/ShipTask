@@ -17,9 +17,9 @@ scope, полномочия, Task Manager lifecycle, запрет Production и 
 |---|---|---|---|
 | `Соло` | Текущая основная модель, последовательно, без субагентов | Self-review текущей модели плюс объективные checks | Только terminal result или настоящий blocker |
 | `Классический` | Sol/controller делает почти всё; Luna получает только тривиальные пакеты | Полная итоговая проверка exact result | Только terminal result или настоящий blocker |
-| `Баланс` | Luna пытается выполнить лёгкие и средние ограниченные задачи; сложные решения и fallback остаются Sol/controller | Сильный final review exact candidate | Только terminal result или настоящий blocker |
-| `Рой` | Ограниченные волны разных candidates, critics, test authors и judges | Результаты сокращаются до одного candidate и проходят final review | Только terminal result или настоящий blocker |
-| `Экономичный` | Экономичные controller и workers с минимальным расходом дефицитного профиля | Все доступные checks; дорогой gate может быть отложен | Terminal result либо честный resumable checkpoint |
+| `Баланс` | Luna выполняет bulk research/implementation/tests; Sol/controller оставляет material decisions и integration | Сильный final review exact candidate | Только terminal result или настоящий blocker |
+| `Рой` | Luna-волны разных candidates, critics, test authors и judges | Результаты сокращаются до одного candidate и проходят final review | Только terminal result или настоящий blocker |
+| `Экономичный` | Luna выполняет всю содержательную работу; non-Luna root допустим только как transport/authority оболочка | Все доступные checks; дорогой gate может быть отложен | Terminal result либо честный resumable checkpoint |
 
 ## Как работает режим по умолчанию
 
@@ -71,18 +71,28 @@ tests, preliminary critique и rework.
 решение, а worker реализует уже заданный contract. После material rework exact
 candidate снова проходит final review.
 
+До первой source mutation или targeted test должен наблюдаемо стартовать Luna
+Max child с явно заданными model/effort. Встроенные platform-роли
+`critic`/`reviewer` здесь не используются, потому что они обходят выбранный
+profile; semantic critics запускаются на Luna через обычный agent type.
+
 Если Luna встречает существенную неопределённость, конфликт contract/context,
 слабый oracle или проблему за границами пакета, она сохраняет изменения,
 проверки, evidence и причину остановки и возвращает работу Sol/controller-у.
-Sol уточняет contract, продолжает сам либо формирует новый безопасный пакет;
+Sol принимает неделимое material decision, уточняет contract либо формирует
+новый безопасный Luna-пакет; ordinary implementation не переносится на Sol;
 Luna не должна бесконечно повторять ту же попытку.
 
 ## `Рой`
 
 `Рой` полезен там, где несколько действительно разных подходов, независимая
 критика или широкий поиск edge cases повышают шанс сильного результата. Он
-запускает конечные волны candidates, critics, test authors и judges, сохраняя
+запускает на Luna конечные волны candidates, critics, test authors и judges, сохраняя
 каждого пишущего участника в отдельном worktree.
+
+Для material candidate-friendly развилки хотя бы одна wave содержит минимум два
+намеренно разных Luna candidate. Один writer на Task без конкурирующей wave не
+является достаточным исполнением обещания `Роя`.
 
 Неудачные дешёвые попытки допустимы, но не должны загрязнять integration target
 или размножать внешние эффекты. Reducer оставляет один рекомендуемый candidate и
@@ -91,9 +101,14 @@ Luna не должна бесконечно повторять ту же поп�
 
 ## `Экономичный`
 
-`Экономичный` нужен, когда проверяющий профиль дефицитен. Экономичные profiles
-исследуют, реализуют, тестируют и критикуют, но сводят работу к одному exact
-candidate и сохраняют raw checks, known defects, unknowns и deferred gates.
+`Экономичный` нужен, когда проверяющий профиль дефицитен. Luna Max анализирует,
+исследует, реализует, тестирует и критикует, но сводит работу к одному exact
+candidate и сохраняет raw checks, known defects, unknowns и deferred gates.
+Если root запущен на другой модели, он только ведёт Goal/Task Manager/fan-in,
+вызывает Luna supervisor и переносит подготовленные им packets в direct Luna
+workers; для запуска вообще без Sol top-level тоже выбирается Luna Max.
+Недоступность Luna приводит к checkpoint, а не к скрытой Sol/GPT-5.4
+implementation.
 
 Это единственный режим, где текущая попытка может честно завершиться без
 terminal результата. Такой выход оставляет `In Progress` или действительно

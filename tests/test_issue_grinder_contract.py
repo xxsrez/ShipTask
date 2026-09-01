@@ -11,6 +11,7 @@ REQUIREMENTS = ROOT / "docs" / "skills" / "issue-grinder" / "requirements.md"
 ARCHITECTURE = ROOT / "docs" / "skills" / "issue-grinder" / "architecture.md"
 EVALUATION = ROOT / "docs" / "skills" / "issue-grinder" / "evaluation.md"
 WRITER_GUARD = SKILL_ROOT / "scripts" / "writer_worktree_guard.py"
+ROUTING_GUARD = SKILL_ROOT / "scripts" / "model_routing_guard.py"
 
 
 class IssueGrinderContractTest(unittest.TestCase):
@@ -99,6 +100,7 @@ class IssueGrinderContractTest(unittest.TestCase):
             "references/modes/economical.md",
             "references/multi-agent-execution.md",
             "references/strategic-explainer.md",
+            "scripts/model_routing_guard.py",
             "scripts/writer_worktree_guard.py",
         ):
             self.assertTrue((SKILL_ROOT / relative).is_file(), relative)
@@ -209,6 +211,25 @@ class IssueGrinderContractTest(unittest.TestCase):
         ):
             self.assertIn(invariant, guard)
         self.assertNotIn('"--force"', guard)
+
+    def test_model_routing_guard_is_fail_closed_and_part_of_runtime(self) -> None:
+        guard = ROUTING_GUARD.read_text(encoding="utf-8")
+        execution_modes = (
+            SKILL_ROOT / "references" / "execution-modes.md"
+        ).read_text(encoding="utf-8")
+        multi_agent = (
+            SKILL_ROOT / "references" / "multi-agent-execution.md"
+        ).read_text(encoding="utf-8")
+
+        for marker in (
+            "issue-grinder/model-routing/v1",
+            "gpt-5.6-luna",
+            "platform_agent_type_bypasses_mode_profile",
+            "actual_luna_model_mismatch",
+        ):
+            self.assertIn(marker, guard)
+        self.assertIn("Model routing — hard gate", execution_modes)
+        self.assertIn("Model routing admission — hard gate", multi_agent)
 
     def test_publication_unit_stays_with_coordinator(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")

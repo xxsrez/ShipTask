@@ -58,15 +58,16 @@ plugins/issue-grinder/
     │   │   ├── multi-agent-execution.md
     │   │   └── strategic-explainer.md
     │   └── scripts/
+    │       ├── model_routing_guard.py
     │       └── writer_worktree_guard.py
     └── task-composer/
         ├── SKILL.md
         └── agents/openai.yaml
 ```
 
-Plugin не содержит собственный MCP server, UI, assets или hooks. Единственный
-runtime script механически обеспечивает writer admission; Task Manager уже
-предоставляет live data, authentication, authorization и controlled mutations;
+Plugin не содержит собственный MCP server, UI, assets или hooks. Два узких
+runtime scripts механически обеспечивают model routing и writer admission; Task
+Manager уже предоставляет live data, authentication, authorization и controlled mutations;
 Issue Grinder остаётся workflow- и orchestration-слоем вокруг этого adapter-а.
 
 Такая форма следует принципу минимального plugin из
@@ -144,7 +145,7 @@ repository source `task-composer/`; его planning-only lifecycle не расш
 native writing по `IG-FLOW-03`. Жёсткая plugin-to-plugin dependency для него не
 моделируется.
 
-### 1.4 Узкий runtime guard вместо скрытого orchestration engine
+### 1.4 Узкие runtime guards вместо скрытого orchestration engine
 
 Runtime script добавляется только для повторяемой детерминированной операции,
 которую существующие tools и инструкции не выполняют надёжно. Scope resolution,
@@ -152,10 +153,25 @@ Goal, lifecycle, verification, reflection и multi-agent dispatch зависят
 живого контекста и остаются решениями coordinator-а. Выносить их во второй
 скрытый orchestration engine нельзя.
 
-Наблюдаемый дефект двух первых реальных прогонов доказал ровно одну подходящую
-для механизации операцию: coordinator прочитал hard invariant worktree, но
-несколько writers всё равно начали запись в общий checkout. Поэтому runtime
-содержит узкий `scripts/writer_worktree_guard.py`. Он:
+Наблюдаемые дефекты реальных прогонов доказали две подходящие для механизации
+операции. В первых delivery coordinator прочитал hard invariant worktree, но
+несколько writers всё равно начали запись в общий checkout. Позднее `Баланс`,
+`Рой` и `Экономичный` называли Luna предпочтительной, однако substantive agents
+наследовали Sol, а platform-типы `critic`/`reviewer` включали GPT-5.4. Поэтому
+runtime содержит два узких guard-а.
+
+`scripts/model_routing_guard.py`:
+
+- отделяет semantic role от platform `agent_type`;
+- требует explicit model, effort и bounded `fork_turns` для каждого child;
+- в `Балансе`, `Рое` и `Экономичном` fail-closed требует Luna Max для
+  substantive economical lane;
+- отвергает встроенные `critic`/`reviewer`, когда их фиксированный platform
+  profile обходит mode routing;
+- сравнивает requested и observed child profile и выдаёт стабильный receipt
+  `issue-grinder/model-routing/v1`.
+
+`scripts/writer_worktree_guard.py`:
 
 - создаёт новую task-owned branch и linked worktree от exact base через
   `git worktree add --lock` без `--force`;
@@ -166,11 +182,12 @@ Goal, lifecycle, verification, reflection и multi-agent dispatch зависят
 - фиксирует clean integration checkout и обнаруживает любую Git-visible mutation
   во время writer wave.
 
-Guard не выбирает scope, packet, число writers, profile, owner, integration
-strategy или cleanup policy. Он не удаляет worktree, не reset-ит состояние и не
-считает receipt доказательством качества реализации. Это механическая проекция
-только `IG-MA-06..07`; Git сохраняет отдельные `HEAD` и index каждого linked
-worktree, но exclusive agent ownership остаётся ответственностью coordinator-а.
+Guards не выбирают scope, packet, число writers, смысл роли, owner, integration
+strategy или cleanup policy. Они не создают agents, не удаляют worktree, не
+reset-ят состояние и не считают receipt доказательством качества реализации.
+Это механическая проекция routing и `IG-MA-06..07`; Git сохраняет отдельные
+`HEAD` и index каждого linked worktree, но exclusive agent ownership остаётся
+ответственностью coordinator-а.
 Guard не является filesystem sandbox и сам не отзывает у subagent доступ к
 другим путям. Поэтому admission barrier предупреждает обычную ошибку до
 implementation dispatch, а integration canary обнаруживает оставшееся нарушение
@@ -180,8 +197,8 @@ implementation dispatch, а integration canary обнаруживает оста
 
 Build- и evaluation-скрипты на уровне repository по-прежнему проверяют semantic
 coverage Level 1/Level 2, behavioural scenarios, Marketplace package и byte
-identity. В отличие от них writer guard входит в runtime package, потому что
-обеспечивает доказанный хрупкий precondition до внешней записи.
+identity. В отличие от них оба guards входят в runtime package, потому что
+обеспечивают доказанные хрупкие preconditions до model dispatch и внешней записи.
 
 Hooks являются plugin/Codex lifecycle-механизмом, а не внутренним шагом skill.
 Они могут выполняться вместе с hooks из других источников, требуют отдельного
@@ -204,7 +221,9 @@ issue-grinder/
 │   ├── mode-help.md
 │   ├── run-and-goal.md
 │   └── ...
-└── scripts/writer_worktree_guard.py
+└── scripts/
+    ├── model_routing_guard.py
+    └── writer_worktree_guard.py
 ```
 
 После проверки `issue-grinder/` и `task-composer/` копируются в отдельный
@@ -487,7 +506,46 @@ publication unit; supervisor возвращает только решения, f
 anchors и не создаёт новую Codex task. Так логическое управление выполняется
 нормализованным профилем без второго effect owner.
 
-### 4.3 Режимные workflow
+### 4.3 Маршрутный admission
+
+Нормализованный профиль не должен оставаться декларацией. До каждого child
+dispatch coordinator строит receipt с canonical mode, настоящей semantic role,
+platform `agent_type`, exact requested model/effort и bounded `fork_turns`, а
+после старта при доступности дополняет его observed child profile. Если runtime
+surface не раскрывает actual profile, receipt сохраняет `telemetry_pending` и
+exact spawn args для внешней recursive telemetry проверки. Механическую часть
+проверяет runtime `model_routing_guard.py`; отрицательный receipt запрещает spawn
+или закрывает уже начатую wave до содержательной работы.
+
+В трёх экономичных topology действует fail-closed default:
+
+- `Баланс` отдаёт Luna Max обычные research, implementation, tests, preliminary
+  verification/critique и bounded rework; controller оставляет только конкретное
+  material judgment, integration decision и final review;
+- `Рой` запускает на Luna Max scouts, candidates, critics, test authors, judges
+  и reducers; на candidate-friendly scope хотя бы одна material wave содержит
+  минимум два намеренно разных candidate;
+- `Экономичный` выполняет на Luna Max весь substantive analysis, delivery и
+  review. Non-Luna root допустим только как transport/authority оболочка,
+  которая переносит решения supervisor-а в direct worker dispatch; end-user
+  запуск без Sol требует Luna Max уже на top level.
+
+Каждая Luna-lane явно задаёт `gpt-5.6-luna`, `max` и `fork_turns="none"` либо
+положительное bounded значение. Молчаливое наследование root запрещено.
+Встроенные platform-типы `critic`/`reviewer` имеют фиксированный GPT-5.4 profile
+и поэтому в этих режимах без явного пользовательского override не применяются:
+semantic critic/reviewer создаётся как `default`, `explorer` или `worker` с
+явным mode profile. Недоступность Luna уменьшает capacity, но не разрешает
+скрытую Sol/GPT-5.4 implementation: `Баланс` сохраняет material controller lane,
+а `Рой`/`Экономичный` сохраняют evidence/checkpoint до совместимой capacity.
+
+Receipt не доверяет названию роли. Coordinator должен доказать, что
+`material_judgment` действительно содержит неделимое решение, а не ordinary
+implementation, и сверить фактическую модель по telemetry. Это устраняет
+наблюдённый failure mode, где Luna использовалась только для комментариев, а
+режимы фактически выполнялись Sol и GPT-5.4.
+
+### 4.4 Режимные workflow
 
 Каждый canonical mode компилируется в отдельный runtime-файл и только там
 владеет своими topology, role/profile routing, problem fallback, review и stop
@@ -508,7 +566,7 @@ promise:
 остановки. `mode-help.md` остаётся только delivery-free справкой и не является
 источником runtime policy.
 
-### 4.4 Review packet и переключение
+### 4.5 Review packet и переключение
 
 Expensive review packet содержит exact scope/base/candidate identity,
 acceptance, integrated diff и source anchors, выполненные checks, material
@@ -887,14 +945,20 @@ delegation не отключает отдельный Strategic Explainer interf
 2. строит dependency graph и карту поверхностей записи;
 3. выделяет conflict-free dependency-ready packets, а в `Рое` отдельно
    регистрирует intentional candidates с purpose и candidate identity;
-4. создаёт branches от подтверждённой integration base и выдаёт каждому writer
+4. до каждого child spawn получает model-routing receipt, переносит exact
+   model/effort/fork в фактический dispatch и сверяет observed profile;
+5. создаёт branches от подтверждённой integration base и выдаёт каждому writer
    отдельные feature branch и Git worktree;
-5. оставляет read-only исследователей без worktree;
-6. запускает столько пакетов, critics или candidates, сколько оправдано
+6. оставляет read-only исследователей без worktree;
+7. запускает столько пакетов, critics или candidates, сколько оправдано
    режимом, доступной capacity и ожидаемой ценностью;
-7. принимает отчёты, но сам объединяет изменения;
-8. проверяет exact integrated result;
-9. после каждого результата или изменения scope пересчитывает frontier.
+8. принимает отчёты, но сам объединяет изменения;
+9. проверяет exact integrated result;
+10. после каждого результата или изменения scope пересчитывает frontier.
+
+Routing admission предшествует writer admission: неверная модель должна быть
+остановлена до подготовки implementation turn, а неверный worktree — до первой
+FileChange. Оба receipts сохраняются в run continuity и evidence.
 
 ### 11.1 Двухфазный writer admission
 

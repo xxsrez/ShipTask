@@ -36,6 +36,9 @@ ISSUE_TITLE = ROOT / "issue-grinder" / "references" / "thread-title.md"
 ISSUE_WORKTREE_GUARD = (
     ROOT / "issue-grinder" / "scripts" / "writer_worktree_guard.py"
 )
+ISSUE_ROUTING_GUARD = (
+    ROOT / "issue-grinder" / "scripts" / "model_routing_guard.py"
+)
 ISSUE_MODE_HARNESS = ROOT / "scripts" / "issue_grinder_mode_harness.py"
 ISSUE_MODE_HARNESS_TEST = ROOT / "tests" / "test_issue_grinder_mode_harness.py"
 ISSUE_MODE_LOADING_SMOKE = (
@@ -498,6 +501,9 @@ def validate_issue_skill(errors: list[str]) -> None:
         "`economical`",
         "Не пересчитывай automatic mode",
         "controller_profile = worker_profile = Luna Max",
+        "## Model routing — hard gate",
+        "model_routing_guard.py",
+        "Platform-типы `critic` и `reviewer`",
         "## Выбранный режим — обязательная загрузка",
         "[Соло](modes/solo.md)",
         "[Классический](modes/classic.md)",
@@ -533,8 +539,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         ISSUE_MODE_FILES["balance"],
         "# Баланс",
         "canonical_mode=balance",
-        "предпочтительным исполнителем лёгких и средних bounded",
-        "основную массу implementation",
+        "До первой source mutation или targeted test создай первую Luna Max wave",
+        "основную массу implementation, repository research",
         "возвращает fallback controller/reviewer-у",
         "bounded material rework в новую economical wave",
         "Без final gate",
@@ -546,6 +552,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "canonical_mode=swarm",
         "большой объём дешёвого поиска",
         "множество одинаковых prompts",
+        "Best-of-M wave с `M >= 2`",
+        "Все содержательные child roles `Роя` по умолчанию являются Luna Max",
         "один recommended candidate",
         "намеренно иной\ncandidate",
         "Без final review",
@@ -556,6 +564,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "# Экономичный",
         "canonical_mode=economical",
         "почти без расхода более дефицитного",
+        "Все содержательные решения и работа режима выполняются Luna Max",
+        "transport/authority оболочкой",
         "один exact recommended candidate",
         "resumable checkpoint",
         "update_goal(complete|blocked)",
@@ -567,6 +577,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "Только coordinator владеет Goal",
         "собственные feature branch и Git worktree",
         "Startup recovery — before new work",
+        "Model routing admission — hard gate",
+        "model_routing_guard.py",
         "staged/unstaged/untracked",
         "resume --allow-dirty",
         "Writer admission — hard gate",
@@ -583,6 +595,17 @@ def validate_issue_skill(errors: list[str]) -> None:
         "intentional candidates",
         "Worker, reviewer\nили scout не формулирует готовый comment",
         "`create_thread`, отдельная projectless task",
+    )
+    require(
+        errors,
+        ISSUE_ROUTING_GUARD,
+        'SCHEMA = "issue-grinder/model-routing/v1"',
+        'LUNA_MODEL = "gpt-5.6-luna"',
+        'LUNA_EFFORT = "max"',
+        'FORCED_PROFILE_AGENT_TYPES = frozenset({"critic", "reviewer"})',
+        '"platform_agent_type_bypasses_mode_profile"',
+        '"actual_luna_model_mismatch"',
+        "return 0 if receipt.allowed else 2",
     )
     require(
         errors,
@@ -698,6 +721,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "## 4. Режимы исполнения и профильный resolver",
         "mode record",
         "Luna Max supervisor",
+        "### 4.3 Маршрутный admission",
+        "model_routing_guard.py",
         "`modes/{solo,classic,balance,swarm,economical}.md`",
         "mode-specific topology",
         "единственного runtime owner-а режима",
