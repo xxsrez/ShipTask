@@ -11,6 +11,7 @@ METADATA = ROOT / "scope-reviewer" / "agents" / "openai.yaml"
 SCOPE = ROOT / "scope-reviewer" / "references" / "scope-and-review.md"
 REPAIR = ROOT / "scope-reviewer" / "references" / "plan-improvement.md"
 REPORTING = ROOT / "scope-reviewer" / "references" / "reporting.md"
+INVOCATION = ROOT / "scope-reviewer" / "references" / "invocation-and-live-run.md"
 REQUIREMENTS = ROOT / "docs" / "skills" / "scope-reviewer" / "requirements.md"
 EVALUATION = ROOT / "docs" / "skills" / "scope-reviewer" / "evaluation.md"
 
@@ -24,7 +25,7 @@ class ScopeReviewerContractTest(unittest.TestCase):
         requirement_ids = re.findall(
             r"^### `((?:SR)-\d{2})`", REQUIREMENTS.read_text(encoding="utf-8"), re.M
         )
-        self.assertEqual(requirement_ids, [f"SR-{number:02d}" for number in range(1, 13)])
+        self.assertEqual(requirement_ids, [f"SR-{number:02d}" for number in range(1, 14)])
         evaluation = EVALUATION.read_text(encoding="utf-8")
         for requirement_id in requirement_ids:
             with self.subTest(requirement_id=requirement_id):
@@ -42,6 +43,27 @@ class ScopeReviewerContractTest(unittest.TestCase):
         self.assertIn("не меняет `Backlog`/рабочие статусы", skill)
         self.assertIn("Strategic Outcome", skill)
         self.assertIn("Стратегический gap не создаёт скрытую задолженность", skill)
+
+    def test_implicit_invocation_has_two_precise_classes_and_live_handoff(self) -> None:
+        skill = normalized(SKILL.read_text(encoding="utf-8"))
+        metadata = normalized(METADATA.read_text(encoding="utf-8"))
+        invocation = normalized(INVOCATION.read_text(encoding="utf-8"))
+
+        self.assertIn("ревью плана перед запуском", skill)
+        self.assertIn("активного долгого Issue Grinder", skill)
+        self.assertIn("allow_implicit_invocation: true", metadata)
+        for marker in (
+            "Pre-launch review",
+            "Active long-run review",
+            "посмотри на неё",
+            "Не создавай отдельную пользовательскую Codex task/session",
+            "Goal ref/status",
+            "execution mode",
+            "active worker ownership",
+            "передай управление owning Issue Grinder",
+            "произвольная Codex task без однозначного Task Manager delivery scope",
+        ):
+            self.assertIn(marker, invocation)
 
     def test_each_optic_has_exact_luna_max_profile_and_clean_context(self) -> None:
         skill = SKILL.read_text(encoding="utf-8")

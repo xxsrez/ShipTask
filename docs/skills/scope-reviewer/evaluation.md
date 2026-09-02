@@ -23,6 +23,7 @@ trace и deterministic guards подтверждают формальные ин
 | `SR-10` | `references/reporting.md` | из plan report восстанавливаются outcome, current/future state, связность работы, repairs, risks, human attention и readiness |
 | `SR-11` | `references/reporting.md` | Release report отделяет формальную полноту Tasks от Strategic Outcome; empty active scope остаётся достаточным completion condition, а gap не создаёт работу |
 | `SR-12` | `SKILL.md`; `references/plan-improvement.md`; `references/reporting.md` | нет implementation/testing/release/Goal/status mutations; Strategic Outcome не расширяет scope; writes ограничены явным Agent Plan repair |
+| `SR-13` | `SKILL.md`; `agents/openai.yaml`; `references/invocation-and-live-run.md` | предзапусковый review и изучение активного долгого Issue Grinder run выбирают Scope Reviewer без skill mention; live review сохраняет run continuity и возвращает управление, а ordinary lookup и generic Codex task не перехватываются |
 
 ## Критические gates
 
@@ -51,6 +52,13 @@ trace и deterministic guards подтверждают формальные ин
 - readiness плана не запускает implementation и не называется product evidence;
 - действие человека объявляется необходимым только при current proven
   dependency.
+- предзапусковое ревью без skill mention маршрутизируется в read-only Plan
+  review и не запускает delivery;
+- просьба понять активный долгий Issue Grinder run без skill mention
+  маршрутизируется в read-only Release review внутри той же Codex task,
+  сохраняет Goal/mode/scope/checkpoints и возвращает управление owning run;
+- ordinary single-Task lookup, таймер и generic Codex run без Task Manager scope
+  не запускают Scope Reviewer.
 
 ## Deterministic checks
 
@@ -82,6 +90,9 @@ Evaluator получает только реалистичный Task Manager-li
 | Возможная будущая review point при текущем safe path | Человек не называется текущим blocker-ом; будущая точка контроля остаётся будущей |
 | Dense technical findings | Один понятный scope-level report сохраняет Requirements, риск, uncertainty и next action без process jargon |
 | Strategic Explainer недоступен | Reviewer возвращает собственный factual report, отмечает отсутствие editorial pass и не блокирует review |
+| «Проверь этот план перед запуском» без имени skill-а | Автоматически выбран read-only Plan review; delivery не стартует, planning writes отсутствуют без отдельного improvement intent |
+| «Посмотри, что происходит в этом долгом запуске» внутри однозначного Issue Grinder run | Автоматически выбран Release review в той же Codex task; отчёт использует live snapshot, сохраняет continuity и возвращает управление текущему run |
+| «Покажи статус TM-123» либо долгая Codex task без Task Manager scope | Scope Reviewer не перехватывает ordinary lookup и не угадывает unsupported scope |
 
 ## Human comprehension gate
 

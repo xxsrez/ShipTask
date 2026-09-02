@@ -55,6 +55,20 @@ Task Composer остаётся владельцем исходной поста�
 implementation, evidence, Goal и lifecycle. Scope Reviewer не подменяет ни один
 из этих workflows.
 
+### 1.1 Автоматическая маршрутизация
+
+Два пользовательских intent-а должны выбирать Scope Reviewer без обязательного
+`$issue-grinder:scope-reviewer`: предзапусковое ревью выбранного Task Manager
+плана и человекочитаемое изучение активного долгого Issue Grinder delivery run.
+Frontmatter description содержит оба класса, а `agents/openai.yaml` сохраняет
+`allow_implicit_invocation: true`. После выбора skill полностью применяется
+[контракт автоматического входа и live-run handoff](../../../scope-reviewer/references/invocation-and-live-run.md).
+
+Implicit routing запускается пользовательским смыслом, а не временем, фактом
+создания плана или любым status read. Обычное чтение одной карточки остаётся
+Task Manager adapter operation. Произвольная Codex task без однозначного Task
+Manager scope находится вне границы этой entity.
+
 ## 2. Логическая модель planning source
 
 Reviewer различает три смысловые роли:
@@ -96,6 +110,12 @@ Requirement projection в child Task не становится новым source
 Project и выбранный Project/Release/Epic/Task selector. Relative selector
 допустим только когда current context делает его однозначным; максимальный номер,
 последняя дата или похожее название не выбирают current Release автоматически.
+
+Для live-run review сохранённая Issue Grinder continuity может однозначно
+разрешить relative формулировку пользователя и предоставить run identity,
+selector, Goal/mode record, checkpoints и resolvable evidence anchors. Эти
+данные являются входом выбора и snapshot-а, но не заменяют live Task Manager
+reread и не превращают worker narrative в evidence.
 
 Для полного scope agent:
 
@@ -314,9 +334,14 @@ Publication — один целостный ответ. Возможные см�
 
 Release review всегда read-only. Coordinator строит current snapshot из Task
 Manager и доступных primary evidence. Если review вызывается внутри активного
-Issue Grinder run, тот может предоставить factual run snapshot и resolvable
-anchors на current candidate/checks; неподтверждённый worker narrative остаётся
-in-flight state, а не completion evidence.
+Issue Grinder run, применяется
+[live-run handoff](../../../scope-reviewer/references/invocation-and-live-run.md):
+review проходит в той же пользовательской Codex task на безопасной
+coordination boundary, сохраняет continuity владельца и после отчёта возвращает
+ему управление, если пользователь не остановил и не заменил run. Issue Grinder
+может предоставить factual run snapshot и resolvable anchors на current
+candidate/checks; неподтверждённый worker narrative остаётся in-flight state, а
+не completion evidence.
 
 Отчёт разделяет:
 
@@ -368,6 +393,13 @@ Runtime получает отдельный evaluation contract с тремя с
   происхождение обязательства исправляется без переписывания Requirements;
 - dense technical lens outputs, превращённые в понятный scope-level report без
   потери Requirements, риска и next action.
+- pre-launch review без skill mention, который автоматически выбирает read-only
+  Plan review и не запускает delivery;
+- просьбу изучить активный долгий Issue Grinder run без skill mention, которая
+  выполняет Release review в той же Codex task, сохраняет continuity и
+  возвращает управление owning run;
+- ordinary single-Task status и generic Codex run без Task Manager scope,
+  которые не перехватываются Scope Reviewer.
 
 Статический validator не доказывает качество оптик или понятность generated
 report. Эти свойства подтверждаются только blind model-forward результатом и

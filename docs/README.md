@@ -220,8 +220,9 @@ Architecture — за «как сейчас этого достигать». С�
   observable gates для decomposition, metadata, relations, duplicate safety и
   planning-only authority.
 - [Scope Reviewer evaluation](skills/scope-reviewer/evaluation.md) —
-  трасса `SR-*`, Luna Max routing, Requirements preservation и blind cases для
-  планов и текущего Release.
+  трасса `SR-*`, Luna Max routing, Requirements preservation, автоматический
+  вход в предзапусковый и live-run review и blind cases для планов и текущего
+  Release.
 - [Проверка классификации `In Review`](reference/shiptask-review-disposition-evaluation.md)
   — decision-level cases для task-contract conflict, proven failure,
   verification blocker, critical codebase fallback, incident persistence и Goal behavior.

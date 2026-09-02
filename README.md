@@ -157,7 +157,10 @@ Scope Reviewer превращает распределённый план или
 отдельным fresh Luna Max reviewer-ом. Обычный review и любой Release report
 остаются read-only; только явная просьба улучшить план разрешает менять
 agent-owned planning model. Human Requirements, delivery lifecycle и рабочие
-статусы skill не меняет.
+статусы skill не меняет. Без явного имени skill автоматически выбирается для
+предзапускового ревью Task Manager плана и человекочитаемого изучения активного
+долгого Issue Grinder run; live-review сохраняет run continuity и возвращает
+управление delivery-владельцу.
 
 ## Структура
 

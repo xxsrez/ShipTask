@@ -62,6 +62,7 @@ SCOPE_METADATA = ROOT / "scope-reviewer" / "agents" / "openai.yaml"
 SCOPE_REVIEW = ROOT / "scope-reviewer" / "references" / "scope-and-review.md"
 SCOPE_REPAIR = ROOT / "scope-reviewer" / "references" / "plan-improvement.md"
 SCOPE_REPORTING = ROOT / "scope-reviewer" / "references" / "reporting.md"
+SCOPE_INVOCATION = ROOT / "scope-reviewer" / "references" / "invocation-and-live-run.md"
 SCOPE_ROUTING_GUARD = (
     ROOT / "scope-reviewer" / "scripts" / "lens_routing_guard.py"
 )
@@ -1193,6 +1194,9 @@ def validate_scope_reviewer_skill(errors: list[str]) -> None:
         "Plan review",
         "Plan improvement",
         "Release review",
+        "references/invocation-and-live-run.md",
+        "ревью плана перед запуском",
+        "активного долгого Issue Grinder",
         "не разрешает writes",
         "Task Manager adapter",
         "references/scope-and-review.md",
@@ -1219,11 +1223,24 @@ def validate_scope_reviewer_skill(errors: list[str]) -> None:
         errors,
         SCOPE_METADATA,
         'display_name: "Scope Reviewer"',
-        'short_description: "Проверить план или Release и понятно объяснить"',
+        'short_description: "Проверить план перед запуском или долгий Release"',
         "$issue-grinder:scope-reviewer",
         'value: "task-manager"',
         'transport: "streamable_http"',
         "allow_implicit_invocation: true",
+    )
+    require(
+        errors,
+        SCOPE_INVOCATION,
+        "Pre-launch review",
+        "Active long-run review",
+        "посмотри на неё",
+        "Не создавай отдельную пользовательскую Codex task/session",
+        "Goal ref/status",
+        "execution mode",
+        "active worker ownership",
+        "передай управление owning Issue Grinder",
+        "произвольная Codex task без однозначного Task Manager delivery scope",
     )
     require(
         errors,
@@ -1275,6 +1292,9 @@ def validate_scope_reviewer_skill(errors: list[str]) -> None:
         "каждый plan review содержит отдельную Requirements integrity optic",
         "Human Requirements до и после любого repair byte-identical",
         "request показать, объяснить, проверить или дать status не создаёт writes",
+        "предзапусковое ревью без skill mention",
+        "активный долгий Issue Grinder run без skill mention",
+        "generic Codex run без Task Manager scope",
         "Blind model-forward corpus",
         "Human comprehension gate",
     )
@@ -2073,7 +2093,7 @@ def validate_source_layers(errors: list[str]) -> None:
     packages = (
         (SHIP_REQUIREMENTS, "ST", 29),
         (COMPOSER_REQUIREMENTS, "TC", 12),
-        (SCOPE_REQUIREMENTS, "SR", 12),
+        (SCOPE_REQUIREMENTS, "SR", 13),
         (STRATEGIC_REQUIREMENTS, "SE", 19),
     )
     for requirements, prefix, count in packages:
@@ -2255,6 +2275,10 @@ def validate_source_layers(errors: list[str]) -> None:
         "Полная visibility для планирования",
         "Такой же обзор текущего Release",
         "Никакой скрытой delivery или authority роли",
+        "Автоматический вход в предзапусковое и live-run ревью",
+        "проверить, объяснить или оценить готовность выбранного Task\n  Manager плана",
+        "активном долгом Issue Grinder / Task\n  Manager delivery run",
+        "без создания отдельной task/session",
     )
     require(
         errors,
@@ -2399,6 +2423,9 @@ def validate_source_layers(errors: list[str]) -> None:
                 "## 0. Compilation contract",
                 "все `SR-*` без скрытого ослабления",
                 "Task Manager-only sibling",
+                "### 1.1 Автоматическая маршрутизация",
+                "references/invocation-and-live-run.md",
+                "возвращает\nему управление",
                 "примерно эквивалентное наблюдаемое поведение",
             )
             continue
@@ -3556,6 +3583,7 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         SCOPE_REVIEW,
         SCOPE_REPAIR,
         SCOPE_REPORTING,
+        SCOPE_INVOCATION,
         SCOPE_REQUIREMENTS,
         SCOPE_SPEC,
         SCOPE_EVALUATION,

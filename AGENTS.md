@@ -71,8 +71,11 @@ evaluation` и возможность восстановить семантич�
   Task Manager, project lifecycle, mutations и authority decisions в runtime
   contract.
 - Запросы создать или разложить Task Manager работу направляйте через Task
-  Composer, когда он доступен. Read, status и audit оставляйте Task Manager
-  adapter; они не запускают delivery.
+  Composer, когда он доступен. Предзапусковое ревью Task Manager плана и
+  человекочитаемое изучение активного долгого Issue Grinder run автоматически
+  направляйте через Scope Reviewer даже без явного имени skill-а; это не
+  запускает delivery. Ordinary read/status/audit одной карточки оставляйте Task
+  Manager adapter.
 - Project и Release refs, repository path, branch, provider, environment, URL,
   команды и production policy берите из current project context, а не
   зашивайте в skill.
