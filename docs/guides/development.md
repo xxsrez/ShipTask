@@ -53,6 +53,9 @@
 - Task Composer остаётся planning-only: он формулирует и создаёт `Backlog`
   scope, но не получает ShipTask delivery lifecycle. Missing Label не разрешает
   taxonomy mutation; unknown current Release не разрешает guess.
+- Scope Reviewer остаётся review-only за исключением явного plan-improvement
+  intent. Даже в этом режиме он меняет только Agent Plan, сохраняет Human
+  Requirements byte-identical и не получает delivery lifecycle.
 
 YAML frontmatter skill содержит только `name` и `description`. Routing signals
 должны покрывать positive Task Manager anchors и negative read/audit/planning/
@@ -66,6 +69,7 @@ python3 -B -m unittest discover -s tests -p 'test_*.py'
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py issue-grinder
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py scope-reviewer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
@@ -214,12 +218,19 @@ Epic до implementation и передать bounded context исполните�
 матрица:
 [Task Composer evaluation](../reference/task-composer-evaluation.md).
 
+Для Scope Reviewer проверьте exact selector и полный versioned snapshot,
+обязательную Requirements optic для плана, отдельный fresh Luna Max route каждой
+оптики, ноль writes в read/status/Release review, byte-identical Human
+Requirements при repair и один понятный report без dump-а findings. Полная
+матрица: [Scope Reviewer evaluation](../skills/scope-reviewer/evaluation.md).
+
 ## Runtime-дистрибуция
 
-Repository directories `issue-grinder/`, `ship-tasks/`, `task-composer/` и
-`strategic-explainer/` — source of truth.
+Repository directories `issue-grinder/`, `ship-tasks/`, `task-composer/`,
+`scope-reviewer/` и `strategic-explainer/` — source of truth.
 Runtime-distribution разделена на два независимых plugin:
-`issue-grinder@srez-marketplace` содержит `issue-grinder` и `task-composer`, а
+`issue-grinder@srez-marketplace` содержит `issue-grinder`, `task-composer` и
+`scope-reviewer`, а
 `strategic-explainer@srez-marketplace` содержит только
 `$strategic-explainer:strategic-explainer`. Task Manager connector
 устанавливается отдельно как adapter-only `task-manager@srez-marketplace`.
@@ -235,7 +246,7 @@ native. Отсутствие provider-а не мешает обязательн�
 
 1. Выполните validations, закоммитьте exact scope и отправьте в `origin/main`;
    проверьте `HEAD == origin/main`.
-2. Синхронизируйте `issue-grinder` и `task-composer` в Issue Grinder plugin, а
+2. Синхронизируйте `issue-grinder`, `task-composer` и `scope-reviewer` в Issue Grinder plugin, а
    `strategic-explainer` — в его отдельный plugin;
    проверьте каждую пару через `diff -qr`.
 3. Получите marketplace name через `read_marketplace_name.py` и обновите только
@@ -247,13 +258,15 @@ native. Отсутствие provider-а не мешает обязательн�
 5. Проверьте quick validation marketplace copies, byte identity installed cache
    и состояние installed/enabled.
 6. В fresh App Server catalog подтвердите `issue-grinder:issue-grinder`,
-   `issue-grinder:task-composer` и `strategic-explainer:strategic-explainer`, отсутствие
+   `issue-grinder:task-composer`, `issue-grinder:scope-reviewer` и
+   `strategic-explainer:strategic-explainer`, отсутствие
    установленного `ship-tasks:ship-tasks`,
    standalone user copies и отсутствие этих skills в adapter-only Task Manager
    plugin.
 
 Не создавайте `~/.codex/skills/issue-grinder`,
 `~/.codex/skills/ship-tasks`,
-`~/.codex/skills/task-composer` или
+`~/.codex/skills/task-composer`,
+`~/.codex/skills/scope-reviewer` или
 `~/.codex/skills/strategic-explainer`. Marketplace snapshot и
 installed cache не удаляются вручную.

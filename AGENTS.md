@@ -11,9 +11,10 @@
   [`docs/skills/README.md`](docs/skills/README.md) — техническая схема source
   packages.
 - Репозиторий является source of truth для `$issue-grinder`, legacy
-  `$ship-tasks`, `$issue-grinder:task-composer` и `$strategic-explainer`.
-  Runtime находится в `issue-grinder/`, `ship-tasks/`, `task-composer/` и
-  `strategic-explainer/`.
+  `$ship-tasks`, `$issue-grinder:task-composer`,
+  `$issue-grinder:scope-reviewer` и `$strategic-explainer`.
+  Runtime находится в `issue-grinder/`, `ship-tasks/`, `task-composer/`,
+  `scope-reviewer/` и `strategic-explainer/`.
 - Основной язык документации — русский. Точные названия protocol, state и tool
   можно оставлять на английском.
 
@@ -62,6 +63,10 @@ evaluation` и возможность восстановить семантич�
 - `$issue-grinder:task-composer` остаётся Task Manager-only planning workflow:
   без delivery, implementation, release, Goal lifecycle, fallback provider и
   автоматического изменения Label taxonomy.
+- `$issue-grinder:scope-reviewer` остаётся Task Manager-only review workflow:
+  read/status и Release review не создают writes, явный plan-improvement intent
+  разрешает менять только agent-owned planning model, а Human Requirements,
+  delivery lifecycle и authority decisions остаются вне его полномочий.
 - `$strategic-explainer` остаётся generic communication skill: без ShipTask,
   Task Manager, project lifecycle, mutations и authority decisions в runtime
   contract.
@@ -94,14 +99,14 @@ evaluation` и возможность восстановить семантич�
 
 ## Distribution boundaries
 
-- `issue-grinder@srez-marketplace` содержит Issue Grinder и Task Composer;
+- `issue-grinder@srez-marketplace` содержит Issue Grinder, Task Composer и Scope Reviewer;
   `strategic-explainer@srez-marketplace` — только Strategic Explainer.
 - `task-manager@srez-marketplace` остаётся отдельным adapter-only package и не
   содержит skills этого репозитория.
 - `ship-tasks@srez-marketplace` — неустановленный legacy rollback artifact; его
   нельзя устанавливать одновременно с Issue Grinder.
 - Не создавайте standalone user-level копии в
-  `~/.codex/skills/{issue-grinder,ship-tasks,task-composer,strategic-explainer}`.
+  `~/.codex/skills/{issue-grinder,ship-tasks,task-composer,scope-reviewer,strategic-explainer}`.
 
 ## Definition of done для изменения skill
 
@@ -110,7 +115,7 @@ evaluation` и возможность восстановить семантич�
 1. Exact repository scope закоммичен и запушен в `origin/main`, а local `HEAD`
    совпадает с `origin/main`.
 2. Repository sources byte-identical соответствующим sources в двух
-   установленных Marketplace packages: Issue Grinder/Task Composer в
+   установленных Marketplace packages: Issue Grinder/Task Composer/Scope Reviewer в
    `Srez Marketplace/plugins/issue-grinder/skills/` и Strategic Explainer в
    `Srez Marketplace/plugins/strategic-explainer/skills/`.
 3. Installed cache byte-identical Marketplace sources; оба plugins имеют
@@ -132,6 +137,7 @@ python3 -B -m unittest discover -s tests -p 'test_*.py'
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py issue-grinder
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py scope-reviewer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check

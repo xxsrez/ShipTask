@@ -14,7 +14,7 @@ decomposition, `Backlog`, Labels и relations —
 Профиль повторно сверен с marketplace source и installed cache
 `task-manager@srez-marketplace` версии `0.7.5+codex.20260821203934`.
 Package содержит только adapter skill `task-manager`, не содержит
-`ship-tasks`/`task-composer`/`strategic-explainer`, а marketplace source и
+`ship-tasks`/`task-composer`/`scope-reviewer`/`strategic-explainer`, а marketplace source и
 installed cache совпадают.
 Текущий Task Manager `SKILL.md` прямо запрещает adapter самостоятельно
 определять delivery, Goal, verification, release, report-content и terminal-status

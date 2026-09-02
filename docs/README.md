@@ -37,6 +37,14 @@
   comments, видимые acceptance incidents, свобода выбора инструментов и
   фактическая классификация приёмки; лёгкие per-Task gates и периодические
   thorough UAT batch releases одним exact integrated candidate без approval.
+- `$issue-grinder:scope-reviewer`:
+  [Overview](skills/scope-reviewer/overview.md),
+  [Requirements](skills/scope-reviewer/requirements.md) и
+  [Architecture](skills/scope-reviewer/architecture.md),
+  [Evaluation](skills/scope-reviewer/evaluation.md) — source package
+  Task Manager-only reviewer-а, который через независимые Luna Max оптики даёт
+  понятный обзор плана или текущего Release, по явному intent автоматически
+  исправляет agent-owned planning model и никогда не меняет Human Requirements.
 - `$issue-grinder:task-composer`:
   [Requirements](skills/task-composer/requirements.md) и
   [Architecture](skills/task-composer/architecture.md) — planning-only Task
@@ -202,6 +210,9 @@
 - [Task Composer evaluation](reference/task-composer-evaluation.md) —
   observable gates для decomposition, metadata, relations, duplicate safety и
   planning-only authority.
+- [Scope Reviewer evaluation](skills/scope-reviewer/evaluation.md) —
+  трасса `SR-*`, Luna Max routing, Requirements preservation и blind cases для
+  планов и текущего Release.
 - [Проверка классификации `In Review`](reference/shiptask-review-disposition-evaluation.md)
   — decision-level cases для task-contract conflict, proven failure,
   verification blocker, critical codebase fallback, incident persistence и Goal behavior.

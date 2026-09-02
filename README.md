@@ -2,7 +2,8 @@
 
 Репозиторий содержит current Task Manager delivery skill `$issue-grinder`,
 planning-only `$issue-grinder:task-composer`, общий
-`$strategic-explainer:strategic-explainer` и legacy source `$ship-tasks`.
+`$issue-grinder:scope-reviewer`, общий `$strategic-explainer:strategic-explainer`
+и legacy source `$ship-tasks`.
 Issue Grinder доводит выбранный scope из `To Do`, `In Progress`, `In Review` до
 проверенного результата либо, только в `Экономичном` режиме, до честной
 возобновляемой контрольной точки. Он создаёт стратегический Goal только для явно
@@ -36,7 +37,7 @@ contract в exact integration candidate, даже если blocking Task ещё 
 ответственности заданы в [философии проекта](docs/philosophy.md), а source unit —
 отдельная entity. В [`docs/skills/<skill>/`](docs/skills/README.md) у неё есть
 три независимых source-документа: user-owned `overview.md`, user-owned
-`requirements.md` и agent-owned `architecture.md`. Документы четырёх skills не
+`requirements.md` и agent-owned `architecture.md`. Документы пяти skills не
 объединяются. Runtime является компактной стохастической компиляцией локального
 source package. Strategic Explainer предоставляет
 semantic facade: callers передают только назначение, scope и source anchors,
@@ -151,12 +152,21 @@ context в каждой child Task. При delivery ShipTask перечитыв�
 но его смысл не расширяет exact child scope. Созданные элементы остаются в
 `Backlog`; неизвестный current Release не угадывается и не блокирует создание.
 
+Scope Reviewer превращает распределённый план или ход Release в один понятный
+человеку обзор. Он сам выбирает materially useful оптики и запускает каждую
+отдельным fresh Luna Max reviewer-ом. Обычный review и любой Release report
+остаются read-only; только явная просьба улучшить план разрешает менять
+agent-owned planning model. Human Requirements, delivery lifecycle и рабочие
+статусы skill не меняет.
+
 ## Структура
 
 - [`issue-grinder/SKILL.md`](issue-grinder/SKILL.md) — current delivery skill.
 - [`ship-tasks/SKILL.md`](ship-tasks/SKILL.md) — исполнимый skill.
 - [`task-composer/SKILL.md`](task-composer/SKILL.md) — planning-only
   формулировка, декомпозиция и создание Task Manager scope.
+- [`scope-reviewer/SKILL.md`](scope-reviewer/SKILL.md) — независимый review,
+  безопасное улучшение Agent Plan и человекочитаемый plan/Release report.
 - [`strategic-explainer/SKILL.md`](strategic-explainer/SKILL.md) — общий
   semantic facade и deterministic role resolver; terminal provider проходит
   отдельный provider-only admission и только затем загружает внутренний
@@ -172,6 +182,11 @@ context в каждой child Task. При delivery ShipTask перечитыв�
   и [Architecture](docs/skills/ship-tasks/architecture.md) — source `$ship-tasks`.
 - [`docs/skills/task-composer/requirements.md`](docs/skills/task-composer/requirements.md)
   и [Architecture](docs/skills/task-composer/architecture.md) — source Task Composer.
+- [`docs/skills/scope-reviewer/overview.md`](docs/skills/scope-reviewer/overview.md),
+  [Requirements](docs/skills/scope-reviewer/requirements.md),
+  [Architecture](docs/skills/scope-reviewer/architecture.md) и
+  [Evaluation](docs/skills/scope-reviewer/evaluation.md) — source и observable
+  contract Scope Reviewer.
 - [`docs/skills/strategic-explainer/overview.md`](docs/skills/strategic-explainer/overview.md),
   [Requirements](docs/skills/strategic-explainer/requirements.md) и
   [Architecture](docs/skills/strategic-explainer/architecture.md) — source
@@ -191,21 +206,23 @@ python3 -B -m unittest discover -s tests -p 'test_*.py'
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py issue-grinder
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py scope-reviewer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py strategic-explainer
 ruby ~/.codex/skills/project-docs/scripts/validate_docs.rb . --strict-navigation
 git diff --check
 ```
 
 Current runtime публикуется двумя установленными независимыми plugin:
-`issue-grinder@srez-marketplace` содержит Issue Grinder и Task Composer, а
+`issue-grinder@srez-marketplace` содержит Issue Grinder, Task Composer и Scope Reviewer, а
 `strategic-explainer@srez-marketplace` — только ordinary Strategic Explainer.
 Task Manager connector устанавливается отдельно как adapter-only
 `task-manager@srez-marketplace`. Legacy `ship-tasks@srez-marketplace` остаётся
 доступным как неустановленный rollback artifact и не устанавливается вместе с
 Issue Grinder. Codex manifest не умеет автоматически устанавливать plugin
 dependency, поэтому Issue Grinder выбирает ordinary при его наличии и
-разрешении, иначе native; Task Composer использует ordinary. Standalone каталоги
+разрешении, иначе native; Task Composer использует ordinary, а Scope Reviewer
+при его отсутствии сохраняет factual report без независимой редактуры. Standalone каталоги
 `~/.codex/skills/issue-grinder`, `~/.codex/skills/ship-tasks`, `~/.codex/skills/task-composer` и
-`~/.codex/skills/strategic-explainer` не устанавливаются: они создают вторые
+`~/.codex/skills/scope-reviewer`, `~/.codex/skills/strategic-explainer` не устанавливаются: они создают вторые
 logical skills рядом с plugin-qualified runtime. Каждый repository source
 сверяется со своим Marketplace package и installed plugin cache.

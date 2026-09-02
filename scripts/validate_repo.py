@@ -57,6 +57,14 @@ SHIP_SKILL = ROOT / "ship-tasks" / "SKILL.md"
 SHIP_METADATA = ROOT / "ship-tasks" / "agents" / "openai.yaml"
 COMPOSER_SKILL = ROOT / "task-composer" / "SKILL.md"
 COMPOSER_METADATA = ROOT / "task-composer" / "agents" / "openai.yaml"
+SCOPE_SKILL = ROOT / "scope-reviewer" / "SKILL.md"
+SCOPE_METADATA = ROOT / "scope-reviewer" / "agents" / "openai.yaml"
+SCOPE_REVIEW = ROOT / "scope-reviewer" / "references" / "scope-and-review.md"
+SCOPE_REPAIR = ROOT / "scope-reviewer" / "references" / "plan-improvement.md"
+SCOPE_REPORTING = ROOT / "scope-reviewer" / "references" / "reporting.md"
+SCOPE_ROUTING_GUARD = (
+    ROOT / "scope-reviewer" / "scripts" / "lens_routing_guard.py"
+)
 STRATEGIC_SKILL = ROOT / "strategic-explainer" / "SKILL.md"
 STRATEGIC_METADATA = ROOT / "strategic-explainer" / "agents" / "openai.yaml"
 STRATEGIC_PROVIDER = (
@@ -74,6 +82,10 @@ SHIP_REQUIREMENTS = SKILL_SOURCES / "ship-tasks" / "requirements.md"
 SPEC = SKILL_SOURCES / "ship-tasks" / "architecture.md"
 COMPOSER_REQUIREMENTS = SKILL_SOURCES / "task-composer" / "requirements.md"
 COMPOSER_SPEC = SKILL_SOURCES / "task-composer" / "architecture.md"
+SCOPE_OVERVIEW = SKILL_SOURCES / "scope-reviewer" / "overview.md"
+SCOPE_REQUIREMENTS = SKILL_SOURCES / "scope-reviewer" / "requirements.md"
+SCOPE_SPEC = SKILL_SOURCES / "scope-reviewer" / "architecture.md"
+SCOPE_EVALUATION = SKILL_SOURCES / "scope-reviewer" / "evaluation.md"
 STRATEGIC_REQUIREMENTS = (
     SKILL_SOURCES / "strategic-explainer" / "requirements.md"
 )
@@ -214,6 +226,12 @@ CORE_FILES = (
     SHIP_METADATA,
     COMPOSER_SKILL,
     COMPOSER_METADATA,
+    SCOPE_SKILL,
+    SCOPE_METADATA,
+    SCOPE_REVIEW,
+    SCOPE_REPAIR,
+    SCOPE_REPORTING,
+    SCOPE_ROUTING_GUARD,
     STRATEGIC_SKILL,
     STRATEGIC_METADATA,
     STRATEGIC_ENTRYPOINT,
@@ -226,11 +244,15 @@ CORE_FILES = (
     ISSUE_MODE_GUIDE,
     SPEC,
     COMPOSER_SPEC,
+    SCOPE_SPEC,
+    SCOPE_EVALUATION,
     STRATEGIC_SPEC,
     SOURCE_INDEX,
     ISSUE_REQUIREMENTS,
     SHIP_REQUIREMENTS,
     COMPOSER_REQUIREMENTS,
+    SCOPE_OVERVIEW,
+    SCOPE_REQUIREMENTS,
     STRATEGIC_REQUIREMENTS,
     STRATEGIC_OVERVIEW,
     OVERVIEW,
@@ -270,6 +292,15 @@ CURRENT_CONTRACT_FILES = (
     SHIP_METADATA,
     COMPOSER_SKILL,
     COMPOSER_METADATA,
+    SCOPE_SKILL,
+    SCOPE_METADATA,
+    SCOPE_REVIEW,
+    SCOPE_REPAIR,
+    SCOPE_REPORTING,
+    SCOPE_SPEC,
+    SCOPE_EVALUATION,
+    SCOPE_OVERVIEW,
+    SCOPE_REQUIREMENTS,
     STRATEGIC_SKILL,
     STRATEGIC_METADATA,
     SPEC,
@@ -1104,6 +1135,115 @@ def validate_composer_skill(errors: list[str]) -> None:
     )
 
 
+def validate_scope_reviewer_skill(errors: list[str]) -> None:
+    validate_frontmatter(errors, SCOPE_SKILL, "scope-reviewer", 150)
+    require(
+        errors,
+        SCOPE_SKILL,
+        "$issue-grinder:scope-reviewer",
+        "Plan review",
+        "Plan improvement",
+        "Release review",
+        "не разрешает writes",
+        "Task Manager adapter",
+        "references/scope-and-review.md",
+        "Requirements integrity optic",
+        "built-in `default` subagent",
+        'fork_turns="none"',
+        'model="gpt-5.6-luna"',
+        'reasoning_effort="max"',
+        "scripts/lens_routing_guard.py",
+        "не имитируй независимый review текущей моделью",
+        "Report subagent-а не является evidence",
+        "references/plan-improvement.md",
+        "Human Requirements\nне изменяй ни при каких обстоятельствах",
+        "representation blocker",
+        "optimistic concurrency",
+        "не запускает Issue Grinder",
+        "references/reporting.md",
+        "$strategic-explainer:strategic-explainer",
+        "явную editing task",
+        "Не читай provider-internal contract",
+        "один связный ответ",
+    )
+    require(
+        errors,
+        SCOPE_METADATA,
+        'display_name: "Scope Reviewer"',
+        'short_description: "Проверить план или Release и понятно объяснить"',
+        "$issue-grinder:scope-reviewer",
+        'value: "task-manager"',
+        'transport: "streamable_http"',
+        "allow_implicit_invocation: true",
+    )
+    require(
+        errors,
+        SCOPE_REVIEW,
+        "terminal cursor",
+        "Human Requirements",
+        "Agent Plan",
+        "byte-identical",
+        "version vector",
+        "Requirements integrity — отдельная обязательная оптика",
+        "SCOPE_REVIEWER_LENS_V1",
+        "`auto-fixable`",
+        "`human-requirement-decision`",
+        "coverage gap, а не PASS",
+        "Requirement → Task/plan element → acceptance → expected evidence",
+    )
+    require(
+        errors,
+        SCOPE_REPAIR,
+        "явного mutation\nintent",
+        "byte-identical значение",
+        "`representation blocker`",
+        "любые изменения Human Requirements",
+        "Label taxonomy",
+        "optimistic concurrency",
+        "Unknown outcome",
+        "`requirements-integrity failure`",
+        "Partial repair",
+        "новый snapshot",
+        "Readiness — оценка плана",
+    )
+    require(
+        errors,
+        SCOPE_REPORTING,
+        "одна\nсвязная композиция",
+        "фактически доказанный product/release outcome",
+        "Worker narrative без primary evidence",
+        "не пишет comments, не меняет\nstatus/Goal",
+        "$strategic-explainer:strategic-explainer",
+        "explicit editing task",
+        "не выбирает findings, repair, readiness, lifecycle",
+        "новым clean editing\ncall",
+        "один report",
+    )
+    require(
+        errors,
+        SCOPE_EVALUATION,
+        "Трасса Requirements → runtime → observation",
+        "каждый plan review содержит отдельную Requirements integrity optic",
+        "Human Requirements до и после любого repair byte-identical",
+        "request показать, объяснить, проверить или дать status не создаёт writes",
+        "Blind model-forward corpus",
+        "Human comprehension gate",
+    )
+    routing = read(SCOPE_ROUTING_GUARD)
+    for marker in (
+        'EXPECTED_AGENT_TYPE = "default"',
+        'EXPECTED_MODEL = "gpt-5.6-luna"',
+        'EXPECTED_EFFORT = "max"',
+        'EXPECTED_FORK_TURNS = "none"',
+        'defects.append("blank_optic")',
+        'defects.append("blank_snapshot_id")',
+        'defects.append("actual_luna_model_mismatch")',
+        'defects.append("actual_luna_effort_mismatch")',
+    ):
+        if marker not in routing:
+            fail(errors, f"{relative(SCOPE_ROUTING_GUARD)} is missing {marker!r}")
+
+
 def validate_strategic_skill(errors: list[str]) -> None:
     # These markers prove that the constitutional/source-separation wiring is
     # present. Readability itself requires the model-forward evaluation contract.
@@ -1266,6 +1406,13 @@ def validate_strategic_provider_encapsulation(errors: list[str]) -> None:
         SPEC,
         COMPOSER_REQUIREMENTS,
         COMPOSER_SPEC,
+        SCOPE_SKILL,
+        SCOPE_REVIEW,
+        SCOPE_REPAIR,
+        SCOPE_REPORTING,
+        SCOPE_REQUIREMENTS,
+        SCOPE_SPEC,
+        SCOPE_EVALUATION,
         REVIEW_MATRIX,
         COMPOSER_EVALUATION,
     )
@@ -1304,6 +1451,10 @@ def validate_strategic_provider_encapsulation(errors: list[str]) -> None:
         (COMPOSER_SKILL, read(COMPOSER_SKILL)),
         (COMPOSER_REQUIREMENTS, section(read(COMPOSER_REQUIREMENTS), "### `TC-09` — Strategic Explainer для каждого Epic")),
         (COMPOSER_SPEC, section(read(COMPOSER_SPEC), "## 5. Strategic Explainer")),
+        (SCOPE_SKILL, section(read(SCOPE_SKILL), "## 5. Верни один человекочитаемый отчёт")),
+        (SCOPE_REQUIREMENTS, section(read(SCOPE_REQUIREMENTS), "### `SR-09` — Человекочитаемый и лёгкий итоговый отчёт")),
+        (SCOPE_SPEC, section(read(SCOPE_SPEC), "## 10. Human-readable report")),
+        (SCOPE_REPORTING, section(read(SCOPE_REPORTING), "## Независимый редакторский проход")),
     )
     invocation_markers = (
         "STRATEGIC_EXPLAINER_PROVIDER_V1",
@@ -1873,6 +2024,7 @@ def validate_source_layers(errors: list[str]) -> None:
     packages = (
         (SHIP_REQUIREMENTS, "ST", 29),
         (COMPOSER_REQUIREMENTS, "TC", 12),
+        (SCOPE_REQUIREMENTS, "SR", 12),
         (STRATEGIC_REQUIREMENTS, "SE", 19),
     )
     for requirements, prefix, count in packages:
@@ -1898,11 +2050,11 @@ def validate_source_layers(errors: list[str]) -> None:
                 "семантически эквивалентным всем требованиям `ST-*`",
             )
         else:
-            level_one_status = (
-                "Статус: current Level 1, 2026-08-31"
-                if requirements == STRATEGIC_REQUIREMENTS
-                else "Статус: current Level 1, 2026-08-27"
-            )
+            level_one_status = {
+                COMPOSER_REQUIREMENTS: "Статус: current Level 1, 2026-08-27",
+                SCOPE_REQUIREMENTS: "Статус: current Level 1, 2026-09-02",
+                STRATEGIC_REQUIREMENTS: "Статус: current Level 1, 2026-08-31",
+            }[requirements]
             require(
                 errors,
                 requirements,
@@ -2028,6 +2180,35 @@ def validate_source_layers(errors: list[str]) -> None:
     )
     require(
         errors,
+        SCOPE_REQUIREMENTS,
+        "Один понятный обзор выбранного scope",
+        "Актуальная и правдивая картина",
+        "Независимый анализ через уместные оптики Luna Max",
+        '`gpt-5.6-luna` subagent с `reasoning_effort="max"`',
+        "Защищённые Requirements человека",
+        "Автоматическое улучшение agent-owned плана",
+        "Простой запрос показать, объяснить, проверить или дать status report остаётся\nread-only",
+        "Requirements review как отдельная обязательная оптика",
+        "Повторяемый цикл до готовности плана",
+        "Осмысленная композиция вместо свалки отчётов",
+        "Человекочитаемый и лёгкий итоговый отчёт",
+        "Полная visibility для планирования",
+        "Такой же обзор текущего Release",
+        "Никакой скрытой delivery или authority роли",
+    )
+    require(
+        errors,
+        SCOPE_OVERVIEW,
+        "Статус: действующий пользовательский Overview, 2026-09-02",
+        "принадлежит пользователю",
+        "превращает распределённый по Task Manager план\nили ход Release",
+        "не ещё один список Tasks",
+        "автоматически исправлять изменяемую агентом часть planning model",
+        "сохраняет\nсогласованные человеком Requirements неприкосновенными",
+        "visibility на весь выбранный scope",
+    )
+    require(
+        errors,
         STRATEGIC_REQUIREMENTS,
         "## Конституционное ядро",
         "Продукт Strategic Explainer —\nпонимание читателя",
@@ -2119,6 +2300,7 @@ def validate_source_layers(errors: list[str]) -> None:
         (ISSUE_SPEC, "IG-*", "Статус: current Level 2, 2026-08-30"),
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current Level 2 contract, 2026-08-27"),
+        (SCOPE_SPEC, "SR-*", "Статус: current agent-owned Architecture, 2026-09-02"),
         (STRATEGIC_SPEC, "SE-*", "Статус: current agent-owned Architecture, 2026-08-31"),
     ):
         if architecture == ISSUE_SPEC:
@@ -2143,6 +2325,19 @@ def validate_source_layers(errors: list[str]) -> None:
                 "## 0. Compilation contract",
                 "производная смысловая компиляция",
                 "примерно эквивалентными",
+            )
+            continue
+        if architecture == SCOPE_SPEC:
+            require(
+                errors,
+                architecture,
+                status_marker,
+                "[Overview](overview.md)",
+                "[Requirements](requirements.md)",
+                "## 0. Compilation contract",
+                "все `SR-*` без скрытого ослабления",
+                "Task Manager-only sibling",
+                "примерно эквивалентное наблюдаемое поведение",
             )
             continue
         require(
@@ -2219,7 +2414,7 @@ def validate_source_layers(errors: list[str]) -> None:
         errors,
         ROOT / "README.md",
         "[`docs/skills/<skill>/`](docs/skills/README.md)",
-        "Документы четырёх skills не\nобъединяются",
+        "Документы пяти skills не\nобъединяются",
         "Project, Release и\ncurrent scope остаются live selectors",
         "без повторного approval",
         "Browser switch допустим как диагностика",
@@ -2230,12 +2425,19 @@ def validate_source_layers(errors: list[str]) -> None:
         "сохраняя применимый strategic\ncontext в каждой child Task",
         "ShipTask перечитывает current Epic",
         "не расширяет exact child scope",
+        "Scope Reviewer превращает распределённый план или ход Release",
+        "только явная просьба улучшить план разрешает менять",
+        "Human Requirements, delivery lifecycle и рабочие\nстатусы skill не меняет",
         "новый Explainer result как\nreflection input",
     )
     require(
         errors,
         DOCS_INDEX,
         "[Source model](skills/README.md)",
+        "[Overview](skills/scope-reviewer/overview.md)",
+        "[Requirements](skills/scope-reviewer/requirements.md)",
+        "[Architecture](skills/scope-reviewer/architecture.md)",
+        "[Evaluation](skills/scope-reviewer/evaluation.md)",
         "[Overview](skills/strategic-explainer/overview.md)",
         "[Requirements](skills/ship-tasks/requirements.md)",
         "[Architecture](skills/ship-tasks/architecture.md)",
@@ -2246,6 +2448,7 @@ def validate_source_layers(errors: list[str]) -> None:
         "[0034: Luna Max для ordinary Strategic Explainer]",
         "[0035: Semantic facade владеет invocation Strategic Explainer]",
         "[Режимы Issue Grinder](guides/issue-grinder-modes.md)",
+        "[Scope Reviewer evaluation](skills/scope-reviewer/evaluation.md)",
         "[Terminal Strategic Explainer и ShipTask routing: evaluation]",
     )
     require(
@@ -3096,7 +3299,7 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         ADAPTER,
         "current compatibility contract",
         "adapter skill `task-manager`",
-        "не содержит\n`ship-tasks`/`task-composer`/`strategic-explainer`",
+        "не содержит\n`ship-tasks`/`task-composer`/`scope-reviewer`/`strategic-explainer`",
         "Adapter не выбирает business scope",
         "current Task `version`",
         "native Label catalogs/assignment",
@@ -3176,8 +3379,9 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "Installed cache",
         "installed/enabled",
         "standalone user-level",
-        "~/.codex/skills/{issue-grinder,ship-tasks,task-composer,strategic-explainer}",
+        "~/.codex/skills/{issue-grinder,ship-tasks,task-composer,scope-reviewer,strategic-explainer}",
         "двух\n   установленных Marketplace packages",
+        "Issue Grinder/Task Composer/Scope Reviewer",
         "Srez Marketplace/plugins/strategic-explainer/skills/",
         "strategic-explainer@srez-marketplace",
         "task-manager@srez-marketplace` остаётся отдельным adapter-only package",
@@ -3187,7 +3391,7 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         errors,
         ROOT / "README.md",
         "Current runtime публикуется двумя установленными независимыми plugin",
-        "issue-grinder@srez-marketplace` содержит Issue Grinder и Task Composer",
+        "issue-grinder@srez-marketplace` содержит Issue Grinder, Task Composer и Scope Reviewer",
         "strategic-explainer@srez-marketplace` — только ordinary Strategic Explainer",
         "Codex manifest не умеет автоматически\nустанавливать plugin dependency",
         "$strategic-explainer:strategic-explainer",
@@ -3197,6 +3401,8 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         errors,
         DEVELOPMENT,
         "два независимых plugin",
+        "`scope-reviewer/` и `strategic-explainer/` — source of truth",
+        "`issue-grinder@srez-marketplace` содержит `issue-grinder`, `task-composer` и\n`scope-reviewer`",
         "ship-tasks@srez-marketplace",
         "strategic-explainer@srez-marketplace",
         "$strategic-explainer:strategic-explainer",
@@ -3267,6 +3473,15 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         SHIP_METADATA,
         COMPOSER_SKILL,
         COMPOSER_METADATA,
+        SCOPE_SKILL,
+        SCOPE_METADATA,
+        SCOPE_REVIEW,
+        SCOPE_REPAIR,
+        SCOPE_REPORTING,
+        SCOPE_REQUIREMENTS,
+        SCOPE_SPEC,
+        SCOPE_EVALUATION,
+        SCOPE_OVERVIEW,
         STRATEGIC_SKILL,
         STRATEGIC_METADATA,
         SHIP_REQUIREMENTS,
@@ -3335,8 +3550,17 @@ def current_task_source_files() -> tuple[Path, ...]:
         SHIP_METADATA,
         COMPOSER_SKILL,
         COMPOSER_METADATA,
+        SCOPE_SKILL,
+        SCOPE_METADATA,
+        SCOPE_REVIEW,
+        SCOPE_REPAIR,
+        SCOPE_REPORTING,
+        SCOPE_REQUIREMENTS,
         SPEC,
         COMPOSER_SPEC,
+        SCOPE_SPEC,
+        SCOPE_EVALUATION,
+        SCOPE_OVERVIEW,
         COMPOSER_EVALUATION,
         OVERVIEW,
         REPORT,
@@ -3377,6 +3601,7 @@ def markdown_files() -> list[Path]:
     files = [ROOT / "README.md", ROOT / "AGENTS.md"]
     files.extend(sorted((ROOT / "ship-tasks").rglob("*.md")))
     files.extend(sorted((ROOT / "task-composer").rglob("*.md")))
+    files.extend(sorted((ROOT / "scope-reviewer").rglob("*.md")))
     files.extend(sorted((ROOT / "strategic-explainer").rglob("*.md")))
     files.extend(sorted((ROOT / "docs").rglob("*.md")))
     return files
@@ -3427,6 +3652,7 @@ def main() -> int:
         validate_issue_skill(errors)
         validate_ship_skill(errors)
         validate_composer_skill(errors)
+        validate_scope_reviewer_skill(errors)
         validate_strategic_skill(errors)
         validate_strategic_provider_encapsulation(errors)
         validate_trigger_matrix(errors)

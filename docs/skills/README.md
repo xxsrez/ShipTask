@@ -22,6 +22,11 @@ docs/skills/
 ├── ship-tasks/
 │   ├── requirements.md
 │   └── architecture.md
+├── scope-reviewer/
+│   ├── overview.md
+│   ├── requirements.md
+│   ├── architecture.md
+│   └── evaluation.md
 ├── task-composer/
 │   ├── requirements.md
 │   └── architecture.md
@@ -33,9 +38,10 @@ docs/skills/
 ```
 
 Канонический source package содержит все три документа. В current tree
-пользовательский Overview определён для Issue Grinder и Strategic Explainer.
-Overview остальных entities нельзя заполнять из Requirements, Architecture или
-реализации: для этого нужно отдельное явное решение пользователя.
+пользовательский Overview определён для Issue Grinder, Scope Reviewer и
+Strategic Explainer. Overview остальных entities нельзя заполнять из
+Requirements, Architecture или реализации: для этого нужно отдельное явное
+решение пользователя.
 
 Каждый каталог — независимый source package:
 
@@ -110,6 +116,11 @@ level, однако plugin packaging не объединяет source contracts 
   созданы, а installed state доказывается отдельно.
 - [`$ship-tasks`](ship-tasks/requirements.md) —
   [Architecture](ship-tasks/architecture.md).
+- [`$issue-grinder:scope-reviewer`](scope-reviewer/overview.md) —
+  [Requirements](scope-reviewer/requirements.md) и
+  [Architecture](scope-reviewer/architecture.md),
+  [Evaluation](scope-reviewer/evaluation.md); source package, repository runtime
+  и observable evaluation созданы, а installed state доказывается отдельно.
 - [`$issue-grinder:task-composer`](task-composer/requirements.md) —
   [Architecture](task-composer/architecture.md).
 - [`$strategic-explainer:strategic-explainer`](strategic-explainer/overview.md) —

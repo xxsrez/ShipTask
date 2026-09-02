@@ -8,6 +8,7 @@ Task Manager понятным человеку образом.
 Task Manager skill  = технический адаптер
 ShipTask skill      = требования к delivery result
 Task Composer       = постановка и planning graph в Backlog
+Scope Reviewer      = независимый обзор и безопасный repair Agent Plan
 Project memory      = selector и project-specific context
 Strategic Explainer = stateless API независимого объяснения
 ```
@@ -155,6 +156,12 @@ Tasks механически: decomposition следует independently verifia
 каждая child Task получает компактную проекцию своего вклада и применимых
 strategic constraints/non-goals.
 
+Обзор созданного плана и текущего Release принадлежит Scope Reviewer. Он
+собирает один current snapshot, проверяет его через независимые Luna Max оптики
+и возвращает человеку одну целостную картину. Plan/Release review read-only;
+явный plan-improvement intent разрешает исправить только Agent Plan при
+доказанной сохранности Human Requirements.
+
 - `single`: одна Task, без Goal.
 - `batch-implementation`: имплементация/rework минимум двух Tasks, с Goal и
   effective user topology rule либо automatic delegation по default.
@@ -285,9 +292,13 @@ smoke evidence. Отсутствующий UAT receipt — proof gap, а не ve
 - [Task Composer Requirements](skills/task-composer/requirements.md)
 - [Task Composer Architecture](skills/task-composer/architecture.md)
 - [Task Composer как planning sibling-skill](decisions/0023-task-composer-as-planning-sibling.md)
+- [Scope Reviewer Overview](skills/scope-reviewer/overview.md)
+- [Scope Reviewer Requirements](skills/scope-reviewer/requirements.md)
+- [Scope Reviewer Architecture](skills/scope-reviewer/architecture.md)
+- [Scope Reviewer Evaluation](skills/scope-reviewer/evaluation.md)
 
-Runtime sources — `ship-tasks/SKILL.md`, `task-composer/SKILL.md` и package
-`strategic-explainer/`. `SKILL.md` Explainer является semantic facade и
+Runtime sources — `ship-tasks/SKILL.md`, `task-composer/SKILL.md`,
+`scope-reviewer/SKILL.md` и package `strategic-explainer/`. `SKILL.md` Explainer является semantic facade и
 admission layer к fresh provider, а text-improvement contract загружается только
 terminal subagent. Plugin distribution и installed cache должны быть
 byte-identical repository source; standalone user-level copies не используются.
