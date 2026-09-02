@@ -30,7 +30,8 @@ Task Composer превращает требования человека в св
 
 - одна независимо исполнимая работа остаётся одной Task;
 - составной outcome становится Epic — parent Task с несколькими подзадачами;
-- Epic сохраняет problem, strategic intent, требования и границы человека;
+- Epic сохраняет problem, Strategic Outcome и защищённые требования и границы
+  человека отдельно от Agent Plan;
 - подзадачи получают конкретный исполнимый scope, технические детали,
   acceptance criteria и ожидаемое evidence;
 - уместные пользовательские attachments из bug report сохраняются на той
@@ -80,6 +81,35 @@ Task Composer создаёт или формулирует planning artifacts, �
 Task Composer может подготовить Task Manager scope, но дальнейшая delivery
 принадлежит Issue Grinder и его отдельному lifecycle contract.
 
+### 2.1 Три смысловые роли
+
+До decomposition Task Composer строит три разные части planning model:
+
+1. **Strategic Outcome** — компактный синтез problem и желаемого изменения,
+   который помогает оценивать полезность и связность будущих Tasks.
+2. **Human Requirements** — только явно данные или согласованные человеком
+   outcomes, constraints и non-goals. Их происхождение должно оставаться
+   различимым.
+3. **Agent Plan** — изменяемый способ достижения: decomposition, boundaries,
+   dependencies, acceptance, evidence и technical detail.
+
+Фиксированные заголовки не обязательны, пока новый читатель и Scope Reviewer
+могут однозначно восстановить эти роли. Предположение агента не повышается до
+Human Requirement из-за уверенной формулировки, повторения в нескольких Tasks
+или полезности для Strategic Outcome. Если широкий ориентир допускает несколько
+material трактовок, Task Composer возвращает вопрос вместо скрытого расширения
+exact user scope.
+
+Стратегическая связность и формальные обязательства проверяются раздельно:
+
+```text
+Strategic Outcome → вклад Tasks и направление решений
+Human Requirement → Task/plan element → acceptance → expected evidence
+```
+
+Первая связь помогает качеству плана, но не создаёт обязательство. Вторая
+фиксирует то, что должно быть формально выполнено.
+
 ## 3. Live scope и preflight
 
 Task Manager connector остаётся единственным task adapter. До write skill
@@ -109,10 +139,11 @@ relevant title/problem terms. Exact duplicate не создаётся. Material 
 
 ## 4. Композиция задачи
 
-Сначала формируется целая candidate-модель без writes: Project/Release/status,
-parent, children, descriptions, attachment mapping, labels и relation graph.
-Модель должна покрыть требования человека без придуманного scope и без
-технических пробелов между подзадачами.
+Сначала формируется целая candidate-модель без writes: Strategic Outcome, Human
+Requirements, Agent Plan, Project/Release/status, parent, children,
+descriptions, attachment mapping, labels и relation graph. Модель должна
+покрыть требования человека без придуманного scope и без технических пробелов
+между подзадачами.
 
 Исходный план является материалом для понимания цели и зависимостей, а не
 готовым списком карточек. Task Composer строит outcome graph: отделяет
@@ -154,10 +185,10 @@ Epic с единственной формальной подзадачей и н
 
 Одиночная Task содержит:
 
-- problem и ожидаемый observable outcome;
-- exact scope и material constraints человека;
-- достаточную техническую конкретику для исполнения;
-- objective acceptance criteria и ожидаемое evidence;
+- problem и Strategic Outcome;
+- отличимые Human Requirements, exact scope и material constraints человека;
+- Agent Plan: достаточную техническую конкретику для исполнения, objective
+  acceptance criteria и ожидаемое evidence;
 - явно названные non-goals или dependencies, если они меняют решение.
 
 ### 4.2 Epic и подзадачи
@@ -170,10 +201,12 @@ Epic с единственной формальной подзадачей и н
 Epic объясняет:
 
 - какую проблему, для кого и зачем решаем;
-- desired observable outcome и strategic intent;
-- exact scope, требования и ограничения, данные человеком;
+- Strategic Outcome как общий ориентир;
+- отличимые Human Requirements: exact scope, обязательные результаты,
+  ограничения и non-goals, данные человеком;
+- Agent Plan верхнего уровня: как подзадачи вместе дают целостный результат;
 - cross-cutting acceptance и non-goals;
-- как подзадачи вместе дают целостный результат.
+- известные стратегические пробелы, которые не являются обязательствами.
 
 Epic не становится свалкой tactical instructions. Техническая деталь остаётся
 в нём только когда является явным cross-cutting требованием человека или
@@ -182,10 +215,10 @@ Epic не становится свалкой tactical instructions. Техни�
 Каждая подзадача содержит:
 
 - один конкретный independently deliverable result;
-- собственный вклад в desired outcome Epic;
-- точную границу изменения и materially relevant technical details;
-- применимые parent requirements и dependencies;
-- проверяемые acceptance criteria и evidence;
+- собственный вклад в Strategic Outcome Epic;
+- применимые Human Requirements и non-goals без добавления нового смысла;
+- Agent Plan: точную границу изменения, materially relevant technical details,
+  dependencies, проверяемые acceptance criteria и evidence;
 - secret-safe operational references: имя credential/secret store и target,
   но никогда не secret value.
 
@@ -195,13 +228,14 @@ Epic и отражается в каждой применимой подзада
 
 ### 4.3 Стратегическая преемственность
 
-Epic остаётся каноническим полным источником общей проблемы, desired outcome и
-cross-cutting boundaries. Native parent-child hierarchy даёт исполнителю путь к
-этому источнику, но одной ссылки недостаточно: description каждой подзадачи
-содержит короткую самодостаточную проекцию релевантного смысла. Она прямо
-объясняет вклад Task в Epic, применимые стратегические требования, ограничения и
-non-goals, а также качества, которыми нельзя пожертвовать ради локального
-упрощения. Полный текст Epic при этом не копируется в каждую карточку.
+Epic остаётся каноническим полным источником общей проблемы, Strategic Outcome,
+Human Requirements и cross-cutting boundaries. Native parent-child hierarchy
+даёт исполнителю путь к этому источнику, но одной ссылки недостаточно:
+description каждой подзадачи содержит короткую самодостаточную проекцию
+релевантного смысла. Она прямо объясняет вклад Task в Epic, применимые Human
+Requirements, ограничения и non-goals, а также качества, которыми нельзя
+пожертвовать ради локального упрощения. Полный текст Epic при этом не копируется
+в каждую карточку.
 
 До create candidate-модель проверяется с позиции нового исполнителя, который
 видит подзадачу и её parent: он должен суметь назвать общий outcome, собственный
@@ -209,6 +243,9 @@ non-goals, а также качества, которыми нельзя пож�
 Epic помогает выбирать решение внутри этой границы, но не разрешает выполнять
 соседние подзадачи или расширять scope. Material gap либо противоречие между
 Epic и child остаётся явным и требует исправления planning model до write.
+Широкий Strategic Outcome не превращает такой gap в Human Requirement: repair
+может менять Agent Plan внутри exact scope, а новое обязательство требует
+пользовательского решения.
 
 ### 4.4 Attachments из bug report
 
@@ -318,6 +355,8 @@ cleanup без authority: skill перечисляет созданные, по�
   user title;
 - созданные relation types и direction;
 - description, сохраняющий intended strategic/technical split;
+- различимые Strategic Outcome, Human Requirements и Agent Plan без
+  agent-invented requirement;
 - каждый обязательный attachment на сопоставленной Task и отсутствие
   unresolved attachment omission.
 

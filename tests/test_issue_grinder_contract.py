@@ -43,9 +43,9 @@ class IssueGrinderContractTest(unittest.TestCase):
         for invariant in (
             "candidate blocker → причинное объяснение → reflection",
             "для каждой причины дай отдельный ответ",
-            "почему она блокирует цель",
+            "почему она блокирует обязательный результат активного issue",
             "почему Issue Grinder не может устранить её сам",
-            "зачем нужен заблокированный шаг",
+            "зачем этот шаг нужен issue contract",
             "post-explanation reflection",
             "update_goal(status=blocked)",
             "одного совпадения selector-а для continuity недостаточно",
@@ -69,6 +69,10 @@ class IssueGrinderContractTest(unittest.TestCase):
             "Luna retry loop",
             "$strategic-explainer:strategic-explainer",
             "только пользователю в чате",
+            "Strategic Outcome — постоянный ориентир исполнения",
+            "empty active scope остаётся достаточным",
+            "не превращай в источник новых Requirements",
+            "применимые Human Requirements и отличимый Agent Plan",
         ):
             self.assertIn(invariant, runtime)
 

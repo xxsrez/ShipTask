@@ -35,8 +35,23 @@ create-and-deliver flow, а не обход этой границы.
 ### `TC-02` — Human intent без придуманного scope
 
 Созданная planning model сохраняет problem, desired outcome, exact scope,
-requirements, constraints и non-goals пользователя. Недостающий material выбор
-не маскируется гладким текстом и не угадывается из старой памяти.
+requirements, constraints и non-goals пользователя и позволяет однозначно
+различить три смысловые роли:
+
+- **Strategic Outcome** — компактный общий ориентир: какую проблему решает scope
+  и к какому изменению должна вести работа;
+- **Human Requirements** — явно данные или согласованные человеком обязательные
+  результаты, ограничения и non-goals;
+- **Agent Plan** — выбранные агентом decomposition, Task boundaries,
+  dependencies, acceptance, expected evidence и technical detail.
+
+Strategic Outcome может быть сформулирован агентом как синтез доступного
+пользовательского контекста и направляет построение плана, но сам по себе не
+создаёт новое Human Requirement. Предположение агента, рекомендуемый hardening,
+удобный способ реализации или критерий, который человек не задавал и не
+согласовывал, остаются частью Agent Plan либо открытым вопросом и не выдаются за
+требование человека. Недостающий material выбор не маскируется гладким текстом
+и не угадывается из старой памяти.
 
 ### `TC-03` — Минимальная полезная decomposition
 
@@ -49,10 +64,12 @@ deliverables; подзадачи совместно покрывают его б
 
 ### `TC-04` — Problem-first Epic и исполнимые Tasks
 
-Epic объясняет проблему, beneficiary, цель и cross-cutting boundaries.
-Подзадачи содержат конкретный результат, достаточную техническую границу,
-acceptance, evidence и реальные dependencies. Tactical detail не вытесняет
-смысл, а high-level Epic не оставляет исполнителю технические пробелы.
+Epic объясняет проблему, beneficiary, Strategic Outcome, Human Requirements и
+cross-cutting boundaries, сохраняя их отличимыми от Agent Plan. Подзадачи
+содержат конкретный результат, достаточную техническую границу, acceptance,
+evidence и реальные dependencies. Tactical detail не вытесняет смысл, а
+high-level Epic не оставляет исполнителю технические пробелы. Standalone Task
+сохраняет то же различие без искусственного Epic.
 
 ### `TC-05` — Live Task Manager projection
 
@@ -138,6 +155,13 @@ session.
 Epic. Стратегический контекст направляет выбор решения и планку качества, но не
 расширяет exact scope или полномочия дочерней Task. Material противоречие между
 Epic и подзадачей остаётся видимым и не сглаживается уверенной формулировкой.
+
+Strategic Outcome не превращает широкое желаемое состояние в скрытые Human
+Requirements, новые обязательные Tasks или бесконечную задолженность. В пределах
+явного planning intent Task Composer вправе улучшать Agent Plan так, чтобы он
+лучше служил общему ориентиру, но material работа за пределами exact user scope
+остаётся видимым planning gap или вопросом человеку, а не придуманным
+обязательством.
 
 ### `TC-12` — Уместные attachments из bug report
 

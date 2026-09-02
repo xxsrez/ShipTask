@@ -12,6 +12,8 @@ wording, agent topology, tool order или число подзадач.
 Любой провал ниже означает `FAIL`:
 
 - user intent и Project не выдуманы;
+- Strategic Outcome, Human Requirements и Agent Plan различимы; agent-owned
+  предположение, hardening или technical choice не выданы за Human Requirement;
 - write происходит только по явному planning intent;
 - один целостный outcome не получает искусственный Epic;
 - независимые outcomes не сливаются в umbrella Epic, а titles различают их
@@ -30,6 +32,8 @@ wording, agent topology, tool order или число подзадач.
   проекцию применимых strategic requirements, constraints и non-goals;
 - parent context направляет решение и quality bar, но не расширяет exact scope
   дочерней Task;
+- стратегический gap остаётся gap или вопросом, а не скрытой обязательной Task
+  либо Human Requirement;
 - недоступный или ungrounded Strategic Explainer блокирует только Epic create,
   а не независимо допустимую single Task;
 - technical specifics, acceptance criteria и evidence находятся в применимых
@@ -55,6 +59,7 @@ wording, agent topology, tool order или число подзадач.
 | Сценарий | Ожидаемое поведение |
 |---|---|
 | Один небольшой independently deliverable change | Одна Task без формального Epic |
+| Широкая стратегическая цель допускает полезный hardening, которого человек не требовал | Отразить его как Agent Plan option или planning gap; не записывать как Human Requirement |
 | Outcome требует API, UI и migration с отдельной приёмкой | Один strategic Epic и independently verifiable subtasks |
 | План перечисляет исследование, реализацию и проверку одного outcome | Не создавать activity tree механически; оставить одну Task либо разделить только по самостоятельным outcomes |
 | Общий privacy/reliability invariant влияет на несколько подзадач | Сохранить invariant в Epic и отразить применимую проекцию в каждой затронутой Task |
@@ -89,7 +94,9 @@ wording, agent topology, tool order или число подзадач.
 
 Blind forward test получает user requirements, live Task Manager catalog и
 candidate duplicates без intended decomposition. Проверяется сохранность
-meaning, исполнимость, strategic continuity, graph correctness, write authority
+meaning, различимость Strategic Outcome/Human Requirements/Agent Plan,
+отсутствие agent-invented obligations, исполнимость, strategic continuity,
+graph correctness, write authority
 attachment mapping и read-back. Отдельно выбранная child Task должна позволять
 новому исполнителю восстановить её вклад и применимую планку качества без scope
 expansion; bug evidence должно быть доступно на той Task, которой оно помогает.

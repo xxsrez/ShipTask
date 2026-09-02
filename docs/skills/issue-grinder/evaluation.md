@@ -36,11 +36,11 @@
 | `IG-FLOW-05` | `SKILL.md` §2; `task-manager-flow.md` | integrated-blocked-by; late-reopen-recheck |
 | `IG-FLOW-06` | `SKILL.md` §5; `execution-modes.md`; `modes/economical.md`; mode harness | active-scope-prevents-completion; economical-checkpoint-is-nonterminal |
 | `IG-GOAL-01` | `run-and-goal.md`; `execution-modes.md`; `modes/economical.md`; trace harness | explicit-multi-create; implicit-no-goal; grow-and-keep; economical-checkpoint-keeps-goal |
-| `IG-GOAL-02` | `run-and-goal.md` | strategic-release-objective; issue-list-rejected |
-| `IG-GOAL-03` | `SKILL.md` §5; `run-and-goal.md`; `modes/economical.md`; trace harness | empty-scope-complete; active-scope-continue; checkpoint-goal-not-complete |
+| `IG-GOAL-02` | `SKILL.md`; `run-and-goal.md`; `multi-agent-execution.md` | strategic-release-objective; issue-list-rejected; strategic-context-restored; single-issue-parent-context; strategy-does-not-expand-scope |
+| `IG-GOAL-03` | `SKILL.md` §5; `run-and-goal.md`; `modes/economical.md`; trace harness | empty-scope-complete; active-scope-continue; checkpoint-goal-not-complete; completed-tasks-with-strategic-gap-still-complete |
 | `IG-GOAL-04` | `SKILL.md` §3; blocker harness | explanation-unlocks; true-external-blocker |
 | `IG-GOAL-05` | `SKILL.md` §3 | final-reflection-continues; chat-only-final |
-| `IG-GOAL-06` | `SKILL.md` §2; `task-manager-flow.md` | nonmaterial-gap-transparent; material-gap-blocks |
+| `IG-GOAL-06` | `SKILL.md` §2; `task-manager-flow.md` | nonmaterial-gap-transparent-by-issue-contract; material-acceptance-gap-blocks |
 | `IG-GOAL-07` | `SKILL.md` §3; `strategic-explainer.md`; blocker harness | all-causes-overview; one-separate-answer-per-cause; three-lens-completeness; reason-reflection-unlocks |
 | `IG-SCOPE-01` | `run-and-goal.md`; `task-manager-flow.md` | prompt-selector-precedence |
 | `IG-SCOPE-02` | `run-and-goal.md` | explicit-default-release; implicit-missing-selector |
@@ -72,7 +72,7 @@
 | `IG-MA-06` | `multi-agent-execution.md`; `writer_worktree_guard.py` | two-phase-admission; shared-main-rejected; integration-canary |
 | `IG-MA-07` | `multi-agent-execution.md`; `writer_worktree_guard.py` | exclusive-writable-owner; duplicate-branch-and-path-rejected |
 | `IG-MA-08` | `multi-agent-execution.md` | read-only-role-no-worktree |
-| `IG-MA-09` | `multi-agent-execution.md` | complete-packet-contract |
+| `IG-MA-09` | `multi-agent-execution.md` | strategic-outcome-and-contribution-in-packet; human-requirements-distinct-from-agent-plan; packet-context-does-not-expand-scope |
 | `IG-MA-10` | `SKILL.md` §2; `multi-agent-execution.md` | exact-integrated-verification |
 | `IG-MA-11` | `multi-agent-execution.md` | redispatch-after-return-and-scope-change |
 | `IG-MA-12` | `SKILL.md` §2; `multi-agent-execution.md`; `writer_worktree_guard.py`; trace harness | startup-inventory-before-fresh-work; branch-only-restored; dirty-checkpoint-resumed; active-owner-rejected; ambiguous-preserved; intentional-candidate-not-replacement |
@@ -155,8 +155,9 @@ candidate blocker
 - incomplete/raw-error report был опубликован;
 - общий report не перечислил все подтверждённые причины либо для хотя бы
   одной причины нет отдельного ответа;
-- reason-specific answer не объяснил, почему причина блокирует цель, почему
-  Issue Grinder не может устранить её сам или зачем нужен заблокированный шаг для цели;
+- reason-specific answer не объяснил, почему причина блокирует обязательный
+  результат активного issue, почему Issue Grinder не может устранить её сам или
+  зачем заблокированный шаг нужен issue contract и общей цели;
 - остановка или `update_goal(blocked)` произошли до публикации общего report и всех
   отдельных ответов;
 - caller error Strategic Explainer превратился в blocker вместо исправления;
@@ -235,7 +236,8 @@ fresh model-forward smoke.
 
 После install/upgrade новая Codex-сессия должна:
 
-- видеть `issue-grinder:issue-grinder` и `issue-grinder:task-composer`;
+- видеть `issue-grinder:issue-grinder`, `issue-grinder:task-composer` и
+  `issue-grinder:scope-reviewer`;
 - не видеть установленный `ship-tasks:ship-tasks`;
 - видеть Task Manager dependency и optional Strategic Explainer;
 - на чистый вопрос о режимах/default/различиях дать краткую справку о пяти
@@ -272,7 +274,11 @@ fresh model-forward smoke.
   title и продолжив при отсутствии capability;
 - на synthetic blocker case продолжить после найденного safe action, а на
   настоящем authority blocker-е дать полный общий причинный report и отдельный
-  трёхчастный ответ по каждой причине.
+  трёхчастный ответ по каждой причине;
+- на completed Task scope с известным strategic gap завершить Goal, раскрыть gap
+  в отчёте и не создать новую Task, blocker или delivery iteration;
+- перед implementation и после simulated resume восстановить Strategic Outcome,
+  Human Requirements, вклад issue и exact Agent Plan, не расширяя scope.
 
 Static, deterministic и registration checks не заменяют этот model-forward
 smoke; если live synthetic run не выполнен, это указывается как непроверенная

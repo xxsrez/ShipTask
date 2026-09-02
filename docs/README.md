@@ -18,7 +18,10 @@
   [Evaluation](skills/issue-grinder/evaluation.md) — current source package
   нового Task Manager-only delivery skill со стратегическим Goal,
   максимальной автономностью явного run, blocker reflection и изолированной
-  multi-agent работой. Пять execution mode включают `Соло` без рабочей
+  multi-agent работой. Strategic Outcome постоянно направляет локальные
+  решения, но не создаёт новую задолженность: пустого active Task scope
+  достаточно для формального завершения даже при известном стратегическом gap.
+  Пять execution mode включают `Соло` без рабочей
   делегации Issue Grinder и четыре стратегии с разной долей экономичной работы,
   избыточностью и финальной проверкой; внешние semantic providers не входят в
   mode topology, чистая справка о режимах не запускает delivery, а runtime
@@ -45,14 +48,17 @@
   Task Manager-only reviewer-а, который через независимые Luna Max оптики даёт
   понятный обзор плана или текущего Release, по явному intent автоматически
   исправляет agent-owned planning model и никогда не меняет Human Requirements.
+  Он различает формальную полноту Tasks и достижение Strategic Outcome, не
+  превращая стратегический gap в blocker или новую работу.
 - `$issue-grinder:task-composer`:
   [Overview](skills/task-composer/overview.md),
   [Requirements](skills/task-composer/requirements.md),
   [Architecture](skills/task-composer/architecture.md) и
   [Evaluation](skills/task-composer/evaluation.md) — planning-only Task
   Manager workflow: одна Task либо strategic Epic с конкретными подзадачами,
-  переносом применимого strategic context в каждую child Task, live Labels,
-  hierarchy, semantic relations, `Backlog` и необязательным current Release.
+  различимыми Strategic Outcome, Human Requirements и Agent Plan, переносом
+  применимого strategic context в каждую child Task, live Labels, hierarchy,
+  semantic relations, `Backlog` и необязательным current Release.
 - `$strategic-explainer:strategic-explainer`:
   [Overview](skills/strategic-explainer/overview.md),
   [Requirements](skills/strategic-explainer/requirements.md),

@@ -57,17 +57,26 @@ implementation, evidence, Goal и lifecycle. Scope Reviewer не подменя�
 
 ## 2. Логическая модель planning source
 
-Reviewer различает два независимых слоя:
+Reviewer различает три смысловые роли:
 
-- **Human Requirements** — user-owned problem, desired outcome, требования,
-  ограничения и non-goals;
+- **Strategic Outcome** — общий ориентир, синтезирующий problem и желаемое
+  изменение; он направляет оценку связности и решений, но не является
+  исчерпывающим списком обязательств;
+- **Human Requirements** — user-owned обязательные outcomes, ограничения и
+  non-goals;
 - **Agent Plan** — agent-owned decomposition, Task scopes, acceptance,
   expected evidence, hierarchy, relations, sequencing и technical detail.
 
-Предпочтительная Task Manager representation предоставляет слоям отдельные
-поля, версии и write operations. Каждая Task хранит применимые Requirement IDs
-либо другую стабильную связь с каноническим источником, а Agent Plan указывает,
-относительно какой Requirements version он построен.
+Strategic Outcome может быть agent-authored формулировкой, но его material
+изменение не должно подменять пользовательский смысл. Reviewer может уточнить
+формулировку ориентира и Agent Plan в режиме improvement, сохраняя problem,
+desired outcome, Human Requirements и exact scope.
+
+Предпочтительная Task Manager representation предоставляет ролям различимые
+поля либо стабильные структурные границы и versions. Каждая Task хранит
+применимые Requirement IDs либо другую стабильную связь с каноническим
+источником, а Agent Plan указывает, относительно какой Requirements version он
+построен.
 
 До появления такого adapter contract допустима структурированная representation
 в current Task fields только при строгом preservation guard. Reviewer должен
@@ -92,8 +101,8 @@ Project и выбранный Project/Release/Epic/Task selector. Relative selec
 
 1. проходит все страницы inventory до terminal pagination;
 2. читает full detail каждой materially relevant Task;
-3. разрешает parent/child hierarchy, relations, statuses, Requirements и Agent
-   Plan;
+3. разрешает parent/child hierarchy, relations, statuses, Strategic Outcome,
+   Human Requirements и Agent Plan;
 4. читает применимые comments и внешние evidence anchors только когда они нужны
    для заявленного состояния;
 5. сохраняет snapshot manifest из canonical refs, versions и source anchors.
@@ -106,11 +115,13 @@ report coordinator перечитывает version vector. Изменившие
 
 ## 4. Выбор оптик
 
-Coordinator выводит оптики из problem, состава scope, Requirements, task graph,
-execution state и известных рисков. Он не применяет универсальный фиксированный
-набор, но для plan review проверяет необходимость как минимум следующих классов:
+Coordinator выводит оптики из problem, Strategic Outcome, состава scope,
+Requirements, task graph, execution state и известных рисков. Он не применяет
+универсальный фиксированный набор, но для plan review проверяет необходимость
+как минимум следующих классов:
 
 - Requirements integrity и согласованность;
+- стратегическая связность Tasks и отсутствие agent-invented obligations;
 - полнота outcome/decomposition и ownership;
 - dependencies, sequencing и critical path;
 - acceptance, evidence и наблюдаемая готовность;
@@ -180,10 +191,17 @@ Findings проходят disposition:
   продолжения;
 - optional improvement не выдаётся за blocker или обязательную работу.
 
-Coordinator строит coverage map `Requirement → Task/plan element → acceptance →
-expected evidence` и выявляет скрытый остаток, дублирование ownership и
-требование без observable proof. Эта карта является внутренним основанием
-readiness, а не обязательной формой пользовательского отчёта.
+Coordinator строит две разные карты:
+
+```text
+Strategic Outcome → вклад Tasks и известный стратегический gap
+Human Requirement → Task/plan element → acceptance → expected evidence
+```
+
+Первая карта оценивает связность, но не создаёт формальный completion gate.
+Вторая выявляет обязательный скрытый остаток, дублирование ownership и
+требование без observable proof и служит внутренним основанием readiness. Ни
+одна карта не навязывает форму пользовательского отчёта.
 
 ## 7. Автоматический plan repair
 
@@ -193,13 +211,16 @@ coordinator подтверждает:
 - exact scope и write authority;
 - неизменившийся Requirements version и snapshot;
 - однозначную границу Human Requirements/Agent Plan;
+- различимый Strategic Outcome и отсутствие material изменения пользовательского
+  смысла;
 - что изменяемая Task ещё принадлежит planning surface и её repair не подменяет
   активную delivery/rework;
 - что proposed patch не расширяет пользовательский scope.
 
-Auto-fix может уточнить task wording и technical boundary, acceptance, expected
-evidence, labels, hierarchy, relations и sequencing, а также перестроить
-agent-owned decomposition, если current Task Manager capabilities позволяют
+Auto-fix может уточнить wording Strategic Outcome без изменения его смысла,
+task wording и technical boundary, acceptance, expected evidence, labels,
+hierarchy, relations и sequencing, а также перестроить agent-owned
+decomposition, если current Task Manager capabilities позволяют
 сделать это без destructive deletion и скрытой потери history. Устаревший
 элемент предпочтительно supersede/cancel по отдельно разрешённой planning
 семантике, а не удалять физически. Если нужная lifecycle operation не входит в
@@ -252,6 +273,7 @@ Ready означает одновременно:
 - Human Requirements однозначны для текущего scope либо явно согласованы с
   известными boundaries;
 - coverage map не содержит скрытого обязательного остатка;
+- известный стратегический gap назван и не превращён в скрытое обязательство;
 - Task decomposition, ownership и dependencies внутренне согласованы;
 - acceptance и expected evidence позволяют наблюдать каждый обязательный
   outcome;
@@ -267,9 +289,9 @@ Readiness не переводит Tasks из `Backlog`, не запускает 
 
 Coordinator сначала создаёт factual synthesis из accepted findings и current
 snapshot. Он включает только material content: problem, current/future state,
-целостную модель работы, repairs, Requirements questions, risks/dependencies,
-review/human attention и readiness. Lens transcripts и process diary в draft не
-копируются.
+Strategic Outcome, формальную модель обязательств, целостную модель работы,
+repairs, Requirements questions, risks/dependencies, review/human attention и
+readiness. Lens transcripts и process diary в draft не копируются.
 
 Затем coordinator передаёт этот factual target text отдельному
 `$strategic-explainer:strategic-explainer` как explicit editing task с exact
@@ -300,6 +322,8 @@ in-flight state, а не completion evidence.
 
 - фактически доказанный product/release outcome;
 - current Task Manager lifecycle projection;
+- формальную полноту Tasks и степень достижения более широкого Strategic
+  Outcome;
 - известную незавершённую или in-flight работу;
 - critical path и следующий observable state;
 - current blockers и лишь возможные будущие risks;
@@ -307,8 +331,11 @@ in-flight state, а не completion evidence.
   human dependency.
 
 Task count и status percentage могут быть supporting context, но не заменяют
-оценку относительно общей цели Release. Scope Reviewer не публикует Task
-comments, не меняет status/Goal и не запускает repair delivery scope.
+оценку относительно общей цели Release. При этом empty active scope является
+достаточным формальным критерием завершения Goal: стратегический gap остаётся
+видимым выводом и не создаёт Task, blocker или новый delivery loop. Scope
+Reviewer не публикует Task comments, не меняет status/Goal и не запускает repair
+delivery scope.
 
 ## 12. Observable evaluation
 
@@ -335,6 +362,10 @@ Runtime получает отдельный evaluation contract с тремя с
   отчёт не строит ложный progress;
 - current safe path, при котором возможная human dependency не называется
   blocker-ом;
+- формально завершённый Task scope с частично достигнутым Strategic Outcome,
+  где Goal не удерживается открытым и gap не превращается в новую работу;
+- план, в котором агент назвал собственный hardening Human Requirement, где
+  происхождение обязательства исправляется без переписывания Requirements;
 - dense technical lens outputs, превращённые в понятный scope-level report без
   потери Requirements, риска и next action.
 

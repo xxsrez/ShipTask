@@ -40,6 +40,8 @@ class ScopeReviewerContractTest(unittest.TestCase):
         self.assertIn("Human Requirements не изменяй ни при каких обстоятельствах", compact)
         self.assertIn("**Release review** — всегда read-only", compact)
         self.assertIn("не меняет `Backlog`/рабочие статусы", skill)
+        self.assertIn("Strategic Outcome", skill)
+        self.assertIn("Стратегический gap не создаёт скрытую задолженность", skill)
 
     def test_each_optic_has_exact_luna_max_profile_and_clean_context(self) -> None:
         skill = SKILL.read_text(encoding="utf-8")
@@ -57,6 +59,7 @@ class ScopeReviewerContractTest(unittest.TestCase):
 
     def test_plan_repair_fails_closed_on_requirements_boundary(self) -> None:
         repair = REPAIR.read_text(encoding="utf-8")
+        compact = normalized(repair)
         for marker in (
             "byte-identical",
             "representation blocker",
@@ -65,8 +68,9 @@ class ScopeReviewerContractTest(unittest.TestCase):
             "requirements-integrity failure",
             "Partial repair",
             "Readiness — оценка плана",
+            "не превращён в Requirement, blocker или скрытую Task",
         ):
-            self.assertIn(marker, repair)
+            self.assertIn(marker, compact)
 
     def test_reporting_is_one_composition_with_release_truth_boundaries(self) -> None:
         reporting = REPORTING.read_text(encoding="utf-8")
@@ -79,6 +83,8 @@ class ScopeReviewerContractTest(unittest.TestCase):
             "фактически доказанный product/release outcome",
             "Worker narrative без primary evidence",
             "не пишет comments, не меняет status/Goal",
+            "достаточен для формального завершения Goal",
+            "не создаёт новую Task, blocker или delivery loop",
         ):
             self.assertIn(marker, compact)
 

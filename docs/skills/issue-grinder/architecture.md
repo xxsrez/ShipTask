@@ -622,6 +622,19 @@ Coordinator перечитывает scope:
 полезности для оставшегося scope. Автоматический rollback или включение такой
 работы в интеграцию только по инерции не выполняется.
 
+Для каждого текущего scope coordinator различает:
+
+- **Strategic Outcome** — общий ориентир, по которому выбираются локальные
+  решения и проверяется связность работы;
+- **Human Requirements** — обязательные результаты и ограничения человека;
+- **Agent Plan и issue contracts** — конкретная изменяемая декомпозиция и
+  формальная задолженность delivery-прогона.
+
+Strategic Outcome может быть шире формальной задолженности. Он не создаёт issue,
+acceptance, verification либо blocker и не удерживает run открытым сам по себе.
+Если все issue формально завершены, известный стратегический gap сохраняется в
+финальном отчёте и может стать входом отдельного planning flow.
+
 ### 5.1 Создание Goal
 
 После live scope resolution coordinator изучает весь текущий фронт, общие
@@ -655,10 +668,14 @@ Goal и не присваивает чужую цель.
 выключают автономность уже начатого прогона.
 
 Стратегический outcome не остаётся одноразовым текстом при создании Goal. Перед
-новой dispatch wave, существенным integration/review решением и финальной
-reflection coordinator заново соотносит frontier с этим outcome. Каждый worker
-packet получает только применимую к нему проекцию общей цели вместе с exact
-issue contract; стратегический контекст не расширяет owned scope.
+implementation/rework, новой dispatch wave, существенным integration/review
+решением, blocker analysis и финальной reflection coordinator заново соотносит
+frontier с этим outcome. После compaction, interruption, resume или material
+scope change он восстанавливает контекст до следующего такого решения. Для
+single-issue run без Goal outcome выводится из current Task, её parent chain и
+выбранного scope. Каждый worker packet получает только применимую к нему
+проекцию общей цели, вклад пакета, Human Requirements и exact issue contract;
+стратегический контекст не расширяет owned scope и не создаёт обязательств.
 
 ## 6. Основной delivery loop
 
@@ -727,12 +744,14 @@ facade из своей top-level collaboration surface. Поэтому provider 
 Полученный либо самостоятельно написанный native text проходит reflection:
 объясняет ли он честно фактическое состояние и не обнаруживает ли доступную
 существенную незавершённую работу текущего scope. Существенной считается работа,
-которая нужна для acceptance issue, стратегического результата, исправления
-ложного evidence/status, обработки нового участника dynamic scope или снятия
-настоящего blocker-а. Необязательное улучшение, новый возможный feature либо
-косметический hardening не удерживают текущий run открытым. Ready result не
-переписывается ради стилистической вариативности. Если обнаружен существенный
-пробел, status transition отменяется и issue возвращается в delivery loop.
+которая нужна для обязательного результата и acceptance текущего issue,
+исправления ложного evidence/status, обработки нового участника dynamic scope
+или снятия настоящего blocker-а. Strategic Outcome помогает распознать смысл
+этой работы, но сам по себе не делает новую работу обязательной. Необязательное
+улучшение, новый возможный feature либо косметический hardening не удерживают
+текущий run открытым. Ready result не переписывается ради стилистической
+вариативности. Если обнаружен существенный пробел в issue contract, status
+transition отменяется и issue возвращается в delivery loop.
 
 После reflection публикационная последовательность такова:
 
@@ -777,10 +796,11 @@ ref или idempotency key adapter-а, exact target issue/version и digest го
 заменяют эту проверку.
 
 Исключение `IG-GOAL-06` применяется только когда недоступная проверка относится
-к детали, которая не меняет достигнутый стратегический outcome и не ставит под
-сомнение основной acceptance, целостность данных, безопасность или identity
-проверяемой версии. Если такой вывод нельзя обосновать имеющимися evidence,
-проверка не считается несущественной.
+к детали, которая не ставит под сомнение обязательный результат, основной
+acceptance, целостность данных, безопасность или identity проверяемой версии.
+Влияние на Strategic Outcome раскрывается как residual risk, но не является
+отдельным completion gate. Если такой вывод нельзя обосновать имеющимися
+evidence, проверка не считается несущественной.
 
 При применении исключения coordinator сохраняет в issue comment точный
 непроверенный фрагмент, причину, основание non-blocking решения и остаточный
@@ -856,10 +876,10 @@ live reconciliation, а исчерпанный safe path — к candidate blocke
 `To Do`, `In Progress` и `In Review` является достаточным предметным критерием;
 стратегический outcome не превращается во второй независимый terminal gate.
 Финальный текст ещё раз проверяется на изменение scope, скрытый существенный
-остаток и доступное обязательное действие текущего run. Новая идея или
-необязательное улучшение могут попасть в итоговый отчёт, но не создают новый
-цикл сами по себе. Только после чистой переоценки Goal завершается, а
-пользователь получает причинный итоговый отчёт.
+остаток внутри issue contracts и доступное обязательное действие текущего run.
+Новая идея, стратегический gap или необязательное улучшение могут попасть в
+итоговый отчёт, но не создают новый цикл сами по себе. Только после чистой
+переоценки Goal завершается, а пользователь получает причинный итоговый отчёт.
 
 Наличие `In Progress` или `In Review` запрещает terminal completion, но не
 запрещает экономичную контрольную точку. После неё тот же run восстанавливает
@@ -1023,10 +1043,13 @@ coordinator исполняет fail-closed protocol:
 одного логического file ownership недостаточно
 ([официальная model guidance](https://developers.openai.com/api/docs/guides/latest-model)).
 
-Каждый packet содержит exact scope, owned surfaces, исходные данные,
-ограничения, ожидаемый результат и способ проверки. Сохранившийся task-owned
-worktree является checkpoint: после доказанной остановки прежнего владельца он
-передаётся новому exclusive writer, а не дублируется.
+Каждый packet содержит Strategic Outcome всего scope, вклад конкретного issue
+или пакета, применимые Human Requirements, exact локальный scope, owned
+surfaces, Agent Plan, исходные данные, ограничения, ожидаемый результат и способ
+проверки. Outcome направляет выбор решения, но не разрешает worker-у добавлять
+requirements, work или terminal criteria. Сохранившийся task-owned worktree
+является checkpoint: после доказанной остановки прежнего владельца он передаётся
+новому exclusive writer, а не дублируется.
 
 Intentional candidate `Роя` не является replacement checkpoint. До `prepare`
 coordinator фиксирует найденный existing work, отличающий purpose нового
@@ -1081,7 +1104,7 @@ Task Manager cancellation statuses от имени Issue Grinder.
 | Level 1 | Архитектурный механизм | Наблюдаемое evidence |
 |---|---|---|
 | `IG-FLOW-*` | delivery loop, publication transaction, live read-back | корректная последовательность статусов и причинные комментарии без ложного completion |
-| `IG-GOAL-*` | strategic synthesis, Goal lifecycle, blocker/final reflection | Goal отражает общую проблему и завершается только после fresh empty active scope |
+| `IG-GOAL-*` | strategic synthesis, persistent execution context, Goal lifecycle, blocker/final reflection | Strategic Outcome направляет локальные решения без новой задолженности; Goal завершается после fresh empty active scope даже при известном strategic gap |
 | `IG-SCOPE-*` | selector-as-predicate и контрольные refresh points | новые и исключённые issue учитываются до terminal result |
 | `IG-AUTO-*` | explicit-mode gate, UAT resolver и узкий security selector | нет Production access; разрешённая UAT работа не ждёт рутинного approval |
 | `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint и semantic topology boundary | Luna default выбирает `Экономичный`, иной default — `Классический`; `Соло` сохраняет current profile и ноль Issue Grinder execution-subagents, но допускает отдельный service provider; выбранный mode не дрейфует; каждый режим выполняет своё обещание |
