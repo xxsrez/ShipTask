@@ -1,8 +1,8 @@
 # Issue Grinder: observable evaluation
 
-Статус: current Level 2 evaluation, 2026-08-30. Документ проверяет компиляцию
-локальных [Requirements](requirements.md) и [Architecture](architecture.md), но
-не создаёт новый policy contract.
+Статус: current observable evaluation, 2026-09-02. Документ проверяет
+компиляцию локальных [Overview](overview.md), [Requirements](requirements.md) и
+[Architecture](architecture.md), но не создаёт новый policy contract.
 
 ## Слои проверки
 

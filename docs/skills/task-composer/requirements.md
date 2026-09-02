@@ -5,7 +5,8 @@
 Этот документ — полный пользовательский исходный код только для
 `$issue-grinder:task-composer`. Он не определяет требования к Issue Grinder или
 Strategic Explainer; их использование ниже является локальной dependency Task
-Composer.
+Composer. Документ принадлежит пользователю и меняется только по его явному
+указанию изменить именно Requirements.
 
 Требования задают обязательный outcome, rationale, observable evidence и
 scope/truth/safety/authority boundaries. Architecture и runtime могут
@@ -15,9 +16,10 @@ scope/truth/safety/authority boundaries. Architecture и runtime могут
 остаются свободными, если точный механизм не назван здесь отдельным инвариантом.
 
 `architecture.md` хранит agent-owned current способ достижения этих требований.
-`task-composer/SKILL.md` является компактной смысловой компиляцией обоих файлов.
-Если runtime удалить и пересобрать из них, новый skill должен быть примерно
-эквивалентен по всем требованиям `TC-*` и выбранной архитектуре.
+`task-composer/SKILL.md` является компактной смысловой компиляцией локальных
+Overview, Requirements и Architecture. Если runtime удалить и пересобрать из
+этих трёх самостоятельных документов, новый skill должен быть примерно
+эквивалентен по назначению, всем требованиям `TC-*` и выбранной архитектуре.
 
 ## Требования
 

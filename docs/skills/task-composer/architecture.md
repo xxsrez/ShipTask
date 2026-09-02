@@ -1,9 +1,9 @@
 # Task Composer
 
-Статус: current Level 2 contract, 2026-08-27. Применимые Level 1 requirements —
-`TC-*` в локальных
-[требованиях пользователя](requirements.md). Эта architecture описывает
-current архитектуру достижения и не может ослаблять Level 1. Planning boundary
+Статус: current agent-owned Architecture, 2026-09-02. Независимые user-owned
+источники находятся в локальных [Overview](overview.md) и
+[Requirements](requirements.md). Эта Architecture описывает current способ
+достижения цели и не может ослаблять, расширять или переопределять их. Planning boundary
 зафиксирован в
 [ADR-0023](../../decisions/0023-task-composer-as-planning-sibling.md), а current
 distribution находится в `issue-grinder@srez-marketplace`; отдельная
@@ -12,12 +12,13 @@ dependency Strategic Explainer — в
 
 ## 0. Compilation contract
 
-Эта architecture вместе с локальным `requirements.md` является полным current
-source package `$issue-grinder:task-composer`. Runtime `task-composer/SKILL.md` —
-производная смысловая компиляция этих двух документов: его можно удалить и
-собрать заново, сохранив все `TC-*` и выбранную здесь реализацию примерно
-эквивалентными по наблюдаемому поведению. ADR, reports и evaluations дают
-rationale и evidence, но не являются параллельным current contract.
+Локальные `overview.md`, `requirements.md` и `architecture.md` являются тремя
+самостоятельными source-входами `$issue-grinder:task-composer`. Runtime
+`task-composer/SKILL.md` — их производная смысловая компиляция: его можно удалить
+и собрать заново, сохранив назначение Overview, все `TC-*` и выбранную здесь
+реализацию примерно эквивалентными по наблюдаемому поведению. ADR, reports и
+evaluations дают rationale и evidence, но не являются параллельным current
+contract.
 
 Specification описывает Task Manager-only skill `$issue-grinder:task-composer`, который
 формулирует, декомпозирует и по явному planning intent создаёт качественные

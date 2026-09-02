@@ -174,14 +174,18 @@ agent-owned planning model. Human Requirements, delivery lifecycle и рабоч
 - [`docs/skills/README.md`](docs/skills/README.md) — source model и независимые
   Overview/Requirements/Architecture packages для каждого skill; Overview
   появляется только после явного определения пользователем.
-- [`docs/skills/issue-grinder/requirements.md`](docs/skills/issue-grinder/requirements.md)
-  и [Architecture](docs/skills/issue-grinder/architecture.md) — source
+- [`docs/skills/issue-grinder/overview.md`](docs/skills/issue-grinder/overview.md),
+  [Requirements](docs/skills/issue-grinder/requirements.md) и
+  [Architecture](docs/skills/issue-grinder/architecture.md) — source
   `$issue-grinder`; [Evaluation](docs/skills/issue-grinder/evaluation.md) хранит
   точную трассировку и быстрый сценарный корпус.
 - [`docs/skills/ship-tasks/requirements.md`](docs/skills/ship-tasks/requirements.md)
   и [Architecture](docs/skills/ship-tasks/architecture.md) — source `$ship-tasks`.
-- [`docs/skills/task-composer/requirements.md`](docs/skills/task-composer/requirements.md)
-  и [Architecture](docs/skills/task-composer/architecture.md) — source Task Composer.
+- [`docs/skills/task-composer/overview.md`](docs/skills/task-composer/overview.md),
+  [Requirements](docs/skills/task-composer/requirements.md) и
+  [Architecture](docs/skills/task-composer/architecture.md) — source Task
+  Composer; [Evaluation](docs/skills/task-composer/evaluation.md) хранит
+  observable contract.
 - [`docs/skills/scope-reviewer/overview.md`](docs/skills/scope-reviewer/overview.md),
   [Requirements](docs/skills/scope-reviewer/requirements.md),
   [Architecture](docs/skills/scope-reviewer/architecture.md) и

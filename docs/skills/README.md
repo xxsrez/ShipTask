@@ -1,6 +1,6 @@
 # Skill source packages
 
-Статус: current repository source model, 2026-08-30.
+Статус: current repository source model, 2026-09-02.
 
 [Философия проекта](../philosophy.md) объясняет, зачем существует эта схема и
 кому принадлежат решения. Здесь зафиксирована её техническая структура.
@@ -28,8 +28,10 @@ docs/skills/
 │   ├── architecture.md
 │   └── evaluation.md
 ├── task-composer/
+│   ├── overview.md
 │   ├── requirements.md
-│   └── architecture.md
+│   ├── architecture.md
+│   └── evaluation.md
 └── strategic-explainer/
     ├── overview.md
     ├── requirements.md
@@ -38,8 +40,8 @@ docs/skills/
 ```
 
 Канонический source package содержит все три документа. В current tree
-пользовательский Overview определён для Issue Grinder, Scope Reviewer и
-Strategic Explainer. Overview остальных entities нельзя заполнять из
+пользовательский Overview определён для Issue Grinder, Task Composer, Scope
+Reviewer и Strategic Explainer. Overview остальных entities нельзя заполнять из
 Requirements, Architecture или реализации: для этого нужно отдельное явное
 решение пользователя.
 
@@ -121,8 +123,10 @@ level, однако plugin packaging не объединяет source contracts 
   [Architecture](scope-reviewer/architecture.md),
   [Evaluation](scope-reviewer/evaluation.md); source package, repository runtime
   и observable evaluation созданы, а installed state доказывается отдельно.
-- [`$issue-grinder:task-composer`](task-composer/requirements.md) —
-  [Architecture](task-composer/architecture.md).
+- [`$issue-grinder:task-composer`](task-composer/overview.md) —
+  [Requirements](task-composer/requirements.md),
+  [Architecture](task-composer/architecture.md) и
+  [Evaluation](task-composer/evaluation.md).
 - [`$strategic-explainer:strategic-explainer`](strategic-explainer/overview.md) —
   [Requirements](strategic-explainer/requirements.md),
   [Architecture](strategic-explainer/architecture.md) и

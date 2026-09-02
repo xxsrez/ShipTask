@@ -1,6 +1,8 @@
-# Task Composer evaluation contract
+# Task Composer: observable evaluation
 
-Статус: current reference, 2026-08-27.
+Статус: current observable evaluation, 2026-09-02. Документ проверяет
+компиляцию локальных [Overview](overview.md), [Requirements](requirements.md) и
+[Architecture](architecture.md), но не создаёт новый policy contract.
 
 Проверка оценивает observable planning result `$issue-grinder:task-composer`, а не exact
 wording, agent topology, tool order или число подзадач.

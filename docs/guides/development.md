@@ -216,7 +216,7 @@ duplicate search как clean outcome title. Для каждой child Task та
 сохранение exact scope. В ShipTask-проверке child Task должна загрузить current
 Epic до implementation и передать bounded context исполнителю/reviewer. Полная
 матрица:
-[Task Composer evaluation](../reference/task-composer-evaluation.md).
+[Task Composer evaluation](../skills/task-composer/evaluation.md).
 
 Для Scope Reviewer проверьте exact selector и полный versioned snapshot,
 обязательную Requirements optic для плана, отдельный fresh Luna Max route каждой

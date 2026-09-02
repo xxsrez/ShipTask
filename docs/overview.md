@@ -272,6 +272,10 @@ smoke evidence. Отсутствующий UAT receipt — proof gap, а не ve
 
 ## Источники
 
+- [Issue Grinder Overview](skills/issue-grinder/overview.md)
+- [Issue Grinder Requirements](skills/issue-grinder/requirements.md)
+- [Issue Grinder Architecture](skills/issue-grinder/architecture.md)
+- [Issue Grinder Evaluation](skills/issue-grinder/evaluation.md)
 - [ShipTask Requirements](skills/ship-tasks/requirements.md)
 - [ShipTask Architecture](skills/ship-tasks/architecture.md)
 - [Constitution-first ADR](decisions/0017-constitution-first-runtime-contract.md)
@@ -289,8 +293,10 @@ smoke evidence. Отсутствующий UAT receipt — proof gap, а не ve
 - [Lifecycle evaluation](reference/shiptask-review-disposition-evaluation.md)
 - [Strategic Explainer Requirements](skills/strategic-explainer/requirements.md)
 - [Strategic Explainer Architecture](skills/strategic-explainer/architecture.md)
+- [Task Composer Overview](skills/task-composer/overview.md)
 - [Task Composer Requirements](skills/task-composer/requirements.md)
 - [Task Composer Architecture](skills/task-composer/architecture.md)
+- [Task Composer Evaluation](skills/task-composer/evaluation.md)
 - [Task Composer как planning sibling-skill](decisions/0023-task-composer-as-planning-sibling.md)
 - [Scope Reviewer Overview](skills/scope-reviewer/overview.md)
 - [Scope Reviewer Requirements](skills/scope-reviewer/requirements.md)

@@ -46,8 +46,10 @@
   понятный обзор плана или текущего Release, по явному intent автоматически
   исправляет agent-owned planning model и никогда не меняет Human Requirements.
 - `$issue-grinder:task-composer`:
-  [Requirements](skills/task-composer/requirements.md) и
-  [Architecture](skills/task-composer/architecture.md) — planning-only Task
+  [Overview](skills/task-composer/overview.md),
+  [Requirements](skills/task-composer/requirements.md),
+  [Architecture](skills/task-composer/architecture.md) и
+  [Evaluation](skills/task-composer/evaluation.md) — planning-only Task
   Manager workflow: одна Task либо strategic Epic с конкретными подзадачами,
   переносом применимого strategic context в каждую child Task, live Labels,
   hierarchy, semantic relations, `Backlog` и необязательным current Release.
@@ -66,16 +68,17 @@
   model-forward regression и независимым пересказом. По явному запросу skill выполняет глубокую
   редакторскую реконструкцию без потери смысла. Он ничего не изменяет и не
   принимает решений о статусе или полномочиях.
-Документация является исходным кодом. Локальный Level 1 отвечает за «что обязано
-быть истинно», локальный Level 2 — за agent-owned «как сейчас этого достигать»,
-а соответствующий `SKILL.md` — компактная исполнимая проекция обоих уровней.
+Документация является исходным кодом. Overview отвечает за «что это, для кого и
+зачем», локальный Level 1 — за «что обязано быть истинно», а agent-owned
+Architecture — за «как сейчас этого достигать». Соответствующий `SKILL.md`
+является компактной исполнимой проекцией всех трёх входов.
 
 ## Specifications
 
 - [Режимы исполнения Issue Grinder](specs/issue-grinder-execution-modes.md) —
   rationale и сравнительная модель пяти устойчивых режимов `Соло`,
-  `Классический`, `Баланс`, `Рой` и `Экономичный`. Действующая policy остаётся только в
-  локальных Requirements, Architecture и runtime-проекции.
+  `Классический`, `Баланс`, `Рой` и `Экономичный`. Действующая policy остаётся
+  только в локальных Overview, Requirements, Architecture и runtime-проекции.
 
 ## Experiments
 
@@ -207,7 +210,7 @@
   — observable invocation-isolation, self-discovery,
   fidelity/authority/comprehension gates и regression cases без фиксированной
   scoring ceremony.
-- [Task Composer evaluation](reference/task-composer-evaluation.md) —
+- [Task Composer evaluation](skills/task-composer/evaluation.md) —
   observable gates для decomposition, metadata, relations, duplicate safety и
   planning-only authority.
 - [Scope Reviewer evaluation](skills/scope-reviewer/evaluation.md) —

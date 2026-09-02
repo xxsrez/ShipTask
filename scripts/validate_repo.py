@@ -75,6 +75,7 @@ STRATEGIC_ENTRYPOINT = (
 )
 SKILL_SOURCES = ROOT / "docs" / "skills"
 SOURCE_INDEX = SKILL_SOURCES / "README.md"
+ISSUE_OVERVIEW = SKILL_SOURCES / "issue-grinder" / "overview.md"
 ISSUE_REQUIREMENTS = SKILL_SOURCES / "issue-grinder" / "requirements.md"
 ISSUE_SPEC = SKILL_SOURCES / "issue-grinder" / "architecture.md"
 ISSUE_EVALUATION = SKILL_SOURCES / "issue-grinder" / "evaluation.md"
@@ -82,6 +83,7 @@ SHIP_REQUIREMENTS = SKILL_SOURCES / "ship-tasks" / "requirements.md"
 SPEC = SKILL_SOURCES / "ship-tasks" / "architecture.md"
 COMPOSER_REQUIREMENTS = SKILL_SOURCES / "task-composer" / "requirements.md"
 COMPOSER_SPEC = SKILL_SOURCES / "task-composer" / "architecture.md"
+COMPOSER_OVERVIEW = SKILL_SOURCES / "task-composer" / "overview.md"
 SCOPE_OVERVIEW = SKILL_SOURCES / "scope-reviewer" / "overview.md"
 SCOPE_REQUIREMENTS = SKILL_SOURCES / "scope-reviewer" / "requirements.md"
 SCOPE_SPEC = SKILL_SOURCES / "scope-reviewer" / "architecture.md"
@@ -102,7 +104,7 @@ REVIEW_MATRIX = (
 STRATEGIC_EVALUATION = (
     ROOT / "docs" / "reference" / "strategic-explainer-evaluation.md"
 )
-COMPOSER_EVALUATION = ROOT / "docs" / "reference" / "task-composer-evaluation.md"
+COMPOSER_EVALUATION = SKILL_SOURCES / "task-composer" / "evaluation.md"
 TERMINAL_ROUTING_REPORT = (
     ROOT / "docs" / "reports" / "2026-08-27-terminal-provider-routing-evaluation.md"
 )
@@ -248,8 +250,10 @@ CORE_FILES = (
     SCOPE_EVALUATION,
     STRATEGIC_SPEC,
     SOURCE_INDEX,
+    ISSUE_OVERVIEW,
     ISSUE_REQUIREMENTS,
     SHIP_REQUIREMENTS,
+    COMPOSER_OVERVIEW,
     COMPOSER_REQUIREMENTS,
     SCOPE_OVERVIEW,
     SCOPE_REQUIREMENTS,
@@ -283,6 +287,7 @@ CURRENT_CONTRACT_FILES = (
     ISSUE_METADATA,
     ISSUE_SPEC,
     ISSUE_EVALUATION,
+    ISSUE_OVERVIEW,
     ISSUE_REQUIREMENTS,
     ISSUE_WORKTREE_GUARD,
     ISSUE_HELP,
@@ -305,6 +310,7 @@ CURRENT_CONTRACT_FILES = (
     STRATEGIC_METADATA,
     SPEC,
     COMPOSER_SPEC,
+    COMPOSER_OVERVIEW,
     STRATEGIC_SPEC,
     SOURCE_INDEX,
     SHIP_REQUIREMENTS,
@@ -729,7 +735,11 @@ def validate_issue_skill(errors: list[str]) -> None:
         ISSUE_REQUIREMENTS,
         "Статус: current Level 1, 2026-08-30",
         "полный current-набор явно сформулированных пользователем",
+        "принадлежит пользователю",
+        "указанию изменить\nименно Requirements",
         "Изменение смысла Level 1 требует явного решения пользователя",
+        "локальных Overview, Requirements и Architecture",
+        "трёх самостоятельных документов",
         "Если scope вырос с одного issue до нескольких",
         "весь входящий в scope фронт issue",
         "не превращать эту проверку в бюрократическую блокировку",
@@ -752,9 +762,31 @@ def validate_issue_skill(errors: list[str]) -> None:
     )
     require(
         errors,
+        ISSUE_OVERVIEW,
+        "Статус: действующий пользовательский Overview, 2026-09-02",
+        "принадлежит пользователю",
+        "меняется только по его явному указанию",
+        "skill для автономной разработки и доставки больших сложных\nизменений",
+        "отдельную задачу, Release или Project scope",
+        "возвращает готовый\nпроверенный результат",
+    )
+    require(
+        errors,
+        ISSUE_EVALUATION,
+        "Статус: current observable evaluation, 2026-09-02",
+        "[Overview](overview.md)",
+        "[Requirements](requirements.md)",
+        "[Architecture](architecture.md)",
+        "не создаёт новый policy contract",
+    )
+    require(
+        errors,
         ISSUE_SPEC,
-        "Статус: current Level 2, 2026-08-30",
+        "Статус: current agent-owned Architecture, 2026-09-02",
+        "[Overview](overview.md)",
+        "[Requirements](requirements.md)",
         "## 0. Compilation contract",
+        "тремя\nсамостоятельными source-входами",
         "issue-grinder@srez-marketplace",
         "`issue-grinder:issue-grinder`, `issue-grinder:task-composer`",
         "удаляет локально `ship-tasks@srez-marketplace`",
@@ -1042,9 +1074,10 @@ def validate_composer_skill(errors: list[str]) -> None:
     require(
         errors,
         COMPOSER_SPEC,
-        "Статус: current Level 2 contract, 2026-08-27",
-        "`TC-*` в локальных",
-        "[требованиях пользователя](requirements.md)",
+        "Статус: current agent-owned Architecture, 2026-09-02",
+        "[Overview](overview.md)",
+        "[Requirements](requirements.md)",
+        "тремя\nсамостоятельными source-входами",
         "planning mutations",
         "Проверяемая trigger matrix",
         "не управляет delivery lifecycle",
@@ -1083,6 +1116,11 @@ def validate_composer_skill(errors: list[str]) -> None:
     require(
         errors,
         COMPOSER_EVALUATION,
+        "Статус: current observable evaluation, 2026-09-02",
+        "[Overview](overview.md)",
+        "[Requirements](requirements.md)",
+        "[Architecture](architecture.md)",
+        "не создаёт новый policy contract",
         "observable planning result",
         "write происходит только по явному planning intent",
         "Epic problem-first",
@@ -1111,6 +1149,17 @@ def validate_composer_skill(errors: list[str]) -> None:
         "semantic request/result contract",
         "operational unavailability",
         "не читает provider-internal\n  contract",
+    )
+    require(
+        errors,
+        COMPOSER_OVERVIEW,
+        "Статус: действующий пользовательский Overview, 2026-09-02",
+        "принадлежит пользователю",
+        "меняется только по его явному указанию",
+        "превращает замысел и требования человека",
+        "качество постановки и декомпозиции",
+        "не за саму\nразработку",
+        "готовый к проверке и последующей передаче\nв delivery",
     )
     for path in (
         COMPOSER_REQUIREMENTS,
@@ -2065,6 +2114,15 @@ def validate_source_layers(errors: list[str]) -> None:
                 "`architecture.md` хранит agent-owned current способ достижения",
                 "примерно\nэквивалентен",
             )
+            if requirements == COMPOSER_REQUIREMENTS:
+                require(
+                    errors,
+                    requirements,
+                    "принадлежит пользователю",
+                    "указанию изменить именно Requirements",
+                    "локальных\nOverview, Requirements и Architecture",
+                    "трёх самостоятельных документов",
+                )
 
     require(
         errors,
@@ -2178,6 +2236,8 @@ def validate_source_layers(errors: list[str]) -> None:
         "Никакие\nдругие invocation parameters или provider instructions",
         "Исправленный source/anchor получает новый\nsemantic call",
     )
+    for requirements in (ISSUE_REQUIREMENTS, COMPOSER_REQUIREMENTS):
+        forbid(errors, requirements, "[Overview]", "overview.md")
     require(
         errors,
         SCOPE_REQUIREMENTS,
@@ -2297,9 +2357,9 @@ def validate_source_layers(errors: list[str]) -> None:
         "Plugin — общий distribution artifact",
     )
     for architecture, prefix, status_marker in (
-        (ISSUE_SPEC, "IG-*", "Статус: current Level 2, 2026-08-30"),
+        (ISSUE_SPEC, "IG-*", "Статус: current agent-owned Architecture, 2026-09-02"),
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
-        (COMPOSER_SPEC, "TC-*", "Статус: current Level 2 contract, 2026-08-27"),
+        (COMPOSER_SPEC, "TC-*", "Статус: current agent-owned Architecture, 2026-09-02"),
         (SCOPE_SPEC, "SR-*", "Статус: current agent-owned Architecture, 2026-09-02"),
         (STRATEGIC_SPEC, "SE-*", "Статус: current agent-owned Architecture, 2026-08-31"),
     ):
@@ -2308,11 +2368,13 @@ def validate_source_layers(errors: list[str]) -> None:
                 errors,
                 architecture,
                 status_marker,
-                f"`{prefix}`\nв локальных",
-                "[требованиях пользователя](requirements.md)",
+                "[Overview](overview.md)",
+                "[Requirements](requirements.md)",
                 "## 0. Compilation contract",
+                "тремя\nсамостоятельными source-входами",
                 "компактной смысловой проекцией",
                 "примерно эквивалентное наблюдаемое поведение",
+                "три независимых runtime skill",
             )
             continue
         if architecture == STRATEGIC_SPEC:
@@ -2338,6 +2400,20 @@ def validate_source_layers(errors: list[str]) -> None:
                 "все `SR-*` без скрытого ослабления",
                 "Task Manager-only sibling",
                 "примерно эквивалентное наблюдаемое поведение",
+            )
+            continue
+        if architecture == COMPOSER_SPEC:
+            require(
+                errors,
+                architecture,
+                status_marker,
+                "[Overview](overview.md)",
+                "[Requirements](requirements.md)",
+                "## 0. Compilation contract",
+                "тремя\nсамостоятельными source-входами",
+                "производная смысловая компиляция",
+                "назначение Overview",
+                "примерно эквивалентными",
             )
             continue
         require(
@@ -2438,6 +2514,8 @@ def validate_source_layers(errors: list[str]) -> None:
         "[Requirements](skills/scope-reviewer/requirements.md)",
         "[Architecture](skills/scope-reviewer/architecture.md)",
         "[Evaluation](skills/scope-reviewer/evaluation.md)",
+        "[Overview](skills/task-composer/overview.md)",
+        "[Evaluation](skills/task-composer/evaluation.md)",
         "[Overview](skills/strategic-explainer/overview.md)",
         "[Requirements](skills/ship-tasks/requirements.md)",
         "[Architecture](skills/ship-tasks/architecture.md)",
@@ -3561,6 +3639,8 @@ def current_task_source_files() -> tuple[Path, ...]:
         SCOPE_SPEC,
         SCOPE_EVALUATION,
         SCOPE_OVERVIEW,
+        ISSUE_OVERVIEW,
+        COMPOSER_OVERVIEW,
         COMPOSER_EVALUATION,
         OVERVIEW,
         REPORT,

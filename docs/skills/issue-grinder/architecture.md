@@ -1,20 +1,19 @@
 # Issue Grinder: архитектура
 
-Статус: current Level 2, 2026-08-30. Применимые Level 1 requirements — `IG-*`
-в локальных [требованиях пользователя](requirements.md).
-
-Этот документ описывает одно текущее инженерное решение для `$issue-grinder`.
-Он является agent-owned: его можно уточнять без изменения Level 1, пока
-обязательный результат и пользовательские границы сохраняются. При конфликте
-всегда побеждает `requirements.md`.
+Статус: current agent-owned Architecture, 2026-09-02. Независимые user-owned
+источники находятся в локальных [Overview](overview.md) и
+[Requirements](requirements.md). Эта Architecture описывает current способ
+достижения цели `$issue-grinder` и не может ослаблять, расширять или
+переопределять два пользовательских документа. Их возможный конфликт сохраняется
+и разрешается только пользователем.
 
 ## 0. Compilation contract
 
-Локальные `requirements.md` и `architecture.md` вместе образуют полный current
-source package `$issue-grinder`. Будущий runtime skill должен стать их
-компактной смысловой проекцией: удаление runtime и повторная сборка только из
-этих двух документов должны давать примерно эквивалентное наблюдаемое
-поведение.
+Локальные `overview.md`, `requirements.md` и `architecture.md` являются тремя
+самостоятельными source-входами `$issue-grinder`. Runtime skill должен быть их
+компактной смысловой проекцией: удаление runtime и повторная сборка из этих трёх
+документов должны давать примерно эквивалентное наблюдаемое поведение, сохраняя
+назначение Overview, все `IG-*` и выбранную здесь реализацию.
 
 Runtime `$issue-grinder` создан в repository как Level 3 compilation. Этот
 факт сам по себе ещё не утверждает, что Marketplace package опубликован,
@@ -25,11 +24,11 @@ Runtime `$issue-grinder` создан в repository как Level 3 compilation. 
 ### 1.1 Минимальная форма plugin
 
 `$issue-grinder` поставляется отдельным plugin `issue-grinder`. Plugin содержит
-два независимых runtime skill: одноимённый delivery coordinator и канонический
-planning-only `task-composer`. Общий distribution artifact не смешивает их
-Requirements: Task Composer сохраняет собственный source package, boundary и
-runtime source, но после cutover остаётся доступен без установки старого
-ShipTask.
+три независимых runtime skill: одноимённый delivery coordinator, канонический
+planning-only `task-composer` и `scope-reviewer`. Общий distribution artifact не
+смешивает их Overview, Requirements или Architecture: каждый skill сохраняет
+собственный source package, boundary и runtime source, но после cutover остаётся
+доступен без установки старого ShipTask.
 
 Marketplace package имеет минимальную форму:
 
@@ -60,15 +59,21 @@ plugins/issue-grinder/
     │   └── scripts/
     │       ├── model_routing_guard.py
     │       └── writer_worktree_guard.py
-    └── task-composer/
+    ├── task-composer/
+    │   ├── SKILL.md
+    │   └── agents/openai.yaml
+    └── scope-reviewer/
         ├── SKILL.md
-        └── agents/openai.yaml
+        ├── agents/openai.yaml
+        ├── references/
+        └── scripts/
 ```
 
-Plugin не содержит собственный MCP server, UI, assets или hooks. Два узких
-runtime scripts механически обеспечивают model routing и writer admission; Task
-Manager уже предоставляет live data, authentication, authorization и controlled mutations;
-Issue Grinder остаётся workflow- и orchestration-слоем вокруг этого adapter-а.
+Plugin не содержит собственный MCP server, UI, assets или hooks. Узкие runtime
+scripts механически обеспечивают model routing, writer admission и проверку
+маршрута независимых оптик; Task Manager уже предоставляет live data,
+authentication, authorization и controlled mutations; skills остаются workflow-
+и orchestration-слоем вокруг этого adapter-а.
 
 Такая форма следует принципу минимального plugin из
 [официальной архитектуры OpenAI](https://developers.openai.com/plugins/concepts/plugins):
@@ -140,7 +145,9 @@ read/status/audit, иные объяснения и planning-only запросы
 Task Manager остаётся отдельно установленным adapter plugin и не копируется в
 Issue Grinder package. Task Composer копируется только из канонического
 repository source `task-composer/`; его planning-only lifecycle не расширяется
-правами Issue Grinder. Strategic Explainer также остаётся отдельным plugin:
+правами Issue Grinder. Scope Reviewer аналогично копируется только из
+канонического repository source `scope-reviewer/` и сохраняет собственные
+границы review и plan improvement. Strategic Explainer также остаётся отдельным plugin:
 при доступности вызывается его semantic facade, при отсутствии применяется
 native writing по `IG-FLOW-03`. Жёсткая plugin-to-plugin dependency для него не
 моделируется.
