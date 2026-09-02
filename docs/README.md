@@ -205,6 +205,9 @@ Architecture — за «как сейчас этого достигать». С�
   — оставляет callers только semantic request/result contract, переносит весь
   invocation recipe в facade и сохраняет методику улучшения только terminal
   provider-subagent.
+- [0036: Luna execution plane для режима «Баланс»](decisions/0036-balance-luna-execution-plane.md)
+  — сохраняет сильный Sol control/final gate, переносит полный routine packet
+  loop на Luna и вводит адаптивную независимую проверку без голосования.
 
 ## Reference
 

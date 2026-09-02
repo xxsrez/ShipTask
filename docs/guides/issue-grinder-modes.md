@@ -22,7 +22,7 @@ Explainer и другие ограниченные service/provider agents в н
 |---|---|---|---|
 | `Соло` | Текущая основная модель последовательно выполняет всю delivery-работу без рабочих субагентов Issue Grinder | Self-review текущей модели плюс объективные checks | Только terminal result или настоящий blocker |
 | `Классический` | Sol/controller делает почти всё; Luna получает только тривиальные пакеты | Полная итоговая проверка exact result | Только terminal result или настоящий blocker |
-| `Баланс` | Luna выполняет bulk research/implementation/tests; Sol/controller оставляет material decisions и integration | Сильный final review exact candidate | Только terminal result или настоящий blocker |
+| `Баланс` | Luna ведёт полный routine loop пакетов; Sol/controller оставляет material decisions и integration | Независимая Luna-проверка плюс сильный final review exact candidate | Только terminal result или настоящий blocker |
 | `Рой` | Luna-волны разных candidates, critics, test authors и judges | Результаты сокращаются до одного candidate и проходят final review | Только terminal result или настоящий blocker |
 | `Экономичный` | Luna выполняет всю содержательную работу; non-Luna root допустим только как transport/authority оболочка | Все доступные checks; дорогой gate может быть отложен | Terminal result либо честный resumable checkpoint |
 
@@ -68,11 +68,23 @@ Controller/reviewer изучает весь live scope, принимает су�
 
 ## `Баланс`
 
-`Баланс` подходит, когда нужно сократить расход проверяющего профиля без отказа
-от сильного final gate. Controller/reviewer задаёт стратегию, acceptance и risk
-classification, а Luna становится предпочтительным исполнителем лёгких и
-средних ограниченных задач и выполняет основную массу implementation, research,
-tests, preliminary critique и rework.
+`Баланс` подходит, когда нужно сохранить автономность и сильный final gate
+`Классического`, но существенно сократить расход проверяющего профиля.
+Controller/reviewer одним целостным проходом задаёт стратегию, acceptance, risk
+map и package boundaries. После этого Luna ведёт полный routine loop лёгких и
+средних ограниченных пакетов: implementation, research, tests, independent
+critique и rework. Дорогой профиль не управляет каждым шагом и не перечитывает
+сырой transcript всех дешёвых waves.
+
+Обычная форма — Luna packet lead и независимый Luna verifier. Если nested
+delegation недоступна, coordinator вызывает те же Luna lanes напрямую, не
+забирая их работу себе. Для каждого существенного finding требуется одно из
+трёх: исправление, опровержение evidence или явная передача на решение. Несколько
+ответов «всё хорошо» не перевешивают один воспроизводимый дефект.
+
+Дополнительные candidates создаются адаптивно: только при реальной развилке,
+слабом oracle, провале прежнего подхода или высокой ценности отдельной попытки.
+Множество одинаковых Luna prompts не считается независимой проверкой.
 
 Если сложное решение можно отделить от исполнения, controller принимает
 решение, а worker реализует уже заданный contract. После material rework exact
@@ -85,10 +97,14 @@ profile; semantic critics запускаются на Luna через обычн
 
 Если Luna встречает существенную неопределённость, конфликт contract/context,
 слабый oracle или проблему за границами пакета, она сохраняет изменения,
-проверки, evidence и причину остановки и возвращает работу Sol/controller-у.
-Sol принимает неделимое material decision, уточняет contract либо формирует
-новый безопасный Luna-пакет; ordinary implementation не переносится на Sol;
-Luna не должна бесконечно повторять ту же попытку.
+проверки, findings и причину остановки и возвращает Sol/controller-у один
+compact evidence packet и узкий вопрос. Sol принимает неделимое material
+decision, уточняет contract и возвращает отделимую implementation в новый
+Luna-пакет; Luna не должна бесконечно повторять ту же попытку.
+
+Run валиден именно как `Баланс`, только когда routing receipts и наблюдаемая
+telemetry показывают Luna-owned ordinary work. Успешный функциональный результат
+не скрывает основной Sol-конвейер или routing failure.
 
 ## `Рой`
 

@@ -4,11 +4,13 @@ from dataclasses import replace
 import unittest
 
 from scripts.issue_grinder_mode_harness import (
+    BalanceFinding,
     EconomicalCheckpoint,
     ExecutionMode,
     LUNA_MAX,
     ModeOrigin,
     Profile,
+    assess_balance_packet,
     decide_mode_switch,
     decide_run_exit,
     mode_dispatch_policy,
@@ -42,6 +44,96 @@ def complete_checkpoint() -> EconomicalCheckpoint:
 
 
 class IssueGrinderModeHarnessTest(unittest.TestCase):
+    def test_complete_balance_packet_can_enter_final_review(self) -> None:
+        decision = assess_balance_packet(
+            packet_id="TM-42-implementation-1",
+            exact_candidate="commit:abc123",
+            checks=("unit: passed", "integration: passed"),
+            materially_changed=True,
+            independent_verification_possible=True,
+            independent_verification_performed=True,
+            findings=(
+                BalanceFinding(
+                    finding="boundary case covered",
+                    evidence="test_boundary_case: passed",
+                    material=True,
+                    disposition="fixed",
+                ),
+            ),
+            expensive_work_roles=(
+                "material_judgment",
+                "integration_decision",
+                "final_review",
+            ),
+        )
+
+        self.assertEqual(decision.action, "ready_for_final_review")
+        self.assertTrue(decision.may_enter_final_review)
+        self.assertEqual(decision.defects, ())
+
+    def test_balance_packet_requires_independent_verification_when_possible(
+        self,
+    ) -> None:
+        decision = assess_balance_packet(
+            packet_id="TM-42-implementation-1",
+            exact_candidate="commit:abc123",
+            checks=("unit: passed",),
+            materially_changed=True,
+            independent_verification_possible=True,
+            independent_verification_performed=False,
+            findings=(),
+        )
+
+        self.assertFalse(decision.may_enter_final_review)
+        self.assertIn("independent_verification_missing", decision.defects)
+
+    def test_balance_material_finding_is_not_outvoted(self) -> None:
+        decision = assess_balance_packet(
+            packet_id="TM-42-implementation-1",
+            exact_candidate="commit:abc123",
+            checks=("unit: passed",),
+            materially_changed=True,
+            independent_verification_possible=True,
+            independent_verification_performed=True,
+            findings=(
+                BalanceFinding("looks good", "review:a", False, "fixed"),
+                BalanceFinding("looks good", "review:b", False, "fixed"),
+                BalanceFinding(
+                    "data race remains",
+                    "stress_test: reproduces",
+                    True,
+                    "escalate",
+                ),
+            ),
+            escalation_questions=("Which consistency contract is required?",),
+        )
+
+        self.assertFalse(decision.may_enter_final_review)
+        self.assertIn("escalation_pending", decision.defects)
+        self.assertIn("finding_2:material_escalation_pending", decision.defects)
+
+    def test_balance_rejects_broad_escalation_and_ordinary_expensive_work(
+        self,
+    ) -> None:
+        decision = assess_balance_packet(
+            packet_id="TM-42-implementation-1",
+            exact_candidate="commit:abc123",
+            checks=("unit: passed",),
+            materially_changed=False,
+            independent_verification_possible=False,
+            independent_verification_performed=False,
+            findings=(),
+            escalation_questions=("Choose storage", "Implement the feature"),
+            routing_valid=False,
+            expensive_work_roles=("research", "implementation"),
+        )
+
+        self.assertFalse(decision.may_enter_final_review)
+        self.assertIn("routing_invalid", decision.defects)
+        self.assertIn("escalation_not_narrow", decision.defects)
+        self.assertIn("ordinary_expensive_work:research", decision.defects)
+        self.assertIn("ordinary_expensive_work:implementation", decision.defects)
+
     def test_every_explicit_mode_wins_for_luna_and_non_luna(self) -> None:
         for main_profile in (Profile("gpt-5.6-luna", "low"), SOL):
             for mode in ExecutionMode:

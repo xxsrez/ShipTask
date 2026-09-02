@@ -1,6 +1,6 @@
 # Режимы исполнения Issue Grinder
 
-Статус: реализованный проект решения, 2026-08-30. Документ объясняет замысел,
+Статус: реализованный проект решения, 2026-09-02. Документ объясняет замысел,
 но не является отдельным источником действующей policy.
 
 Согласованы пять пользовательских режимов и их постоянные названия: `Соло`,
@@ -150,7 +150,7 @@ branches и изолированные worktrees. Спекулятивная и�
 |---|---|---|---|---|---|
 | `Соло` | Простое последовательное исполнение без внутренней topology | Текущая основная модель выполняет по одному issue или пакету за раз | Нет | Отдельного reviewer-а нет; current model делает self-review по объективному evidence | Terminal result |
 | `Классический` | Максимальную уверенность | Full-scope strategy и material judgment — проверяющему профилю; только strict-simple packets — экономичному | По умолчанию нет competing full implementations | Exact integrated diff, evidence и итоговый result | Terminal result |
-| `Баланс` | Принятый результат на единицу дефицитной квоты | Экономичные workers под решениями основного профиля | Выборочно | План, risk gates, integrated batches и финал | Terminal result |
+| `Баланс` | Принятый результат на единицу дефицитной квоты | Luna-owned полный routine packet loop | Адаптивно при развилке, слабом oracle или высокой ожидаемой ценности | Стратегия, material decisions, integration и финал | Terminal result |
 | `Рой` | Пользу массового дешёвого поиска и проверки | Волны экономичных candidates, critics и verifiers | Норма режима | Постановка границ и финальный exact candidate | Terminal result только после финального gate |
 | `Экономичный` | Максимальный безопасный прогресс без доступной дорогой квоты | Экономичный coordinator и workers | Допустимы, но сворачиваются в один рекомендуемый candidate | Может быть отложена | Resumable non-terminal result допустим |
 
@@ -225,25 +225,27 @@ Goal-contract, а не topology.
 
 ### Распределение работы
 
-1. Экономичные read-only scouts могут собрать карту кода, воспроизвести баги,
-   найти затронутые contracts и подготовить точные source anchors.
-2. Основной либо проверяющий профиль определяет стратегический outcome,
-   dependency graph, risk surfaces, acceptance и package boundaries.
+1. Основной либо проверяющий профиль одним проходом определяет стратегический
+   outcome, dependency graph, risk surfaces, acceptance и package boundaries.
+2. Для каждого подходящего bounded packet назначается Luna lead. Он ведёт
+   research, implementation, tests, critique и rework и возвращает один compact
+   evidence packet вместо пошаговой переписки с дорогим coordinator-ом.
 3. Работа классифицируется не по размеру diff, а по оставшемуся judgment,
-   blast radius, обратимости, связанности и качеству oracle:
-4. Независимые экономичные critics и test authors атакуют candidate до дорогого
-   review.
-5. Integration owner объединяет совместимую содержательную партию, выполняет
+   blast radius, обратимости, связанности и качеству oracle.
+4. Существенно изменившийся candidate получает независимую Luna-проверку, когда
+   это возможно. Каждый material finding исправляется, опровергается evidence
+   либо явно передаётся на решение; одобрения не складываются в голосование.
+5. При material uncertainty Sol/controller получает один узкий вопрос. После
+   решения отделимая implementation снова возвращается Luna.
+6. Integration owner объединяет совместимую содержательную партию, выполняет
    aggregate checks и передаёт exact candidate проверяющему профилю.
-6. Маленькое локальное замечание может исправить integration owner после
-   остановки других writers. Большой rework возвращается экономичному worker в
-   отдельный пакет.
 
 ### Избыточность
 
-По умолчанию создаётся одна реализация. Дополнительный candidate или critic
-появляется, когда первый вариант не прошёл oracle, остаётся реальная развилка
-или дешёвая независимая проверка способна существенно снизить review load.
+По умолчанию создаётся одна реализация и независимая дешёвая проверка.
+Дополнительный candidate появляется, когда первый вариант не прошёл oracle,
+остаётся реальная развилка или отдельная попытка способна существенно снизить
+review load. Несколько одинаковых prompts не являются независимостью.
 
 ### Завершение
 
@@ -463,8 +465,10 @@ Summary помогает навигации, но reviewer самостояте�
 4. `Классический` выполняет full-scope analysis, оставляет material judgment
    проверяющему профилю, проводит final integrated review и сохраняет terminal
    promise без ссылки на поведение прежней версии.
-5. `Баланс` направляет ограниченную проверяемую implementation экономичному
-   worker-у, но сохраняет high-judgment decision и final integrated review.
+5. `Баланс` передаёт Luna полный routine loop ограниченного пакета, получает
+   независимую дешёвую проверку и compact finding ledger, но сохраняет
+   high-judgment decision и final integrated review; после узкого Sol decision
+   отделимая implementation снова уходит Luna.
 6. `Рой` создаёт намеренно различимые candidates, изолирует writers, сокращает
    результаты до одного exact candidate и не передаёт reviewer-у весь сырой
    transcript.

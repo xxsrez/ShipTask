@@ -70,10 +70,10 @@ plugins/issue-grinder/
 ```
 
 Plugin не содержит собственный MCP server, UI, assets или hooks. Узкие runtime
-scripts механически обеспечивают model routing, writer admission и проверку
-маршрута независимых оптик; Task Manager уже предоставляет live data,
-authentication, authorization и controlled mutations; skills остаются workflow-
-и orchestration-слоем вокруг этого adapter-а.
+scripts механически валидируют объявленный model routing, обеспечивают writer
+admission и проверяют маршрут независимых оптик; Task Manager предоставляет
+live data, authentication, authorization и controlled mutations; skills
+остаются workflow- и orchestration-слоем вокруг этого adapter-а.
 
 Такая форма следует принципу минимального plugin из
 [официальной архитектуры OpenAI](https://developers.openai.com/plugins/concepts/plugins):
@@ -170,12 +170,13 @@ Goal, lifecycle, verification, reflection и multi-agent dispatch зависят
 `scripts/model_routing_guard.py`:
 
 - отделяет semantic role от platform `agent_type`;
-- требует explicit model, effort и bounded `fork_turns` для каждого child;
+- связывает unique packet identity, semantic role, explicit model, effort и
+  bounded `fork_turns` в один стабильный dispatch fingerprint;
 - в `Балансе`, `Рое` и `Экономичном` fail-closed требует Luna Max для
   substantive economical lane;
 - не выводит model/effort из имени либо типа агента;
 - сравнивает requested и observed child profile и выдаёт стабильный receipt
-  `issue-grinder/model-routing/v1`.
+  `issue-grinder/model-routing/v2`.
 
 `scripts/writer_worktree_guard.py`:
 
@@ -200,6 +201,14 @@ implementation dispatch, а integration canary обнаруживает оста
 до fan-in/lifecycle effect и переводит wave в fail-closed reconciliation.
 Опора на `--lock` и porcelain format соответствует
 [официальному `git-worktree`](https://git-scm.com/docs/git-worktree.html).
+
+Routing guard также не перехватывает raw platform `spawn_agent`: coordinator
+может нарушить protocol и не вызвать Python script. Packet-bound fingerprint и
+recursive telemetry делают такой обход наблюдаемым и запрещают считать run
+валидным cost-aware mode, но не создают физического platform enforcement.
+Непропускаемый gate потребовал бы dispatcher tool, который одновременно
+валидирует и создаёт child, а direct raw spawn был бы ему недоступен. Runtime не
+выдаёт локальный preflight за такую гарантию.
 
 Build- и evaluation-скрипты на уровне repository по-прежнему проверяют semantic
 coverage Level 1/Level 2, behavioural scenarios, Marketplace package и byte
@@ -516,19 +525,21 @@ anchors и не создаёт новую Codex task. Так логическо�
 ### 4.3 Маршрутный admission
 
 Нормализованный профиль не должен оставаться декларацией. До каждого child
-dispatch coordinator строит receipt с canonical mode, настоящей semantic role,
-platform `agent_type`, exact requested model/effort и bounded `fork_turns`, а
-после старта при доступности дополняет его observed child profile. Если runtime
-surface не раскрывает actual profile, receipt сохраняет `telemetry_pending` и
-exact spawn args для внешней recursive telemetry проверки. Механическую часть
-проверяет runtime `model_routing_guard.py`; отрицательный receipt запрещает spawn
-или закрывает уже начатую wave до содержательной работы.
+dispatch coordinator строит receipt с unique packet identity, canonical mode,
+настоящей semantic role, platform `agent_type`, exact requested model/effort,
+bounded `fork_turns` и fingerprint этих dispatch args, а после старта при
+доступности дополняет его observed child profile. Если runtime surface не
+раскрывает actual profile, receipt сохраняет `telemetry_pending` и exact spawn
+args для внешней recursive telemetry проверки. Механическую часть проверяет
+runtime `model_routing_guard.py`; отрицательный receipt запрещает spawn или
+закрывает уже начатую wave до содержательной работы.
 
 В трёх экономичных topology действует fail-closed default:
 
-- `Баланс` отдаёт Luna Max обычные research, implementation, tests, preliminary
-  verification/critique и bounded rework; controller оставляет только конкретное
-  material judgment, integration decision и final review;
+- `Баланс` отдаёт Luna Max полный routine loop bounded packet-а: research,
+  implementation, tests, independent verification/critique и rework;
+  controller оставляет только конкретное material judgment, integration
+  decision и final review;
 - `Рой` запускает на Luna Max scouts, candidates, critics, test authors, judges
   и reducers; на candidate-friendly scope хотя бы одна material wave содержит
   минимум два намеренно разных candidate;
@@ -562,7 +573,7 @@ promise:
 |---|---|---|
 | `solo` | `modes/solo.md` | `IG-MODE-11`, один current profile, terminal-only |
 | `classic` | `modes/classic.md` | `IG-MODE-03`, `IG-MA-14..17`, controller-led terminal result |
-| `balance` | `modes/balance.md` | `IG-MODE-04`, части `IG-MODE-08..09`, economical bulk и final gate |
+| `balance` | `modes/balance.md` | `IG-MODE-04`, части `IG-MODE-08..09`, Luna packet loop, adaptive verification и final gate |
 | `swarm` | `modes/swarm.md` | `IG-MODE-05`, части `IG-MODE-08..09`, bounded candidate waves |
 | `economical` | `modes/economical.md` | `IG-MODE-06`, части `IG-MODE-08..09`, resumable checkpoint |
 
@@ -573,7 +584,68 @@ promise:
 остановки. `mode-help.md` остаётся только delivery-free справкой и не является
 источником runtime policy.
 
-### 4.5 Review packet и переключение
+### 4.5 Balance control plane и Luna packet loop
+
+`Баланс` не является уменьшенным `Роем` и не использует постоянное Best-of-N.
+Он разделяет дорогой control plane и дешёвый execution plane так, чтобы Sol либо
+другой проверяющий профиль не тратил основной контекст на повседневную работу.
+
+Первоначальный full-scope проход создаёт control brief:
+
+- Strategic Outcome и применимые Human Requirements;
+- dependency/risk map, package boundaries и integration points;
+- acceptance/oracles и irreversible/high-risk surfaces;
+- уже принятые material decisions;
+- признаки узкой эскалации и exact final gate.
+
+После этого обычный bounded packet получает direct Luna Max packet lead в
+собственном admitted writer worktree. Lead владеет внутренним циклом research,
+implementation, tests, critique и rework и возвращает один task-owned commit
+либо точный checkpoint. При доступной nested delegation он может вызывать
+read-only Luna verifier/test author/critic и различимые candidate/reducer roles,
+но каждый такой execution-child проходит собственный packet-bound routing
+admission. Если nested delegation недоступна, operational coordinator создаёт
+эти Luna roles напрямую из того же compact contract; дорогой профиль не
+дублирует их содержательную работу.
+
+Обычный materially changed candidate получает независимый economical verifier,
+когда существует полезный oracle. Verifier видит current requirements, exact
+diff/source anchors и способ проверки, но не использует итоговую уверенность
+автора как evidence. Findings сводятся не голосованием, а ledger-ом:
+
+```text
+finding: <конкретный дефект или возражение>
+evidence: <воспроизводимый source/check anchor>
+materiality: material | non-material
+disposition: fixed | refuted_with_evidence | escalate
+```
+
+Один воспроизводимый material defect блокирует передачу в final gate независимо
+от количества общих `pass`. Additional candidate появляется только при реальной
+развилке, слабом/проваленном oracle, неудаче подхода либо высокой ожидаемой
+ценности независимой попытки. Для нескольких candidates заранее фиксируются
+различимые purpose/approach; одинаковые prompts не считаются независимостью.
+
+При material uncertainty packet lead прекращает corrective mutations и
+возвращает compact escalation: exact state, completed work, checks, findings,
+unknowns и один вопрос. Controller решает только неделимую часть и создаёт новый
+bounded Luna contract. Ordinary implementation и rework остаются на Luna lane;
+controller выполняет их сам только при доказанной неотделимости judgment от
+исполнения и записывает причину в `expensive-work ledger`.
+
+Packet lead остаётся execution-child, а не вторым effect owner. Goal, Task
+Manager writes, fan-in, publication unit, exact integrated candidate и final
+acceptance принадлежат одному operational coordinator. Такая topology сохраняет
+контроль `Классического`, но уменьшает не только стоимость реализации, но и
+дорогой пошаговой orchestration.
+
+Balance-run валиден как режим только при наблюдаемом Luna-owned ordinary work:
+packet-bound routing receipts, фактические profiles и expensive-work ledger
+должны согласовываться. Функционально успешный Sol-конвейер с отсутствующей Luna
+implementation является полезным candidate, но routing-invalid результатом, а
+не доказательством `Баланса`.
+
+### 4.6 Review packet и переключение
 
 Expensive review packet содержит exact scope/base/candidate identity,
 acceptance, integrated diff и source anchors, выполненные checks, material
@@ -1129,7 +1201,10 @@ ID само по себе не доказывает поведение.
    required/forbidden decisions и их порядок. Blocker/writer trace остаётся в
    `scripts/issue_grinder_trace_harness.py`, а mode resolver, profile
    normalization, economical exit и switch barrier — в
-   `scripts/issue_grinder_mode_harness.py`. Оба являются oracle отдельных hard
+   `scripts/issue_grinder_mode_harness.py`. Тот же mode harness проверяет
+   механическую готовность Balance packet-а: independent verification,
+   finding dispositions, narrow escalation, routing validity и допустимые
+   категории expensive work. Оба harness являются oracle отдельных hard
    invariants и не доказывают, что Markdown runtime вызовет те же effects.
 3. **Independent model-forward evaluation.** Запускает реальный skill на
    синтетическом Task Manager и временном Git repository. Детерминированные
@@ -1165,10 +1240,13 @@ ID само по себе не доказывает поведение.
   последовательной execution lane, отсутствием Issue Grinder worker delegation
   и допустимым отдельным Strategic Explainer provider; конкретный
   `Классический`, где Sol/controller делает почти всё, а
-  Luna получает только тривиальные packets; `Баланс`, где Luna пытается
-  выполнить лёгкие и средние bounded tasks и при problem/contract conflict
-  возвращает evidence fallback Sol/controller-у; оба сохраняют exact final
-  review; `Рой` с intentional candidate identity, reduction и bounded stop;
+  Luna получает только тривиальные packets; `Баланс`, где Luna packet lead
+  ведёт полный routine loop, независимый economical verifier проверяет
+  materially changed candidate, findings не голосуются, а узкий Sol decision
+  возвращает отделимое исполнение в новую Luna wave; raw Sol implementation
+  либо отсутствующий packet-bound receipt делает case routing-invalid даже при
+  функциональном успехе; оба сохраняют exact final review; `Рой` с intentional
+  candidate identity, reduction и bounded stop;
   `Экономичный` с одним resumable candidate без ложного Done/Goal close;
 - Luna profile normalization, root-shell supervisor, explicit role override и
   неизвестное cross-family ordering без догадки;

@@ -233,8 +233,9 @@ class IssueGrinderContractTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         for marker in (
-            "issue-grinder/model-routing/v1",
+            "issue-grinder/model-routing/v2",
             "gpt-5.6-luna",
+            "dispatch_fingerprint",
             "actual_luna_model_mismatch",
         ):
             self.assertIn(marker, guard)
@@ -242,6 +243,33 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertNotIn("platform_agent_type_bypasses_mode_profile", guard)
         self.assertIn("Model routing — hard gate", execution_modes)
         self.assertIn("Model routing admission — hard gate", multi_agent)
+
+    def test_balance_compiles_luna_execution_plane_and_final_control(self) -> None:
+        balance = (
+            SKILL_ROOT / "references" / "modes" / "balance.md"
+        ).read_text(encoding="utf-8")
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        requirements = REQUIREMENTS.read_text(encoding="utf-8")
+        architecture = ARCHITECTURE.read_text(encoding="utf-8")
+        evaluation = EVALUATION.read_text(encoding="utf-8")
+
+        for marker in (
+            "один Luna packet lead",
+            "полным внутренним циклом пакета",
+            "независимому Luna verifier/critic",
+            "fixed | refuted_with_evidence | escalate",
+            "не большинством голосов",
+            "compact evidence packet с одним узким вопросом",
+            "`expensive-work ledger`",
+            "невалидным `Балансом`",
+            "Без final gate",
+        ):
+            self.assertIn(marker, balance)
+
+        self.assertIn("economical packet lead", skill)
+        self.assertIn("принятый результат на единицу", requirements)
+        self.assertIn("Balance control plane и Luna packet loop", architecture)
+        self.assertIn("balance-finding-ledger-no-vote", evaluation)
 
     def test_publication_unit_stays_with_coordinator(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")

@@ -15,6 +15,12 @@ from enum import Enum
 LUNA_MODEL = "gpt-5.6-luna"
 LUNA_MAX_EFFORT = "max"
 ACTIVE_TASK_STATUSES = frozenset({"In Progress", "In Review"})
+BALANCE_CONTROLLER_ROLES = frozenset(
+    {"material_judgment", "integration_decision", "final_review"}
+)
+BALANCE_FINDING_DISPOSITIONS = frozenset(
+    {"fixed", "refuted_with_evidence", "escalate"}
+)
 
 
 class ExecutionMode(str, Enum):
@@ -148,6 +154,73 @@ def resolve_mode(
             worker_override=worker_override,
         ),
     )
+
+
+@dataclass(frozen=True)
+class BalanceFinding:
+    finding: str
+    evidence: str
+    material: bool
+    disposition: str
+
+
+@dataclass(frozen=True)
+class BalancePacketDecision:
+    action: str
+    may_enter_final_review: bool
+    defects: tuple[str, ...] = ()
+
+
+def assess_balance_packet(
+    *,
+    packet_id: str,
+    exact_candidate: str,
+    checks: tuple[str, ...],
+    materially_changed: bool,
+    independent_verification_possible: bool,
+    independent_verification_performed: bool,
+    findings: tuple[BalanceFinding, ...],
+    escalation_questions: tuple[str, ...] = (),
+    routing_valid: bool = True,
+    expensive_work_roles: tuple[str, ...] = (),
+) -> BalancePacketDecision:
+    """Validate the mechanical readiness of one Balance evidence packet."""
+
+    defects: list[str] = []
+    if not packet_id.strip():
+        defects.append("blank_packet_id")
+    if not exact_candidate.strip():
+        defects.append("blank_exact_candidate")
+    if not checks or any(not check.strip() for check in checks):
+        defects.append("missing_checks")
+    if materially_changed and independent_verification_possible:
+        if not independent_verification_performed:
+            defects.append("independent_verification_missing")
+    if not routing_valid:
+        defects.append("routing_invalid")
+    for role in expensive_work_roles:
+        if role.strip().casefold() not in BALANCE_CONTROLLER_ROLES:
+            defects.append(f"ordinary_expensive_work:{role.strip().casefold()}")
+    if len(escalation_questions) > 1:
+        defects.append("escalation_not_narrow")
+    if any(not question.strip() for question in escalation_questions):
+        defects.append("blank_escalation_question")
+    if len(escalation_questions) == 1 and escalation_questions[0].strip():
+        defects.append("escalation_pending")
+
+    for index, finding in enumerate(findings):
+        if not finding.finding.strip():
+            defects.append(f"finding_{index}:blank_finding")
+        if finding.disposition not in BALANCE_FINDING_DISPOSITIONS:
+            defects.append(f"finding_{index}:invalid_disposition")
+        if finding.material and not finding.evidence.strip():
+            defects.append(f"finding_{index}:missing_material_evidence")
+        if finding.material and finding.disposition == "escalate":
+            defects.append(f"finding_{index}:material_escalation_pending")
+
+    if defects:
+        return BalancePacketDecision("rework_or_escalate", False, tuple(defects))
+    return BalancePacketDecision("ready_for_final_review", True)
 
 
 @dataclass(frozen=True)

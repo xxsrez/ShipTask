@@ -18,8 +18,9 @@
   authority boundary; не задавайте agent topology, форму context, число
   attempts/options или внутренний reasoning без явного пользовательского
   требования. ShipTask automatic default, natural-language user topology rules,
-  отдельный worktree каждого implementation writer, а также Luna Max routing и
-  current-profile escalation являются такими явными topology/profile-требованиями.
+  отдельный worktree каждого implementation writer, Luna Max routing,
+  current-profile escalation и Balance Luna-owned packet loop с узким возвратом
+  отделимого исполнения являются такими явными topology/profile-требованиями.
 - Оставляйте агенту свободу выбора инструментов, реализации и достаточной
   проверки, если safety/authority не требуют жёсткого порядка.
 - Жёсткий порядок нужен там, где effects необратимо расходятся: для
@@ -137,7 +138,9 @@ skill, реалистичный exact Task Manager scope и обычный proje
   override получает Luna Max, complex packet наследует current model/effort, а
   ordinary Strategic Explainer всегда использует свой exact Luna Max profile;
 - ambiguity, unexpected environment/tool state или proof gap останавливают Luna
-  packet и передают его current profile без повторного Luna loop;
+  packet без одинакового retry; в `Балансе` current profile решает один узкий
+  вопрос и возвращает отделимое исполнение в новый Luna packet, а остальные
+  режимы применяют собственный fallback;
 - явный user profile для subagents имеет приоритет, а выбор primary profile сам
   по себе не отключает cheap-lane default;
 - shared evolving write surface ограничивает writers до одной safe lane, но не
