@@ -1,6 +1,6 @@
 """Deterministic oracle for the mechanical Issue Grinder mode decisions.
 
-The oracle covers the parts of IG-MODE-02, IG-MODE-06, IG-MODE-07,
+The oracle covers the parts of IG-MODE-02, IG-MODE-04..07,
 IG-MODE-10, IG-MODE-11 and IG-MA-19 that can be decided from structured state.  It
 deliberately does not parse natural language, orchestrate agents or stand in for
 a model-forward run of the skill.
@@ -264,6 +264,118 @@ class ReviewWaveDecision:
     may_accept_terminal: bool
     may_checkpoint: bool
     defects: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class DirectCampaignObservation:
+    """Observed direct-stage fallback when execution children cannot delegate."""
+
+    mode: ExecutionMode
+    stage_order: tuple[str, ...]
+    material_candidate_fork: bool
+    no_fork_reason: str
+    candidate_author_ids: tuple[str, ...]
+    candidate_purposes: tuple[str, ...]
+    reviewer_id: str
+    reducer_id: str
+    routing_guard_owner_ids: tuple[str, ...]
+    dispatched_owner_ids: tuple[str, ...]
+    event_wait_stage_count: int
+    common_exact_base: bool
+    candidate_stage_quiescent_before_review: bool
+    review_complete: bool
+    finding_ledger_returned: bool
+    final_review_started_after_stages: bool
+    unchanged_state_actions: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class DirectCampaignDecision:
+    action: str
+    may_enter_controller_final_review: bool
+    defects: tuple[str, ...] = ()
+
+
+def assess_direct_campaign(
+    observation: DirectCampaignObservation,
+) -> DirectCampaignDecision:
+    """Validate the bounded direct-stage fallback for Balance and Swarm."""
+
+    if observation.mode not in (ExecutionMode.BALANCE, ExecutionMode.SWARM):
+        raise ValueError("direct campaign applies only to Balance and Swarm")
+
+    defects: list[str] = []
+    authors = observation.candidate_author_ids
+    owners = (*authors, observation.reviewer_id)
+    if any(not owner.strip() for owner in owners):
+        defects.append("blank_direct_owner")
+    if len(set(owners)) != len(owners):
+        defects.append("direct_owners_not_independent")
+    if tuple(observation.routing_guard_owner_ids) != owners:
+        defects.append("routing_guards_do_not_match_direct_owners")
+    if tuple(observation.dispatched_owner_ids) != owners:
+        defects.append("dispatches_do_not_match_direct_owners")
+    if observation.event_wait_stage_count != len(observation.stage_order):
+        defects.append("event_waits_do_not_match_stages")
+    if not observation.common_exact_base:
+        defects.append("candidate_base_mismatch")
+    if not observation.candidate_stage_quiescent_before_review:
+        defects.append("review_started_before_candidate_quiescence")
+    if not observation.review_complete:
+        defects.append("independent_review_incomplete")
+    if not observation.finding_ledger_returned:
+        defects.append("finding_ledger_missing")
+    if not observation.final_review_started_after_stages:
+        defects.append("controller_final_review_started_early")
+
+    for action in observation.unchanged_state_actions:
+        normalized = action.strip().casefold()
+        if normalized in FORBIDDEN_UNCHANGED_COORDINATION:
+            defects.append(f"unchanged_state_coordination:{normalized}")
+
+    if observation.mode is ExecutionMode.BALANCE:
+        if observation.stage_order != ("execution", "independent_review"):
+            defects.append("balance_stage_order_invalid")
+        if not authors:
+            defects.append("balance_candidate_missing")
+        if observation.material_candidate_fork:
+            if len(authors) < 2:
+                defects.append("balance_material_fork_requires_multiple_candidates")
+            if observation.reducer_id != observation.reviewer_id:
+                defects.append("balance_adaptive_reducer_reviewer_mismatch")
+        elif len(authors) > 1:
+            defects.append("balance_multiple_candidates_without_material_fork")
+        elif observation.reducer_id.strip():
+            defects.append("balance_unexpected_reducer")
+    else:
+        if observation.stage_order != ("candidates", "reduction_review"):
+            defects.append("swarm_stage_order_invalid")
+        if not authors:
+            defects.append("swarm_candidate_missing")
+        if observation.material_candidate_fork and len(authors) < 2:
+            defects.append("swarm_material_fork_requires_multiple_candidates")
+        if not observation.material_candidate_fork and not observation.no_fork_reason.strip():
+            defects.append("swarm_no_fork_reason_missing")
+        if not observation.material_candidate_fork and len(authors) > 1:
+            defects.append("swarm_multiple_candidates_without_material_fork")
+        if observation.reducer_id != observation.reviewer_id:
+            defects.append("swarm_reducer_reviewer_mismatch")
+
+    purposes = tuple(purpose.strip() for purpose in observation.candidate_purposes)
+    if len(authors) > 1:
+        if len(purposes) != len(authors) or any(not purpose for purpose in purposes):
+            defects.append("candidate_purposes_missing")
+        elif len(set(purposes)) != len(purposes):
+            defects.append("candidate_purposes_not_distinct")
+    elif purposes not in ((), ("default",)):
+        defects.append("single_candidate_purpose_invalid")
+
+    may_enter = not defects
+    return DirectCampaignDecision(
+        "ready_for_controller_final_review" if may_enter else "repair_direct_campaign",
+        may_enter,
+        tuple(defects),
+    )
 
 
 def assess_review_wave(observation: ReviewWaveObservation) -> ReviewWaveDecision:

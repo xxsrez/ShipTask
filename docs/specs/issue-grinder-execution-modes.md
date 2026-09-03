@@ -127,12 +127,14 @@ effort.
   results в один review packet.
 - Во всех режимах, кроме `Соло`, каждый exact candidate получает независимого
   reviewer-а, включая малый и простой scope.
-- Родительский coordinator видит ровно одного владельца рабочей или
-  проверочной волны; внутренние authors, critics, reviewers и reducers остаются
-  его children.
-- Нормальный путь нового владельца ограничен одним заранее разрешённым guard,
-  одним dispatch и одним событийным ожиданием. После material rework
-  продолжаются тот же owner и та же reviewer session.
+- Campaign состоит из bounded стадий; каждая direct рабочая или проверочная
+  волна внутри стадии имеет одного owner-а и один outcome. Внутренние authors,
+  critics, reviewers и reducers остаются за одним owner-ом только при
+  доказанной nested delegation; иначе используются предусмотренные режимом
+  direct stages без остановки terminal run.
+- Нормальный путь каждого нового direct owner-а ограничен одним заранее
+  разрешённым guard, одним dispatch и событийным ожиданием. После material
+  rework продолжаются тот же candidate owner и та же reviewer session.
 - Terminal acceptance выполняется только по правилам выбранного режима и
   current authority.
 
@@ -159,7 +161,7 @@ branches и изолированные worktrees. Спекулятивная и�
 | `Соло` | Простое последовательное исполнение без внутренней topology | Текущая основная модель выполняет по одному issue или пакету за раз | Нет | Отдельного reviewer-а нет; current model делает self-review по объективному evidence | Terminal result |
 | `Классический` | Максимальную уверенность | Full-scope strategy и material judgment — проверяющему профилю; только strict-simple packets — экономичному | По умолчанию нет competing full implementations | Независимый Luna-review exact candidate и итоговая приёмка controller-а | Terminal result |
 | `Баланс` | Принятый результат на единицу дефицитной квоты | Luna-owned полный routine packet loop | Адаптивно при развилке, слабом oracle или высокой ожидаемой ценности | Стратегия, material decisions, integration и финал | Terminal result |
-| `Рой` | Пользу массового дешёвого поиска и проверки | Один economical wave owner управляет candidates, critics и verifiers | Норма режима | Независимый review выбранного exact candidate | Terminal result только после финального gate |
+| `Рой` | Пользу массового дешёвого поиска и проверки | Bounded Luna candidate campaign и отдельное economical reduction | Норма режима | Независимый Luna-review и итоговый review controller-а | Terminal result только после финального gate |
 | `Экономичный` | Максимальный безопасный прогресс без доступной дорогой квоты | Экономичный coordinator и workers | Допустимы, но сворачиваются в один рекомендуемый candidate | Независимый economical review обязателен для terminal result; partial review может стать deferred gate | Resumable non-terminal result допустим |
 
 ## 6. Режим `Соло`
@@ -307,8 +309,10 @@ terminal blocker-а.
 1. Проверяющий профиль, когда он доступен, задаёт исходную problem boundary,
    acceptance и опасные surfaces. Для уже однозначного bounded scope это может
    сделать coordinator по mode contract.
-2. Один direct economical swarm owner запускает candidate и critic waves внутри
-   своей волны в пределах безопасной capacity.
+2. При доказанной nested delegation один economical swarm owner ведёт campaign.
+   Без неё coordinator запускает bounded batch самостоятельных одно-ownerных
+   direct candidate waves от общей exact base, а после quiescence — отдельного
+   economical reducer/reviewer.
 3. Детерминированные checks удаляют явно несостоятельные варианты.
 4. Экономичные judges сравнивают оставшихся candidates, сохраняя dissent и
    provenance.

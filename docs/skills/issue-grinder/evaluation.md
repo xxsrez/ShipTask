@@ -14,13 +14,37 @@
    и механические Git-инварианты writer admission. Они не симулируют reasoning и поэтому
    являются oracle hard invariants, а не полным тестом skill.
 3. Model-forward cases должны запускать установленный skill в новой сессии на
-   синтетическом Task Manager scope; generator не получает rubric или expected
-   answer. Полный repository-executable harness этого слоя пока отсутствует;
-   доступны узкие mode-loading и Solo-topology smoke. Остальные coverage names
-   ниже являются обязательным corpus, а не доказанными PASS.
+   изолированном синтетическом scope; Task Manager effects можно исключить, если
+   case измеряет только mode topology и delivery по локальному плану. Generator
+   не получает скрытый oracle или expected answer. Полный
+   repository-executable harness этого слоя пока отсутствует; доступны узкие
+   mode-loading и Solo-topology smoke. Остальные coverage names ниже являются
+   обязательным corpus, а не доказанными PASS.
 4. Distribution smoke проверяет source → Marketplace → installed cache,
    activation и отсутствие одновременно установленного ShipTask. Его evidence
    относится к конкретному snapshot и не переносится на следующую версию.
+
+## Протокол синтетической настройки режимов
+
+Model-forward tuning не меняет mode contract под имена файлов или частные
+особенности одного fixture. Правила оцениваются в два шага: повторяемый tuning
+fixture помогает найти дефект orchestration, а перед итоговым выводом
+используется не участвовавший в правках holdout с другой предметной формой.
+
+Каждый отдельный прогон имеет единый потолок `3 600` секунд. Значение берётся из
+одного поля manifest и одинаково передаётся process runner-у и в rendered
+prompt; подготовка обязана остановиться при расхождении. Планового
+десятиминутного checkpoint или схемы `600 + 3000` нет. Режимы запускаются
+последовательно из одной frozen base, каждый в новом изолированном checkout и
+свежей Codex-сессии.
+
+Неблокирующая погрешность не останавливает прогон: она записывается рядом с той
+метрикой, которую способна исказить. Дефект, влияющий на весь прогон, отмечается
+отдельно и исключает только причинно затронутые сравнения. Минимальный итоговый
+набор измерений: terminal outcome, внешний oracle, blind quality review,
+валидность mode topology, elapsed time и раздельные Sol/Luna tokens. Улучшение
+признаётся общим только если оно сохраняет contract на tuning fixture и не
+ухудшает holdout из-за fixture-specific правила.
 
 ## Coverage map
 
@@ -54,8 +78,8 @@
 | `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | five-canonical-modes; mode-does-not-expand-authority |
 | `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; luna-any-effort-economical; non-luna-classic; mode-persists-after-model-change |
 | `IG-MODE-03` | `modes/classic.md`; `multi-agent-execution.md`; mode harness | classic-sol-does-almost-all; classic-luna-trivial-only; classic-high-judgment-owner; classic-simple-independent-review; classic-final-review-terminal |
-| `IG-MODE-04` | `modes/balance.md`; `multi-agent-execution.md`; routing guard; mode harness | balance-control-brief; balance-luna-packet-lead; balance-full-routine-loop; balance-independent-economical-verifier-always; balance-adaptive-candidates; balance-finding-ledger-no-vote; balance-narrow-escalation; balance-rework-same-reviewer; balance-expensive-work-ledger; balance-routing-invalid-despite-functional-success; balance-final-gate |
-| `IG-MODE-05` | `modes/swarm.md`; `multi-agent-execution.md`; routing guard; mode harness | swarm-one-direct-owner; swarm-all-child-work-luna; swarm-material-best-of-m; swarm-isolated-overlap; swarm-independent-selected-candidate-review; swarm-reduction; swarm-bounded-stop; swarm-final-gate |
+| `IG-MODE-04` | `modes/balance.md`; `multi-agent-execution.md`; routing guard; mode harness | balance-control-brief; balance-direct-execution-review; balance-full-routine-loop; balance-independent-economical-verifier-always; balance-adaptive-candidates; balance-finding-ledger-no-vote; balance-narrow-escalation; balance-rework-same-reviewer; balance-expensive-work-ledger; balance-routing-invalid-despite-functional-success; balance-final-gate |
+| `IG-MODE-05` | `modes/swarm.md`; `multi-agent-execution.md`; routing guard; mode harness | swarm-bounded-direct-campaign; swarm-all-child-work-luna; swarm-material-best-of-m; swarm-isolated-overlap; swarm-independent-selected-candidate-review; swarm-reduction; swarm-bounded-stop; swarm-final-gate |
 | `IG-MODE-06` | `SKILL.md` §5; `modes/economical.md`; mode/routing guards; mode harness | economical-all-substantive-luna; non-luna-root-shell-only; economical-independent-luna-review; economical-terminal-when-proven; economical-partial-review-checkpoint; economical-resumable-candidate; no-false-done; no-false-blocked |
 | `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md`; mode/routing guards | luna-profile-collapse; explicit-luna-max-child; bounded-fork; observed-profile-match; agent-label-neutral; luna-low-root-luna-max-supervisor; role-override-wins |
 | `IG-MODE-08` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | economical-handoff-preserves-evidence; swarm-alternative-approach; same-retry-rejected |
@@ -82,7 +106,7 @@
 | `IG-MA-16` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | luna-uncertainty-evidence-handoff; balance-one-question-escalation; balance-decision-then-luna-redispatch; inseparable-judgment-reason-recorded; mode-specific-next-route; same-luna-retry-rejected |
 | `IG-MA-17` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; routing guard | classic-luna-unavailable-controller; economical-capacity-loss-no-sol-substitution; routing-failure-stops-wave |
 | `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing; worker-evidence-coordinator-facade; nested-facade-no-new-task; solo-provider-outside-execution-topology |
-| `IG-MA-19` | `SKILL.md` §2; `execution-modes.md`; `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; mode harness | non-solo-simple-independent-review; one-parent-visible-wave-owner; one-guard-spawn-event-wait; unchanged-state-polling-rejected; large-scope-internal-risk-lenses; material-rework-reuses-reviewer; economical-deadline-partial-ledger-only |
+| `IG-MA-19` | `SKILL.md` §2; `execution-modes.md`; `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; mode harness | non-solo-simple-independent-review; capability-aware-direct-stages; one-guard-spawn-per-owner; stage-event-wait; unchanged-state-polling-rejected; large-scope-risk-lenses; material-rework-reuses-reviewer; economical-deadline-partial-ledger-only |
 
 ## Быстрый mode corpus
 
@@ -110,10 +134,17 @@ Corpus доказывает:
   candidate, packet-bound routing, только узкую escalation, допустимые категории
   дорогой работы и material finding, который нельзя перевесить общими
   одобрениями;
-- review-wave lifecycle всех non-Solo modes: одного parent-visible owner-а,
-  независимый review простого scope, единичные guard/spawn/event-wait, запрет
-  polling неизменившегося state, reuse owner/reviewer после material rework и
-  только economical checkpoint с partial deadline ledger;
+- review lifecycle всех non-Solo modes: независимый review простого scope,
+  single-owner wave при доказанной nested capability и mode-specific direct
+  stages без неё, один guard/spawn на нового owner-а, stage-level event waits,
+  запрет polling неизменившегося state, reuse owner/reviewer после material
+  rework и только economical checkpoint с partial deadline ledger;
+- direct-stage corpus: `Баланс` использует последовательность execution →
+  independent reduction/review до controller final gate и допускает
+  дополнительные purpose-distinct candidates только для material fork; `Рой`
+  требует несколько purpose-distinct candidates при material fork, но не
+  выдумывает их без него, и запускает отдельного reducer/reviewer только после
+  quiescence candidates;
 - полноту resumable checkpoint, запрет ложного `complete`/`blocked` и
   обязательный активный Task Manager status/Goal;
 - явный switch только после quiescent writers, неизменного integration checkout,
@@ -140,7 +171,7 @@ bounded fork и `issue-grinder/model-routing/v2` fingerprint точных dispat
 args, отвергают inherited Sol, `fork_turns=all` и observed profile mismatch, но
 не выводят model/effort из имени либо типа агента. Для `Баланса` отдельно
 сохраняются только узкие controller roles material judgment/integration/final
-review; packet lead, research, implementation, tests, verifier, critic, reducer
+  review; packet owner, research, implementation, tests, verifier, critic, reducer
 и rework требуют Luna. Явный пользовательский role override сохраняется и
 сверяется с observed profile. Guard не доказывает честность semantic label,
 фактический вызов child или невозможность raw spawn без preflight — это
@@ -264,13 +295,14 @@ fresh model-forward smoke.
    всё, а Luna получает только тривиальные packets; `Соло` сохраняет current
   model, ноль Issue Grinder execution-subagents и допускает отдельный
   Strategic Explainer provider для одного и нескольких issue; в
-  `Балансе` до source mutation появляется observed Luna Max packet lead для
-  обычного research/implementation/test/critique/rework loop, отдельно
+  `Балансе` до source mutation появляется observed Luna Max execution owner для
+  обычного research/implementation/test/self-review loop, отдельно
   наблюдается Luna verification materially changed candidate, а Sol остаётся
   на control brief, узком material decision, integration decision и final gate;
   после Sol decision отделимое исполнение снова получает Luna; `Рой` запускает
-  на Luna минимум два isolated intentional candidate
-  для material fork, Luna critics/reducer и сокращает wave до одного result;
+  на Luna минимум два isolated purpose-distinct intentional candidate от общей
+  base, после их quiescence — Luna reducer/reviewer и сокращает campaign до
+  одного result;
   `Экономичный` выполняет весь substantive packet и review на Luna Max, оставляя
   non-Luna root только transport/authority shell, и сохраняет один resumable
   candidate без ложного `Done`/Goal completion;

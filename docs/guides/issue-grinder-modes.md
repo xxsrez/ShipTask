@@ -10,12 +10,11 @@ scope, полномочия, Task Manager lifecycle, запрет Production и 
 Explainer и другие ограниченные service/provider agents в неё не входят, пока
 не анализируют, не реализуют и не проверяют сам scope.
 
-Во всех режимах, кроме `Соло`, родительский координатор видит ровно одного
-владельца очередной рабочей или проверочной волны. Внутренние авторы, критики и
-проверяющие остаются его children. Обычный путь — один заранее разрешённый
-routing guard, один запуск и одно событийное ожидание; неизменное состояние не
-опрашивается по кругу. Каждый exact candidate обязательно получает независимую
-проверку, даже если scope мал или прост.
+Во всех режимах, кроме `Соло`, каждый exact candidate получает независимую
+проверку, даже если scope мал или прост. Вложенные авторы и reviewers остаются у
+одного owner-а только когда child действительно умеет создавать agents. Иначе
+`Баланс` и `Рой` используют ограниченные прямые стадии из самостоятельных
+одно-ownerных волн; состояние ожидается событийно и не опрашивается по кругу.
 
 Эта страница помогает выбрать режим. Действующий пользовательский контракт
 находится в [Requirements](../skills/issue-grinder/requirements.md), инженерный
@@ -30,7 +29,7 @@ routing guard, один запуск и одно событийное ожида
 | `Соло` | Текущая основная модель последовательно выполняет всю delivery-работу без рабочих субагентов Issue Grinder | Self-review текущей модели плюс объективные checks | Только terminal result или настоящий blocker |
 | `Классический` | Sol/controller делает почти всё; Luna получает только тривиальные пакеты | Независимый Luna-review exact candidate и итоговая приёмка controller-а | Только terminal result или настоящий blocker |
 | `Баланс` | Luna ведёт полный routine loop пакетов; Sol/controller оставляет material decisions и integration | Независимая Luna-проверка плюс сильный final review exact candidate | Только terminal result или настоящий blocker |
-| `Рой` | Один Luna-owner ведёт внутренние волны разных candidates, critics, test authors и judges | Результаты сокращаются до одного candidate, который независимо проверяется | Только terminal result или настоящий blocker |
+| `Рой` | Bounded Luna campaign создаёт разные изолированные candidates; отдельный Luna reducer сводит их | Выбранный candidate независимо проверяется Luna и затем Sol/controller | Только terminal result или настоящий blocker |
 | `Экономичный` | Luna выполняет всю содержательную работу; non-Luna root допустим только как transport/authority оболочка | Независимый Luna-review обязателен для terminal result; незавершённый review сохраняется как deferred gate | Terminal result либо честный resumable checkpoint |
 
 ## Как работает режим по умолчанию
@@ -85,10 +84,10 @@ map и package boundaries. После этого Luna ведёт полный ro
 critique и rework. Дорогой профиль не управляет каждым шагом и не перечитывает
 сырой transcript всех дешёвых waves.
 
-Обычная форма — один Luna packet lead, который внутри своей волны отделяет
-автора от независимого Luna verifier-а. Если nested delegation недоступна, lead
-возвращает checkpoint и точный proof gap: coordinator не разворачивает те же
-lanes в собственных direct children. Для каждого существенного finding
+Обычная форма — Luna execution owner, который возвращает один candidate, и
+независимый Luna verifier. При доказанной nested delegation они могут находиться
+внутри одной owner-wave; без неё это две последовательные direct stages, а не
+checkpoint. Для каждого существенного finding
 требуется одно из трёх: исправление, опровержение evidence или явная передача на
 решение. Несколько ответов «всё хорошо» не перевешивают один воспроизводимый
 дефект.
@@ -120,9 +119,11 @@ telemetry показывают Luna-owned ordinary work. Успешный фун
 ## `Рой`
 
 `Рой` полезен там, где несколько действительно разных подходов, независимая
-критика или широкий поиск edge cases повышают шанс сильного результата. Один
-direct Luna swarm owner запускает внутри своей волны candidates, critics, test
-authors и judges, сохраняя каждого пишущего участника в отдельном worktree.
+критика или широкий поиск edge cases повышают шанс сильного результата. Sol
+один раз задаёт bounded campaign. При недоступной nested delegation он напрямую
+запускает оправданные Luna candidates от общей exact base, а после их завершения
+— отдельного Luna reducer/reviewer. Каждый пишущий участник остаётся в отдельном
+worktree.
 
 Для material candidate-friendly развилки хотя бы одна wave содержит минимум два
 намеренно разных Luna candidate. Один writer на Task без конкурирующей wave не

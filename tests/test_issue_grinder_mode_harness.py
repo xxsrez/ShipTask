@@ -5,6 +5,7 @@ import unittest
 
 from scripts.issue_grinder_mode_harness import (
     BalanceFinding,
+    DirectCampaignObservation,
     EconomicalCheckpoint,
     ExecutionMode,
     LUNA_MAX,
@@ -12,6 +13,7 @@ from scripts.issue_grinder_mode_harness import (
     Profile,
     ReviewWaveObservation,
     assess_balance_packet,
+    assess_direct_campaign,
     assess_review_wave,
     decide_mode_switch,
     decide_run_exit,
@@ -169,6 +171,154 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         self.assertFalse(economical.may_accept_terminal)
         self.assertFalse(classic.may_checkpoint)
         self.assertEqual(classic.action, "repair_review_wave")
+
+    def test_balance_direct_stages_replace_unavailable_nested_delegation(self) -> None:
+        decision = assess_direct_campaign(
+            DirectCampaignObservation(
+                mode=ExecutionMode.BALANCE,
+                stage_order=("execution", "independent_review"),
+                material_candidate_fork=False,
+                no_fork_reason="",
+                candidate_author_ids=("luna-executor",),
+                candidate_purposes=("default",),
+                reviewer_id="luna-reviewer",
+                reducer_id="",
+                routing_guard_owner_ids=("luna-executor", "luna-reviewer"),
+                dispatched_owner_ids=("luna-executor", "luna-reviewer"),
+                event_wait_stage_count=2,
+                common_exact_base=True,
+                candidate_stage_quiescent_before_review=True,
+                review_complete=True,
+                finding_ledger_returned=True,
+                final_review_started_after_stages=True,
+            )
+        )
+
+        self.assertTrue(decision.may_enter_controller_final_review)
+        self.assertEqual(decision.action, "ready_for_controller_final_review")
+        self.assertEqual(decision.defects, ())
+
+    def test_swarm_direct_campaign_keeps_distinct_candidates_and_reducer(self) -> None:
+        decision = assess_direct_campaign(
+            DirectCampaignObservation(
+                mode=ExecutionMode.SWARM,
+                stage_order=("candidates", "reduction_review"),
+                material_candidate_fork=True,
+                no_fork_reason="",
+                candidate_author_ids=("candidate-a", "candidate-b", "candidate-c"),
+                candidate_purposes=("minimal", "reliability", "simple-api"),
+                reviewer_id="reducer-reviewer",
+                reducer_id="reducer-reviewer",
+                routing_guard_owner_ids=(
+                    "candidate-a",
+                    "candidate-b",
+                    "candidate-c",
+                    "reducer-reviewer",
+                ),
+                dispatched_owner_ids=(
+                    "candidate-a",
+                    "candidate-b",
+                    "candidate-c",
+                    "reducer-reviewer",
+                ),
+                event_wait_stage_count=2,
+                common_exact_base=True,
+                candidate_stage_quiescent_before_review=True,
+                review_complete=True,
+                finding_ledger_returned=True,
+                final_review_started_after_stages=True,
+            )
+        )
+
+        self.assertTrue(decision.may_enter_controller_final_review)
+        self.assertEqual(decision.defects, ())
+
+    def test_direct_campaign_rejects_fake_swarm_and_early_final_review(self) -> None:
+        decision = assess_direct_campaign(
+            DirectCampaignObservation(
+                mode=ExecutionMode.SWARM,
+                stage_order=("candidates", "reduction_review"),
+                material_candidate_fork=True,
+                no_fork_reason="",
+                candidate_author_ids=("candidate-a",),
+                candidate_purposes=("same",),
+                reviewer_id="candidate-a",
+                reducer_id="candidate-a",
+                routing_guard_owner_ids=("candidate-a", "candidate-a"),
+                dispatched_owner_ids=("candidate-a", "candidate-a"),
+                event_wait_stage_count=1,
+                common_exact_base=False,
+                candidate_stage_quiescent_before_review=False,
+                review_complete=False,
+                finding_ledger_returned=False,
+                final_review_started_after_stages=False,
+                unchanged_state_actions=("status_poll",),
+            )
+        )
+
+        self.assertFalse(decision.may_enter_controller_final_review)
+        self.assertIn("direct_owners_not_independent", decision.defects)
+        self.assertIn("swarm_material_fork_requires_multiple_candidates", decision.defects)
+        self.assertIn("controller_final_review_started_early", decision.defects)
+        self.assertIn("unchanged_state_coordination:status_poll", decision.defects)
+
+    def test_swarm_does_not_invent_candidates_without_a_material_fork(self) -> None:
+        decision = assess_direct_campaign(
+            DirectCampaignObservation(
+                mode=ExecutionMode.SWARM,
+                stage_order=("candidates", "reduction_review"),
+                material_candidate_fork=False,
+                no_fork_reason="The API and oracle admit one bounded implementation shape.",
+                candidate_author_ids=("candidate-a",),
+                candidate_purposes=("default",),
+                reviewer_id="reducer-reviewer",
+                reducer_id="reducer-reviewer",
+                routing_guard_owner_ids=("candidate-a", "reducer-reviewer"),
+                dispatched_owner_ids=("candidate-a", "reducer-reviewer"),
+                event_wait_stage_count=2,
+                common_exact_base=True,
+                candidate_stage_quiescent_before_review=True,
+                review_complete=True,
+                finding_ledger_returned=True,
+                final_review_started_after_stages=True,
+            )
+        )
+
+        self.assertTrue(decision.may_enter_controller_final_review)
+        self.assertEqual(decision.defects, ())
+
+    def test_balance_can_use_bounded_adaptive_candidates(self) -> None:
+        decision = assess_direct_campaign(
+            DirectCampaignObservation(
+                mode=ExecutionMode.BALANCE,
+                stage_order=("execution", "independent_review"),
+                material_candidate_fork=True,
+                no_fork_reason="",
+                candidate_author_ids=("candidate-a", "candidate-b"),
+                candidate_purposes=("minimal", "reliability"),
+                reviewer_id="luna-reviewer",
+                reducer_id="luna-reviewer",
+                routing_guard_owner_ids=(
+                    "candidate-a",
+                    "candidate-b",
+                    "luna-reviewer",
+                ),
+                dispatched_owner_ids=(
+                    "candidate-a",
+                    "candidate-b",
+                    "luna-reviewer",
+                ),
+                event_wait_stage_count=2,
+                common_exact_base=True,
+                candidate_stage_quiescent_before_review=True,
+                review_complete=True,
+                finding_ledger_returned=True,
+                final_review_started_after_stages=True,
+            )
+        )
+
+        self.assertTrue(decision.may_enter_controller_final_review)
+        self.assertEqual(decision.defects, ())
 
     def test_complete_balance_packet_can_enter_final_review(self) -> None:
         decision = assess_balance_packet(

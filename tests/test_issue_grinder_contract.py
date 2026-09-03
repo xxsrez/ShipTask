@@ -254,8 +254,8 @@ class IssueGrinderContractTest(unittest.TestCase):
         evaluation = EVALUATION.read_text(encoding="utf-8")
 
         for marker in (
-            "один Luna packet lead",
-            "полным внутренним циклом пакета",
+            "Обычно один Luna packet owner",
+            "отдельную direct Luna review stage",
             "независимому Luna verifier/critic",
             "fixed | refuted_with_evidence | escalate",
             "не большинством голосов",
@@ -266,12 +266,12 @@ class IssueGrinderContractTest(unittest.TestCase):
         ):
             self.assertIn(marker, balance)
 
-        self.assertIn("economical packet lead", skill)
+        self.assertIn("direct Luna execution owner", skill)
         self.assertIn("принятый результат на единицу", requirements)
         self.assertIn("Balance control plane и Luna packet loop", architecture)
         self.assertIn("balance-finding-ledger-no-vote", evaluation)
 
-    def test_non_solo_review_wave_owner_contract_is_compiled(self) -> None:
+    def test_non_solo_capability_aware_stage_contract_is_compiled(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         execution_modes = (
             SKILL_ROOT / "references" / "execution-modes.md"
@@ -283,8 +283,15 @@ class IssueGrinderContractTest(unittest.TestCase):
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
         evaluation = EVALUATION.read_text(encoding="utf-8")
 
-        for text in (requirements, architecture, skill, execution_modes, multi_agent):
-            self.assertIn("один", text.casefold())
+        for text in (architecture, skill, execution_modes, multi_agent):
+            self.assertTrue(
+                "nested delegation" in text.casefold()
+                or "nested collaboration" in text.casefold()
+            )
+            self.assertTrue(
+                "direct stage" in text.casefold()
+                or "direct luna" in text.casefold()
+            )
             self.assertTrue(
                 "event" in text.casefold() or "событийн" in text.casefold()
             )
@@ -298,9 +305,19 @@ class IssueGrinderContractTest(unittest.TestCase):
             )
             self.assertIn("event-driven wait", mode_runtime)
         self.assertIn("IG-MA-19", requirements)
-        self.assertIn("one-parent-visible-wave-owner", evaluation)
+        self.assertIn("capability-aware-direct-stages", evaluation)
         self.assertIn("pre-dispatch guard ×1 → spawn owner ×1 → event wait ×1", architecture)
-        self.assertIn("routing guard ×1 → spawn owner ×1 → event wait ×1", multi_agent)
+        self.assertIn("Для каждого нового direct owner-а", multi_agent)
+        self.assertIn("multi-target/event mechanism", multi_agent)
+
+    def test_model_forward_tuning_uses_one_hour_and_holdout(self) -> None:
+        evaluation = EVALUATION.read_text(encoding="utf-8")
+
+        self.assertIn("потолок `3 600` секунд", evaluation)
+        self.assertIn("одного поля manifest", evaluation)
+        self.assertIn("десятиминутного checkpoint", evaluation)
+        self.assertIn("holdout", evaluation)
+        self.assertIn("не участвовавший в правках", evaluation)
 
     def test_publication_unit_stays_with_coordinator(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
