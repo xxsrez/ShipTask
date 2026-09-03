@@ -1016,6 +1016,16 @@ mode record и checkpoint до нового dispatch.
 непроизводственные среды также допустимы. Публичность UAT не повышает действие
 до approval gate.
 
+Классификация среды берётся из current project context, project delivery profile
+и exact target. Общая подпись connector-а, tool schema или platform guard вроде
+`deploy to production`, применяемая ко всем публичным hosted deployment, описывает
+тип внешнего effect, но не переименовывает подтверждённый project UAT в Product
+Production. При таком расхождении coordinator вызывает обычную прямую операцию
+для exact UAT target и не просит у пользователя внутреннее подтверждение. Он не
+обходит фактический platform approval gate: отказ платформы сохраняется как
+provider evidence и обрабатывается по обычному blocker loop, но не превращается
+в permission loop поверх уже действующей UAT authority.
+
 Production отклоняется всегда: Issue Grinder не подключается к production
 endpoint, не читает production logs/data, не выполняет smoke и не создаёт там
 mutation или deployment. Локальное чтение project metadata, необходимое лишь
@@ -1351,9 +1361,10 @@ ID само по себе не доказывает поведение.
   и native continuation;
 - non-material verification gap и соседний material gap, где исключение
   запрещено;
-- public UAT, неизвестный target, Production alias, попытку production read и
-  узкий `Да всегда` с успешным/неуспешным memory read-back, future equivalent
-  operation и несовпадающую категорию;
+- public UAT, неизвестный target, Production alias, попытку production read,
+  расхождение project UAT с общей provider-меткой `production`, узкий `Да всегда`
+  с успешным/неуспешным memory read-back, future equivalent operation и
+  несовпадающую категорию;
 - synthetic substitute для real data/recipient и настоящий high-risk внешний
   effect, требующий selector-а;
 - независимые и конфликтующие writer surfaces, недоступных subagents, worker

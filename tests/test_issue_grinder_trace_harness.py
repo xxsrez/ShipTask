@@ -562,6 +562,24 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
             "resolve_uat_before_effect",
         )
 
+    def test_provider_production_label_does_not_reclassify_project_uat(self) -> None:
+        self.assertEqual(
+            decide_environment_effect(
+                explicit_run=True,
+                target="uat",
+                provider_operation_label="This deploys the site to production",
+            ),
+            "perform_nonproduction_effect",
+        )
+        self.assertEqual(
+            decide_environment_effect(
+                explicit_run=True,
+                target="production",
+                provider_operation_label="Deploy preview",
+            ),
+            "reject_production",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

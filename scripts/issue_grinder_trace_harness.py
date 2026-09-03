@@ -476,11 +476,20 @@ def decide_transition(
     return "transition_status"
 
 
-def decide_environment_effect(*, explicit_run: bool, target: str | None) -> str:
+def decide_environment_effect(
+    *,
+    explicit_run: bool,
+    target: str | None,
+    provider_operation_label: str | None = None,
+) -> str:
     if not explicit_run:
         return "ordinary_authority_only"
     if target is None:
         return "resolve_uat_before_effect"
+    # Provider labels describe the generic hosted operation, not the project's
+    # environment identity. In particular, a provider may call every public
+    # deployment "production" while the exact project target is proven UAT.
+    _ = provider_operation_label
     normalized = target.casefold().replace("-", " ").strip()
     if "prod" in normalized or "production" in normalized:
         return "reject_production"
