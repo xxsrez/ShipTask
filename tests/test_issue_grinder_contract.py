@@ -367,6 +367,34 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("`create_thread`", multi_agent)
         self.assertIn("provider наблюдается\nкак его прямой built-in child", architecture)
         self.assertIn("не получает пакет «сформулировать комментарий»", architecture)
+        self.assertIn("provider-child как reusable channel", architecture)
+        self.assertIn("`followup_task` или\n`send_message`", architecture)
+        self.assertIn("Каждый завершившийся facade call закрыт навсегда", explainer)
+        self.assertIn("вообще не вызывает facade", explainer)
+
+    def test_automatic_blocker_audit_does_not_repeat_human_wait_work(self) -> None:
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        run_goal = (
+            SKILL_ROOT / "references" / "run-and-goal.md"
+        ).read_text(encoding="utf-8")
+        explainer = (
+            SKILL_ROOT / "references" / "strategic-explainer.md"
+        ).read_text(encoding="utf-8")
+        architecture = ARCHITECTURE.read_text(encoding="utf-8")
+        evaluation = EVALUATION.read_text(encoding="utf-8")
+
+        normalized_skill = " ".join(skill.split())
+        self.assertIn("переиспользуй blocker fingerprint", normalized_skill)
+        self.assertIn(
+            "не повторяй проверку, facade, handoff или user request",
+            normalized_skill,
+        )
+        for text in (run_goal, architecture):
+            self.assertIn("browser/profile", text)
+            self.assertIn("update_goal", text)
+            self.assertIn("resume signal", text)
+        self.assertIn("новой unit не создаёт", explainer)
+        self.assertIn("двух следующих автоматических Goal\n  turns", evaluation)
 
 
 if __name__ == "__main__":

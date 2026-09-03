@@ -463,6 +463,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "почему Issue Grinder не может устранить её сам",
         "зачем этот шаг нужен issue contract",
         "platform blocker audit",
+        "переиспользуй blocker fingerprint",
+        "не повторяй проверку, facade, handoff или user request",
         "Финальный Goal\ncomment возвращай только пользователю в чате",
         "Production запрещён полностью",
         "[Task Manager flow](references/task-manager-flow.md)",
@@ -508,6 +510,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "`create_goal`",
         "стратегический outcome",
         "Нетерминальный\ncheckpoint `Экономичного` режима сохраняет Goal активным",
+        "не повторяет browser/profile discovery",
+        "выполни только отсутствующий `update_goal(blocked)`",
     )
     require(
         errors,
@@ -695,6 +699,10 @@ def validate_issue_skill(errors: list[str]) -> None:
         "observable resume condition",
         "отдельный answer должен объяснить",
         "публикации общего report, всех\nотдельных ответов",
+        "Каждый завершившийся facade call закрыт навсегда",
+        "`followup_task` или `send_message`",
+        "вообще не вызывает facade",
+        "не повторяет report, reason answers или user\nrequest",
         "только пользователю в чате",
     )
     require(
@@ -790,6 +798,9 @@ def validate_issue_skill(errors: list[str]) -> None:
         "[Requirements](requirements.md)",
         "[Architecture](architecture.md)",
         "не создаёт новый policy contract",
+        "автоматический Goal turn с тем же принятым blocker fingerprint",
+        "завершённый provider-child был продолжен через `followup_task`",
+        "на platform threshold выполнить только Goal mutation",
     )
     require(
         errors,
@@ -810,6 +821,9 @@ def validate_issue_skill(errors: list[str]) -> None:
         "не получает пакет «сформулировать комментарий»",
         "`collaboration.spawn_agent`",
         "как его прямой built-in child",
+        "provider-child как reusable channel",
+        "не повторяет browser/profile/account discovery",
+        "только отсутствующий `update_goal(status=blocked)`",
         "наблюдаемым evaluation scenario",
         "## 4. Режимы исполнения и профильный resolver",
         "mode record",

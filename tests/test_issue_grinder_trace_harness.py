@@ -5,6 +5,8 @@ from pathlib import Path
 import unittest
 
 from scripts.issue_grinder_trace_harness import (
+    AcceptedBlockerState,
+    BlockerContinuationContext,
     BlockerContext,
     BlockerReasonAnswer,
     BlockerReport,
@@ -12,6 +14,7 @@ from scripts.issue_grinder_trace_harness import (
     SafeAction,
     WriterPacket,
     decide_blocker,
+    decide_blocker_continuation,
     decide_environment_effect,
     decide_finalization,
     decide_goal_creation,
@@ -396,6 +399,71 @@ class IssueGrinderTraceHarnessTest(unittest.TestCase):
         self.assertIn("publish_blocker_report", decision.events)
         self.assertIn("goal_block_pending_audit", decision.events)
         self.assertNotIn("update_goal:blocked", decision.events)
+
+    def test_automatic_goal_continuation_reuses_handoff_without_retry(self) -> None:
+        decision = decide_blocker_continuation(
+            BlockerContinuationContext(
+                goal_active=True,
+                current_fingerprint="md-393:independent-principal",
+                accepted=AcceptedBlockerState(
+                    fingerprint="md-393:independent-principal",
+                    handoff_published=True,
+                    consecutive_goal_turns=2,
+                ),
+            )
+        )
+
+        self.assertEqual(decision.action, "await_platform_blocker_audit")
+        self.assertFalse(decision.may_repeat_blocker_check)
+        self.assertFalse(decision.may_invoke_explainer)
+        self.assertFalse(decision.may_publish)
+        self.assertFalse(decision.may_request_user)
+        self.assertFalse(decision.may_update_goal_blocked)
+        self.assertTrue(decision.may_stop)
+        self.assertIn("suppress_duplicate_blocker_check", decision.events)
+        self.assertIn("suppress_duplicate_user_request", decision.events)
+
+    def test_platform_threshold_adds_only_missing_goal_effect(self) -> None:
+        decision = decide_blocker_continuation(
+            BlockerContinuationContext(
+                goal_active=True,
+                current_fingerprint="md-393:independent-principal",
+                accepted=AcceptedBlockerState(
+                    fingerprint="md-393:independent-principal",
+                    handoff_published=True,
+                    consecutive_goal_turns=3,
+                ),
+            )
+        )
+
+        self.assertEqual(decision.action, "finalize_goal_blocked")
+        self.assertFalse(decision.may_repeat_blocker_check)
+        self.assertFalse(decision.may_invoke_explainer)
+        self.assertFalse(decision.may_publish)
+        self.assertFalse(decision.may_request_user)
+        self.assertTrue(decision.may_update_goal_blocked)
+        self.assertEqual(decision.events[-2:], ("update_goal:blocked", "stop"))
+
+    def test_new_relevant_signal_invalidates_accepted_blocker(self) -> None:
+        decision = decide_blocker_continuation(
+            BlockerContinuationContext(
+                goal_active=True,
+                current_fingerprint="md-393:independent-principal",
+                accepted=AcceptedBlockerState(
+                    fingerprint="md-393:independent-principal",
+                    handoff_published=True,
+                    consecutive_goal_turns=2,
+                ),
+                relevant_user_signal=True,
+            )
+        )
+
+        self.assertEqual(decision.action, "resume_delivery")
+        self.assertTrue(decision.may_repeat_blocker_check)
+        self.assertFalse(decision.may_invoke_explainer)
+        self.assertFalse(decision.may_publish)
+        self.assertFalse(decision.may_stop)
+        self.assertIn("invalidate_blocker_checkpoint", decision.events)
 
     def test_optional_improvement_does_not_create_bureaucratic_loop(self) -> None:
         decision = decide_blocker(

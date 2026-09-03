@@ -55,7 +55,7 @@ prompt; подготовка обязана остановиться при ра
 |---|---|---|
 | `IG-FLOW-01` | `SKILL.md` §1; `task-manager-flow.md` | active-status-filter; backlog-rejected |
 | `IG-FLOW-02` | `SKILL.md` §2; `task-manager-flow.md` | all-lifecycle-transitions |
-| `IG-FLOW-03` | `SKILL.md` §3; `strategic-explainer.md` | trivial-start; required-comment; native-fallback |
+| `IG-FLOW-03` | `SKILL.md` §3; `strategic-explainer.md` | trivial-start; required-comment; native-fallback; fresh-facade-per-unit; completed-provider-not-reused |
 | `IG-FLOW-04` | `SKILL.md` §3; `strategic-explainer.md` | comment-reveals-work; optional-follow-up |
 | `IG-FLOW-05` | `SKILL.md` §2; `task-manager-flow.md` | integrated-blocked-by; late-reopen-recheck |
 | `IG-FLOW-06` | `SKILL.md` §5; `execution-modes.md`; `modes/economical.md`; mode harness | active-scope-prevents-completion; economical-checkpoint-is-nonterminal |
@@ -65,13 +65,13 @@ prompt; подготовка обязана остановиться при ра
 | `IG-GOAL-04` | `SKILL.md` §3; blocker harness | explanation-unlocks; true-external-blocker |
 | `IG-GOAL-05` | `SKILL.md` §3 | final-reflection-continues; chat-only-final |
 | `IG-GOAL-06` | `SKILL.md` §2; `task-manager-flow.md` | nonmaterial-gap-transparent-by-issue-contract; material-acceptance-gap-blocks |
-| `IG-GOAL-07` | `SKILL.md` §3; `strategic-explainer.md`; blocker harness | all-causes-overview; one-separate-answer-per-cause; three-lens-completeness; reason-reflection-unlocks |
+| `IG-GOAL-07` | `SKILL.md` §3; `strategic-explainer.md`; blocker harness | all-causes-overview; one-separate-answer-per-cause; three-lens-completeness; reason-reflection-unlocks; accepted-blocker-auto-continuation-no-repeat; threshold-goal-effect-only |
 | `IG-SCOPE-01` | `run-and-goal.md`; `task-manager-flow.md` | prompt-selector-precedence |
 | `IG-SCOPE-02` | `run-and-goal.md` | explicit-default-release; implicit-missing-selector |
 | `IG-SCOPE-03` | `run-and-goal.md`; `task-manager-flow.md` | late-member; excluded-member; final-refresh |
 | `IG-UI-01` | `run-and-goal.md`; `thread-title.md` | fresh-placeholder-renamed; meaningful-title-preserved; ambiguous-candidate-preserved; title-capability-failure-nonblocking |
 | `IG-AUTO-01` | `SKILL.md` §4; `run-and-goal.md`; `autonomy-and-environments.md` | explicit-persistence; implicit-no-extra-authority |
-| `IG-AUTO-02` | `SKILL.md` §3; `modes/economical.md`; blocker harness | preflight-unlock; explanation-unlock; sufficient-economical-checkpoint-stops-boundedly |
+| `IG-AUTO-02` | `SKILL.md` §3; `modes/economical.md`; blocker harness | preflight-unlock; explanation-unlock; relevant-signal-resumes; sufficient-economical-checkpoint-stops-boundedly |
 | `IG-AUTO-03` | `SKILL.md` §4; environment harness | production-rejected; public-uat-allowed; provider-production-label-does-not-reclassify-uat |
 | `IG-AUTO-04` | `SKILL.md` §4; environment harness | default-uat; unknown-uat-before-effect |
 | `IG-AUTO-05` | `autonomy-and-environments.md` | security-selector; narrow-always-readback |
@@ -207,6 +207,13 @@ candidate blocker
 - blocker-report или `update_goal(blocked)` произошли до post-explanation
   reflection;
 - platform blocker audit задержал принятый blocker-report пользователю;
+- автоматический Goal turn с тем же принятым blocker fingerprint повторил
+  browser/profile/account discovery, blocked action, Strategic Explainer,
+  blocker-handoff или просьбу пользователю без нового релевантного сигнала;
+- достигнутый platform threshold создал новую communication unit вместо
+  единственного отсутствующего `update_goal(blocked)`;
+- релевантный resume signal или изменившийся primary state не инвалидировал
+  прежний blocker checkpoint;
 - incomplete/raw-error report был опубликован;
 - общий report не перечислил все подтверждённые причины либо для хотя бы
   одной причины нет отдельного ответа;
@@ -216,6 +223,8 @@ candidate blocker
 - остановка или `update_goal(blocked)` произошли до публикации общего report и всех
   отдельных ответов;
 - caller error Strategic Explainer превратился в blocker вместо исправления;
+- завершённый provider-child был продолжен через `followup_task` или
+  `send_message` для caller repair либо следующей publication unit;
 - public UAT, синтетический fixture или непроверенная альтернатива были названы
   terminal причиной без попытки самостоятельного продолжения;
 - optional improvement создал бесконечную итерацию;
@@ -335,7 +344,10 @@ fresh model-forward smoke.
   title и продолжив при отсутствии capability;
 - на synthetic blocker case продолжить после найденного safe action, а на
   настоящем authority blocker-е дать полный общий причинный report и отдельный
-  трёхчастный ответ по каждой причине;
+  трёхчастный ответ по каждой причине; в двух следующих автоматических Goal
+  turns с тем же fingerprint не повторять blocked proof, facade, handoff и user
+  request, а на platform threshold выполнить только Goal mutation; новый
+  релевантный signal обязан возобновить live reconciliation;
 - на completed Task scope с известным strategic gap завершить Goal, раскрыть gap
   в отчёте и не создать новую Task, blocker или delivery iteration;
 - перед implementation и после simulated resume восстановить Strategic Outcome,

@@ -924,6 +924,13 @@ facade из своей top-level collaboration surface. Поэтому provider 
 как его прямой built-in child, а не как grandchild worker-а или отдельная
 пользовательская task.
 
+Terminal result semantic facade закрывает invocation. Coordinator не сохраняет
+provider-child как reusable channel и не вызывает на нём `followup_task` или
+`send_message`: исправленный caller request и каждая следующая publication unit
+получают отдельный fresh top-level facade call. Исключение не нужно даже для
+автоматического Goal turn: неизменный уже опубликованный blocker не является
+новой unit и повторного facade call не получает.
+
 Тот же communication route применяется к любому другому Task Manager comment,
 который Issue Grinder решает опубликовать, а также к blocker- и final-report по
 правилам Level 1. Routine progress journal в Task Manager по умолчанию не
@@ -1043,6 +1050,31 @@ Goal. Goal получает terminal `blocked` только когда даль�
 terminal `blocked`, Goal остаётся активным, а report честно называет это
 расхождение; audit не задерживает объяснение пользователю и не запускает
 внутренний бесконечный цикл.
+
+Первая принятая публикация сохраняет blocker checkpoint с fingerprint из
+canonical selector/frontier, exact заблокированного effect, current primary
+causes, authority boundary, требуемого user action и observable resume signal.
+Этот fingerprint отделяет платформенный подсчёт последовательных Goal turns от
+повторного доказательства уже установленного blocker-а.
+
+Если платформа автоматически продолжила Goal, а fingerprint совпадает и не
+появилось релевантного user signal либо изменения primary state, coordinator:
+
+1. засчитывает очередной audit turn на прежнем принятом checkpoint;
+2. не повторяет browser/profile/account discovery, external proof или другой
+   blocked action только ради надежды на самопроизвольное изменение;
+3. не создаёт новую publication unit, не вызывает Strategic Explainer, не
+   повторяет handoff, reason answers или просьбу пользователю;
+4. до платформенного порога завершает turn без нового handoff, а при достижении
+   порога выполняет только отсутствующий `update_goal(status=blocked)` и
+   останавливается.
+
+Релевантный observable resume signal, изменившийся primary state либо другой
+fingerprint инвалидирует checkpoint и возвращает run к bounded live
+reconciliation. Сам факт автоматического продолжения новым evidence или
+разрешением на повтор проверки не является. Status-вопрос пользователя также
+не доказывает изменение blocker-а, если он не совпадает с указанным resume
+condition.
 
 Нетерминальный checkpoint `Экономичного` режима проходит отдельную проверку и
 не маскируется под blocker. Он допустим, когда рекомендуемый candidate,
@@ -1427,13 +1459,16 @@ ID само по себе не доказывает поведение.
 - совместимый и несовместимый активный Goal, доказанная continuity против одного
   совпадения selector-а, single-issue explicit checkpoint и новый implicit run;
 - платформенный blocker audit, включая принятый report при отложенной Goal
-  mutation;
+  mutation, автоматические продолжения до platform threshold без повторного
+  profile/account discovery, публикации или просьбы пользователю и единственный
+  `update_goal(status=blocked)` на достигнутом пороге;
 - каждый lifecycle transition, `comment committed / status failed`, оба
   unknown outcomes, version conflict и защита от duplicate comment;
 - реализацию `blocked by` в integration base, код только в постороннем worker
   branch, поздний reopen и targeted recheck;
 - отсутствующий Explainer, caller error, technical failure, reflection finding
-  и native continuation;
+  и native continuation; попытку продолжить завершённый provider-child через
+  `followup_task`/`send_message` вместо нового facade call;
 - non-material verification gap и соседний material gap, где исключение
   запрещено;
 - public UAT, неизвестный target, Production alias, попытку production read,

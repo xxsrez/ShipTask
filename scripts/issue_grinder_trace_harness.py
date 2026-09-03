@@ -107,6 +107,35 @@ class BlockerDecision:
 
 
 @dataclass(frozen=True)
+class AcceptedBlockerState:
+    fingerprint: str
+    handoff_published: bool
+    consecutive_goal_turns: int = 1
+
+
+@dataclass(frozen=True)
+class BlockerContinuationContext:
+    goal_active: bool
+    current_fingerprint: str
+    accepted: AcceptedBlockerState | None = None
+    relevant_user_signal: bool = False
+    primary_state_changed: bool = False
+    platform_blocker_turn_threshold: int = 3
+
+
+@dataclass(frozen=True)
+class BlockerContinuationDecision:
+    action: str
+    events: tuple[str, ...]
+    may_repeat_blocker_check: bool
+    may_invoke_explainer: bool
+    may_publish: bool
+    may_request_user: bool
+    may_update_goal_blocked: bool
+    may_stop: bool
+
+
+@dataclass(frozen=True)
 class WriterPacket:
     owner: str
     prepared: bool
@@ -412,6 +441,91 @@ def decide_blocker(
         may_publish=True,
         may_stop=True,
         may_update_goal_blocked=context.goal_active,
+    )
+
+
+def decide_blocker_continuation(
+    context: BlockerContinuationContext,
+) -> BlockerContinuationDecision:
+    """Handle an automatic Goal continuation after a blocker handoff."""
+
+    if context.platform_blocker_turn_threshold < 1:
+        raise ValueError("platform_blocker_turn_threshold must be positive")
+    if context.accepted and context.accepted.consecutive_goal_turns < 1:
+        raise ValueError("consecutive_goal_turns must be positive")
+
+    events = ["automatic_goal_continuation"]
+    accepted = context.accepted
+    same_accepted_blocker = bool(
+        accepted
+        and accepted.handoff_published
+        and accepted.fingerprint == context.current_fingerprint
+    )
+
+    if context.relevant_user_signal or context.primary_state_changed:
+        events.extend(("invalidate_blocker_checkpoint", "resume_delivery"))
+        return BlockerContinuationDecision(
+            action="resume_delivery",
+            events=tuple(events),
+            may_repeat_blocker_check=True,
+            may_invoke_explainer=False,
+            may_publish=False,
+            may_request_user=False,
+            may_update_goal_blocked=False,
+            may_stop=False,
+        )
+
+    if not same_accepted_blocker:
+        events.extend(
+            ("blocker_checkpoint_not_reusable", "reenter_blocker_reflection")
+        )
+        return BlockerContinuationDecision(
+            action="reenter_blocker_reflection",
+            events=tuple(events),
+            may_repeat_blocker_check=True,
+            may_invoke_explainer=True,
+            may_publish=True,
+            may_request_user=False,
+            may_update_goal_blocked=False,
+            may_stop=False,
+        )
+
+    events.extend(
+        (
+            "reuse_accepted_blocker_checkpoint",
+            "suppress_duplicate_blocker_check",
+            "suppress_duplicate_explainer_invocation",
+            "suppress_duplicate_publication",
+            "suppress_duplicate_user_request",
+        )
+    )
+    if (
+        context.goal_active
+        and accepted.consecutive_goal_turns
+        >= context.platform_blocker_turn_threshold
+    ):
+        events.extend(("update_goal:blocked", "stop"))
+        return BlockerContinuationDecision(
+            action="finalize_goal_blocked",
+            events=tuple(events),
+            may_repeat_blocker_check=False,
+            may_invoke_explainer=False,
+            may_publish=False,
+            may_request_user=False,
+            may_update_goal_blocked=True,
+            may_stop=True,
+        )
+
+    events.extend(("goal_block_pending_audit", "stop"))
+    return BlockerContinuationDecision(
+        action="await_platform_blocker_audit",
+        events=tuple(events),
+        may_repeat_blocker_check=False,
+        may_invoke_explainer=False,
+        may_publish=False,
+        may_request_user=False,
+        may_update_goal_blocked=False,
+        may_stop=True,
     )
 
 
