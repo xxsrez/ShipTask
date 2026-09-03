@@ -10,6 +10,13 @@ scope, полномочия, Task Manager lifecycle, запрет Production и 
 Explainer и другие ограниченные service/provider agents в неё не входят, пока
 не анализируют, не реализуют и не проверяют сам scope.
 
+Во всех режимах, кроме `Соло`, родительский координатор видит ровно одного
+владельца очередной рабочей или проверочной волны. Внутренние авторы, критики и
+проверяющие остаются его children. Обычный путь — один заранее разрешённый
+routing guard, один запуск и одно событийное ожидание; неизменное состояние не
+опрашивается по кругу. Каждый exact candidate обязательно получает независимую
+проверку, даже если scope мал или прост.
+
 Эта страница помогает выбрать режим. Действующий пользовательский контракт
 находится в [Requirements](../skills/issue-grinder/requirements.md), инженерный
 способ исполнения — в
@@ -21,10 +28,10 @@ Explainer и другие ограниченные service/provider agents в н
 | Режим | Кто выполняет работу | Проверка | Когда заканчивается |
 |---|---|---|---|
 | `Соло` | Текущая основная модель последовательно выполняет всю delivery-работу без рабочих субагентов Issue Grinder | Self-review текущей модели плюс объективные checks | Только terminal result или настоящий blocker |
-| `Классический` | Sol/controller делает почти всё; Luna получает только тривиальные пакеты | Полная итоговая проверка exact result | Только terminal result или настоящий blocker |
+| `Классический` | Sol/controller делает почти всё; Luna получает только тривиальные пакеты | Независимый Luna-review exact candidate и итоговая приёмка controller-а | Только terminal result или настоящий blocker |
 | `Баланс` | Luna ведёт полный routine loop пакетов; Sol/controller оставляет material decisions и integration | Независимая Luna-проверка плюс сильный final review exact candidate | Только terminal result или настоящий blocker |
-| `Рой` | Luna-волны разных candidates, critics, test authors и judges | Результаты сокращаются до одного candidate и проходят final review | Только terminal result или настоящий blocker |
-| `Экономичный` | Luna выполняет всю содержательную работу; non-Luna root допустим только как transport/authority оболочка | Все доступные checks; дорогой gate может быть отложен | Terminal result либо честный resumable checkpoint |
+| `Рой` | Один Luna-owner ведёт внутренние волны разных candidates, critics, test authors и judges | Результаты сокращаются до одного candidate, который независимо проверяется | Только terminal result или настоящий blocker |
+| `Экономичный` | Luna выполняет всю содержательную работу; non-Luna root допустим только как transport/authority оболочка | Независимый Luna-review обязателен для terminal result; незавершённый review сохраняется как deferred gate | Terminal result либо честный resumable checkpoint |
 
 ## Как работает режим по умолчанию
 
@@ -63,8 +70,10 @@ Controller/reviewer изучает весь live scope, принимает су�
 получает только действительно тривиальные, самодостаточные пакеты с ясным oracle
 и низким риском.
 
-После fan-in controller/reviewer читает точную интегрированную версию и проводит
-итоговую проверку. Конкурирующие полные реализации по умолчанию не создаются.
+После fan-in один direct Luna review owner независимо проверяет точную
+интегрированную версию, включая простой scope. Controller принимает exact
+candidate по проверяемому finding ledger. После material rework продолжается та
+же review session. Конкурирующие полные реализации по умолчанию не создаются.
 
 ## `Баланс`
 
@@ -76,11 +85,13 @@ map и package boundaries. После этого Luna ведёт полный ro
 critique и rework. Дорогой профиль не управляет каждым шагом и не перечитывает
 сырой transcript всех дешёвых waves.
 
-Обычная форма — Luna packet lead и независимый Luna verifier. Если nested
-delegation недоступна, coordinator вызывает те же Luna lanes напрямую, не
-забирая их работу себе. Для каждого существенного finding требуется одно из
-трёх: исправление, опровержение evidence или явная передача на решение. Несколько
-ответов «всё хорошо» не перевешивают один воспроизводимый дефект.
+Обычная форма — один Luna packet lead, который внутри своей волны отделяет
+автора от независимого Luna verifier-а. Если nested delegation недоступна, lead
+возвращает checkpoint и точный proof gap: coordinator не разворачивает те же
+lanes в собственных direct children. Для каждого существенного finding
+требуется одно из трёх: исправление, опровержение evidence или явная передача на
+решение. Несколько ответов «всё хорошо» не перевешивают один воспроизводимый
+дефект.
 
 Дополнительные candidates создаются адаптивно: только при реальной развилке,
 слабом oracle, провале прежнего подхода или высокой ценности отдельной попытки.
@@ -109,9 +120,9 @@ telemetry показывают Luna-owned ordinary work. Успешный фун
 ## `Рой`
 
 `Рой` полезен там, где несколько действительно разных подходов, независимая
-критика или широкий поиск edge cases повышают шанс сильного результата. Он
-запускает на Luna конечные волны candidates, critics, test authors и judges, сохраняя
-каждого пишущего участника в отдельном worktree.
+критика или широкий поиск edge cases повышают шанс сильного результата. Один
+direct Luna swarm owner запускает внутри своей волны candidates, critics, test
+authors и judges, сохраняя каждого пишущего участника в отдельном worktree.
 
 Для material candidate-friendly развилки хотя бы одна wave содержит минимум два
 намеренно разных Luna candidate. Один writer на Task без конкурирующей wave не
@@ -128,10 +139,14 @@ telemetry показывают Luna-owned ordinary work. Успешный фун
 исследует, реализует, тестирует и критикует, но сводит работу к одному exact
 candidate и сохраняет raw checks, known defects, unknowns и deferred gates.
 Если root запущен на другой модели, он только ведёт Goal/Task Manager/fan-in,
-вызывает Luna supervisor и переносит подготовленные им packets в direct Luna
-workers; для запуска вообще без Sol top-level тоже выбирается Luna Max.
+вызывает одного Luna supervisor, а тот управляет своими внутренними workers;
+для запуска вообще без Sol top-level тоже выбирается Luna Max.
 Недоступность Luna приводит к checkpoint, а не к скрытой Sol/GPT-5.4
 implementation.
+
+Перед terminal acceptance exact candidate обязательно проверяет независимый
+Luna reviewer. Если проверка не завершилась, результат остаётся resumable
+checkpoint с deferred gate, а не объявляется терминальным.
 
 Это единственный режим, где текущая попытка может честно завершиться без
 terminal результата. Такой выход оставляет `In Progress` или действительно

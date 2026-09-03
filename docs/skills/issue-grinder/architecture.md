@@ -1,6 +1,6 @@
 # Issue Grinder: архитектура
 
-Статус: current agent-owned Architecture, 2026-09-02. Независимые user-owned
+Статус: current agent-owned Architecture, 2026-09-03. Независимые user-owned
 источники находятся в локальных [Overview](overview.md) и
 [Requirements](requirements.md). Эта Architecture описывает current способ
 достижения цели `$issue-grinder` и не может ослаблять, расширять или
@@ -209,6 +209,14 @@ recursive telemetry делают такой обход наблюдаемым и
 Непропускаемый gate потребовал бы dispatcher tool, который одновременно
 валидирует и создаёт child, а direct raw spawn был бы ему недоступен. Runtime не
 выдаёт локальный preflight за такую гарантию.
+
+Абсолютные пути обоих bundled guard-ов разрешаются один раз при загрузке
+multi-agent runtime и сохраняются в continuity текущего run. Нормальный
+dispatch не тратит model turns на поиск script, чтение `--help` или повторное
+исследование его interface: эти действия допустимы только как явное
+восстановление после доказанного package/path mismatch. Внутренний владелец
+волны применяет тот же admission к собственным children, поэтому корневой
+дефицитный профиль не обслуживает их receipts.
 
 Build- и evaluation-скрипты на уровне repository по-прежнему проверяют semantic
 coverage Level 1/Level 2, behavioural scenarios, Marketplace package и byte
@@ -604,12 +612,13 @@ implementation, tests, critique и rework и возвращает один task-
 либо точный checkpoint. При доступной nested delegation он может вызывать
 read-only Luna verifier/test author/critic и различимые candidate/reducer roles,
 но каждый такой execution-child проходит собственный packet-bound routing
-admission. Если nested delegation недоступна, operational coordinator создаёт
-эти Luna roles напрямую из того же compact contract; дорогой профиль не
-дублирует их содержательную работу.
+admission. Если nested delegation недоступна, lead возвращает точный checkpoint
+и proof gap: operational coordinator не разворачивает внутреннюю волну в набор
+собственных direct children и не подменяет независимый review дорогим
+self-review.
 
-Обычный materially changed candidate получает независимый economical verifier,
-когда существует полезный oracle. Verifier видит current requirements, exact
+Каждый exact candidate до final gate получает независимого economical verifier,
+включая малый или простой scope. Verifier видит current requirements, exact
 diff/source anchors и способ проверки, но не использует итоговую уверенность
 автора как evidence. Findings сводятся не голосованием, а ledger-ом:
 
@@ -645,7 +654,50 @@ packet-bound routing receipts, фактические profiles и expensive-work
 implementation является полезным candidate, но routing-invalid результатом, а
 не доказательством `Баланса`.
 
-### 4.6 Review packet и переключение
+### 4.6 Владелец волны и событийная координация
+
+Для каждого non-Solo участка multi-agent topology operational coordinator
+создаёт не плоский набор children, а одного прямого wave owner. Роль owner-а
+зависит от режима:
+
+- в `Классическом` это independent review owner точного кандидата;
+- в `Балансе` — Luna packet lead, который внутри своего цикла отделяет автора от
+  independent reviewer-а;
+- в `Рое` — Luna swarm owner, который внутри bounded envelope управляет scouts,
+  candidates, critics, test authors, reviewer-ом и reducer-ом;
+- в `Экономичном` Luna top-level остаётся operational owner, а для exact
+  candidate создаёт одного independent Luna review owner; non-Luna transport
+  shell вместо этого создаёт одного Luna supervisor, который владеет всей
+  внутренней волной.
+
+На простом scope review owner самостоятельно читает candidate и возвращает
+ledger. На большом scope, например Teams, он может создать read-only lenses по
+реальным risk surfaces: data model/migrations, ACL/authorization, API/filtering,
+UI/synchronization и tests/UAT. Деление по числу Tasks без независимой
+поверхности не создаёт lens. В любом случае parent получает один candidate и
+один объединённый ledger, а не сообщения всех внутренних reviewers.
+
+Новый direct owner проходит один заранее разрешённый routing guard, один spawn
+и один event-driven wait до `complete | needs_attention | deadline`. Owner не
+публикует routine progress родителю; при неизменном состоянии coordinator не
+вызывает status list, короткие polling waits или nudges. Owner сам ждёт
+внутренних children и возвращает только требующий решения вопрос либо итоговый
+handoff. Его deadline короче общего ceiling run, чтобы даже при неполном review
+вернуть partial ledger и не потерять evidence.
+
+После material rework coordinator продолжает существующего owner-а и тот же
+independent reviewer session с exact changed candidate. Нормальный путь содержит
+один follow-up и один новый event-driven wait без повторного guard/spawn. Новый
+reviewer допустим только после доказанной недоступности прежнего, потери
+независимости либо material изменения review contract. Partial ledger не
+разрешает terminal acceptance; `Экономичный` может сохранить его как deferred
+gate resumable checkpoint.
+
+Эта схема ограничивает parent-visible coordination константой относительно
+числа внутренних agents. Она не ограничивает полезную ширину `Роя` и не
+ослабляет обязательный review: меняется место оркестрации, а не evidence gate.
+
+### 4.7 Review packet и переключение
 
 Expensive review packet содержит exact scope/base/candidate identity,
 acceptance, integrated diff и source anchors, выполненные checks, material
@@ -1056,22 +1108,52 @@ service/provider transport.
 2. строит dependency graph и карту поверхностей записи;
 3. выделяет conflict-free dependency-ready packets, а в `Рое` отдельно
    регистрирует intentional candidates с purpose и candidate identity;
-4. до каждого child spawn получает model-routing receipt, переносит exact
-   model/effort/fork в фактический dispatch и сверяет observed profile;
-5. создаёт branches от подтверждённой integration base и выдаёт каждому writer
+4. для каждой non-Solo волны назначает ровно одного direct wave owner; авторы,
+   critics, verifiers и reducers внутри волны остаются его children;
+5. до spawn direct owner-а получает один model-routing receipt, переносит exact
+   model/effort/fork в фактический dispatch и сверяет observed profile; owner
+   самостоятельно проводит тот же gate для внутренних children;
+6. создаёт branches от подтверждённой integration base и выдаёт каждому writer
    отдельные feature branch и Git worktree;
-6. оставляет read-only исследователей без worktree;
-7. запускает столько пакетов, critics или candidates, сколько оправдано
-   режимом, доступной capacity и ожидаемой ценностью;
-8. принимает отчёты, но сам объединяет изменения;
-9. проверяет exact integrated result;
-10. после каждого результата или изменения scope пересчитывает frontier.
+7. оставляет read-only исследователей без worktree;
+8. запускает внутри owner-а столько пакетов, critics или candidates, сколько
+   оправдано режимом, доступной capacity и ожидаемой ценностью;
+9. ожидает один owner handoff без polling неизменившегося состояния;
+10. принимает один объединённый отчёт, но сам объединяет изменения;
+11. проверяет exact integrated result;
+12. после каждого результата или изменения scope пересчитывает frontier.
 
 Routing admission предшествует writer admission: неверная модель должна быть
 остановлена до подготовки implementation turn, а неверный worktree — до первой
 FileChange. Оба receipts сохраняются в run continuity и evidence.
 
-### 11.1 Двухфазный writer admission
+### 11.1 Event-driven lifecycle владельца волны
+
+Перед первой волной coordinator один раз разрешает абсолютный путь bundled
+routing guard и его стабильный interface. Normal direct-owner trace:
+
+```text
+pre-dispatch guard ×1 → spawn owner ×1 → event wait ×1
+```
+
+Ожидание получает конечный deadline не больше остатка run ceiling и завершается
+только результатом, запросом внимания либо deadline handoff. Owner не отправляет
+routine progress наверх, а coordinator не будит его пустыми сообщениями и не
+делает `list_agents` или короткие повторные waits при неизменном state. Если
+platform прерывает event wait новым пользовательским input, coordinator сначала
+обрабатывает этот input; это не превращает normal trace в polling loop.
+
+Rework trace переиспользует идентичности owner/reviewer:
+
+```text
+follow-up exact changed candidate ×1 → event wait ×1
+```
+
+Повторный guard/spawn нужен только при доказанном replacement condition. Каждый
+owner применяет тот же lifecycle к собственной внутренней волне и возвращает
+родителю один consolidated handoff.
+
+### 11.2 Двухфазный writer admission
 
 Прямой dispatch implementation writer-а запрещён. Для каждой параллельной wave
 coordinator исполняет fail-closed protocol:
@@ -1181,7 +1263,7 @@ Task Manager cancellation statuses от имени Issue Grinder.
 | `IG-AUTO-*` | explicit-mode gate, UAT resolver и узкий security selector | нет Production access; разрешённая UAT работа не ждёт рутинного approval |
 | `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint и semantic topology boundary | Luna default выбирает `Экономичный`, иной default — `Классический`; `Соло` сохраняет current profile и ноль Issue Grinder execution-subagents, но допускает отдельный service provider; выбранный mode не дрейфует; каждый режим выполняет своё обещание |
 | `IG-HELP-*` | ранний fast path и компактный `mode-help.md` | чистая справка объясняет пять режимов и default без Task Manager, Goal, title mutations или subagents |
-| `IG-MA-*` | dependency-ready packets, isolated writers, integration owner и profile routing | параллельные writers изолированы, а acceptance относится к объединённой версии |
+| `IG-MA-*` | dependency-ready packets, isolated writers, integration owner, profile routing и один event-driven wave owner | параллельные writers изолированы; parent-visible coordination не растёт с числом внутренних agents; независимый review остаётся обязательным для non-Solo terminal acceptance |
 
 Группированная таблица является только обзором. Точная coverage map связывает
 каждый отдельный `IG-*` как минимум с одним runtime surface и одним наблюдаемым
@@ -1202,7 +1284,9 @@ ID само по себе не доказывает поведение.
    `scripts/issue_grinder_trace_harness.py`, а mode resolver, profile
    normalization, economical exit и switch barrier — в
    `scripts/issue_grinder_mode_harness.py`. Тот же mode harness проверяет
-   механическую готовность Balance packet-а: independent verification,
+   механическую готовность Balance packet-а и review-wave lifecycle:
+   independent verification даже простого scope, один parent-visible owner,
+   guard/spawn/event-wait envelope, reuse после rework,
    finding dispositions, narrow escalation, routing validity и допустимые
    категории expensive work. Оба harness являются oracle отдельных hard
    invariants и не доказывают, что Markdown runtime вызовет те же effects.
@@ -1247,7 +1331,8 @@ ID само по себе не доказывает поведение.
   либо отсутствующий packet-bound receipt делает case routing-invalid даже при
   функциональном успехе; оба сохраняют exact final review; `Рой` с intentional
   candidate identity, reduction и bounded stop;
-  `Экономичный` с одним resumable candidate без ложного Done/Goal close;
+  `Экономичный` с independent Luna review перед terminal acceptance и одним
+  resumable candidate без ложного Done/Goal close;
 - Luna profile normalization, root-shell supervisor, explicit role override и
   неизвестное cross-family ordering без догадки;
 - zero/one/multiple issue, рост и сокращение scope, late matching issue,

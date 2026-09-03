@@ -84,7 +84,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertEqual(len(rows), len(set(rows)), "duplicate coverage rows")
         self.assertEqual(set(rows), requirement_ids)
-        self.assertEqual(len(requirement_ids), 53)
+        self.assertEqual(len(requirement_ids), 54)
 
     def test_architecture_runtime_layout_exists(self) -> None:
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
@@ -270,6 +270,37 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("принятый результат на единицу", requirements)
         self.assertIn("Balance control plane и Luna packet loop", architecture)
         self.assertIn("balance-finding-ledger-no-vote", evaluation)
+
+    def test_non_solo_review_wave_owner_contract_is_compiled(self) -> None:
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        execution_modes = (
+            SKILL_ROOT / "references" / "execution-modes.md"
+        ).read_text(encoding="utf-8")
+        multi_agent = (
+            SKILL_ROOT / "references" / "multi-agent-execution.md"
+        ).read_text(encoding="utf-8")
+        requirements = REQUIREMENTS.read_text(encoding="utf-8")
+        architecture = ARCHITECTURE.read_text(encoding="utf-8")
+        evaluation = EVALUATION.read_text(encoding="utf-8")
+
+        for text in (requirements, architecture, skill, execution_modes, multi_agent):
+            self.assertIn("один", text.casefold())
+            self.assertTrue(
+                "event" in text.casefold() or "событийн" in text.casefold()
+            )
+        for mode in ("classic", "balance", "swarm", "economical"):
+            mode_runtime = (
+                SKILL_ROOT / "references" / "modes" / f"{mode}.md"
+            ).read_text(encoding="utf-8")
+            self.assertTrue(
+                "independent" in mode_runtime
+                or "независим" in mode_runtime.casefold()
+            )
+            self.assertIn("event-driven wait", mode_runtime)
+        self.assertIn("IG-MA-19", requirements)
+        self.assertIn("one-parent-visible-wave-owner", evaluation)
+        self.assertIn("pre-dispatch guard ×1 → spawn owner ×1 → event wait ×1", architecture)
+        self.assertIn("routing guard ×1 → spawn owner ×1 → event wait ×1", multi_agent)
 
     def test_publication_unit_stays_with_coordinator(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")

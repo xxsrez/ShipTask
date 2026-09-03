@@ -10,7 +10,9 @@ from scripts.issue_grinder_mode_harness import (
     LUNA_MAX,
     ModeOrigin,
     Profile,
+    ReviewWaveObservation,
     assess_balance_packet,
+    assess_review_wave,
     decide_mode_switch,
     decide_run_exit,
     mode_dispatch_policy,
@@ -44,6 +46,130 @@ def complete_checkpoint() -> EconomicalCheckpoint:
 
 
 class IssueGrinderModeHarnessTest(unittest.TestCase):
+    def complete_review_wave(
+        self,
+        mode: ExecutionMode,
+        **overrides: object,
+    ) -> ReviewWaveObservation:
+        values: dict[str, object] = {
+            "mode": mode,
+            "scope_is_simple": True,
+            "direct_owner_id": "review-wave-owner",
+            "parent_visible_child_ids": ("review-wave-owner",),
+            "candidate_author_id": "candidate-author",
+            "reviewer_id": "independent-reviewer",
+            "routing_guard_count": 1,
+            "owner_dispatch_count": 1,
+            "event_wait_count": 1,
+            "review_complete": True,
+            "finding_ledger_returned": True,
+        }
+        values.update(overrides)
+        return ReviewWaveObservation(**values)
+
+    def test_all_non_solo_modes_keep_independent_review_on_simple_scope(self) -> None:
+        for mode in (
+            ExecutionMode.CLASSIC,
+            ExecutionMode.BALANCE,
+            ExecutionMode.SWARM,
+            ExecutionMode.ECONOMICAL,
+        ):
+            with self.subTest(mode=mode):
+                decision = assess_review_wave(self.complete_review_wave(mode))
+                self.assertEqual(decision.action, "ready_for_terminal_acceptance")
+                self.assertTrue(decision.may_accept_terminal)
+                self.assertEqual(decision.defects, ())
+
+    def test_simple_scope_does_not_waive_independent_reviewer(self) -> None:
+        decision = assess_review_wave(
+            self.complete_review_wave(
+                ExecutionMode.CLASSIC,
+                reviewer_id="candidate-author",
+                review_complete=False,
+            )
+        )
+
+        self.assertFalse(decision.may_accept_terminal)
+        self.assertIn("reviewer_not_independent", decision.defects)
+        self.assertIn("independent_review_incomplete", decision.defects)
+
+    def test_flat_children_polling_and_repeated_guard_are_rejected(self) -> None:
+        decision = assess_review_wave(
+            self.complete_review_wave(
+                ExecutionMode.SWARM,
+                parent_visible_child_ids=("candidate-a", "candidate-b", "reviewer"),
+                routing_guard_count=3,
+                owner_dispatch_count=3,
+                event_wait_count=4,
+                unchanged_state_actions=("status_list", "status_poll", "empty_nudge"),
+            )
+        )
+
+        self.assertFalse(decision.may_accept_terminal)
+        self.assertIn("parent_visible_children_not_one_owner", decision.defects)
+        self.assertIn("direct_owner_guard_count_not_one", decision.defects)
+        self.assertIn("direct_owner_dispatch_count_not_one", decision.defects)
+        self.assertIn("direct_owner_event_wait_count_not_one", decision.defects)
+        self.assertIn("unchanged_state_coordination:status_poll", decision.defects)
+
+    def test_material_rework_reuses_owner_and_reviewer_once(self) -> None:
+        accepted = assess_review_wave(
+            self.complete_review_wave(
+                ExecutionMode.BALANCE,
+                material_rework=True,
+                resumed_owner_id="review-wave-owner",
+                resumed_reviewer_id="independent-reviewer",
+                continuation_wait_count=1,
+            )
+        )
+        rejected = assess_review_wave(
+            self.complete_review_wave(
+                ExecutionMode.BALANCE,
+                material_rework=True,
+                resumed_owner_id="replacement-owner",
+                resumed_reviewer_id="replacement-reviewer",
+                continuation_wait_count=2,
+                replacement_reviewer_created=True,
+            )
+        )
+
+        self.assertTrue(accepted.may_accept_terminal)
+        self.assertFalse(rejected.may_accept_terminal)
+        self.assertIn("rework_owner_replaced", rejected.defects)
+        self.assertIn("rework_reviewer_replaced", rejected.defects)
+        self.assertIn("rework_event_wait_count_not_one", rejected.defects)
+        self.assertIn("replacement_reviewer_without_reason", rejected.defects)
+
+    def test_only_economical_may_checkpoint_partial_deadline_review(self) -> None:
+        economical = assess_review_wave(
+            self.complete_review_wave(
+                ExecutionMode.ECONOMICAL,
+                review_complete=False,
+                finding_ledger_returned=False,
+                terminal_acceptance_requested=False,
+                deadline_reached=True,
+                partial_ledger_returned=True,
+                checkpoint_requested=True,
+            )
+        )
+        classic = assess_review_wave(
+            self.complete_review_wave(
+                ExecutionMode.CLASSIC,
+                review_complete=False,
+                finding_ledger_returned=False,
+                terminal_acceptance_requested=False,
+                deadline_reached=True,
+                partial_ledger_returned=True,
+                checkpoint_requested=True,
+            )
+        )
+
+        self.assertEqual(economical.action, "economical_review_checkpoint")
+        self.assertTrue(economical.may_checkpoint)
+        self.assertFalse(economical.may_accept_terminal)
+        self.assertFalse(classic.may_checkpoint)
+        self.assertEqual(classic.action, "repair_review_wave")
+
     def test_complete_balance_packet_can_enter_final_review(self) -> None:
         decision = assess_balance_packet(
             packet_id="TM-42-implementation-1",

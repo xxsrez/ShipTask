@@ -719,7 +719,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         *(f"IG-AUTO-{number:02d}" for number in range(1, 6)),
         *(f"IG-MODE-{number:02d}" for number in range(1, 13)),
         "IG-HELP-01",
-        *(f"IG-MA-{number:02d}" for number in range(1, 19)),
+        *(f"IG-MA-{number:02d}" for number in range(1, 20)),
     ]
     if requirement_ids != expected_ids:
         fail(
@@ -741,7 +741,7 @@ def validate_issue_skill(errors: list[str]) -> None:
     require(
         errors,
         ISSUE_REQUIREMENTS,
-        "Статус: current Level 1, 2026-09-02",
+        "Статус: current Level 1, 2026-09-03",
         "полный current-набор явно сформулированных пользователем",
         "принадлежит пользователю",
         "указанию изменить\nименно Requirements",
@@ -785,7 +785,7 @@ def validate_issue_skill(errors: list[str]) -> None:
     require(
         errors,
         ISSUE_EVALUATION,
-        "Статус: current observable evaluation, 2026-09-02",
+        "Статус: current observable evaluation, 2026-09-03",
         "[Overview](overview.md)",
         "[Requirements](requirements.md)",
         "[Architecture](architecture.md)",
@@ -794,7 +794,7 @@ def validate_issue_skill(errors: list[str]) -> None:
     require(
         errors,
         ISSUE_SPEC,
-        "Статус: current agent-owned Architecture, 2026-09-02",
+        "Статус: current agent-owned Architecture, 2026-09-03",
         "[Overview](overview.md)",
         "[Requirements](requirements.md)",
         "## 0. Compilation contract",
@@ -2396,7 +2396,7 @@ def validate_source_layers(errors: list[str]) -> None:
         "Plugin — общий distribution artifact",
     )
     for architecture, prefix, status_marker in (
-        (ISSUE_SPEC, "IG-*", "Статус: current agent-owned Architecture, 2026-09-02"),
+        (ISSUE_SPEC, "IG-*", "Статус: current agent-owned Architecture, 2026-09-03"),
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current agent-owned Architecture, 2026-09-02"),
         (SCOPE_SPEC, "SR-*", "Статус: current agent-owned Architecture, 2026-09-02"),

@@ -1,7 +1,7 @@
 """Deterministic oracle for the mechanical Issue Grinder mode decisions.
 
 The oracle covers the parts of IG-MODE-02, IG-MODE-06, IG-MODE-07,
-IG-MODE-10 and IG-MODE-11 that can be decided from structured state.  It
+IG-MODE-10, IG-MODE-11 and IG-MA-19 that can be decided from structured state.  It
 deliberately does not parse natural language, orchestrate agents or stand in for
 a model-forward run of the skill.
 """
@@ -20,6 +20,15 @@ BALANCE_CONTROLLER_ROLES = frozenset(
 )
 BALANCE_FINDING_DISPOSITIONS = frozenset(
     {"fixed", "refuted_with_evidence", "escalate"}
+)
+FORBIDDEN_UNCHANGED_COORDINATION = frozenset(
+    {
+        "guard_discovery",
+        "guard_help",
+        "status_poll",
+        "status_list",
+        "empty_nudge",
+    }
 )
 
 
@@ -193,9 +202,10 @@ def assess_balance_packet(
         defects.append("blank_exact_candidate")
     if not checks or any(not check.strip() for check in checks):
         defects.append("missing_checks")
-    if materially_changed and independent_verification_possible:
-        if not independent_verification_performed:
-            defects.append("independent_verification_missing")
+    if not independent_verification_performed:
+        defects.append("independent_verification_missing")
+    if not independent_verification_possible:
+        defects.append("independent_verification_unavailable")
     if not routing_valid:
         defects.append("routing_invalid")
     for role in expensive_work_roles:
@@ -221,6 +231,107 @@ def assess_balance_packet(
     if defects:
         return BalancePacketDecision("rework_or_escalate", False, tuple(defects))
     return BalancePacketDecision("ready_for_final_review", True)
+
+
+@dataclass(frozen=True)
+class ReviewWaveObservation:
+    mode: ExecutionMode
+    scope_is_simple: bool
+    direct_owner_id: str
+    parent_visible_child_ids: tuple[str, ...]
+    candidate_author_id: str
+    reviewer_id: str
+    routing_guard_count: int
+    owner_dispatch_count: int
+    event_wait_count: int
+    review_complete: bool
+    finding_ledger_returned: bool
+    terminal_acceptance_requested: bool = True
+    deadline_reached: bool = False
+    partial_ledger_returned: bool = False
+    checkpoint_requested: bool = False
+    unchanged_state_actions: tuple[str, ...] = ()
+    material_rework: bool = False
+    resumed_owner_id: str = ""
+    resumed_reviewer_id: str = ""
+    continuation_wait_count: int = 0
+    replacement_reviewer_created: bool = False
+
+
+@dataclass(frozen=True)
+class ReviewWaveDecision:
+    action: str
+    may_accept_terminal: bool
+    may_checkpoint: bool
+    defects: tuple[str, ...] = ()
+
+
+def assess_review_wave(observation: ReviewWaveObservation) -> ReviewWaveDecision:
+    """Check the mechanical owner/reviewer/event envelope for one non-Solo wave."""
+
+    if observation.mode is ExecutionMode.SOLO:
+        raise ValueError("IG-MA-19 does not apply to Solo")
+
+    defects: list[str] = []
+    if not observation.direct_owner_id.strip():
+        defects.append("blank_direct_owner")
+    if observation.parent_visible_child_ids != (observation.direct_owner_id,):
+        defects.append("parent_visible_children_not_one_owner")
+    if observation.routing_guard_count != 1:
+        defects.append("direct_owner_guard_count_not_one")
+    if observation.owner_dispatch_count != 1:
+        defects.append("direct_owner_dispatch_count_not_one")
+    if observation.event_wait_count != 1:
+        defects.append("direct_owner_event_wait_count_not_one")
+    if not observation.candidate_author_id.strip():
+        defects.append("blank_candidate_author")
+    if not observation.reviewer_id.strip():
+        defects.append("blank_reviewer")
+    elif observation.reviewer_id == observation.candidate_author_id:
+        defects.append("reviewer_not_independent")
+    if not observation.review_complete:
+        defects.append("independent_review_incomplete")
+    if not observation.finding_ledger_returned:
+        defects.append("finding_ledger_missing")
+
+    for action in observation.unchanged_state_actions:
+        normalized = action.strip().casefold()
+        if normalized in FORBIDDEN_UNCHANGED_COORDINATION:
+            defects.append(f"unchanged_state_coordination:{normalized}")
+
+    if observation.deadline_reached and not (
+        observation.finding_ledger_returned or observation.partial_ledger_returned
+    ):
+        defects.append("deadline_handoff_missing")
+
+    if observation.material_rework:
+        if observation.resumed_owner_id != observation.direct_owner_id:
+            defects.append("rework_owner_replaced")
+        if observation.resumed_reviewer_id != observation.reviewer_id:
+            defects.append("rework_reviewer_replaced")
+        if observation.continuation_wait_count != 1:
+            defects.append("rework_event_wait_count_not_one")
+        if observation.replacement_reviewer_created:
+            defects.append("replacement_reviewer_without_reason")
+
+    may_checkpoint = (
+        observation.mode is ExecutionMode.ECONOMICAL
+        and observation.checkpoint_requested
+        and (observation.finding_ledger_returned or observation.partial_ledger_returned)
+    )
+    may_accept_terminal = (
+        observation.terminal_acceptance_requested
+        and observation.review_complete
+        and observation.finding_ledger_returned
+        and not defects
+    )
+    if may_accept_terminal:
+        action = "ready_for_terminal_acceptance"
+    elif may_checkpoint:
+        action = "economical_review_checkpoint"
+    else:
+        action = "repair_review_wave"
+    return ReviewWaveDecision(action, may_accept_terminal, may_checkpoint, tuple(defects))
 
 
 @dataclass(frozen=True)

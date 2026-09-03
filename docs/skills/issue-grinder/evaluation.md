@@ -1,6 +1,6 @@
 # Issue Grinder: observable evaluation
 
-Статус: current observable evaluation, 2026-09-02. Документ проверяет
+Статус: current observable evaluation, 2026-09-03. Документ проверяет
 компиляцию локальных [Overview](overview.md), [Requirements](requirements.md) и
 [Architecture](architecture.md), но не создаёт новый policy contract.
 
@@ -53,10 +53,10 @@
 | `IG-AUTO-05` | `autonomy-and-environments.md` | security-selector; narrow-always-readback |
 | `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | five-canonical-modes; mode-does-not-expand-authority |
 | `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; luna-any-effort-economical; non-luna-classic; mode-persists-after-model-change |
-| `IG-MODE-03` | `modes/classic.md`; `multi-agent-execution.md` | classic-sol-does-almost-all; classic-luna-trivial-only; classic-high-judgment-owner; classic-final-review-terminal |
-| `IG-MODE-04` | `modes/balance.md`; `multi-agent-execution.md`; routing guard | balance-control-brief; balance-luna-packet-lead; balance-full-routine-loop; balance-independent-economical-verifier; balance-adaptive-candidates; balance-finding-ledger-no-vote; balance-narrow-escalation; balance-rework-redispatch; balance-expensive-work-ledger; balance-routing-invalid-despite-functional-success; balance-final-gate |
-| `IG-MODE-05` | `modes/swarm.md`; `multi-agent-execution.md`; routing guard | swarm-all-child-work-luna; swarm-material-best-of-m; swarm-isolated-overlap; swarm-reduction; swarm-bounded-stop; swarm-final-gate |
-| `IG-MODE-06` | `SKILL.md` §5; `modes/economical.md`; mode/routing guards | economical-all-substantive-luna; non-luna-root-shell-only; economical-terminal-when-proven; economical-resumable-candidate; no-false-done; no-false-blocked |
+| `IG-MODE-03` | `modes/classic.md`; `multi-agent-execution.md`; mode harness | classic-sol-does-almost-all; classic-luna-trivial-only; classic-high-judgment-owner; classic-simple-independent-review; classic-final-review-terminal |
+| `IG-MODE-04` | `modes/balance.md`; `multi-agent-execution.md`; routing guard; mode harness | balance-control-brief; balance-luna-packet-lead; balance-full-routine-loop; balance-independent-economical-verifier-always; balance-adaptive-candidates; balance-finding-ledger-no-vote; balance-narrow-escalation; balance-rework-same-reviewer; balance-expensive-work-ledger; balance-routing-invalid-despite-functional-success; balance-final-gate |
+| `IG-MODE-05` | `modes/swarm.md`; `multi-agent-execution.md`; routing guard; mode harness | swarm-one-direct-owner; swarm-all-child-work-luna; swarm-material-best-of-m; swarm-isolated-overlap; swarm-independent-selected-candidate-review; swarm-reduction; swarm-bounded-stop; swarm-final-gate |
+| `IG-MODE-06` | `SKILL.md` §5; `modes/economical.md`; mode/routing guards; mode harness | economical-all-substantive-luna; non-luna-root-shell-only; economical-independent-luna-review; economical-terminal-when-proven; economical-partial-review-checkpoint; economical-resumable-candidate; no-false-done; no-false-blocked |
 | `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md`; mode/routing guards | luna-profile-collapse; explicit-luna-max-child; bounded-fork; observed-profile-match; agent-label-neutral; luna-low-root-luna-max-supervisor; role-override-wins |
 | `IG-MODE-08` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | economical-handoff-preserves-evidence; swarm-alternative-approach; same-retry-rejected |
 | `IG-MODE-09` | `modes/{balance,swarm,economical}.md` | one-review-candidate; dissent-preserved; finding-disposition-preserved; material-defect-beats-generic-approvals; raw-swarm-transcript-not-required; rework-reviewed-again |
@@ -82,6 +82,7 @@
 | `IG-MA-16` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | luna-uncertainty-evidence-handoff; balance-one-question-escalation; balance-decision-then-luna-redispatch; inseparable-judgment-reason-recorded; mode-specific-next-route; same-luna-retry-rejected |
 | `IG-MA-17` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; routing guard | classic-luna-unavailable-controller; economical-capacity-loss-no-sol-substitution; routing-failure-stops-wave |
 | `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing; worker-evidence-coordinator-facade; nested-facade-no-new-task; solo-provider-outside-execution-topology |
+| `IG-MA-19` | `SKILL.md` §2; `execution-modes.md`; `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; mode harness | non-solo-simple-independent-review; one-parent-visible-wave-owner; one-guard-spawn-event-wait; unchanged-state-polling-rejected; large-scope-internal-risk-lenses; material-rework-reuses-reviewer; economical-deadline-partial-ledger-only |
 
 ## Быстрый mode corpus
 
@@ -105,10 +106,14 @@ Corpus доказывает:
   старого record в новый run;
 - схлопывание Luna-профилей в Luna Max, сохранение non-Luna controller-а и
   независимый приоритет role overrides;
-- Balance packet readiness: обязательную независимую verification при доступном
-  oracle, packet-bound routing, только узкую escalation, допустимые категории
+- Balance packet readiness: обязательную независимую verification любого exact
+  candidate, packet-bound routing, только узкую escalation, допустимые категории
   дорогой работы и material finding, который нельзя перевесить общими
   одобрениями;
+- review-wave lifecycle всех non-Solo modes: одного parent-visible owner-а,
+  независимый review простого scope, единичные guard/spawn/event-wait, запрет
+  polling неизменившегося state, reuse owner/reviewer после material rework и
+  только economical checkpoint с partial deadline ledger;
 - полноту resumable checkpoint, запрет ложного `complete`/`blocked` и
   обязательный активный Task Manager status/Goal;
 - явный switch только после quiescent writers, неизменного integration checkout,

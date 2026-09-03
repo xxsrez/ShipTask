@@ -1,6 +1,6 @@
 # Режимы исполнения Issue Grinder
 
-Статус: реализованный проект решения, 2026-09-02. Документ объясняет замысел,
+Статус: реализованный проект решения, 2026-09-03. Документ объясняет замысел,
 но не является отдельным источником действующей policy.
 
 Согласованы пять пользовательских режимов и их постоянные названия: `Соло`,
@@ -125,6 +125,14 @@ effort.
   проверяющему профилю напрямую.
 - Несогласные выводы и отрицательное evidence не исчезают при сжатии swarm
   results в один review packet.
+- Во всех режимах, кроме `Соло`, каждый exact candidate получает независимого
+  reviewer-а, включая малый и простой scope.
+- Родительский coordinator видит ровно одного владельца рабочей или
+  проверочной волны; внутренние authors, critics, reviewers и reducers остаются
+  его children.
+- Нормальный путь нового владельца ограничен одним заранее разрешённым guard,
+  одним dispatch и одним событийным ожиданием. После material rework
+  продолжаются тот же owner и та же reviewer session.
 - Terminal acceptance выполняется только по правилам выбранного режима и
   current authority.
 
@@ -149,10 +157,10 @@ branches и изолированные worktrees. Спекулятивная и�
 | Режим | Что оптимизирует | Основная работа | Избыточные кандидаты | Дорогая проверка | Обещание run |
 |---|---|---|---|---|---|
 | `Соло` | Простое последовательное исполнение без внутренней topology | Текущая основная модель выполняет по одному issue или пакету за раз | Нет | Отдельного reviewer-а нет; current model делает self-review по объективному evidence | Terminal result |
-| `Классический` | Максимальную уверенность | Full-scope strategy и material judgment — проверяющему профилю; только strict-simple packets — экономичному | По умолчанию нет competing full implementations | Exact integrated diff, evidence и итоговый result | Terminal result |
+| `Классический` | Максимальную уверенность | Full-scope strategy и material judgment — проверяющему профилю; только strict-simple packets — экономичному | По умолчанию нет competing full implementations | Независимый Luna-review exact candidate и итоговая приёмка controller-а | Terminal result |
 | `Баланс` | Принятый результат на единицу дефицитной квоты | Luna-owned полный routine packet loop | Адаптивно при развилке, слабом oracle или высокой ожидаемой ценности | Стратегия, material decisions, integration и финал | Terminal result |
-| `Рой` | Пользу массового дешёвого поиска и проверки | Волны экономичных candidates, critics и verifiers | Норма режима | Постановка границ и финальный exact candidate | Terminal result только после финального gate |
-| `Экономичный` | Максимальный безопасный прогресс без доступной дорогой квоты | Экономичный coordinator и workers | Допустимы, но сворачиваются в один рекомендуемый candidate | Может быть отложена | Resumable non-terminal result допустим |
+| `Рой` | Пользу массового дешёвого поиска и проверки | Один economical wave owner управляет candidates, critics и verifiers | Норма режима | Независимый review выбранного exact candidate | Terminal result только после финального gate |
+| `Экономичный` | Максимальный безопасный прогресс без доступной дорогой квоты | Экономичный coordinator и workers | Допустимы, но сворачиваются в один рекомендуемый candidate | Независимый economical review обязателен для terminal result; partial review может стать deferred gate | Resumable non-terminal result допустим |
 
 ## 6. Режим `Соло`
 
@@ -205,8 +213,9 @@ Goal-contract, а не topology.
 - Экономичный профиль получает только bounded, self-contained, disjoint,
   объективно проверяемые и low-risk пакеты без material judgment.
 - Один integration owner выполняет fan-in и aggregate checks.
-- Проверяющий профиль читает exact integrated diff, существенный source и raw
-  evidence, а затем проводит итоговое code/result review.
+- Один direct Luna review owner независимо проверяет exact integrated diff,
+  существенный source и raw evidence. Проверяющий профиль проводит итоговую
+  приёмку по его finding ledger.
 - Competing full implementations без отдельной причины или пользовательской
   команды не создаются.
 - Run продолжается до пустого active scope либо принятого terminal blocker-а.
@@ -232,9 +241,10 @@ Goal-contract, а не topology.
    evidence packet вместо пошаговой переписки с дорогим coordinator-ом.
 3. Работа классифицируется не по размеру diff, а по оставшемуся judgment,
    blast radius, обратимости, связанности и качеству oracle.
-4. Существенно изменившийся candidate получает независимую Luna-проверку, когда
-   это возможно. Каждый material finding исправляется, опровергается evidence
-   либо явно передаётся на решение; одобрения не складываются в голосование.
+4. Каждый exact candidate получает независимую Luna-проверку внутри волны packet
+   lead-а. Это обязательный gate и для простого scope. Каждый material finding
+   исправляется, опровергается evidence либо явно передаётся на решение;
+   одобрения не складываются в голосование.
 5. При material uncertainty Sol/controller получает один узкий вопрос. После
    решения отделимая implementation снова возвращается Luna.
 6. Integration owner объединяет совместимую содержательную партию, выполняет
@@ -297,8 +307,8 @@ terminal blocker-а.
 1. Проверяющий профиль, когда он доступен, задаёт исходную problem boundary,
    acceptance и опасные surfaces. Для уже однозначного bounded scope это может
    сделать coordinator по mode contract.
-2. Экономичный coordinator запускает candidate и critic waves в пределах
-   безопасной capacity.
+2. Один direct economical swarm owner запускает candidate и critic waves внутри
+   своей волны в пределах безопасной capacity.
 3. Детерминированные checks удаляют явно несостоятельные варианты.
 4. Экономичные judges сравнивают оставшихся candidates, сохраняя dissent и
    provenance.
@@ -358,6 +368,9 @@ budget либо выбранная coordinator-ом конечная серия 
 - Candidate собирается в task-owned branch или integration worktree, не
   подменяя непроверенным результатом пользовательский main checkout.
 - Выполняются все доступные deterministic и aggregate checks.
+- Перед terminal acceptance exact candidate получает обязательный независимый
+  economical review. Незавершённый review сохраняется как deferred gate
+  resumable checkpoint.
 - Неустранённые defects, unknown и вопросы для дорогого reviewer-а сохраняются
   как часть checkpoint, а не сглаживаются итоговым summary.
 - Работа, реально готовая к review, может перейти в `In Review` с правдивым
