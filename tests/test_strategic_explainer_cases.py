@@ -20,6 +20,7 @@ EXPECTED_CASES = {
     "completion-comment-command-dump",
     "concurrent-edit-no-hidden-merge",
     "editing-internal-process-audit-redaction",
+    "editing-representation-with-relations",
     "green-local-failed-uat",
     "hierarchy-cycle-and-stale-guard",
     "historical-content-current-access",
@@ -36,14 +37,16 @@ EXPECTED_CASES = {
     "release-delete-membership-boundary",
     "release-open-tasks-confirmation",
     "saved-view-base-temporary-separation",
+    "simple-answer-no-visual-overkill",
     "stale-capability-false-blocker",
+    "structural-ownership-and-flow",
     "unfinished-release-vague-handoff",
     "viewer-comment-permissions",
     "write-rebind-fences-prepared-commit",
 }
 
 EXPECTED_SOURCE_MIX = {
-    "General": 3,
+    "General": 6,
     "ExampleNotes": 14,
     "Task Manager": 11,
 }
@@ -147,6 +150,33 @@ class StrategicExplainerCasesTest(unittest.TestCase):
                 self.assertIn("оценивает смысл", rubric)
                 self.assertNotRegex(rubric, r"(?i)ровно \d+ (?:слов|предложен|пункт)")
                 self.assertNotIn("обязательный заголовок", rubric.lower())
+
+    def test_representation_cases_cover_choice_grounding_and_editing(self) -> None:
+        expected = {
+            "structural-ownership-and-flow": (
+                "наименьшее структурное представление",
+                "неподтверждённая стрелка",
+                "владелец состояния",
+            ),
+            "simple-answer-no-visual-overkill": (
+                "одной или двух естественных фраз",
+                "декоративное и непропорциональное расширение",
+                "файлы больше 10 мб названы непроверенными",
+            ),
+            "editing-representation-with-relations": (
+                "может превратить плотную прозу",
+                "сохранён запрет администратору",
+                "потерянный владелец",
+            ),
+        }
+
+        for name, markers in expected.items():
+            with self.subTest(case=name):
+                rubric = normalized(
+                    (CASES / name / "rubric.md").read_text(encoding="utf-8")
+                ).lower()
+                for marker in markers:
+                    self.assertIn(marker, rubric)
 
     def test_suite_protocol_preserves_blind_generation(self) -> None:
         protocol = normalized((SUITE / "README.md").read_text(encoding="utf-8"))

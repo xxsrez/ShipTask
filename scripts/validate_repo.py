@@ -1449,6 +1449,14 @@ def validate_strategic_skill(errors: list[str]) -> None:
         "Не превращай эти приёмы в порядок или шаблон",
         "Недоступный график\nили иллюстрацию не восстанавливай догадкой",
         "Простой или точный\nэкспертный ответ не расширяй",
+        "наименьшее достаточное структурное представление",
+        "компактный псевдокод",
+        "дерево вызовов",
+        "дерево компонентов",
+        "неглубокое дерево файлов",
+        "структурный diff",
+        "Не создавай HTML",
+        "не открывай browser",
     )
     text = read(STRATEGIC_SKILL)
     for coupling in ("Issue Grinder", "ShipTask", "Task Manager", "Task Composer", "TM-123"):
@@ -2151,7 +2159,7 @@ def validate_source_layers(errors: list[str]) -> None:
             level_one_status = {
                 COMPOSER_REQUIREMENTS: "Статус: current Level 1, 2026-08-27",
                 SCOPE_REQUIREMENTS: "Статус: current Level 1, 2026-09-02",
-                STRATEGIC_REQUIREMENTS: "Статус: current Level 1, 2026-08-31",
+                STRATEGIC_REQUIREMENTS: "Статус: current Level 1, 2026-09-03",
             }[requirements]
             require(
                 errors,
@@ -2414,7 +2422,7 @@ def validate_source_layers(errors: list[str]) -> None:
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current agent-owned Architecture, 2026-09-02"),
         (SCOPE_SPEC, "SR-*", "Статус: current agent-owned Architecture, 2026-09-02"),
-        (STRATEGIC_SPEC, "SE-*", "Статус: current agent-owned Architecture, 2026-08-31"),
+        (STRATEGIC_SPEC, "SE-*", "Статус: current agent-owned Architecture, 2026-09-03"),
     ):
         if architecture == ISSUE_SPEC:
             require(
@@ -2606,7 +2614,7 @@ def validate_source_layers(errors: list[str]) -> None:
     require(
         errors,
         VISION,
-        "Статус: current agent-owned strategic design, 2026-08-30",
+        "Статус: current agent-owned strategic design, 2026-09-03",
         "[Overview](overview.md)",
         "[Requirements](requirements.md)",
     )
@@ -3186,7 +3194,7 @@ def validate_strategic_contract(errors: list[str]) -> None:
     require(
         errors,
         STRATEGIC_SPEC,
-        "Статус: current agent-owned Architecture, 2026-08-31",
+        "Статус: current agent-owned Architecture, 2026-09-03",
         "[Overview](overview.md)",
         "`SE-*` — в локальных",
         "[Requirements](requirements.md)",
@@ -3254,6 +3262,12 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "минимальный\nобъяснительный мост",
         "не обязательная последовательность",
         "не восстанавливаются догадкой",
+        "наименьшее\nдостаточное структурное представление",
+        "дерево вызовов",
+        "дерево компонентов",
+        "неглубокое дерево файлов",
+        "Read-only provider не создаёт HTML",
+        "не открывает browser",
     )
     require(
         errors,
@@ -3273,6 +3287,10 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Аналогия, визуализация и приблизительный расчёт",
         "не являются его доказательством",
         "простой или точный\nэкспертный вопрос не расширяется",
+        "Форма выбирается по той связи",
+        "наименьшее достаточное представление",
+        "Визуальная форма не делает техническую квитанцию",
+        "специального renderer или browser",
     )
     require(
         errors,
@@ -3346,6 +3364,9 @@ def validate_strategic_contract(errors: list[str]) -> None:
         "Свободная форма вместо отчётного шаблона",
         "Незнакомый механизм, «голое» число и недоступный график",
         "Аналогия с границей и точный экспертный вопрос",
+        "Структура показывает существенную связь",
+        "Простой ответ не превращается в витрину форм",
+        "Редактура может изменить форму без потери отношений",
     )
     require(
         errors,

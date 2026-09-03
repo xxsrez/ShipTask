@@ -211,6 +211,42 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
         self.assertIn("не восстанавливай догадкой", contract)
         self.assertIn("не являются его доказательством", requirements)
 
+    def test_structural_representation_is_minimal_grounded_and_portable(self) -> None:
+        requirements = normalized(REQUIREMENTS)
+        architecture = normalized(ARCHITECTURE)
+        contract = normalized(CONTRACT)
+        evaluation = normalized(EVALUATION)
+
+        self.assertIn("наименьшее достаточное представление", requirements)
+        for text in (architecture, contract, evaluation):
+            self.assertIn("наименьшее достаточное структурное представление", text)
+
+        for text in (requirements, architecture, contract, evaluation):
+            self.assertIn("порядок", text)
+            self.assertIn("владение", text)
+            self.assertIn("переходы состояни", text)
+            self.assertIn("до» и «после", text)
+            self.assertIn("декоративн", text)
+            self.assertIn("renderer", text)
+            self.assertIn("browser", text)
+
+        for marker in (
+            "компактный псевдокод",
+            "дерево вызовов",
+            "дерево компонентов",
+            "неглубокое дерево файлов",
+            "структурный diff",
+            "целевой блок целиком",
+            "не создавай html",
+            "не открывай browser",
+            "material claims",
+            "source basis должен давать точное основание",
+        ):
+            self.assertIn(marker, contract)
+
+        self.assertIn("визуальная форма не делает техническую квитанцию", requirements)
+        self.assertIn("можно менять не только порядок прозы, но и форму", contract)
+
     def test_editing_reuses_the_common_publication_filter(self) -> None:
         text = normalized(CONTRACT)
         editing = " ".join(
