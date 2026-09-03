@@ -40,8 +40,9 @@ verification. Он может затрагивать те же files, что д�
 не называется его resume/replacement.
 
 Если scope содержит material candidate-friendly развилку, до ordinary
-implementation зарегистрируй хотя бы одну настоящую Best-of-M stage с `M >= 2`
-самостоятельными одно-ownerными Luna candidate waves от общей exact base. Один
+implementation зарегистрируй хотя бы одну настоящую Best-of-M wave с `M >= 2`;
+в campaign record это Best-of-M stage с `M >= 2` самостоятельными
+одно-ownerными Luna candidate waves от общей exact base. Один
 writer на каждую Task без конкурирующей material stage не выполняет обещание
 `Роя`. Если candidate-friendly развилки действительно нет, сохрани проверяемую
 причину и всё равно используй Luna для одного candidate и независимых
