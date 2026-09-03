@@ -146,13 +146,16 @@ Corpus доказывает:
   выдумывает их без него, и запускает отдельного reducer/reviewer только после
   quiescence candidates; reviewer plan `Баланса` готовится параллельно, но exact
   review начинается после candidate; small/medium defaults ограничивают
-  candidate/review/recheck/controller значениями `10/8/3/3` tool calls и
+  candidate/review-plan/exact-review/recheck/controller значениями
+  `10/3/5/3/3` tool calls и
   расширяются только по независимым risk surfaces; evaluator отклоняет
   превышение budget, open-ended execution simulation, workspace mutation, поиск
   parent messaging, технические state probes и повтор exploration final gate;
   Git-metadata-restricted corpus использует один writable task-owned shadow tree
   либо, если он недоступен, bounded read-only patch-return без повторной
-  реконструкции проекта;
+  реконструкции проекта; review-plan turn завершается final handoff-ом без
+  messaging discovery, а exact owned files интегрируются одной механической
+  операцией без полного patch в model context;
 - полноту resumable checkpoint, запрет ложного `complete`/`blocked` и
   обязательный активный Task Manager status/Goal;
 - явный switch только после quiescent writers, неизменного integration checkout,

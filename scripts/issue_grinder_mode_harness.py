@@ -292,6 +292,8 @@ class DirectCampaignObservation:
     execution_action_budgets: tuple[int, ...] = ()
     execution_open_ended_simulation: bool = False
     execution_searched_parent_messaging: bool = False
+    review_plan_action_count: int = 0
+    review_exact_action_count: int = 0
     review_action_count: int = 0
     review_action_budget: int = 0
     review_open_ended_exploration: bool = False
@@ -300,6 +302,11 @@ class DirectCampaignObservation:
     final_review_replayed_exploration: bool = False
     controller_final_action_count: int = 0
     controller_final_action_budget: int = 0
+    integration_action_count: int = 0
+    integration_action_budget: int = 0
+    integration_patch_rendered_in_context: bool = False
+    runtime_reference_discovery: bool = False
+    shadow_path_discovery: bool = False
     technical_wait_state_probes: tuple[str, ...] = ()
 
 
@@ -364,6 +371,16 @@ def assess_direct_campaign(
         defects.append("review_action_budget_missing")
     elif observation.review_action_count > observation.review_action_budget:
         defects.append("review_action_budget_exceeded")
+    if observation.mode is ExecutionMode.BALANCE:
+        if observation.review_plan_action_count > 3:
+            defects.append("balance_review_plan_budget_exceeded")
+        if observation.review_exact_action_count > 5:
+            defects.append("balance_exact_review_budget_exceeded")
+        if (
+            observation.review_plan_action_count + observation.review_exact_action_count
+            != observation.review_action_count
+        ):
+            defects.append("balance_review_action_accounting_mismatch")
     if observation.review_open_ended_exploration:
         defects.append("review_open_ended_exploration")
     if observation.reviewer_workspace_mutation:
@@ -379,6 +396,16 @@ def assess_direct_campaign(
         > observation.controller_final_action_budget
     ):
         defects.append("controller_final_action_budget_exceeded")
+    if observation.integration_action_budget <= 0:
+        defects.append("integration_action_budget_missing")
+    elif observation.integration_action_count > observation.integration_action_budget:
+        defects.append("integration_action_budget_exceeded")
+    if observation.integration_patch_rendered_in_context:
+        defects.append("integration_patch_rendered_in_context")
+    if observation.runtime_reference_discovery:
+        defects.append("runtime_reference_discovery")
+    if observation.shadow_path_discovery:
+        defects.append("shadow_path_discovery")
     if observation.technical_wait_state_probes:
         defects.append("technical_wait_state_probe")
 

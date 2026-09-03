@@ -636,8 +636,8 @@ disposition: fixed | refuted_with_evidence | escalate
 различимые purpose/approach; одинаковые prompts не считаются независимостью.
 
 Review plan содержит action budget и stopping condition. Для малого/среднего
-scope defaults ограничивают candidate owner десятью tool calls, review plan
-вместе с exact review восемью, recheck тремя, controller final gate тремя.
+scope defaults ограничивают candidate owner десятью tool calls, review-plan turn
+тремя, exact-review turn пятью, recheck тремя, controller final gate тремя.
 Увеличение до dispatch выводится из независимых risk surfaces. Candidate owner
 один раз читает contract/source, изменяет настоящий изолированный candidate и
 запускает основной suite; он не повторяет известный красный baseline без
@@ -646,6 +646,11 @@ scope defaults ограничивают candidate owner десятью tool call
 suite и максимум три targeted probes. После rework тот же reviewer проверяет
 reproducer, changed surfaces и suite; controller не повторяет exploration без
 противоречия в evidence.
+
+Параллельная подготовка плана заканчивает свой turn final response-ом не позже
+третьего tool call. Session не теряется: exact candidate передаётся ей обычным
+follow-up с оставшимся budget. Поэтому reviewer не ищет messaging interface и
+не удерживает turn открытым до появления candidate.
 
 При material uncertainty packet lead прекращает corrective mutations и
 возвращает compact escalation: exact state, completed work, checks, findings,
@@ -724,6 +729,10 @@ review: меняется форма orchestration, а не evidence gate.
 diff. Созданный coordinator-ом shadow artifact удаляется только после проверки.
 Это не Git worktree и поэтому не используется для параллельных authors; при двух
 writing lanes остаётся обязательным отдельный admitted worktree каждому.
+Shadow path выводится прямо из packet identity без поиска ignore/cache path.
+Проверенные owned files переносятся в integration checkout одной механической
+операцией с последующей отдельной identity-сверкой; полный patch не проходит
+через model context и не набирается вручную по частям.
 
 ### 4.7 Review packet и переключение
 

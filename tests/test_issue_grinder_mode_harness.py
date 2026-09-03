@@ -173,37 +173,52 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         self.assertEqual(classic.action, "repair_review_wave")
 
     def test_balance_direct_stages_replace_unavailable_nested_delegation(self) -> None:
-        decision = assess_direct_campaign(
-            DirectCampaignObservation(
-                mode=ExecutionMode.BALANCE,
-                stage_order=("execution", "independent_review"),
-                material_candidate_fork=False,
-                no_fork_reason="",
-                candidate_author_ids=("luna-executor",),
-                candidate_purposes=("default",),
-                reviewer_id="luna-reviewer",
-                reducer_id="",
-                routing_guard_owner_ids=("luna-executor", "luna-reviewer"),
-                dispatched_owner_ids=("luna-executor", "luna-reviewer"),
-                event_wait_stage_count=2,
-                common_exact_base=True,
-                candidate_stage_quiescent_before_review=True,
-                review_complete=True,
-                finding_ledger_returned=True,
-                final_review_started_after_stages=True,
-                reviewer_plan_prepared_concurrently=True,
-                execution_action_counts=(7,),
-                execution_action_budgets=(10,),
-                review_action_count=5,
-                review_action_budget=8,
-                controller_final_action_count=2,
-                controller_final_action_budget=3,
-            )
+        observation = DirectCampaignObservation(
+            mode=ExecutionMode.BALANCE,
+            stage_order=("execution", "independent_review"),
+            material_candidate_fork=False,
+            no_fork_reason="",
+            candidate_author_ids=("luna-executor",),
+            candidate_purposes=("default",),
+            reviewer_id="luna-reviewer",
+            reducer_id="",
+            routing_guard_owner_ids=("luna-executor", "luna-reviewer"),
+            dispatched_owner_ids=("luna-executor", "luna-reviewer"),
+            event_wait_stage_count=2,
+            common_exact_base=True,
+            candidate_stage_quiescent_before_review=True,
+            review_complete=True,
+            finding_ledger_returned=True,
+            final_review_started_after_stages=True,
+            reviewer_plan_prepared_concurrently=True,
+            execution_action_counts=(7,),
+            execution_action_budgets=(10,),
+            review_plan_action_count=2,
+            review_exact_action_count=3,
+            review_action_count=5,
+            review_action_budget=8,
+            controller_final_action_count=2,
+            controller_final_action_budget=3,
+            integration_action_count=1,
+            integration_action_budget=1,
         )
+        decision = assess_direct_campaign(observation)
 
         self.assertTrue(decision.may_enter_controller_final_review)
         self.assertEqual(decision.action, "ready_for_controller_final_review")
         self.assertEqual(decision.defects, ())
+
+        over_budget = assess_direct_campaign(
+            replace(
+                observation,
+                review_plan_action_count=4,
+                review_exact_action_count=6,
+                review_action_count=10,
+                review_action_budget=10,
+            )
+        )
+        self.assertIn("balance_review_plan_budget_exceeded", over_budget.defects)
+        self.assertIn("balance_exact_review_budget_exceeded", over_budget.defects)
 
     def test_swarm_direct_campaign_keeps_distinct_candidates_and_reducer(self) -> None:
         decision = assess_direct_campaign(
@@ -240,6 +255,8 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                 review_action_budget=8,
                 controller_final_action_count=2,
                 controller_final_action_budget=3,
+                integration_action_count=1,
+                integration_action_budget=1,
             )
         )
 
@@ -270,6 +287,8 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                 execution_action_budgets=(10,),
                 execution_open_ended_simulation=True,
                 execution_searched_parent_messaging=True,
+                review_plan_action_count=9,
+                review_exact_action_count=3,
                 review_action_count=12,
                 review_action_budget=5,
                 review_open_ended_exploration=True,
@@ -278,6 +297,11 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                 final_review_replayed_exploration=True,
                 controller_final_action_count=5,
                 controller_final_action_budget=3,
+                integration_action_count=3,
+                integration_action_budget=1,
+                integration_patch_rendered_in_context=True,
+                runtime_reference_discovery=True,
+                shadow_path_discovery=True,
                 technical_wait_state_probes=("list_agents",),
             )
         )
@@ -291,6 +315,10 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         self.assertIn("execution_open_ended_simulation", decision.defects)
         self.assertIn("execution_searched_parent_messaging", decision.defects)
         self.assertIn("review_action_budget_exceeded", decision.defects)
+        self.assertIn("integration_action_budget_exceeded", decision.defects)
+        self.assertIn("integration_patch_rendered_in_context", decision.defects)
+        self.assertIn("runtime_reference_discovery", decision.defects)
+        self.assertIn("shadow_path_discovery", decision.defects)
         self.assertIn("review_open_ended_exploration", decision.defects)
         self.assertIn("reviewer_workspace_mutation", decision.defects)
         self.assertIn("reviewer_searched_parent_messaging", decision.defects)
@@ -323,6 +351,8 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                 review_action_budget=8,
                 controller_final_action_count=2,
                 controller_final_action_budget=3,
+                integration_action_count=1,
+                integration_action_budget=1,
             )
         )
 
@@ -359,10 +389,14 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                 reviewer_plan_prepared_concurrently=True,
                 execution_action_counts=(8, 8),
                 execution_action_budgets=(10, 10),
+                review_plan_action_count=3,
+                review_exact_action_count=3,
                 review_action_count=6,
                 review_action_budget=8,
                 controller_final_action_count=2,
                 controller_final_action_budget=3,
+                integration_action_count=1,
+                integration_action_budget=1,
             )
         )
 
