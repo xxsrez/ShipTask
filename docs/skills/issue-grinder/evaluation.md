@@ -145,12 +145,13 @@ Corpus доказывает:
   требует несколько purpose-distinct candidates при material fork, но не
   выдумывает их без него, и запускает отдельного reducer/reviewer только после
   quiescence candidates; reviewer plan `Баланса` готовится параллельно, но exact
-  review начинается после candidate; small/medium defaults ограничивают
+  review начинается после candidate; small/medium hard ceilings ограничивают
   candidate/review-plan/exact-review/recheck/controller значениями
-  `10/3/5/3/3` tool calls и
-  расширяются только по независимым risk surfaces; evaluator отклоняет
-  превышение budget, open-ended execution simulation, workspace mutation, поиск
-  parent messaging, технические state probes и повтор exploration final gate;
+  `10/3/5/3/3` tool calls; Teams-подобная работа делится на packets/lenses, а
+  exception одного неделимого риска ограничен `+3` и требует evidence;
+  evaluator отклоняет самовольно завышенный budget, reread runtime policy,
+  directory/parent-messaging discovery, open-ended execution simulation,
+  workspace mutation, технические state probes и повтор exploration final gate;
   Git-metadata-restricted corpus использует один writable task-owned shadow tree
   либо, если он недоступен, bounded read-only patch-return без повторной
   реконструкции проекта; review-plan turn завершается final handoff-ом без

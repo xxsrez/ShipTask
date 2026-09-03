@@ -290,8 +290,11 @@ class DirectCampaignObservation:
     reviewer_plan_prepared_concurrently: bool = False
     execution_action_counts: tuple[int, ...] = ()
     execution_action_budgets: tuple[int, ...] = ()
+    execution_budget_exceptions: tuple[str, ...] = ()
     execution_open_ended_simulation: bool = False
     execution_searched_parent_messaging: bool = False
+    execution_reloaded_runtime_policy: bool = False
+    execution_directory_discovery: bool = False
     review_plan_action_count: int = 0
     review_exact_action_count: int = 0
     review_action_count: int = 0
@@ -354,21 +357,41 @@ def assess_direct_campaign(
         defects.append("execution_action_budgets_do_not_match_candidates")
     elif any(budget <= 0 for budget in observation.execution_action_budgets):
         defects.append("execution_action_budget_missing")
-    elif len(observation.execution_action_counts) == len(authors) and any(
-        count > budget
-        for count, budget in zip(
-            observation.execution_action_counts,
-            observation.execution_action_budgets,
-            strict=True,
-        )
-    ):
-        defects.append("execution_action_budget_exceeded")
+    else:
+        if any(budget > 13 for budget in observation.execution_action_budgets):
+            defects.append("execution_action_ceiling_exceeded")
+        if any(budget > 10 for budget in observation.execution_action_budgets):
+            exceptions = observation.execution_budget_exceptions
+            if len(exceptions) != len(authors) or any(
+                budget > 10 and not evidence.strip()
+                for budget, evidence in zip(
+                    observation.execution_action_budgets,
+                    exceptions,
+                    strict=len(exceptions) == len(authors),
+                )
+            ):
+                defects.append("execution_budget_exception_missing")
+        if len(observation.execution_action_counts) == len(authors) and any(
+            count > budget
+            for count, budget in zip(
+                observation.execution_action_counts,
+                observation.execution_action_budgets,
+                strict=True,
+            )
+        ):
+            defects.append("execution_action_budget_exceeded")
     if observation.execution_open_ended_simulation:
         defects.append("execution_open_ended_simulation")
     if observation.execution_searched_parent_messaging:
         defects.append("execution_searched_parent_messaging")
+    if observation.execution_reloaded_runtime_policy:
+        defects.append("execution_reloaded_runtime_policy")
+    if observation.execution_directory_discovery:
+        defects.append("execution_directory_discovery")
     if observation.review_action_budget <= 0:
         defects.append("review_action_budget_missing")
+    elif observation.review_action_budget > 8:
+        defects.append("review_action_budget_above_ceiling")
     elif observation.review_action_count > observation.review_action_budget:
         defects.append("review_action_budget_exceeded")
     if observation.mode is ExecutionMode.BALANCE:

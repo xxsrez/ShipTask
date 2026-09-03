@@ -636,16 +636,41 @@ disposition: fixed | refuted_with_evidence | escalate
 различимые purpose/approach; одинаковые prompts не считаются независимостью.
 
 Review plan содержит action budget и stopping condition. Для малого/среднего
-scope defaults ограничивают candidate owner десятью tool calls, review-plan turn
-тремя, exact-review turn пятью, recheck тремя, controller final gate тремя.
-Увеличение до dispatch выводится из независимых risk surfaces. Candidate owner
-один раз читает contract/source, изменяет настоящий изолированный candidate и
-запускает основной suite; он не повторяет известный красный baseline без
-диагностической пользы, не реконструирует проект несколькими in-memory
-симуляциями и не ищет parent messaging. Reviewer получает один source/diff pass,
-suite и максимум три targeted probes. После rework тот же reviewer проверяет
-reproducer, changed surfaces и suite; controller не повторяет exploration без
-противоречия в evidence.
+scope candidate owner получает жёсткий ceiling в десять tool calls, review-plan
+turn — три, exact-review turn — пять, recheck — три, controller final gate —
+три. Это не рекомендации и не автоматически расширяемые defaults. Число Tasks,
+файлов, компонентов или перечисленных risk surfaces само по себе не разрешает
+увеличить один packet: большую работу, включая Teams-подобный scope, дели на
+purpose-distinct packets и read-only lenses с отдельным ownership, а не выдавай
+одному owner-у монолитный бюджет.
+
+До dispatch сверх ceiling допустим только явный `budget_exception` для одного
+доказанно неделимого риска, который потеряет проверяемость при разделении. Он
+фиксирует role, base ceiling, не более трёх дополнительных calls, конкретный
+reproducer/evidence и stopping condition. Формулировка «несколько поверхностей
+риска» без неделимого действия exception не создаёт. Rework является отдельным
+трёхвызовным packet и не переносит остаток или перерасход исходного candidate.
+
+Coordinator один раз материализует self-contained execution packet: exact base
+и candidate root, source manifest с прямыми путями, owned files, разрешённые
+checks, action ceiling, purpose и compact output envelope. После dispatch child
+не перечитывает `SKILL.md`, Issue Grinder references/Architecture, routing guard
+или tool catalog; не ищет parent messaging/collaboration tool и не восстанавливает
+уже переданные пути через directory discovery. Targeted поиск символа внутри
+source manifest допустим как часть единственного source pass. Все mutations
+writer-а используют абсолютные пути с префиксом exact candidate root;
+относительный patch из integration checkout запрещён.
+
+Candidate owner один раз читает переданные contract/source, изменяет настоящий
+изолированный candidate и запускает основной suite; он не повторяет известный
+красный baseline без диагностической пользы и не реконструирует проект несколькими
+in-memory симуляциями. Reviewer получает один source/diff pass, suite и максимум
+три targeted probes. После rework тот же reviewer проверяет reproducer, changed
+surfaces и suite; controller не повторяет exploration без противоречия в
+evidence. Handoff малого/среднего packet-а возвращается сразу после последнего
+check как короткая структура `candidate | owned files | checks | findings<=3 |
+unknowns | next`; transcript, повтор contract-а и развёрнутый отчёт в child
+response не входят.
 
 Параллельная подготовка плана заканчивает свой turn final response-ом не позже
 третьего tool call. Session не теряется: exact candidate передаётся ей обычным
@@ -732,7 +757,10 @@ writing lanes остаётся обязательным отдельный admit
 Shadow path выводится прямо из packet identity без поиска ignore/cache path.
 Проверенные owned files переносятся в integration checkout одной механической
 операцией с последующей отдельной identity-сверкой; полный patch не проходит
-через model context и не набирается вручную по частям.
+через model context и не набирается вручную по частям. Каждый writer получает
+этот абсолютный shadow path в materialized packet и использует его префикс во
+всех `apply_patch`/write-вызовах; случайная запись в integration checkout
+считается ownership defect и требует reconciliation до review или fan-in.
 
 ### 4.7 Review packet и переключение
 

@@ -220,6 +220,42 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         self.assertIn("balance_review_plan_budget_exceeded", over_budget.defects)
         self.assertIn("balance_exact_review_budget_exceeded", over_budget.defects)
 
+        missing_exception = assess_direct_campaign(
+            replace(
+                observation,
+                execution_action_counts=(12,),
+                execution_action_budgets=(13,),
+            )
+        )
+        self.assertIn(
+            "execution_budget_exception_missing", missing_exception.defects
+        )
+
+        bounded_exception = assess_direct_campaign(
+            replace(
+                observation,
+                execution_action_counts=(12,),
+                execution_action_budgets=(13,),
+                execution_budget_exceptions=(
+                    "single indivisible migration reproducer; stop after suite",
+                ),
+            )
+        )
+        self.assertNotIn(
+            "execution_budget_exception_missing", bounded_exception.defects
+        )
+        self.assertNotIn("execution_action_ceiling_exceeded", bounded_exception.defects)
+
+        oversized_exception = assess_direct_campaign(
+            replace(
+                observation,
+                execution_action_counts=(14,),
+                execution_action_budgets=(14,),
+                execution_budget_exceptions=("indivisible risk",),
+            )
+        )
+        self.assertIn("execution_action_ceiling_exceeded", oversized_exception.defects)
+
     def test_swarm_direct_campaign_keeps_distinct_candidates_and_reducer(self) -> None:
         decision = assess_direct_campaign(
             DirectCampaignObservation(
@@ -287,6 +323,8 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                 execution_action_budgets=(10,),
                 execution_open_ended_simulation=True,
                 execution_searched_parent_messaging=True,
+                execution_reloaded_runtime_policy=True,
+                execution_directory_discovery=True,
                 review_plan_action_count=9,
                 review_exact_action_count=3,
                 review_action_count=12,
@@ -314,6 +352,8 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         self.assertIn("execution_action_budget_exceeded", decision.defects)
         self.assertIn("execution_open_ended_simulation", decision.defects)
         self.assertIn("execution_searched_parent_messaging", decision.defects)
+        self.assertIn("execution_reloaded_runtime_policy", decision.defects)
+        self.assertIn("execution_directory_discovery", decision.defects)
         self.assertIn("review_action_budget_exceeded", decision.defects)
         self.assertIn("integration_action_budget_exceeded", decision.defects)
         self.assertIn("integration_patch_rendered_in_context", decision.defects)
