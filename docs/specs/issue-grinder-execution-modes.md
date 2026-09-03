@@ -133,8 +133,13 @@ effort.
   доказанной nested delegation; иначе используются предусмотренные режимом
   direct stages без остановки terminal run.
 - Нормальный путь каждого нового direct owner-а ограничен одним заранее
-  разрешённым guard, одним dispatch и событийным ожиданием. После material
+  разрешённым guard, одним dispatch и событийным ожиданием до переданного stage
+  deadline; произвольный десятиминутный timeout не является deadline. После material
   rework продолжаются тот же candidate owner и та же reviewer session.
+- Reviewer/reducer работает внутри заранее заданного action budget: один
+  source/diff pass, основной suite и ограниченные targeted probes; его final
+  response является handoff, open-ended fuzzing и поиск parent messaging не
+  входят в review.
 - Terminal acceptance выполняется только по правилам выбранного режима и
   current authority.
 

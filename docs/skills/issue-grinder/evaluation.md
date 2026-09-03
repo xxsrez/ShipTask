@@ -78,8 +78,8 @@ prompt; подготовка обязана остановиться при ра
 | `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | five-canonical-modes; mode-does-not-expand-authority |
 | `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; luna-any-effort-economical; non-luna-classic; mode-persists-after-model-change |
 | `IG-MODE-03` | `modes/classic.md`; `multi-agent-execution.md`; mode harness | classic-sol-does-almost-all; classic-luna-trivial-only; classic-high-judgment-owner; classic-simple-independent-review; classic-final-review-terminal |
-| `IG-MODE-04` | `modes/balance.md`; `multi-agent-execution.md`; routing guard; mode harness | balance-control-brief; balance-direct-execution-review; balance-full-routine-loop; balance-independent-economical-verifier-always; balance-adaptive-candidates; balance-finding-ledger-no-vote; balance-narrow-escalation; balance-rework-same-reviewer; balance-expensive-work-ledger; balance-routing-invalid-despite-functional-success; balance-final-gate |
-| `IG-MODE-05` | `modes/swarm.md`; `multi-agent-execution.md`; routing guard; mode harness | swarm-bounded-direct-campaign; swarm-all-child-work-luna; swarm-material-best-of-m; swarm-isolated-overlap; swarm-independent-selected-candidate-review; swarm-reduction; swarm-bounded-stop; swarm-final-gate |
+| `IG-MODE-04` | `modes/balance.md`; `multi-agent-execution.md`; routing guard; mode harness | balance-control-brief; balance-direct-execution-review; balance-concurrent-review-planning; balance-bounded-review-envelope; balance-full-routine-loop; balance-independent-economical-verifier-always; balance-adaptive-candidates; balance-finding-ledger-no-vote; balance-narrow-escalation; balance-rework-targeted-only; balance-expensive-work-ledger; balance-routing-invalid-despite-functional-success; balance-final-gate-no-exploration-replay |
+| `IG-MODE-05` | `modes/swarm.md`; `multi-agent-execution.md`; routing guard; mode harness | swarm-bounded-direct-campaign; swarm-all-child-work-luna; swarm-material-best-of-m; swarm-isolated-overlap; swarm-independent-selected-candidate-review; swarm-bounded-reducer-envelope; swarm-reduction; swarm-bounded-stop; swarm-final-gate-no-exploration-replay |
 | `IG-MODE-06` | `SKILL.md` §5; `modes/economical.md`; mode/routing guards; mode harness | economical-all-substantive-luna; non-luna-root-shell-only; economical-independent-luna-review; economical-terminal-when-proven; economical-partial-review-checkpoint; economical-resumable-candidate; no-false-done; no-false-blocked |
 | `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md`; mode/routing guards | luna-profile-collapse; explicit-luna-max-child; bounded-fork; observed-profile-match; agent-label-neutral; luna-low-root-luna-max-supervisor; role-override-wins |
 | `IG-MODE-08` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | economical-handoff-preserves-evidence; swarm-alternative-approach; same-retry-rejected |
@@ -93,7 +93,7 @@ prompt; подготовка обязана остановиться при ра
 | `IG-MA-03` | `multi-agent-execution.md` | dependency-ready-frontier |
 | `IG-MA-04` | `multi-agent-execution.md` | adaptive-width; swarm-useful-width; no-filler-packet |
 | `IG-MA-05` | `SKILL.md` §2; `multi-agent-execution.md` | coordinator-only-fan-in-and-writes |
-| `IG-MA-06` | `multi-agent-execution.md`; `writer_worktree_guard.py` | two-phase-admission; shared-main-rejected; integration-canary |
+| `IG-MA-06` | `multi-agent-execution.md`; `writer_worktree_guard.py` | two-phase-admission; shared-main-rejected; integration-canary; read-only-git-preflight; sequential-patch-return-no-guard-source-read |
 | `IG-MA-07` | `multi-agent-execution.md`; `writer_worktree_guard.py` | exclusive-writable-owner; duplicate-branch-and-path-rejected |
 | `IG-MA-08` | `multi-agent-execution.md` | read-only-role-no-worktree |
 | `IG-MA-09` | `multi-agent-execution.md` | strategic-outcome-and-contribution-in-packet; human-requirements-distinct-from-agent-plan; packet-context-does-not-expand-scope |
@@ -106,7 +106,7 @@ prompt; подготовка обязана остановиться при ра
 | `IG-MA-16` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | luna-uncertainty-evidence-handoff; balance-one-question-escalation; balance-decision-then-luna-redispatch; inseparable-judgment-reason-recorded; mode-specific-next-route; same-luna-retry-rejected |
 | `IG-MA-17` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; routing guard | classic-luna-unavailable-controller; economical-capacity-loss-no-sol-substitution; routing-failure-stops-wave |
 | `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing; worker-evidence-coordinator-facade; nested-facade-no-new-task; solo-provider-outside-execution-topology |
-| `IG-MA-19` | `SKILL.md` §2; `execution-modes.md`; `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; mode harness | non-solo-simple-independent-review; capability-aware-direct-stages; one-guard-spawn-per-owner; stage-event-wait; unchanged-state-polling-rejected; large-scope-risk-lenses; material-rework-reuses-reviewer; economical-deadline-partial-ledger-only |
+| `IG-MA-19` | `SKILL.md` §2; `execution-modes.md`; `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; mode harness | non-solo-simple-independent-review; capability-aware-direct-stages; one-guard-spawn-per-owner; full-stage-deadline-wait; technical-timeout-no-probe; unchanged-state-polling-rejected; final-response-handoff; bounded-review-actions; read-only-reviewer-no-cleanup; large-scope-risk-lenses; material-rework-reuses-reviewer; economical-deadline-partial-ledger-only |
 
 ## Быстрый mode corpus
 
@@ -144,7 +144,10 @@ Corpus доказывает:
   дополнительные purpose-distinct candidates только для material fork; `Рой`
   требует несколько purpose-distinct candidates при material fork, но не
   выдумывает их без него, и запускает отдельного reducer/reviewer только после
-  quiescence candidates;
+  quiescence candidates; reviewer plan `Баланса` готовится параллельно, но exact
+  review начинается после candidate; action budget запрещает open-ended search,
+  workspace mutation, поиск parent messaging, технические state probes и
+  повтор exploratory review дорогим final gate;
 - полноту resumable checkpoint, запрет ложного `complete`/`blocked` и
   обязательный активный Task Manager status/Goal;
 - явный switch только после quiescent writers, неизменного integration checkout,

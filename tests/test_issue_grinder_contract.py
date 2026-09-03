@@ -319,6 +319,27 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("holdout", evaluation)
         self.assertIn("не участвовавший в правках", evaluation)
 
+    def test_balance_and_swarm_bound_review_and_wait_overhead(self) -> None:
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        modes_root = SKILL_ROOT / "references" / "modes"
+        balance = (modes_root / "balance.md").read_text(encoding="utf-8")
+        swarm = (modes_root / "swarm.md").read_text(encoding="utf-8")
+        multi_agent = (
+            SKILL_ROOT / "references" / "multi-agent-execution.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("local model-forward evaluation", skill)
+        self.assertIn("максимум три targeted probes", skill)
+        self.assertIn("параллельно готовит ограниченный review plan", skill)
+        for runtime in (balance, swarm, multi_agent):
+            normalized = " ".join(runtime.casefold().split())
+            self.assertIn("произвольн", runtime)
+            self.assertTrue("десяти" in runtime or "десять" in runtime)
+            self.assertIn("final response", normalized)
+        self.assertIn("Open-ended fuzzing", balance)
+        self.assertIn("Open-ended fuzzing", swarm)
+        self.assertIn("технически вернул\ntimeout", multi_agent)
+
     def test_publication_unit_stays_with_coordinator(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         multi_agent = (

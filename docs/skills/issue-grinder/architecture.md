@@ -609,10 +609,12 @@ promise:
 После этого обычный bounded packet получает direct Luna Max execution owner в
 собственном admitted writer worktree. Он владеет research, implementation,
 tests и self-review и возвращает один task-owned commit либо точный checkpoint.
-При наблюдаемой nested delegation owner может вызывать read-only Luna verifier/
-test author/critic с отдельным packet-bound routing admission. Если вложенность
-недоступна, coordinator после candidate handoff запускает отдельного direct Luna
-review owner-а. Это штатная последовательная стадия и не ослабляет terminal
+Одновременно независимый Luna review owner готовит bounded review plan по
+requirements, risk map и исходной base, но не оценивает ещё не завершённый
+candidate. При наблюдаемой nested delegation роли могут находиться внутри owner
+wave с отдельным packet-bound routing admission. Если вложенность недоступна,
+это две прямые атомарные волны; exact review начинается только после candidate
+handoff. Такая параллельная подготовка не ослабляет independence или terminal
 promise.
 
 Каждый exact candidate до final gate получает независимого economical verifier,
@@ -632,6 +634,14 @@ disposition: fixed | refuted_with_evidence | escalate
 развилке, слабом/проваленном oracle, неудаче подхода либо высокой ожидаемой
 ценности независимой попытки. Для нескольких candidates заранее фиксируются
 различимые purpose/approach; одинаковые prompts не считаются независимостью.
+
+Review plan содержит action budget и stopping condition. Для малого/среднего
+scope normal envelope ограничен одним source/diff pass, одним основным suite и
+максимум тремя targeted risk probes. Open-ended fuzzing, повторное чтение
+неизменившегося candidate, поиск parent messaging tools и cleanup из read-only
+роли запрещены. После rework тот же reviewer проверяет reproducer, изменённые
+surfaces и основной suite; controller final gate не повторяет этот exploratory
+review без противоречия в evidence.
 
 При material uncertainty packet lead прекращает corrective mutations и
 возвращает compact escalation: exact state, completed work, checks, findings,
@@ -681,12 +691,13 @@ UI/synchronization и tests/UAT. Деление по числу Tasks без н�
 один объединённый ledger, а не сообщения всех внутренних reviewers.
 
 Новый direct owner проходит один заранее разрешённый routing guard, один spawn
-и event-driven wait до `complete | needs_attention | deadline`. Owner не
-публикует routine progress родителю; при неизменном состоянии coordinator не
-вызывает status list, короткие polling waits или nudges. Независимых owners одной
-стадии можно ждать общим event mechanism. Owner возвращает только требующий
-решения вопрос либо итоговый handoff; его deadline короче общего ceiling run,
-чтобы даже при неполном review вернуть partial ledger и не потерять evidence.
+и event-driven wait до `complete | needs_attention | deadline`. Wait получает
+весь остаток переданного stage deadline, а не произвольные десять минут. Ранний
+технический timeout только продолжает то же ожидание без `list`, status probe,
+commentary или nudge. Независимых owners одной стадии можно ждать общим event
+mechanism. Final response owner-а является его handoff; отдельный parent
+messaging tool он не ищет. Deadline короче общего ceiling run, чтобы при
+неполном review вернуть partial ledger и не потерять evidence.
 
 После material rework coordinator продолжает существующего owner-а и тот же
 independent reviewer session с exact changed candidate. Нормальный путь содержит
@@ -1152,10 +1163,10 @@ routing guard и его стабильный interface. Normal direct-owner trac
 pre-dispatch guard ×1 → spawn owner ×1 → event wait ×1
 ```
 
-Ожидание получает конечный deadline не больше остатка run ceiling и завершается
-только результатом, запросом внимания либо deadline handoff. Owner не отправляет
-routine progress наверх, а coordinator не будит его пустыми сообщениями и не
-делает `list_agents` или короткие повторные waits при неизменном state. Если
+Ожидание получает весь остаток конечного stage deadline, не больше остатка run
+ceiling, и завершается только результатом, запросом внимания либо deadline
+handoff. Технический timeout раньше stage deadline немедленно продолжает тот же
+wait без `list_agents`, status probe, commentary или nudge. Если
 platform прерывает event wait новым пользовательским input, coordinator сначала
 обрабатывает этот input; это не превращает normal trace в polling loop.
 
@@ -1212,6 +1223,13 @@ coordinator исполняет fail-closed protocol:
 явно задавать delegation, acceptance criteria и проверяемые stopping conditions;
 одного логического file ownership недостаточно
 ([официальная model guidance](https://developers.openai.com/api/docs/guides/latest-model)).
+
+Перед чтением guard implementation и `prepare` coordinator дешёво проверяет
+writability фактического Git common dir. В read-only Git sandbox заведомо
+невозможный worktree flow не запускается: Luna получает read-only patch packet,
+возвращает exact candidate, и coordinator механически применяет его только
+после завершения owner-а. Это сохраняет последовательную запись и не передаёт
+Sol содержательную реализацию.
 
 Каждый packet содержит Strategic Outcome всего scope, вклад конкретного issue
 или пакета, применимые Human Requirements, exact локальный scope, owned

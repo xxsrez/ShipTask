@@ -287,6 +287,14 @@ class DirectCampaignObservation:
     finding_ledger_returned: bool
     final_review_started_after_stages: bool
     unchanged_state_actions: tuple[str, ...] = ()
+    reviewer_plan_prepared_concurrently: bool = False
+    review_action_count: int = 0
+    review_action_budget: int = 0
+    review_open_ended_exploration: bool = False
+    reviewer_workspace_mutation: bool = False
+    reviewer_searched_parent_messaging: bool = False
+    final_review_replayed_exploration: bool = False
+    technical_wait_state_probes: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -327,6 +335,20 @@ def assess_direct_campaign(
         defects.append("finding_ledger_missing")
     if not observation.final_review_started_after_stages:
         defects.append("controller_final_review_started_early")
+    if observation.review_action_budget <= 0:
+        defects.append("review_action_budget_missing")
+    elif observation.review_action_count > observation.review_action_budget:
+        defects.append("review_action_budget_exceeded")
+    if observation.review_open_ended_exploration:
+        defects.append("review_open_ended_exploration")
+    if observation.reviewer_workspace_mutation:
+        defects.append("reviewer_workspace_mutation")
+    if observation.reviewer_searched_parent_messaging:
+        defects.append("reviewer_searched_parent_messaging")
+    if observation.final_review_replayed_exploration:
+        defects.append("final_review_replayed_exploration")
+    if observation.technical_wait_state_probes:
+        defects.append("technical_wait_state_probe")
 
     for action in observation.unchanged_state_actions:
         normalized = action.strip().casefold()
@@ -347,6 +369,8 @@ def assess_direct_campaign(
             defects.append("balance_multiple_candidates_without_material_fork")
         elif observation.reducer_id.strip():
             defects.append("balance_unexpected_reducer")
+        if not observation.reviewer_plan_prepared_concurrently:
+            defects.append("balance_concurrent_review_plan_missing")
     else:
         if observation.stage_order != ("candidates", "reduction_review"):
             defects.append("swarm_stage_order_invalid")

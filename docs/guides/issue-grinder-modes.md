@@ -85,9 +85,10 @@ critique и rework. Дорогой профиль не управляет каж
 сырой transcript всех дешёвых waves.
 
 Обычная форма — Luna execution owner, который возвращает один candidate, и
-независимый Luna verifier. При доказанной nested delegation они могут находиться
-внутри одной owner-wave; без неё это две последовательные direct stages, а не
-checkpoint. Для каждого существенного finding
+независимый Luna verifier. Verifier параллельно готовит bounded review plan, но
+применяет его только к завершённому exact candidate. При доказанной nested
+delegation роли могут находиться внутри одной owner-wave; без неё это прямые
+одно-ownerные волны, а не checkpoint. Для каждого существенного finding
 требуется одно из трёх: исправление, опровержение evidence или явная передача на
 решение. Несколько ответов «всё хорошо» не перевешивают один воспроизводимый
 дефект.
@@ -133,6 +134,11 @@ worktree.
 или размножать внешние эффекты. Reducer оставляет один рекомендуемый candidate и
 не более одного runner-up при существенной неразрешённой развилке. Final reviewer
 получает сжатый проверяемый пакет, а не весь сырой transcript.
+
+Reducer/reviewer получает единые критерии и action budget до запуска campaign:
+он сравнивает compact handoffs, один раз читает выбранный exact candidate,
+запускает основной suite и только ограниченные targeted probes. Он не повторяет
+исследование каждого candidate и не превращает review в открытый fuzzing loop.
 
 ## `Экономичный`
 
