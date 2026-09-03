@@ -636,12 +636,16 @@ disposition: fixed | refuted_with_evidence | escalate
 различимые purpose/approach; одинаковые prompts не считаются независимостью.
 
 Review plan содержит action budget и stopping condition. Для малого/среднего
-scope normal envelope ограничен одним source/diff pass, одним основным suite и
-максимум тремя targeted risk probes. Open-ended fuzzing, повторное чтение
-неизменившегося candidate, поиск parent messaging tools и cleanup из read-only
-роли запрещены. После rework тот же reviewer проверяет reproducer, изменённые
-surfaces и основной suite; controller final gate не повторяет этот exploratory
-review без противоречия в evidence.
+scope defaults ограничивают candidate owner десятью tool calls, review plan
+вместе с exact review восемью, recheck тремя, controller final gate тремя.
+Увеличение до dispatch выводится из независимых risk surfaces. Candidate owner
+один раз читает contract/source, изменяет настоящий изолированный candidate и
+запускает основной suite; он не повторяет известный красный baseline без
+диагностической пользы, не реконструирует проект несколькими in-memory
+симуляциями и не ищет parent messaging. Reviewer получает один source/diff pass,
+suite и максимум три targeted probes. После rework тот же reviewer проверяет
+reproducer, changed surfaces и suite; controller не повторяет exploration без
+противоречия в evidence.
 
 При material uncertainty packet lead прекращает corrective mutations и
 возвращает compact escalation: exact state, completed work, checks, findings,
@@ -710,6 +714,16 @@ gate resumable checkpoint.
 Эта схема не скрывает platform limitation и ограничивает дорогую coordination
 числом полезных стадий и candidate envelope. Она не ослабляет обязательный
 review: меняется форма orchestration, а не evidence gate.
+
+Если sandbox разрешает запись в рабочие файлы, но запрещает Git metadata,
+последовательный Luna writer не обязан превращаться в read-only генератор
+гигантского патча. Coordinator создаёт task-owned shadow tree exact base без
+`.git` внутри разрешённого sandbox, закрепляет его за одним owner-ом и параллельно
+оставляет только read-only review planning. Writer правит и тестирует этот
+реальный candidate, после чего coordinator строит и механически применяет exact
+diff. Созданный coordinator-ом shadow artifact удаляется только после проверки.
+Это не Git worktree и поэтому не используется для параллельных authors; при двух
+writing lanes остаётся обязательным отдельный admitted worktree каждому.
 
 ### 4.7 Review packet и переключение
 

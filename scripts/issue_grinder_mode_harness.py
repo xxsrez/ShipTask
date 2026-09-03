@@ -288,12 +288,18 @@ class DirectCampaignObservation:
     final_review_started_after_stages: bool
     unchanged_state_actions: tuple[str, ...] = ()
     reviewer_plan_prepared_concurrently: bool = False
+    execution_action_counts: tuple[int, ...] = ()
+    execution_action_budgets: tuple[int, ...] = ()
+    execution_open_ended_simulation: bool = False
+    execution_searched_parent_messaging: bool = False
     review_action_count: int = 0
     review_action_budget: int = 0
     review_open_ended_exploration: bool = False
     reviewer_workspace_mutation: bool = False
     reviewer_searched_parent_messaging: bool = False
     final_review_replayed_exploration: bool = False
+    controller_final_action_count: int = 0
+    controller_final_action_budget: int = 0
     technical_wait_state_probes: tuple[str, ...] = ()
 
 
@@ -335,6 +341,25 @@ def assess_direct_campaign(
         defects.append("finding_ledger_missing")
     if not observation.final_review_started_after_stages:
         defects.append("controller_final_review_started_early")
+    if len(observation.execution_action_counts) != len(authors):
+        defects.append("execution_action_counts_do_not_match_candidates")
+    if len(observation.execution_action_budgets) != len(authors):
+        defects.append("execution_action_budgets_do_not_match_candidates")
+    elif any(budget <= 0 for budget in observation.execution_action_budgets):
+        defects.append("execution_action_budget_missing")
+    elif len(observation.execution_action_counts) == len(authors) and any(
+        count > budget
+        for count, budget in zip(
+            observation.execution_action_counts,
+            observation.execution_action_budgets,
+            strict=True,
+        )
+    ):
+        defects.append("execution_action_budget_exceeded")
+    if observation.execution_open_ended_simulation:
+        defects.append("execution_open_ended_simulation")
+    if observation.execution_searched_parent_messaging:
+        defects.append("execution_searched_parent_messaging")
     if observation.review_action_budget <= 0:
         defects.append("review_action_budget_missing")
     elif observation.review_action_count > observation.review_action_budget:
@@ -347,6 +372,13 @@ def assess_direct_campaign(
         defects.append("reviewer_searched_parent_messaging")
     if observation.final_review_replayed_exploration:
         defects.append("final_review_replayed_exploration")
+    if observation.controller_final_action_budget <= 0:
+        defects.append("controller_final_action_budget_missing")
+    elif (
+        observation.controller_final_action_count
+        > observation.controller_final_action_budget
+    ):
+        defects.append("controller_final_action_budget_exceeded")
     if observation.technical_wait_state_probes:
         defects.append("technical_wait_state_probe")
 

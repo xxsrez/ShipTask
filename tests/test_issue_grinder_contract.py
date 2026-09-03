@@ -329,7 +329,8 @@ class IssueGrinderContractTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         self.assertIn("local model-forward evaluation", skill)
-        self.assertIn("максимум три targeted probes", skill)
+        self.assertIn("candidate 10 tool calls", skill)
+        self.assertIn("не объединяй их в обрезаемый", skill)
         self.assertIn("параллельно готовит ограниченный review plan", skill)
         for runtime in (balance, swarm, multi_agent):
             normalized = " ".join(runtime.casefold().split())
@@ -338,6 +339,9 @@ class IssueGrinderContractTest(unittest.TestCase):
             self.assertIn("final response", normalized)
         self.assertIn("Open-ended fuzzing", balance)
         self.assertIn("Open-ended fuzzing", swarm)
+        self.assertIn("shadow tree", balance)
+        self.assertIn("shadow tree", swarm)
+        self.assertIn("shadow tree", multi_agent)
         self.assertIn("технически вернул\ntimeout", multi_agent)
 
     def test_publication_unit_stays_with_coordinator(self) -> None:
