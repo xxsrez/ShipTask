@@ -243,6 +243,13 @@ Architecture — за «как сейчас этого достигать». С�
 
 ## Reports
 
+- [Issue Grinder: проверка единого владельца review-wave](reports/2026-09-03-issue-grinder-review-wave-owner-benchmark.md)
+  — повторный синтетический benchmark после изменения Requirements,
+  Architecture и runtime: подтверждённая экономия Классического, несостоявшиеся
+  topology Баланса и Роя, общий дефект таймаута и решение `Needs revision`.
+- [Issue Grinder: rollback-kit для review-wave owner](reports/2026-09-03-issue-grinder-review-wave-owner-rollback.md)
+  — неисполненный безопасный runbook возврата source, Marketplace package и
+  installed snapshot без потери пользовательских изменений.
 - [Issue Grinder: аудит пяти режимов и маршрутизации моделей](reports/2026-09-01-issue-grinder-five-mode-benchmark.md)
   — исправленный tree-only расход, отзыв прежнего ranking, фактические роли
   Sol/Luna/GPT-5.4, protocol defects и требования к повторному benchmark.

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.11" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Экономия Sol доказана только для Классического</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+</style>
+  <style type="text/css">:root{color-scheme:light;--ink:#172033;--line:#dfe4ec;--soft:#f5f7fa;--accent:#3156d3}*{box-sizing:border-box}html{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#eef1f6;line-height:1.58}body{max-width:1180px;margin:32px auto;padding:48px 56px 64px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 16px 48px rgba(23,32,51,.08)}h1,h2{line-height:1.2;letter-spacing:-.02em}h1{margin-top:0;font-size:2.25rem}h2{margin-top:2.4rem;padding-top:.4rem;border-top:1px solid var(--line)}p,li{max-width:86ch}a{color:var(--accent);text-underline-offset:2px}code{padding:.12rem .32rem;border-radius:5px;background:var(--soft);font-size:.92em}nav#TOC{margin:2rem 0 2.5rem;padding:1.1rem 1.4rem;border-left:4px solid var(--accent);background:var(--soft);border-radius:0 10px 10px 0}nav#TOC::before{content:"Содержание";display:block;margin-bottom:.55rem;font-weight:700}nav#TOC ul{margin:0;padding-left:1.2rem;columns:2;column-gap:2rem}nav#TOC li{break-inside:avoid;margin:.2rem 0}table{display:block;width:100%;overflow-x:auto;border-collapse:collapse;margin:1.25rem 0 1.6rem;font-size:.91rem}th,td{padding:.68rem .76rem;border:1px solid var(--line);vertical-align:top}th{position:sticky;top:0;background:#e9edf7;text-align:left;white-space:nowrap}tbody tr:nth-child(even){background:#fafbfc}ul,ol{padding-left:1.35rem}li+li{margin-top:.35rem}@media(max-width:760px){body{margin:0;padding:28px 20px 44px;border:0;border-radius:0}h1{font-size:1.75rem}nav#TOC ul{columns:1}}@media print{html{background:#fff}body{max-width:none;margin:0;padding:0;border:0;box-shadow:none}nav#TOC{break-after:page}a{color:inherit;text-decoration:none}table{display:table;overflow:visible;font-size:8.5pt}h2{break-after:avoid}}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Экономия Sol доказана только для Классического</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#экономия-sol-доказана-только-для-классического" id="toc-экономия-sol-доказана-только-для-классического">Экономия Sol
+доказана только для Классического</a>
+<ul>
+<li><a href="#итог" id="toc-итог">Итог</a></li>
+<li><a href="#таблица-в-формате-сравнительного-отчёта" id="toc-таблица-в-формате-сравнительного-отчёта">Таблица в формате
+сравнительного отчёта</a></li>
+<li><a href="#сравнение-с-прежней-серией" id="toc-сравнение-с-прежней-серией">Сравнение с прежней серией</a></li>
+<li><a href="#где-уменьшился-sol-tax" id="toc-где-уменьшился-sol-tax">Где уменьшился Sol tax</a>
+<ul>
+<li><a href="#классический" id="toc-классический">Классический</a></li>
+<li><a href="#баланс" id="toc-баланс">Баланс</a></li>
+<li><a href="#рой" id="toc-рой">Рой</a></li>
+<li><a href="#экономичный" id="toc-экономичный">Экономичный</a></li>
+</ul></li>
+<li><a href="#общий-дефект-тест-плана" id="toc-общий-дефект-тест-плана">Общий дефект тест-плана</a></li>
+<li><a href="#решение" id="toc-решение">Решение</a></li>
+<li><a href="#evidence" id="toc-evidence">Evidence</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="экономия-sol-доказана-только-для-классического">Экономия Sol
+доказана только для Классического</h1>
+<p>Дата наблюдения: 2026-09-03.</p>
+<h2 id="итог">Итог</h2>
+<p>Изменение нельзя считать общим улучшением и безопасно оставлять как
+финальную стратегию. Оно действительно снизило расход Sol в
+<code>Классическом</code> на <code>33,9%</code> при полном соблюдении
+режима. Но центральная гипотеза для <code>Баланса</code>,
+<code>Роя</code> и больших вложенных волн не подтвердилась: фактический
+execution-child не получил инструменты <code>collaboration</code> и
+поэтому не смог создать внутренних authors/reviewers/reducers.</p>
+<p>Из-за этого:</p>
+<ul>
+<li><code>Баланс</code> вернул функционально зелёный, но нетерминальный
+checkpoint без независимого reviewer-а;</li>
+<li><code>Рой</code> сократил Sol на <code>66,2%</code> главным образом
+потому, что не создал обещанные конкурирующие candidates и внутреннего
+reviewer-а;</li>
+<li><code>Экономичный</code> прошёл: Luna-root подготовил candidate, а
+один direct Luna-child независимо проверил его после continuation,
+однако Luna-токены выросли на <code>103,0%</code>;</li>
+<li><code>Классический</code> прошёл: Sol-root реализовал candidate,
+один direct Luna review owner проверил его, а после исправления была
+продолжена та же review session.</li>
+</ul>
+<p>Текущий runtime оставлен установленным для разбора пользователем. Сам
+откат не выполнялся. Подготовлен <a href="2026-09-03-issue-grinder-review-wave-owner-rollback.md">rollback-kit</a>.</p>
+<h2 id="таблица-в-формате-сравнительного-отчёта">Таблица в формате
+сравнительного отчёта</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 6%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 6%" />
+<col style="width: 9%" />
+<col style="width: 6%" />
+</colgroup>
+<thead>
+<tr>
+<th>Режим</th>
+<th>Итог</th>
+<th style="text-align: right;">Качество</th>
+<th style="text-align: right;">Functional</th>
+<th style="text-align: right;">Blind review</th>
+<th style="text-align: right;">Sol, токены</th>
+<th style="text-align: right;">Δ Sol к прежнему</th>
+<th style="text-align: right;">Luna, токены</th>
+<th style="text-align: right;">Время</th>
+<th>Объём работы</th>
+<th style="text-align: right;">API-equivalent, USD</th>
+<th>Нюанс режима</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Соло</td>
+<td><code>HIST control</code></td>
+<td style="text-align: right;"><strong>98,7</strong></td>
+<td style="text-align: right;">85/85</td>
+<td style="text-align: right;"><strong>13,7/15</strong></td>
+<td style="text-align: right;"><strong>865 476</strong></td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"><strong>5:57</strong></td>
+<td>0 аг. · 19 выз. · 55 тест.</td>
+<td style="text-align: right;">0,866</td>
+<td>Не перезапускался: runtime Соло не менялся; прежний candidate заново
+включён в слепую оценку</td>
+</tr>
+<tr>
+<td>Классический</td>
+<td><code>PASS terminal</code></td>
+<td style="text-align: right;">97,6</td>
+<td style="text-align: right;">85/85</td>
+<td style="text-align: right;">12,6/15</td>
+<td style="text-align: right;">957 670</td>
+<td style="text-align: right;"><strong>−33,9%</strong></td>
+<td style="text-align: right;">1 188 305</td>
+<td style="text-align: right;">11:30</td>
+<td>1 аг. · 39 выз. · 38 тест.</td>
+<td style="text-align: right;">0,972</td>
+<td>Один direct Luna reviewer; после rework продолжена та же session;
+mode fidelity подтверждён</td>
+</tr>
+<tr>
+<td>Баланс</td>
+<td><code>MODE FAIL · checkpoint</code></td>
+<td style="text-align: right;">97,3</td>
+<td style="text-align: right;">85/85</td>
+<td style="text-align: right;">12,3/15</td>
+<td style="text-align: right;">1 584 804</td>
+<td style="text-align: right;">−13,1%</td>
+<td style="text-align: right;">4 573 924</td>
+<td style="text-align: right;">20:47</td>
+<td>1 аг. · 107 выз. · 112 тест.</td>
+<td style="text-align: right;">1,345</td>
+<td>Packet owner не имел <code>collaboration</code>; независимый
+reviewer не создан; terminal promise не выполнен</td>
+</tr>
+<tr>
+<td>Рой</td>
+<td><code>MODE FAIL</code></td>
+<td style="text-align: right;">98,4</td>
+<td style="text-align: right;">85/85</td>
+<td style="text-align: right;">13,4/15</td>
+<td style="text-align: right;">1 577 028</td>
+<td style="text-align: right;">−66,2%</td>
+<td style="text-align: right;">2 176 776</td>
+<td style="text-align: right;">20:04</td>
+<td>1 аг. · 68 выз. · 20 тест.</td>
+<td style="text-align: right;">1,476</td>
+<td>Нет наблюдаемых M≥2 candidates, внутреннего reviewer-а и reducer-а;
+Sol-root применил текстовый patch и сделал final review</td>
+</tr>
+<tr>
+<td>Экономичный</td>
+<td><code>PASS terminal</code></td>
+<td style="text-align: right;">96,8</td>
+<td style="text-align: right;">85/85</td>
+<td style="text-align: right;">11,8/15</td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4 192 997</td>
+<td style="text-align: right;">18:23</td>
+<td>1 аг. · 74 выз. · 52 тест.</td>
+<td style="text-align: right;"><strong>0,184</strong></td>
+<td>Ноль Sol; direct Luna review owner завершил ledger после
+continuation; Luna выросла на 103,0%</td>
+</tr>
+</tbody>
+</table>
+<p><code>Объём работы</code> использует рекурсивное дерево измеряемой
+сессии. Число тестов — наблюдаемые исполнения test cases с повторными
+прогонами; внешний frozen oracle из 21 теста в это число не включён.
+Колонки <code>Weekly Use</code> и <code>GPT-5.4</code> намеренно
+отсутствуют.</p>
+<h2 id="сравнение-с-прежней-серией">Сравнение с прежней серией</h2>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr>
+<th>Режим</th>
+<th style="text-align: right;">Sol до</th>
+<th style="text-align: right;">Sol после</th>
+<th style="text-align: right;">Изменение</th>
+<th style="text-align: right;">Качество до</th>
+<th style="text-align: right;">Качество после</th>
+<th style="text-align: right;">Время до</th>
+<th style="text-align: right;">Время после</th>
+<th>Принимаемый вывод</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Классический</td>
+<td style="text-align: right;">1 449 767</td>
+<td style="text-align: right;">957 670</td>
+<td style="text-align: right;">−492 097 / <strong>−33,9%</strong></td>
+<td style="text-align: right;">98,1</td>
+<td style="text-align: right;">97,6</td>
+<td style="text-align: right;">10:42</td>
+<td style="text-align: right;">11:30</td>
+<td>Реальное улучшение расхода; разница качества находится в шуме одного
+reviewer-а</td>
+</tr>
+<tr>
+<td>Баланс</td>
+<td style="text-align: right;">1 824 138</td>
+<td style="text-align: right;">1 584 804</td>
+<td style="text-align: right;">−239 334 / −13,1%</td>
+<td style="text-align: right;">98,9</td>
+<td style="text-align: right;">97,3</td>
+<td style="text-align: right;">17:45</td>
+<td style="text-align: right;">20:47</td>
+<td>Нельзя засчитать: новый результат не выполнил terminal и
+independent-review contract</td>
+</tr>
+<tr>
+<td>Рой</td>
+<td style="text-align: right;">4 671 551</td>
+<td style="text-align: right;">1 577 028</td>
+<td style="text-align: right;">−3 094 523 / −66,2%</td>
+<td style="text-align: right;">99,2</td>
+<td style="text-align: right;">98,4</td>
+<td style="text-align: right;">20:05</td>
+<td style="text-align: right;">20:04</td>
+<td>Нельзя засчитать: экономия получена вместе с исчезновением самой
+swarm topology</td>
+</tr>
+<tr>
+<td>Экономичный</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">96,6</td>
+<td style="text-align: right;">96,8</td>
+<td style="text-align: right;">10:38</td>
+<td style="text-align: right;">18:23</td>
+<td>Режим прошёл, но Luna 2 065 918 → 4 192 997 и время выросло на
+73,0%</td>
+</tr>
+</tbody>
+</table>
+<p>Новая слепая оценка дала неизменённому candidate режима
+<code>Соло</code> <code>13,7/15</code> вместо прежних
+<code>13,8/15</code>. Поэтому изменения качества порядка нескольких
+десятых нельзя интерпретировать как устойчивый эффект.</p>
+<h2 id="где-уменьшился-sol-tax">Где уменьшился Sol tax</h2>
+<h3 id="классический">Классический</h3>
+<p>Старая схема тратила Sol на более широкий review orchestration. Новая
+трасса содержит одного direct Luna reviewer-а и ровно один повторный
+<code>followup → wait</code> после исправления. Sol уменьшился на
+<code>492 097</code> токенов без потери terminal result. Это
+подтверждённая полезная часть изменения.</p>
+<h3 id="баланс">Баланс</h3>
+<p>Direct children сократились с двух до одного, но packet owner не смог
+создать внутреннего reviewer-а. Root после первого дедлайна вернулся к
+<code>list_agents</code>, <code>sleep</code>, повторным waits и
+continuation, а независимый gate так и остался незакрыт. Уменьшение Sol
+не компенсирует потерю результата.</p>
+<h3 id="рой">Рой</h3>
+<p>Direct children сократились с девяти до одного, но единственный owner
+не смог создать ни независимых candidates, ни reviewer-а. Он вернул
+root-у текстовый patch и self-review. Root применил patch и сделал
+дорогой final review сам. Именно отсутствие обещанной внутренней работы
+объясняет большую часть наблюдаемого падения Sol; это не честная
+оптимизация <code>Роя</code>.</p>
+<h3 id="экономичный">Экономичный</h3>
+<p>Sol остался нулевым. В этой конкретной трассе root успел реализовать
+candidate до запуска direct review owner-а, а тот после continuation
+вернул review ledger. Контракт результата выполнен, но удвоение Luna и
+рост времени показывают цену обязательного review на маленьком
+scope.</p>
+<h2 id="общий-дефект-тест-плана">Общий дефект тест-плана</h2>
+<p>Runner имел потолок <code>3 600</code> секунд, но frozen prompt
+сохранил устаревшую фразу про внешний десятиминутный потолок.
+<code>Баланс</code>, <code>Рой</code> и <code>Экономичный</code>
+остановили владельцев примерно на шестой минуте и завершили первый turn.
+Исходные наблюдения сохранены. Затем те же root sessions были продолжены
+в тех же workspaces с явным пояснением, что действует оставшийся часовой
+бюджет.</p>
+<p>Это влияет на всю серию:</p>
+<ul>
+<li>три режима получили дополнительный prompt;</li>
+<li>wall-clock является суммой двух интервалов;</li>
+<li>первый owner был прерван до continuation;</li>
+<li>сравнение времени слабее сравнения токенов и mode fidelity.</li>
+</ul>
+<p>Кроме того, четыре root runs выполнялись параллельно. Рекурсивные
+токены атрибутируются независимо, но wall-clock мог зависеть от
+конкуренции за локальные ресурсы. Выполнен один стохастический run
+режима и один слепой reviewer.</p>
+<h2 id="решение">Решение</h2>
+<p>Результат имеет статус <strong>Needs revision</strong>.</p>
+<p>Сохранять обязательный independent-review gate стоит. Не подтверждена
+именно топология «один owner создаёт всех внутренних детей». Следующая
+версия должна начинаться с capability gate:</p>
+<ol type="1">
+<li>если child фактически имеет nested <code>collaboration</code>,
+разрешить одного owner-а;</li>
+<li>если nested delegation недоступна, для <code>Баланса</code> и
+<code>Экономичного</code> использовать две последовательные bounded
+direct lanes: author, затем independent reviewer;</li>
+<li>для <code>Роя</code> либо обеспечить spawn-capable supervisor, либо
+честно вернуться к ограниченному root-visible fan-out — иначе режим не
+существует;</li>
+<li>terminal-режим не должен превращать owner deadline в resumable
+checkpoint.</li>
+</ol>
+<p>Эта следующая правка здесь не реализована: текущий запрос требовал
+подготовить откат, а не молча заменять неудачную стратегию второй.</p>
+<h2 id="evidence">Evidence</h2>
+<ul>
+<li>Локальный baseline report пользователя:
+<code>docs/reports/2026-09-02-issue-grinder-five-mode-synthetic-benchmark.md</code>
+(не включён в этот коммит).</li>
+<li>ShipTask source commit:
+<code>bed44ba954313f7f4a26f8c02e45e616fa367a19</code>.</li>
+<li>Marketplace commit:
+<code>293d5fa0f57d8c749e6ced789335d2e0951d2e50</code>.</li>
+<li>Installed snapshot:
+<code>issue-grinder/0.1.0+codex.20260903010612</code>.</li>
+<li>Benchmark ID:
+<code>issue-grinder-review-wave-owner-20260903T010800Z</code>.</li>
+<li>Frozen fixture SHA-256:
+<code>da385bd99ff82d836db16655a5881901726d6161e09c9fd4b6150f1c4f3df430</code>.</li>
+<li>Frozen prompt SHA-256:
+<code>af01e345c8daff04b03c05da9ff2f3c6a77d476bf5b74bf51aad8f20d7c495e1</code>.</li>
+<li>Root threads: <code>Рой 00000000-0000-4000-8000-a847150165cf</code>,
+<code>Баланс 00000000-0000-4000-8000-4ed0ad0a9dee</code>,
+<code>Классический 00000000-0000-4000-8000-fe57570379ff</code>,
+<code>Экономичный 00000000-0000-4000-8000-8794e032c157</code>.</li>
+<li>Blind reviewer:
+<code>00000000-0000-4000-8000-46c7e6ce29d5</code>.</li>
+<li>Raw artifacts:
+<code>~/.codex/benchmarks/issue-grinder-review-wave-owner-20260903T010800Z</code>.</li>
+</ul>
+<p>API-equivalent использует те же зафиксированные ставки, что baseline;
+blind reviewer в стоимость режимов не включён.</p>
+</body>
+</html>
