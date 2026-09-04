@@ -1,5 +1,6 @@
 from dataclasses import replace
 import unittest
+from pathlib import Path
 
 from scripts.issue_grinder_mode_harness import (
     ExecutionMode, Profile, resolve_mode, mode_dispatch_policy, decide_mode_switch,
@@ -7,6 +8,15 @@ from scripts.issue_grinder_mode_harness import (
 
 
 class ThreeModesTest(unittest.TestCase):
+    def test_launch_button_does_not_force_a_mode(self):
+        path = Path(__file__).resolve().parents[1] / "issue-grinder/agents/openai.yaml"
+        prompt = next(line for line in path.read_text().splitlines()
+                      if "default_prompt:" in line)
+        self.assertIn("$issue-grinder", prompt)
+        self.assertIn("автовыбора", prompt)
+        for name in ("Соло", "Классический", "Экономичный", "Баланс", "Менеджер"):
+            self.assertNotIn(name, prompt)
+
     def test_only_three_modes_exist(self):
         self.assertEqual({m.value for m in ExecutionMode}, {"solo", "classic", "economical"})
 
