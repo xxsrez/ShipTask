@@ -320,7 +320,7 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("до трёх independent Luna", skill)
         for marker in (
             "не больше\n   трёх Luna workers",
-            "одну active wave",
+            "одну execution wave",
             "collective event-driven wait",
             "parallel tool batch",
             "Отдельный independent reviewer не является штатной ролью",

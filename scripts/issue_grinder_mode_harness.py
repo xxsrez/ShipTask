@@ -223,6 +223,9 @@ class BalanceWaveObservation:
     nested_delegation_counts: tuple[int, ...]
     dispatch_window_count: int
     active_wave_count: int
+    total_execution_wave_count: int
+    admission_completed_before_first_source_change: bool
+    tool_wait_in_benefit_assessment: bool
     peak_luna_workers: int
     main_useful_work: bool
     main_repeated_worker_work: bool
@@ -317,6 +320,12 @@ def assess_balance_wave(
         defects.append("balance_dispatch_not_one_window")
     if observation.active_wave_count != 1:
         defects.append("balance_active_wave_count_not_one")
+    if observation.total_execution_wave_count != 1:
+        defects.append("balance_total_execution_wave_count_not_one")
+    if not observation.admission_completed_before_first_source_change:
+        defects.append("balance_source_change_before_admission_dispatch")
+    if not observation.tool_wait_in_benefit_assessment:
+        defects.append("balance_tool_wait_ignored_in_admission")
     if observation.peak_luna_workers != packet_count:
         defects.append("balance_peak_workers_mismatch")
     if not observation.main_useful_work:

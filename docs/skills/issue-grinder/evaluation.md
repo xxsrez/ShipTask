@@ -134,8 +134,10 @@ Corpus доказывает:
 - Luna High worker profile `Баланса`, Luna Max baseline других экономичных
   ролей и независимый приоритет role overrides;
 - Balance wave из двух-трёх dependency-ready self-contained packets с
-  непересекающимися surfaces, одним dispatch window, useful main overlap, одним
-  collective wait, mechanical fan-in, parallel tool gates и main acceptance;
+  непересекающимися surfaces, admission и обязательным dispatch до первой
+  source mutation, учётом tool-bound critical path, одной execution wave,
+  useful main overlap, одним collective wait, mechanical fan-in, parallel tool
+  gates и main acceptance;
 - отклонение лишнего Balance reviewer-а, nested delegation, serial dispatch,
   polling, повторения Luna work основной моделью и непроверенной интеграции;
 - independent-review lifecycle режимов, которые его требуют: один guard/spawn

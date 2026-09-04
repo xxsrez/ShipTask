@@ -89,6 +89,9 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
             "nested_delegation_counts": (0, 0, 0),
             "dispatch_window_count": 1,
             "active_wave_count": 1,
+            "total_execution_wave_count": 1,
+            "admission_completed_before_first_source_change": True,
+            "tool_wait_in_benefit_assessment": True,
             "peak_luna_workers": 3,
             "main_useful_work": True,
             "main_repeated_worker_work": False,
@@ -242,6 +245,18 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         self.assertIn("balance_write_surfaces_overlap", decision.defects)
         self.assertIn("balance_luna_high_effort_required", decision.defects)
         self.assertIn("balance_nested_delegation_forbidden", decision.defects)
+
+    def test_balance_dispatches_before_work_and_counts_tool_wait(self) -> None:
+        decision = assess_balance_wave(
+            self.complete_balance_wave(
+                total_execution_wave_count=2,
+                admission_completed_before_first_source_change=False,
+                tool_wait_in_benefit_assessment=False,
+            )
+        )
+        self.assertIn("balance_total_execution_wave_count_not_one", decision.defects)
+        self.assertIn("balance_source_change_before_admission_dispatch", decision.defects)
+        self.assertIn("balance_tool_wait_ignored_in_admission", decision.defects)
 
     def test_balance_requires_useful_overlap_collective_wait_and_main_acceptance(self) -> None:
         decision = assess_balance_wave(

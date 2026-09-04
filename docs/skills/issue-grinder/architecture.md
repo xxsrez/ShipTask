@@ -567,6 +567,14 @@ write-surface map, acceptance и integration boundaries. Packet допускае
 общим внешним или необратимым effect. Наличие файлов, Tasks или свободных слотов
 само по себе admission не создаёт.
 
+Admission завершается до первой source mutation и до первого длительного
+packet-local tool gate. Если не менее двух packets прошли admission, один
+dispatch window обязателен: main profile не начинает один из них последовательно
+и не откладывает Luna до следующей frontier. В benefit assessment учитывается не
+только размер diff, но и устранимое последовательное время сборок, тестов,
+анализаторов и других tool-bound процессов. Малый diff с несколькими долгими
+независимыми gates может быть хорошим кандидатом для `Баланса`.
+
 В одной активной wave запускаются от двух до трёх Luna High workers. Все они
 получают packets одним dispatch window, отдельные admitted worktree/shadow roots
 и запрет на nested delegation. Packet содержит цель, exact base/root, owned и
@@ -576,9 +584,12 @@ Grinder policy, соседние modules или history, если они уже 
 packet-е; не ищет manager/reviewer и не запускает long-running process без
 владельца.
 
-Main profile во время wave выполняет собственную независимую полезную работу:
-critical или integration packet, общую test infrastructure, risk analysis либо
-подготовку fan-in. Он не повторяет активный Luna packet. После собственной
+Main profile во время wave выполняет собственную независимую полезную работу.
+По умолчанию он выбирает downstream integration, CLI, общую test infrastructure,
+risk analysis либо подготовку fan-in, которые используют уже стабильные
+interfaces и не задерживают dispatch upstream writers. Он не забирает себе
+пригодный Luna packet, если это превращает дальнейшие writers в последовательную
+очередь, и не повторяет активный Luna packet. После собственной
 работы используется одно коллективное event-driven ожидание оставшихся owners;
 неизменное состояние не вызывает polling, status lists, nudges или
 промежуточную пересборку.
@@ -587,8 +598,8 @@ Fan-in механический: main profile проверяет candidate ident
 переносит task-owned bytes/commits в integration candidate, разрешает только
 реальные конфликты и не пересказывает полный patch в model context. Неполный
 handoff сохраняется, а недостающую часть main profile завершает сам без цепочки
-replacement agents. Новая wave допускается только для вновь открывшейся
-независимой frontier.
+replacement agents. За весь run создаётся не более одной execution wave;
+вновь открывшуюся после fan-in frontier main profile завершает сам.
 
 Package-local quick checks выполняют Luna workers. После fan-in main profile
 одним parallel tool batch запускает независимые долгие сборки, тесты и
@@ -598,10 +609,12 @@ Package-local quick checks выполняют Luna workers. После fan-in ma
 штатной ролью Balance; если его требует пользователь, project policy или exact
 scope, он добавляется как внешний обязательный gate, а не как свойство режима.
 
-Mode evidence фиксирует admission reasons, packet/profile receipts, dispatch и
+Mode evidence фиксирует решение admission до первой записи, учёт tool-bound
+critical path, packet/profile receipts, dispatch и
 wait envelope, candidate identities, owned surfaces, fan-in identity,
 integrated checks и final acceptance. Прогон с искусственным дроблением,
 пересекающимися writers, скрытым Luna manager/reviewer, несколькими active waves,
+последовательной source mutation до обязательного dispatch, второй wave,
 повтором Luna work основным профилем или без exact integrated acceptance не
 доказывает `Баланс`, даже если случайно получил рабочий результат.
 
