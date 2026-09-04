@@ -18,17 +18,18 @@ validate_route = MODULE.validate_route
 
 class ModelRoutingGuardTest(unittest.TestCase):
     def luna_route(self, mode: str, role: str = "implementation"):
+        effort = "high" if mode == "balance" else "max"
         return validate_route(
             packet_id=f"packet-{mode}-{role}",
             mode=mode,
             semantic_role=role,
             agent_type="worker",
             model="gpt-5.6-luna",
-            effort="max",
+            effort=effort,
             fork_turns="none",
         )
 
-    def test_three_economical_modes_admit_explicit_luna_max_work(self) -> None:
+    def test_luna_modes_admit_their_explicit_worker_profiles(self) -> None:
         for mode in ("balance", "swarm", "economical"):
             with self.subTest(mode=mode):
                 receipt = self.luna_route(mode)
@@ -50,7 +51,12 @@ class ModelRoutingGuardTest(unittest.TestCase):
                 )
                 self.assertFalse(receipt.allowed)
                 self.assertIn("luna_model_required", receipt.defects)
-                self.assertIn("luna_max_effort_required", receipt.defects)
+                expected = (
+                    "luna_high_effort_required"
+                    if mode == "balance"
+                    else "luna_max_effort_required"
+                )
+                self.assertIn(expected, receipt.defects)
                 self.assertIn("unbounded_or_missing_fork_turns", receipt.defects)
 
     def test_agent_type_label_does_not_override_explicit_profile(self) -> None:
@@ -74,7 +80,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
         self.assertNotIn("FORCED_PROFILE_AGENT_TYPES", guard)
         self.assertNotIn("platform_agent_type_bypasses_mode_profile", guard)
 
-    def test_balance_keeps_material_judgment_on_controller_profile(self) -> None:
+    def test_balance_does_not_admit_a_sol_execution_child(self) -> None:
         receipt = validate_route(
             packet_id="packet-balance-material-judgment",
             mode="balance",
@@ -86,8 +92,9 @@ class ModelRoutingGuardTest(unittest.TestCase):
             actual_model="gpt-5.6-sol",
             actual_effort="xhigh",
         )
-        self.assertTrue(receipt.allowed, receipt.defects)
-        self.assertFalse(receipt.luna_required)
+        self.assertFalse(receipt.allowed)
+        self.assertTrue(receipt.luna_required)
+        self.assertIn("luna_model_required", receipt.defects)
         self.assertEqual(receipt.telemetry_status, "observed")
 
     def test_economical_requires_luna_even_for_review(self) -> None:
@@ -110,10 +117,10 @@ class ModelRoutingGuardTest(unittest.TestCase):
             semantic_role="test_author",
             agent_type="default",
             model="gpt-5.6-luna",
-            effort="max",
+            effort="high",
             fork_turns="1",
             actual_model="gpt-5.4",
-            actual_effort="high",
+            actual_effort="max",
         )
         self.assertFalse(receipt.allowed)
         self.assertIn("actual_luna_model_mismatch", receipt.defects)
@@ -135,16 +142,12 @@ class ModelRoutingGuardTest(unittest.TestCase):
         self.assertTrue(receipt.allowed, receipt.defects)
         self.assertFalse(receipt.luna_required)
 
-    def test_balance_routine_packet_loop_requires_luna(self) -> None:
+    def test_balance_worker_roles_require_luna_high(self) -> None:
         for role in (
-            "packet_lead",
             "research",
             "implementation",
             "test_author",
             "test_runner",
-            "verifier",
-            "critic",
-            "reducer",
             "rework",
         ):
             with self.subTest(role=role):
@@ -152,7 +155,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
                 self.assertTrue(receipt.allowed, receipt.defects)
                 self.assertTrue(receipt.luna_required)
 
-    def test_roy_manager_implementer_and_reviewer_require_luna(self) -> None:
+    def test_manager_implementer_and_reviewer_require_luna_max(self) -> None:
         for role in ("manager", "implementer", "independent_reviewer", "rework"):
             with self.subTest(role=role):
                 receipt = self.luna_route("swarm", role)
@@ -168,7 +171,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
             semantic_role="implementation",
             agent_type="worker",
             model="gpt-5.6-luna",
-            effort="max",
+            effort="high",
             fork_turns="none",
         )
         other_role = validate_route(

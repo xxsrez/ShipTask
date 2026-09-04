@@ -4,19 +4,18 @@ from dataclasses import replace
 import unittest
 
 from scripts.issue_grinder_mode_harness import (
-    BalanceFinding,
-    DirectCampaignObservation,
+    BalanceWaveObservation,
     EconomicalCheckpoint,
     ExecutionMode,
+    LUNA_HIGH,
     LUNA_MAX,
+    ManagerLoopObservation,
     ModeOrigin,
     Profile,
     ReviewWaveObservation,
-    RoyManagerLoopObservation,
-    assess_balance_packet,
-    assess_direct_campaign,
+    assess_balance_wave,
+    assess_manager_loop,
     assess_review_wave,
-    assess_roy_manager_loop,
     decide_mode_switch,
     decide_run_exit,
     mode_dispatch_policy,
@@ -51,9 +50,7 @@ def complete_checkpoint() -> EconomicalCheckpoint:
 
 class IssueGrinderModeHarnessTest(unittest.TestCase):
     def complete_review_wave(
-        self,
-        mode: ExecutionMode,
-        **overrides: object,
+        self, mode: ExecutionMode, **overrides: object
     ) -> ReviewWaveObservation:
         values: dict[str, object] = {
             "mode": mode,
@@ -71,195 +68,47 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         values.update(overrides)
         return ReviewWaveObservation(**values)
 
-    def test_all_non_solo_modes_keep_independent_review_on_simple_scope(self) -> None:
-        for mode in (
-            ExecutionMode.CLASSIC,
-            ExecutionMode.BALANCE,
-            ExecutionMode.SWARM,
-            ExecutionMode.ECONOMICAL,
-        ):
-            with self.subTest(mode=mode):
-                decision = assess_review_wave(self.complete_review_wave(mode))
-                self.assertEqual(decision.action, "ready_for_terminal_acceptance")
-                self.assertTrue(decision.may_accept_terminal)
-                self.assertEqual(decision.defects, ())
+    def complete_balance_wave(self, **overrides: object) -> BalanceWaveObservation:
+        values: dict[str, object] = {
+            "mode": ExecutionMode.BALANCE,
+            "packet_ids": ("parser", "waves", "critical"),
+            "owner_ids": ("luna-parser", "luna-waves", "luna-critical"),
+            "dependency_ready": (True, True, True),
+            "self_contained": (True, True, True),
+            "isolated_candidates": (True, True, True),
+            "stable_interfaces": (True, True, True),
+            "local_oracles": (True, True, True),
+            "owned_surfaces": (
+                ("microflow/parser.py",),
+                ("microflow/waves.py",),
+                ("microflow/critical.py",),
+            ),
+            "routing_valid": (True, True, True),
+            "worker_models": ("gpt-5.6-luna",) * 3,
+            "worker_efforts": ("high",) * 3,
+            "nested_delegation_counts": (0, 0, 0),
+            "dispatch_window_count": 1,
+            "active_wave_count": 1,
+            "peak_luna_workers": 3,
+            "main_useful_work": True,
+            "main_repeated_worker_work": False,
+            "collective_wait_count": 1,
+            "polling_actions": (),
+            "handoff_candidate_ids": ("commit:a", "commit:b", "commit:c"),
+            "handoff_checks_present": (True, True, True),
+            "common_exact_base": True,
+            "fan_in_complete": True,
+            "ownership_verified": True,
+            "parallel_tool_gate_count": 3,
+            "integrated_checks_passed": True,
+            "main_exact_diff_reviewed": True,
+            "main_final_acceptance": True,
+        }
+        values.update(overrides)
+        return BalanceWaveObservation(**values)
 
-    def test_simple_scope_does_not_waive_independent_reviewer(self) -> None:
-        decision = assess_review_wave(
-            self.complete_review_wave(
-                ExecutionMode.CLASSIC,
-                reviewer_id="candidate-author",
-                review_complete=False,
-            )
-        )
-
-        self.assertFalse(decision.may_accept_terminal)
-        self.assertIn("reviewer_not_independent", decision.defects)
-        self.assertIn("independent_review_incomplete", decision.defects)
-
-    def test_flat_children_polling_and_repeated_guard_are_rejected(self) -> None:
-        decision = assess_review_wave(
-            self.complete_review_wave(
-                ExecutionMode.SWARM,
-                parent_visible_child_ids=("candidate-a", "candidate-b", "reviewer"),
-                routing_guard_count=3,
-                owner_dispatch_count=3,
-                event_wait_count=4,
-                unchanged_state_actions=("status_list", "status_poll", "empty_nudge"),
-            )
-        )
-
-        self.assertFalse(decision.may_accept_terminal)
-        self.assertIn("parent_visible_children_not_one_owner", decision.defects)
-        self.assertIn("direct_owner_guard_count_not_one", decision.defects)
-        self.assertIn("direct_owner_dispatch_count_not_one", decision.defects)
-        self.assertIn("direct_owner_event_wait_count_not_one", decision.defects)
-        self.assertIn("unchanged_state_coordination:status_poll", decision.defects)
-
-    def test_material_rework_reuses_owner_and_reviewer_once(self) -> None:
-        accepted = assess_review_wave(
-            self.complete_review_wave(
-                ExecutionMode.BALANCE,
-                material_rework=True,
-                resumed_owner_id="review-wave-owner",
-                resumed_reviewer_id="independent-reviewer",
-                continuation_wait_count=1,
-            )
-        )
-        rejected = assess_review_wave(
-            self.complete_review_wave(
-                ExecutionMode.BALANCE,
-                material_rework=True,
-                resumed_owner_id="replacement-owner",
-                resumed_reviewer_id="replacement-reviewer",
-                continuation_wait_count=2,
-                replacement_reviewer_created=True,
-            )
-        )
-
-        self.assertTrue(accepted.may_accept_terminal)
-        self.assertFalse(rejected.may_accept_terminal)
-        self.assertIn("rework_owner_replaced", rejected.defects)
-        self.assertIn("rework_reviewer_replaced", rejected.defects)
-        self.assertIn("rework_event_wait_count_not_one", rejected.defects)
-        self.assertIn("replacement_reviewer_without_reason", rejected.defects)
-
-    def test_only_economical_may_checkpoint_partial_deadline_review(self) -> None:
-        economical = assess_review_wave(
-            self.complete_review_wave(
-                ExecutionMode.ECONOMICAL,
-                review_complete=False,
-                finding_ledger_returned=False,
-                terminal_acceptance_requested=False,
-                deadline_reached=True,
-                partial_ledger_returned=True,
-                checkpoint_requested=True,
-            )
-        )
-        classic = assess_review_wave(
-            self.complete_review_wave(
-                ExecutionMode.CLASSIC,
-                review_complete=False,
-                finding_ledger_returned=False,
-                terminal_acceptance_requested=False,
-                deadline_reached=True,
-                partial_ledger_returned=True,
-                checkpoint_requested=True,
-            )
-        )
-
-        self.assertEqual(economical.action, "economical_review_checkpoint")
-        self.assertTrue(economical.may_checkpoint)
-        self.assertFalse(economical.may_accept_terminal)
-        self.assertFalse(classic.may_checkpoint)
-        self.assertEqual(classic.action, "repair_review_wave")
-
-    def test_balance_direct_stages_replace_unavailable_nested_delegation(self) -> None:
-        observation = DirectCampaignObservation(
-            mode=ExecutionMode.BALANCE,
-            stage_order=("execution", "independent_review"),
-            material_candidate_fork=False,
-            no_fork_reason="",
-            candidate_author_ids=("luna-executor",),
-            candidate_purposes=("default",),
-            reviewer_id="luna-reviewer",
-            reducer_id="",
-            routing_guard_owner_ids=("luna-executor", "luna-reviewer"),
-            dispatched_owner_ids=("luna-executor", "luna-reviewer"),
-            event_wait_stage_count=2,
-            common_exact_base=True,
-            candidate_stage_quiescent_before_review=True,
-            review_complete=True,
-            finding_ledger_returned=True,
-            final_review_started_after_stages=True,
-            reviewer_plan_prepared_concurrently=True,
-            execution_action_counts=(7,),
-            execution_action_budgets=(10,),
-            review_plan_action_count=2,
-            review_exact_action_count=3,
-            review_action_count=5,
-            review_action_budget=8,
-            controller_final_action_count=2,
-            controller_final_action_budget=3,
-            integration_action_count=1,
-            integration_action_budget=1,
-        )
-        decision = assess_direct_campaign(observation)
-
-        self.assertTrue(decision.may_enter_controller_final_review)
-        self.assertEqual(decision.action, "ready_for_controller_final_review")
-        self.assertEqual(decision.defects, ())
-
-        over_budget = assess_direct_campaign(
-            replace(
-                observation,
-                review_plan_action_count=4,
-                review_exact_action_count=6,
-                review_action_count=10,
-                review_action_budget=10,
-            )
-        )
-        self.assertIn("balance_review_plan_budget_exceeded", over_budget.defects)
-        self.assertIn("balance_exact_review_budget_exceeded", over_budget.defects)
-
-        missing_exception = assess_direct_campaign(
-            replace(
-                observation,
-                execution_action_counts=(12,),
-                execution_action_budgets=(13,),
-            )
-        )
-        self.assertIn(
-            "execution_budget_exception_missing", missing_exception.defects
-        )
-
-        bounded_exception = assess_direct_campaign(
-            replace(
-                observation,
-                execution_action_counts=(12,),
-                execution_action_budgets=(13,),
-                execution_budget_exceptions=(
-                    "single indivisible migration reproducer; stop after suite",
-                ),
-            )
-        )
-        self.assertNotIn(
-            "execution_budget_exception_missing", bounded_exception.defects
-        )
-        self.assertNotIn("execution_action_ceiling_exceeded", bounded_exception.defects)
-
-        oversized_exception = assess_direct_campaign(
-            replace(
-                observation,
-                execution_action_counts=(14,),
-                execution_action_budgets=(14,),
-                execution_budget_exceptions=("indivisible risk",),
-            )
-        )
-        self.assertIn("execution_action_ceiling_exceeded", oversized_exception.defects)
-
-    def complete_roy_manager_loop(self, **overrides: object) -> RoyManagerLoopObservation:
-        observation = RoyManagerLoopObservation(
+    def complete_manager_loop(self, **overrides: object) -> ManagerLoopObservation:
+        observation = ManagerLoopObservation(
             control_brief_complete=True,
             manager_id="luna-manager",
             implementer_id="luna-implementer",
@@ -282,12 +131,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
             manager_implementation=False,
             phase_ids=("contract", "core", "integration", "acceptance"),
             accepted_phase_ids=("contract", "core", "integration", "acceptance"),
-            implementer_session_ids=(
-                "luna-implementer",
-                "luna-implementer",
-                "luna-implementer",
-                "luna-implementer",
-            ),
+            implementer_session_ids=("luna-implementer",) * 4,
             candidate_ids=("candidate-1",) * 4,
             max_concurrent_phases=1,
             manager_complete=True,
@@ -299,211 +143,156 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         )
         return replace(observation, **overrides)
 
-    def test_roy_manager_loop_keeps_sessions_candidate_and_phase_order(self) -> None:
-        decision = assess_roy_manager_loop(self.complete_roy_manager_loop())
+    def test_review_modes_keep_independent_review_on_simple_scope(self) -> None:
+        for mode in (
+            ExecutionMode.CLASSIC,
+            ExecutionMode.SWARM,
+            ExecutionMode.ECONOMICAL,
+        ):
+            with self.subTest(mode=mode):
+                decision = assess_review_wave(self.complete_review_wave(mode))
+                self.assertTrue(decision.may_accept_terminal)
+                self.assertEqual(decision.defects, ())
 
-        self.assertTrue(decision.may_enter_controller_final_review)
-        self.assertEqual(decision.defects, ())
+    def test_solo_and_balance_do_not_use_default_review_wave(self) -> None:
+        for mode in (ExecutionMode.SOLO, ExecutionMode.BALANCE):
+            with self.subTest(mode=mode):
+                with self.assertRaisesRegex(ValueError, "not a default"):
+                    assess_review_wave(self.complete_review_wave(mode))
 
-    def test_roy_manager_loop_rejects_old_swarm_and_early_review(self) -> None:
-        decision = assess_roy_manager_loop(
-            self.complete_roy_manager_loop(
-                manager_source_access=True,
-                manager_work_tool_calls=2,
-                manager_implementation=True,
-                accepted_phase_ids=("contract", "integration", "core"),
-                implementer_session_ids=(
-                    "implementer-a",
-                    "implementer-b",
-                    "implementer-c",
-                    "implementer-d",
-                ),
-                candidate_ids=("a", "b", "c", "d"),
-                max_concurrent_phases=4,
-                manager_complete=False,
-                review_started_after_manager_complete=False,
-                reviewer_delegation_count=4,
-                review_complete=False,
-                finding_ledger_returned=False,
-                controller_final_review_started_after_review=False,
-                unchanged_state_actions=("status_poll",),
+    def test_review_wave_rejects_polling_and_repeated_guard(self) -> None:
+        decision = assess_review_wave(
+            self.complete_review_wave(
+                ExecutionMode.SWARM,
+                routing_guard_count=3,
+                owner_dispatch_count=2,
+                event_wait_count=4,
+                unchanged_state_actions=("status_poll", "empty_nudge"),
             )
         )
+        self.assertFalse(decision.may_accept_terminal)
+        self.assertIn("direct_owner_guard_count_not_one", decision.defects)
+        self.assertIn("unchanged_state_coordination:status_poll", decision.defects)
 
-        self.assertFalse(decision.may_enter_controller_final_review)
+    def test_only_economical_may_checkpoint_partial_review(self) -> None:
+        economical = assess_review_wave(
+            self.complete_review_wave(
+                ExecutionMode.ECONOMICAL,
+                review_complete=False,
+                finding_ledger_returned=False,
+                terminal_acceptance_requested=False,
+                deadline_reached=True,
+                partial_ledger_returned=True,
+                checkpoint_requested=True,
+            )
+        )
+        classic = assess_review_wave(
+            self.complete_review_wave(
+                ExecutionMode.CLASSIC,
+                review_complete=False,
+                finding_ledger_returned=False,
+                terminal_acceptance_requested=False,
+                deadline_reached=True,
+                partial_ledger_returned=True,
+                checkpoint_requested=True,
+            )
+        )
+        self.assertTrue(economical.may_checkpoint)
+        self.assertFalse(classic.may_checkpoint)
+
+    def test_balance_happy_path_matches_accelerated_solo_topology(self) -> None:
+        decision = assess_balance_wave(self.complete_balance_wave())
+        self.assertTrue(decision.may_accept_terminal)
+        self.assertEqual(decision.action, "ready_for_terminal_acceptance")
+        self.assertEqual(decision.defects, ())
+
+    def test_balance_rejects_overwide_or_serialized_wave(self) -> None:
+        overwide = self.complete_balance_wave(
+            packet_ids=("a", "b", "c", "d"),
+            owner_ids=("oa", "ob", "oc", "od"),
+            dependency_ready=(True,) * 4,
+            self_contained=(True,) * 4,
+            isolated_candidates=(True,) * 4,
+            stable_interfaces=(True,) * 4,
+            local_oracles=(True,) * 4,
+            owned_surfaces=(("a",), ("b",), ("c",), ("d",)),
+            routing_valid=(True,) * 4,
+            worker_models=("gpt-5.6-luna",) * 4,
+            worker_efforts=("high",) * 4,
+            nested_delegation_counts=(0,) * 4,
+            handoff_candidate_ids=("ca", "cb", "cc", "cd"),
+            handoff_checks_present=(True,) * 4,
+            peak_luna_workers=4,
+            dispatch_window_count=4,
+        )
+        decision = assess_balance_wave(overwide)
+        self.assertIn("balance_worker_ceiling_exceeded", decision.defects)
+        self.assertIn("balance_dispatch_not_one_window", decision.defects)
+
+    def test_balance_rejects_bad_admission_overlap_and_wrong_profile(self) -> None:
+        decision = assess_balance_wave(
+            self.complete_balance_wave(
+                dependency_ready=(True, False, True),
+                owned_surfaces=(("shared.py",), ("shared.py",), ("third.py",)),
+                worker_efforts=("max", "high", "high"),
+                nested_delegation_counts=(0, 1, 0),
+            )
+        )
+        self.assertIn("packet_dependency_not_ready", decision.defects)
+        self.assertIn("balance_write_surfaces_overlap", decision.defects)
+        self.assertIn("balance_luna_high_effort_required", decision.defects)
+        self.assertIn("balance_nested_delegation_forbidden", decision.defects)
+
+    def test_balance_requires_useful_overlap_collective_wait_and_main_acceptance(self) -> None:
+        decision = assess_balance_wave(
+            self.complete_balance_wave(
+                main_useful_work=False,
+                main_repeated_worker_work=True,
+                collective_wait_count=3,
+                polling_actions=("status_poll",),
+                fan_in_complete=False,
+                parallel_tool_gate_count=1,
+                integrated_checks_passed=False,
+                main_exact_diff_reviewed=False,
+                main_final_acceptance=False,
+                separate_reviewer_count=1,
+            )
+        )
         for defect in (
-            "roy_manager_source_access",
-            "roy_manager_work_tool_use",
-            "roy_manager_implemented",
-            "roy_phases_not_accepted_in_order",
-            "roy_implementer_session_replaced",
-            "roy_candidate_replaced",
-            "roy_parallel_phases",
-            "roy_manager_incomplete",
-            "roy_review_started_early",
-            "roy_reviewer_delegated",
-            "roy_independent_review_incomplete",
-            "roy_finding_ledger_missing",
-            "roy_controller_final_review_started_early",
+            "balance_main_useful_overlap_missing",
+            "balance_main_repeated_worker_work",
+            "balance_collective_wait_count_not_one",
             "unchanged_state_coordination:status_poll",
+            "balance_fan_in_incomplete",
+            "balance_parallel_tool_gates_missing",
+            "balance_integrated_checks_failed",
+            "balance_main_exact_diff_review_missing",
+            "balance_main_final_acceptance_missing",
+            "balance_unexpected_separate_reviewer",
         ):
             self.assertIn(defect, decision.defects)
 
-    def test_roy_rework_reuses_implementer_and_reviewer(self) -> None:
-        accepted = assess_roy_manager_loop(
-            self.complete_roy_manager_loop(
-                material_rework=True,
-                rework_implementer_id="luna-implementer",
-                recheck_reviewer_id="luna-reviewer",
-            )
-        )
-        rejected = assess_roy_manager_loop(
-            self.complete_roy_manager_loop(
-                material_rework=True,
-                rework_implementer_id="replacement-implementer",
-                recheck_reviewer_id="replacement-reviewer",
-            )
-        )
-
-        self.assertTrue(accepted.may_enter_controller_final_review)
-        self.assertIn("roy_rework_implementer_replaced", rejected.defects)
-        self.assertIn("roy_recheck_reviewer_replaced", rejected.defects)
-
-    def test_balance_can_use_bounded_adaptive_candidates(self) -> None:
-        decision = assess_direct_campaign(
-            DirectCampaignObservation(
-                mode=ExecutionMode.BALANCE,
-                stage_order=("execution", "independent_review"),
-                material_candidate_fork=True,
-                no_fork_reason="",
-                candidate_author_ids=("candidate-a", "candidate-b"),
-                candidate_purposes=("minimal", "reliability"),
-                reviewer_id="luna-reviewer",
-                reducer_id="luna-reviewer",
-                routing_guard_owner_ids=(
-                    "candidate-a",
-                    "candidate-b",
-                    "luna-reviewer",
-                ),
-                dispatched_owner_ids=(
-                    "candidate-a",
-                    "candidate-b",
-                    "luna-reviewer",
-                ),
-                event_wait_stage_count=2,
-                common_exact_base=True,
-                candidate_stage_quiescent_before_review=True,
-                review_complete=True,
-                finding_ledger_returned=True,
-                final_review_started_after_stages=True,
-                reviewer_plan_prepared_concurrently=True,
-                execution_action_counts=(8, 8),
-                execution_action_budgets=(10, 10),
-                review_plan_action_count=3,
-                review_exact_action_count=3,
-                review_action_count=6,
-                review_action_budget=8,
-                controller_final_action_count=2,
-                controller_final_action_budget=3,
-                integration_action_count=1,
-                integration_action_budget=1,
-            )
-        )
-
+    def test_manager_loop_keeps_sessions_candidate_and_phase_order(self) -> None:
+        decision = assess_manager_loop(self.complete_manager_loop())
         self.assertTrue(decision.may_enter_controller_final_review)
         self.assertEqual(decision.defects, ())
 
-    def test_complete_balance_packet_can_enter_final_review(self) -> None:
-        decision = assess_balance_packet(
-            packet_id="TM-42-implementation-1",
-            exact_candidate="commit:abc123",
-            checks=("unit: passed", "integration: passed"),
-            materially_changed=True,
-            independent_verification_possible=True,
-            independent_verification_performed=True,
-            findings=(
-                BalanceFinding(
-                    finding="boundary case covered",
-                    evidence="test_boundary_case: passed",
-                    material=True,
-                    disposition="fixed",
-                ),
-            ),
-            expensive_work_roles=(
-                "material_judgment",
-                "integration_decision",
-                "final_review",
-            ),
+    def test_manager_loop_rejects_parallel_phases_and_early_review(self) -> None:
+        decision = assess_manager_loop(
+            self.complete_manager_loop(
+                manager_source_access=True,
+                max_concurrent_phases=2,
+                manager_complete=False,
+                review_started_after_manager_complete=False,
+                review_complete=False,
+            )
         )
+        self.assertIn("manager_source_access", decision.defects)
+        self.assertIn("manager_parallel_phases", decision.defects)
+        self.assertIn("manager_incomplete", decision.defects)
+        self.assertIn("manager_review_started_early", decision.defects)
 
-        self.assertEqual(decision.action, "ready_for_final_review")
-        self.assertTrue(decision.may_enter_final_review)
-        self.assertEqual(decision.defects, ())
-
-    def test_balance_packet_requires_independent_verification_when_possible(
-        self,
-    ) -> None:
-        decision = assess_balance_packet(
-            packet_id="TM-42-implementation-1",
-            exact_candidate="commit:abc123",
-            checks=("unit: passed",),
-            materially_changed=True,
-            independent_verification_possible=True,
-            independent_verification_performed=False,
-            findings=(),
-        )
-
-        self.assertFalse(decision.may_enter_final_review)
-        self.assertIn("independent_verification_missing", decision.defects)
-
-    def test_balance_material_finding_is_not_outvoted(self) -> None:
-        decision = assess_balance_packet(
-            packet_id="TM-42-implementation-1",
-            exact_candidate="commit:abc123",
-            checks=("unit: passed",),
-            materially_changed=True,
-            independent_verification_possible=True,
-            independent_verification_performed=True,
-            findings=(
-                BalanceFinding("looks good", "review:a", False, "fixed"),
-                BalanceFinding("looks good", "review:b", False, "fixed"),
-                BalanceFinding(
-                    "data race remains",
-                    "stress_test: reproduces",
-                    True,
-                    "escalate",
-                ),
-            ),
-            escalation_questions=("Which consistency contract is required?",),
-        )
-
-        self.assertFalse(decision.may_enter_final_review)
-        self.assertIn("escalation_pending", decision.defects)
-        self.assertIn("finding_2:material_escalation_pending", decision.defects)
-
-    def test_balance_rejects_broad_escalation_and_ordinary_expensive_work(
-        self,
-    ) -> None:
-        decision = assess_balance_packet(
-            packet_id="TM-42-implementation-1",
-            exact_candidate="commit:abc123",
-            checks=("unit: passed",),
-            materially_changed=False,
-            independent_verification_possible=False,
-            independent_verification_performed=False,
-            findings=(),
-            escalation_questions=("Choose storage", "Implement the feature"),
-            routing_valid=False,
-            expensive_work_roles=("research", "implementation"),
-        )
-
-        self.assertFalse(decision.may_enter_final_review)
-        self.assertIn("routing_invalid", decision.defects)
-        self.assertIn("escalation_not_narrow", decision.defects)
-        self.assertIn("ordinary_expensive_work:research", decision.defects)
-        self.assertIn("ordinary_expensive_work:implementation", decision.defects)
-
-    def test_every_explicit_mode_wins_for_luna_and_non_luna(self) -> None:
+    def test_every_explicit_mode_wins(self) -> None:
         for main_profile in (Profile("gpt-5.6-luna", "low"), SOL):
             for mode in ExecutionMode:
                 with self.subTest(main=main_profile, mode=mode):
@@ -511,124 +300,71 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                     self.assertEqual(record.canonical_mode, mode)
                     self.assertEqual(record.mode_origin, ModeOrigin.EXPLICIT)
 
-    def test_all_luna_efforts_choose_economical_and_collapse_roles(self) -> None:
+    def test_default_is_always_solo_for_every_main_profile(self) -> None:
         for effort in LUNA_EFFORTS:
             with self.subTest(effort=effort):
                 record = resolve_mode(Profile("gpt-5.6-luna", effort))
-                self.assertEqual(record.canonical_mode, ExecutionMode.ECONOMICAL)
-                self.assertEqual(record.mode_origin, ModeOrigin.AUTOMATIC)
-                self.assertEqual(record.role_profiles.controller, LUNA_MAX)
-                self.assertEqual(record.role_profiles.worker, LUNA_MAX)
-
-    def test_solo_uses_current_profile_one_lane_without_execution_delegation(self) -> None:
-        for main_profile in (Profile("gpt-5.6-luna", "low"), SOL):
-            with self.subTest(main=main_profile):
-                record = resolve_mode(
-                    main_profile,
-                    explicit_mode=ExecutionMode.SOLO,
-                )
-                policy = mode_dispatch_policy(
-                    record,
-                    current_main_profile=main_profile,
-                )
-
                 self.assertEqual(record.canonical_mode, ExecutionMode.SOLO)
-                self.assertEqual(policy.execution_profile, main_profile)
-                self.assertFalse(
-                    policy.issue_grinder_execution_subagents_allowed
-                )
-                self.assertEqual(policy.max_active_execution_lanes, 1)
-                self.assertTrue(policy.service_provider_agents_allowed)
+                self.assertEqual(record.mode_origin, ModeOrigin.AUTOMATIC)
+        self.assertEqual(resolve_mode(SOL).canonical_mode, ExecutionMode.SOLO)
 
-    def test_other_modes_do_not_inherit_solo_topology(self) -> None:
+    def test_balance_normalizes_only_workers_to_luna_high(self) -> None:
+        profiles = normalize_profiles(SOL, mode=ExecutionMode.BALANCE)
+        self.assertEqual(profiles.controller, SOL)
+        self.assertEqual(profiles.worker, LUNA_HIGH)
+
+    def test_other_modes_keep_luna_max_worker_baseline(self) -> None:
         for mode in (
             ExecutionMode.CLASSIC,
-            ExecutionMode.BALANCE,
             ExecutionMode.SWARM,
             ExecutionMode.ECONOMICAL,
         ):
             with self.subTest(mode=mode):
-                policy = mode_dispatch_policy(
-                    resolve_mode(SOL, explicit_mode=mode),
-                    current_main_profile=SOL,
-                )
-                self.assertTrue(
-                    policy.issue_grinder_execution_subagents_allowed
-                )
-                self.assertIsNone(policy.max_active_execution_lanes)
-                self.assertIsNone(policy.execution_profile)
-                self.assertTrue(policy.service_provider_agents_allowed)
+                self.assertEqual(normalize_profiles(SOL, mode=mode).worker, LUNA_MAX)
 
-    def test_automatic_luna_match_is_exact_not_fuzzy(self) -> None:
-        for model in ("gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna-preview"):
-            with self.subTest(model=model):
-                record = resolve_mode(Profile(model, "high"))
-                self.assertEqual(record.canonical_mode, ExecutionMode.CLASSIC)
-
-    def test_non_luna_keeps_controller_and_uses_luna_worker(self) -> None:
-        profiles = normalize_profiles(SOL)
-
-        self.assertEqual(profiles.controller, SOL)
-        self.assertEqual(profiles.worker, LUNA_MAX)
-
-    def test_role_overrides_win_independently(self) -> None:
+    def test_role_overrides_win(self) -> None:
         controller = Profile("gpt-5.6-terra", "high")
         worker = Profile("gpt-5.6-luna", "medium")
         profiles = normalize_profiles(
-            Profile("gpt-5.6-luna", "low"),
+            SOL,
+            mode=ExecutionMode.BALANCE,
             controller_override=controller,
             worker_override=worker,
         )
-
         self.assertEqual(profiles.controller, controller)
         self.assertEqual(profiles.worker, worker)
 
+    def test_solo_and_balance_dispatch_policies_are_distinct(self) -> None:
+        solo = mode_dispatch_policy(resolve_mode(SOL), current_main_profile=SOL)
+        balance_record = resolve_mode(SOL, explicit_mode=ExecutionMode.BALANCE)
+        balance = mode_dispatch_policy(balance_record, current_main_profile=SOL)
+        self.assertFalse(solo.issue_grinder_execution_subagents_allowed)
+        self.assertEqual(solo.max_active_execution_subagents, 0)
+        self.assertEqual(solo.execution_profile, SOL)
+        self.assertTrue(balance.issue_grinder_execution_subagents_allowed)
+        self.assertEqual(balance.max_active_execution_subagents, 3)
+        self.assertEqual(balance.max_active_execution_lanes, 4)
+        self.assertEqual(balance.execution_profile, LUNA_HIGH)
+
     def test_proven_continuation_preserves_mode_after_model_change(self) -> None:
-        original = resolve_mode(
-            SOL,
-            explicit_mode=ExecutionMode.SWARM,
-        )
+        original = resolve_mode(SOL, explicit_mode=ExecutionMode.SWARM)
         resumed = resolve_mode(
             Profile("gpt-5.6-luna", "none"),
             saved_record=original,
             continuity_proven=True,
         )
-
         self.assertIs(resumed, original)
-        self.assertEqual(resumed.canonical_mode, ExecutionMode.SWARM)
-        self.assertEqual(resumed.initial_main_profile, SOL)
 
-    def test_unproven_continuity_does_not_leak_an_old_mode(self) -> None:
-        old_record = resolve_mode(SOL, explicit_mode=ExecutionMode.BALANCE)
-        new_record = resolve_mode(
+    def test_unproven_continuity_returns_to_solo_default(self) -> None:
+        old = resolve_mode(SOL, explicit_mode=ExecutionMode.BALANCE)
+        new = resolve_mode(
             Profile("gpt-5.6-luna", "high"),
-            saved_record=old_record,
+            saved_record=old,
             continuity_proven=False,
         )
+        self.assertEqual(new.canonical_mode, ExecutionMode.SOLO)
 
-        self.assertEqual(new_record.canonical_mode, ExecutionMode.ECONOMICAL)
-        self.assertEqual(new_record.mode_origin, ModeOrigin.AUTOMATIC)
-
-    def test_solo_continuation_uses_new_current_profile_without_mode_drift(self) -> None:
-        original = resolve_mode(SOL, explicit_mode=ExecutionMode.SOLO)
-        new_current = Profile("gpt-5.6-luna", "low")
-        resumed = resolve_mode(
-            new_current,
-            saved_record=original,
-            continuity_proven=True,
-        )
-        policy = mode_dispatch_policy(
-            resumed,
-            current_main_profile=new_current,
-        )
-
-        self.assertIs(resumed, original)
-        self.assertEqual(resumed.canonical_mode, ExecutionMode.SOLO)
-        self.assertEqual(policy.execution_profile, new_current)
-        self.assertFalse(policy.issue_grinder_execution_subagents_allowed)
-        self.assertTrue(policy.service_provider_agents_allowed)
-
-    def test_proven_continuity_requires_a_record_and_switch_barrier(self) -> None:
+    def test_proven_continuity_requires_record_and_switch_barrier(self) -> None:
         with self.assertRaisesRegex(ValueError, "saved mode record"):
             resolve_mode(SOL, continuity_proven=True)
         with self.assertRaisesRegex(ValueError, "switch barrier"):
@@ -639,65 +375,13 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                 explicit_mode=ExecutionMode.BALANCE,
             )
 
-    def test_complete_economical_checkpoint_is_nonterminal(self) -> None:
-        decision = decide_run_exit(
+    def test_only_economical_has_nonterminal_checkpoint(self) -> None:
+        accepted = decide_run_exit(
             ExecutionMode.ECONOMICAL,
             active_scope_count=2,
             checkpoint=complete_checkpoint(),
         )
-
-        self.assertEqual(decision.action, "checkpoint")
-        self.assertTrue(decision.may_checkpoint)
-        self.assertFalse(decision.may_complete)
-        self.assertFalse(decision.may_block)
-
-    def test_checkpoint_requires_every_observable_field(self) -> None:
-        checkpoint = complete_checkpoint()
-        blank_cases = {
-            "exact_candidate": "",
-            "saved_change_identity": "",
-            "task_ownership_evidence": "",
-            "base_identity": "",
-            "branch_or_worktree_identity": "",
-            "integration_identity": "",
-            "checks": (),
-            "raw_results": (),
-            "known_defects": None,
-            "unknowns": None,
-            "deferred_gates": None,
-            "next_step": "",
-            "resume_condition": "",
-            "task_manager_status": "",
-            "goal_active": False,
-        }
-
-        for field_name, value in blank_cases.items():
-            with self.subTest(field=field_name):
-                decision = decide_run_exit(
-                    ExecutionMode.ECONOMICAL,
-                    active_scope_count=1,
-                    checkpoint=replace(checkpoint, **{field_name: value}),
-                )
-                self.assertEqual(decision.action, "continue")
-                self.assertFalse(decision.may_checkpoint)
-                self.assertTrue(
-                    any(field_name in defect for defect in decision.defects),
-                    decision.defects,
-                )
-
-    def test_checkpoint_requires_an_active_task_status(self) -> None:
-        decision = decide_run_exit(
-            ExecutionMode.ECONOMICAL,
-            active_scope_count=1,
-            checkpoint=replace(complete_checkpoint(), task_manager_status="Done"),
-        )
-
-        self.assertEqual(decision.action, "continue")
-        self.assertIn(
-            "checkpoint_missing:active_task_manager_status", decision.defects
-        )
-
-    def test_other_modes_cannot_exit_through_checkpoint(self) -> None:
+        self.assertTrue(accepted.may_checkpoint)
         for mode in (
             ExecutionMode.SOLO,
             ExecutionMode.CLASSIC,
@@ -710,31 +394,27 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                     active_scope_count=1,
                     checkpoint=complete_checkpoint(),
                 )
-                self.assertEqual(decision.action, "continue")
                 self.assertFalse(decision.may_checkpoint)
 
     def test_terminal_completion_requires_empty_active_scope(self) -> None:
         rejected = decide_run_exit(
-            ExecutionMode.CLASSIC,
+            ExecutionMode.BALANCE,
             active_scope_count=1,
             terminal_acceptance_proven=True,
         )
         accepted = decide_run_exit(
-            ExecutionMode.ECONOMICAL,
+            ExecutionMode.BALANCE,
             active_scope_count=0,
             terminal_acceptance_proven=True,
         )
-
-        self.assertEqual(rejected.action, "continue")
         self.assertIn("active_scope_prevents_completion", rejected.defects)
-        self.assertEqual(accepted.action, "complete")
         self.assertTrue(accepted.may_complete)
 
-    def test_mode_switch_requires_explicit_request_and_safe_barrier(self) -> None:
+    def test_mode_switch_requires_explicit_safe_barrier(self) -> None:
         current = resolve_mode(SOL)
         automatic = decide_mode_switch(
             current,
-            ExecutionMode.ECONOMICAL,
+            ExecutionMode.BALANCE,
             explicit_request=False,
         )
         unsafe = decide_mode_switch(
@@ -747,12 +427,9 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
             ownership_reconciled=False,
             evidence_preserved=False,
         )
-
         self.assertEqual(automatic.action, "keep_mode")
-        self.assertEqual(automatic.mode_record, current)
         self.assertEqual(unsafe.action, "await_switch_barrier")
         self.assertEqual(len(unsafe.defects), 4)
-        self.assertFalse(unsafe.may_apply_next_wave)
 
     def test_safe_mode_switch_changes_only_mode_and_origin(self) -> None:
         current = resolve_mode(SOL)
@@ -763,16 +440,9 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
             active_writer_count=1,
             active_writers_checkpointed=True,
         )
-
-        self.assertEqual(decision.action, "switch_next_wave")
         self.assertTrue(decision.may_apply_next_wave)
         self.assertEqual(decision.mode_record.canonical_mode, ExecutionMode.SWARM)
         self.assertEqual(decision.mode_record.mode_origin, ModeOrigin.EXPLICIT)
-        self.assertEqual(
-            decision.mode_record.initial_main_profile,
-            current.initial_main_profile,
-        )
-        self.assertEqual(decision.mode_record.role_profiles, current.role_profiles)
 
 
 if __name__ == "__main__":

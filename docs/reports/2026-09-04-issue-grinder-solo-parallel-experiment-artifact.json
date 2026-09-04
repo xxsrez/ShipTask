@@ -1,0 +1,276 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "Ускоренный Solo: проверка на обычном tool-bound стенде",
+    "description": "Технический отчёт об изолированном прототипе Solo с параллельными Luna-lanes.",
+    "generatedAt": "2026-09-04T13:50:00Z",
+    "cards": [
+      {
+        "id": "wall_card",
+        "description": "Финальный parallel v2 относительно медианы двух Solo controls.",
+        "dataset": "summary",
+        "sourceId": "benchmark_evidence",
+        "metrics": [
+          {"label": "Wall-clock v2, с", "field": "experimental_wall_seconds", "format": "number"},
+          {"label": "к Solo median", "field": "wall_change", "format": "percent", "signed": true}
+        ]
+      },
+      {
+        "id": "sol_card",
+        "description": "Полный рекурсивный расход Sol во всём дереве финального прогона.",
+        "dataset": "summary",
+        "sourceId": "benchmark_evidence",
+        "metrics": [
+          {"label": "Sol tokens v2", "field": "experimental_sol_tokens", "format": "compact"},
+          {"label": "к Solo median", "field": "sol_change", "format": "percent", "signed": true}
+        ]
+      },
+      {
+        "id": "quality_card",
+        "description": "Доля проверок, определённых опубликованным PLAN; скрытые недокументированные правила task_id исключены.",
+        "dataset": "summary",
+        "sourceId": "benchmark_evidence",
+        "metrics": [
+          {"label": "Качество по контракту", "field": "adjusted_quality", "format": "percent"}
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "duration_chart",
+        "title": "Длительность обычных прогонов",
+        "subtitle": "Пять завершённых прогонов одного четырёхпунктового Microflow; меньше — лучше.",
+        "headerMarkdown": "Финальный **parallel v2** завершился за 449.758 секунды — на 31.72% быстрее медианы двух Solo controls.",
+        "question": "Сокращает ли параллельная схема реальное время обычной tool-bound задачи?",
+        "rationale": "Категориальные столбцы позволяют напрямую сравнить небольшое число отдельных прогонов без ложной временной тенденции.",
+        "type": "bar",
+        "dataset": "runs",
+        "sourceId": "benchmark_evidence",
+        "valueFormat": "number",
+        "unit": "с",
+        "encodings": {
+          "x": {"field": "label", "type": "nominal", "label": "Прогон"},
+          "y": {"field": "wall_seconds", "type": "quantitative", "label": "Wall-clock, с", "format": "number"},
+          "tooltip": [
+            {"field": "sol_tokens", "type": "quantitative", "label": "Sol tokens", "format": "compact"},
+            {"field": "luna_tokens", "type": "quantitative", "label": "Luna tokens", "format": "compact"},
+            {"field": "adjusted_score", "type": "quantitative", "label": "Качество", "format": "number"}
+          ]
+        },
+        "maxRows": 5,
+        "layout": "full",
+        "compatibleTypes": ["bar"]
+      }
+    ],
+    "tables": [
+      {
+        "id": "run_table",
+        "title": "Все завершённые обычные прогоны",
+        "subtitle": "XL и незавершённый E3 исключены; tokens — рекурсивная сумма по всему дереву sessions.",
+        "dataset": "runs",
+        "sourceId": "benchmark_evidence",
+        "defaultSort": {"field": "wall_seconds", "direction": "asc"},
+        "density": "spacious",
+        "layout": "full",
+        "columns": [
+          {"field": "run", "label": "Run", "type": "text"},
+          {"field": "scheme", "label": "Схема", "type": "text"},
+          {"field": "wall_seconds", "label": "Wall, с", "format": "number"},
+          {"field": "raw_score", "label": "Oracle raw", "type": "text"},
+          {"field": "adjusted_score", "label": "По контракту", "type": "text"},
+          {"field": "sol_tokens", "label": "Sol tokens", "format": "number"},
+          {"field": "luna_tokens", "label": "Luna tokens", "format": "number"},
+          {"field": "outcome", "label": "Вывод", "type": "text"}
+        ]
+      },
+      {
+        "id": "headline_comparison",
+        "title": "Финальный v2 против Solo",
+        "subtitle": "E4 сравнивается с медианой двух Solo controls S1 и S2.",
+        "dataset": "comparison",
+        "sourceId": "benchmark_evidence",
+        "defaultSort": {"field": "metric", "direction": "asc"},
+        "density": "spacious",
+        "layout": "full",
+        "columns": [
+          {"field": "metric", "label": "Метрика", "type": "text"},
+          {"field": "solo", "label": "Solo median", "type": "text"},
+          {"field": "experimental", "label": "Parallel v2 E4", "type": "text"},
+          {"field": "change", "label": "Изменение", "type": "text", "movement": true}
+        ]
+      },
+      {
+        "id": "sol_allocation",
+        "title": "Распределение Sol-токенов",
+        "subtitle": "Request-level атрибуция; сумма точна, границы соседних фаз приблизительны.",
+        "dataset": "sol_categories",
+        "sourceId": "sol_category_evidence",
+        "defaultSort": {"field": "experimental_tokens", "direction": "desc"},
+        "density": "spacious",
+        "layout": "full",
+        "columns": [
+          {"field": "category", "label": "Категория", "type": "text"},
+          {"field": "solo_tokens", "label": "Solo median", "format": "number"},
+          {"field": "experimental_tokens", "label": "Parallel v2 E4", "format": "number"},
+          {"field": "delta_tokens", "label": "Разница", "format": "number", "movement": true}
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "benchmark_evidence",
+        "label": "Замеры обычного Solo-parallel benchmark",
+        "path": "docs/reports/2026-09-04-issue-grinder-solo-parallel-experiment-source.sql"
+      },
+      {
+        "id": "sol_category_evidence",
+        "label": "Атрибуция Sol-токенов по фазам",
+        "path": "docs/reports/2026-09-04-issue-grinder-solo-parallel-experiment-source.sql"
+      }
+    ],
+    "blocks": [
+      {"id": "title", "type": "markdown", "body": "# Ускоренный Solo: проверка на обычном tool-bound стенде"},
+      {
+        "id": "technical_summary",
+        "type": "markdown",
+        "sourceId": "benchmark_evidence",
+        "body": "## Прототип достиг цели на обычном стенде\n\nФинальный `solo_parallel_v2` закончил тот же четырёхпунктовый Microflow за **449.758 с** против **658.649 с** медианы Solo: wall-clock снизился на **31.72%**. Полный расход Sol составил **1,335,425 tokens**, на **8.53% ниже** Solo median и заметно лучше допустимого потолка `1.15x`. Качество по опубликованному контракту одинаковое — **21/21**; все четыре hash-bound gate выполнены.\n\nЭто пока изолированный прототип, а не шестой официальный режим. Доказательство ограничено малой серией: два Solo controls, один успешный v1 и один финальный v2."
+      },
+      {"id": "headline_metrics", "type": "metric-strip", "cardIds": ["wall_card", "sol_card", "quality_card"]},
+      {
+        "id": "speed_finding",
+        "type": "markdown",
+        "sourceId": "benchmark_evidence",
+        "body": "## Выигрыш дал параллельный запуск настоящих gates\n\nТри независимых 45-секундных gate финального E4 стартовали в пределах **9 мс** и завершились в пределах **6 мс**. Каждый receipt связан с точным hash кандидата и подтверждает реальную CPU/I/O работу, а не искусственную задержку. Поэтому сокращение wall-clock объясняется перекрытием полезных инструментальных путей."
+      },
+      {"id": "duration", "type": "chart", "chartId": "duration_chart", "layout": "full"},
+      {"id": "runs", "type": "table", "tableId": "run_table", "layout": "full"},
+      {
+        "id": "comparison_finding",
+        "type": "markdown",
+        "sourceId": "benchmark_evidence",
+        "body": "## Sol не вырос, хотя общий объём токенов увеличился\n\nВ E4 добавилось **450,290 Luna tokens**, поэтому общий объём вырос на **22.32%**. При этом дефицитный Sol снизился на **124,471 tokens**, а API-equivalent cost — на **7.89%**. Целевая функция выполнена: ускорение не оплачено ростом Sol."
+      },
+      {"id": "comparison", "type": "table", "tableId": "headline_comparison", "layout": "full"},
+      {
+        "id": "allocation_finding",
+        "type": "markdown",
+        "sourceId": "sol_category_evidence",
+        "body": "## Coordination tax велик, но перекрыт переносом реализации на Luna\n\nНа dispatch, ожидание и fan-in ушло **692,284 Sol tokens**, а первичное понимание стало дороже ещё на **174,789**. Зато Sol-реализация трёх изолированных поверхностей сократилась на **882,849 tokens**, а финальная проверка и review — на **108,696**. Следующая оптимизация должна сжимать планирующий и fan-in контекст, а не добавлять manager или новую review-wave."
+      },
+      {"id": "allocation", "type": "table", "tableId": "sol_allocation", "layout": "full"},
+      {
+        "id": "scope_definitions",
+        "type": "markdown",
+        "body": "## Что именно измерялось\n\nПопуляция — пять завершённых запусков одного frozen Microflow из четырёх работ: parser, dependency waves, critical path и CLI/integration. Primary baseline — медиана S1 и S2. Wall-clock считается от запуска top-level Sol до его финального ответа; controller acceptance и последующее профилирование не входят. Sol/Luna tokens считаются рекурсивно по всем дочерним sessions. XL использовался только разово для изучения масштабирования и полностью исключён из этого отчёта."
+      },
+      {
+        "id": "methodology",
+        "type": "markdown",
+        "body": "## Как устроен финальный parallel v2\n\nSol один раз определяет архитектуру и допускает параллель только для двух-трёх действительно независимых owned surfaces. Три Luna High получают короткие самодостаточные пакеты, меняют по одному файлу и запускают лишь быстрый preflight. Пока они работают, Sol делает интеграционный слой. После одного fan-in Sol централизованно запускает независимые долгие gates одним параллельным tool-batch, затем один integration gate, общий suite и один review точного diff. Любой плохой handoff подхватывает Sol."
+      },
+      {
+        "id": "limitations",
+        "type": "markdown",
+        "sourceId": "benchmark_evidence",
+        "body": "## Что ограничивает уверенность\n\n- Hidden oracle задаёт две детали `task_id`, которых нет в PLAN: owner неизвестной зависимости и отсутствие поля вместо `null`. Raw score поэтому различается между кандидатами, одинаково корректными по опубликованному контракту.\n- Solo controls заметно расходятся по времени и токенам; двух наблюдений мало для статистической гарантии.\n- Финальная v2 имеет один законченный run. E2 подтверждает выигрыш общей схемы, но использует более раннее владение long gates.\n- Токен-категории назначаются целому model request. Итоги по моделям точны, границы соседних фаз приблизительны.\n- Фоновая нагрузка машины не контролировалась, хотя receipts подтверждают обязательный объём реальной работы."
+      },
+      {
+        "id": "recommendation",
+        "type": "markdown",
+        "body": "## Где применять прототип\n\nСохранить v2 как кандидат на ускоренный вариант сложного режима, но включать только после admission-проверки. Нужны минимум две независимые поверхности, устойчивые интерфейсы, локальный oracle и существенные параллельные tool paths. Для большой работы вроде Teams делить следует на два-три крупных независимых контура; shared schema, миграции, интеграция, финальная проверка и восстановление после неудачного handoff остаются у Sol. Если независимость не доказана, режим остаётся обычным Solo."
+      },
+      {
+        "id": "further_questions",
+        "type": "markdown",
+        "body": "## Что проверить перед включением в Issue Grinder\n\n1. Повторить v2 на одной реальной сложной задаче с долгими тестами или сборкой и заранее зафиксированными owned surfaces.\n2. Проверить, можно ли сократить Sol planning/fan-in packet без потери terminal promise.\n3. После реального прогона решить, является ли это отдельным режимом или внутренней стратегией Solo для подходящего scope."
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-04T13:50:00Z",
+    "status": "ready",
+    "datasets": {
+      "summary": [
+        {
+          "experimental_wall_seconds": 449.758,
+          "solo_median_seconds": 658.649,
+          "wall_change": -0.3172,
+          "experimental_sol_tokens": 1335425,
+          "solo_median_sol_tokens": 1459896,
+          "sol_change": -0.0853,
+          "adjusted_quality": 1.0
+        }
+      ],
+      "runs": [
+        {"run": "S1", "label": "S1 Solo", "scheme": "Solo", "wall_seconds": 562.143, "raw_score": "19/21", "adjusted_score": "21/21", "sol_tokens": 1247531, "luna_tokens": 0, "total_tokens": 1247531, "outcome": "valid control"},
+        {"run": "E1", "label": "E1 parallel v0", "scheme": "parallel v0", "wall_seconds": 684.787, "raw_score": "21/21", "adjusted_score": "21/21", "sol_tokens": 1303608, "luna_tokens": 1950721, "total_tokens": 3254329, "outcome": "rejected: slower"},
+        {"run": "E2", "label": "E2 parallel v1", "scheme": "parallel v1", "wall_seconds": 468.899, "raw_score": "19/21", "adjusted_score": "21/21", "sol_tokens": 1196426, "luna_tokens": 823187, "total_tokens": 2019613, "outcome": "valid predecessor"},
+        {"run": "S2", "label": "S2 Solo", "scheme": "Solo", "wall_seconds": 755.154, "raw_score": "21/21", "adjusted_score": "21/21", "sol_tokens": 1672261, "luna_tokens": 0, "total_tokens": 1672261, "outcome": "valid control"},
+        {"run": "E4", "label": "E4 parallel v2", "scheme": "parallel v2", "wall_seconds": 449.758, "raw_score": "18/21", "adjusted_score": "21/21", "sol_tokens": 1335425, "luna_tokens": 450290, "total_tokens": 1785715, "outcome": "valid final prototype"}
+      ],
+      "comparison": [
+        {"metric": "API-equivalent cost", "solo": "$1.124687", "experimental": "$1.036007", "change": "-7.89%"},
+        {"metric": "Все tokens", "solo": "1,459,896", "experimental": "1,785,715", "change": "+22.32%"},
+        {"metric": "Качество по контракту", "solo": "21/21", "experimental": "21/21", "change": "одинаковое"},
+        {"metric": "Luna tokens", "solo": "0", "experimental": "450,290", "change": "+450,290"},
+        {"metric": "Sol tokens", "solo": "1,459,896", "experimental": "1,335,425", "change": "-8.53%"},
+        {"metric": "Wall-clock", "solo": "658.649 с", "experimental": "449.758 с", "change": "-31.72%"}
+      ],
+      "sol_categories": [
+        {"category": "Реализация поверхностей", "solo_tokens": 974191, "experimental_tokens": 91342, "delta_tokens": -882849},
+        {"category": "Понимание и планирование", "solo_tokens": 108766, "experimental_tokens": 283555, "delta_tokens": 174789},
+        {"category": "Dispatch, ожидание и fan-in", "solo_tokens": 0, "experimental_tokens": 692284, "delta_tokens": 692284},
+        {"category": "Финальная проверка и review", "solo_tokens": 376940, "experimental_tokens": 268244, "delta_tokens": -108696},
+        {"category": "Всего Sol", "solo_tokens": 1459896, "experimental_tokens": 1335425, "delta_tokens": -124471}
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "benchmark_evidence",
+      "label": "Замеры обычного Solo-parallel benchmark",
+      "path": "docs/reports/2026-09-04-issue-grinder-solo-parallel-experiment-source.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "Воспроизводимая табличная сводка пяти завершённых обычных прогонов из сохранённых run, acceptance, recursive token и gate receipt файлов.",
+        "executed_at": "2026-09-04T13:50:00Z",
+        "sql": "WITH benchmark_runs(run_order, run_id, label, scheme, wall_seconds, raw_passed, adjusted_passed, sol_tokens, luna_tokens, total_tokens, api_equivalent_usd, gate_start_spread_ms, gate_finish_spread_ms, outcome) AS (VALUES (1, 'S1', 'S1 Solo', 'Solo', 562.143, 19, 21, 1247531, 0, 1247531, 1.006278, NULL, NULL, 'valid control'), (2, 'E1', 'E1 parallel v0', 'parallel v0', 684.787, 21, 21, 1303608, 1950721, 3254329, 1.037318, NULL, NULL, 'rejected: slower'), (3, 'E2', 'E2 parallel v1', 'parallel v1', 468.899, 19, 21, 1196426, 823187, 2019613, 0.913293, NULL, NULL, 'valid predecessor'), (4, 'S2', 'S2 Solo', 'Solo', 755.154, 21, 21, 1672261, 0, 1672261, 1.243095, NULL, NULL, 'valid control'), (5, 'E4', 'E4 parallel v2', 'parallel v2', 449.758, 18, 21, 1335425, 450290, 1785715, 1.036007, 9, 6, 'valid final prototype')) SELECT * FROM benchmark_runs ORDER BY run_order;",
+        "tables_used": ["benchmark_runs CTE"],
+        "filters": ["Обычный четырёхпунктовый Microflow", "XL и незавершённый E3 исключены"],
+        "metric_definitions": [
+          "Wall-clock — top-level model execution без controller acceptance и профилирования.",
+          "Tokens — cached input + uncached input + output по рекурсивному дереву sessions.",
+          "Solo median — арифметическая середина S1 и S2, поскольку наблюдений ровно два.",
+          "Adjusted quality исключает только скрытые assertions о task_id, отсутствующие в PLAN."
+        ]
+      }
+    },
+    {
+      "id": "sol_category_evidence",
+      "label": "Атрибуция Sol-токенов по фазам",
+      "path": "docs/reports/2026-09-04-issue-grinder-solo-parallel-experiment-source.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "Сводка request-level атрибуции Sol-токенов Solo median и финального parallel v2 E4.",
+        "executed_at": "2026-09-04T13:50:00Z",
+        "sql": "WITH sol_categories(category_order, category, solo_tokens, experimental_tokens) AS (VALUES (1, 'Реализация поверхностей', 974191, 91342), (2, 'Понимание и планирование', 108766, 283555), (3, 'Dispatch, ожидание и fan-in', 0, 692284), (4, 'Финальная проверка и review', 376940, 268244), (5, 'Всего Sol', 1459896, 1335425)) SELECT category_order, category, solo_tokens, experimental_tokens, experimental_tokens - solo_tokens AS delta_tokens FROM sol_categories ORDER BY category_order;",
+        "tables_used": ["sol_categories CTE"],
+        "metric_definitions": [
+          "Каждый token_count request относится к одной доминирующей фазе по маркеру, роли session и операции.",
+          "Суммы по модели дедуплицированы по cumulative token counters; границы соседних фаз приблизительны."
+        ]
+      }
+    }
+  ],
+  "package_info": {
+    "root": "ShipTask",
+    "manifestPath": "docs/reports/2026-09-04-issue-grinder-solo-parallel-experiment-artifact.json",
+    "snapshotPath": "docs/reports/2026-09-04-issue-grinder-solo-parallel-experiment-artifact.json"
+  }
+}

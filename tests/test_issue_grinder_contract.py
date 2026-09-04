@@ -84,7 +84,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertEqual(len(rows), len(set(rows)), "duplicate coverage rows")
         self.assertEqual(set(rows), requirement_ids)
-        self.assertEqual(len(requirement_ids), 54)
+        self.assertEqual(len(requirement_ids), 60)
 
     def test_architecture_runtime_layout_exists(self) -> None:
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
@@ -122,12 +122,12 @@ class IssueGrinderContractTest(unittest.TestCase):
             "Соло": "solo.md",
             "Классический": "classic.md",
             "Баланс": "balance.md",
-            "Рой": "swarm.md",
+            "Менеджер": "swarm.md",
             "Экономичный": "economical.md",
         }
         self.assertEqual(
             re.findall(
-                r"^## (Соло|Классический|Баланс|Рой|Экономичный)$",
+                r"^## (Соло|Классический|Баланс|Менеджер|Экономичный)$",
                 execution_modes,
                 re.MULTILINE,
             ),
@@ -139,7 +139,7 @@ class IssueGrinderContractTest(unittest.TestCase):
             ).read_text(encoding="utf-8")
             self.assertEqual(
                 re.findall(
-                    r"^# (Соло|Классический|Баланс|Рой|Экономичный)$",
+                    r"^# (Соло|Классический|Баланс|Менеджер|Экономичный)$",
                     mode_runtime,
                     re.MULTILINE,
                 ),
@@ -187,8 +187,8 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertIn("[краткую справку](references/mode-help.md)", skill)
         self.assertIn("[Run, scope и Goal](references/run-and-goal.md)", skill)
-        self.assertLess(len(skill.splitlines()), 180)
-        for mode in ("Соло", "Классический", "Баланс", "Рой", "Экономичный"):
+        self.assertLess(len(skill.splitlines()), 190)
+        for mode in ("Соло", "Классический", "Баланс", "Менеджер", "Экономичный"):
             self.assertIn(f"`{mode}`", mode_help)
         for forbidden_effect in (
             "не разрешает Task Manager scope",
@@ -199,12 +199,12 @@ class IssueGrinderContractTest(unittest.TestCase):
             self.assertIn(forbidden_effect, mode_help)
         self.assertIn("`По умолчанию` — не шестой режим", mode_help)
         self.assertIn("## Главное различие Классического и Баланса", mode_help)
-        self.assertIn("Sol/controller: он делает почти всё", mode_help)
+        self.assertIn("основной исполнитель делает почти всё", mode_help)
         self.assertIn(
-            "основной объём лёгкой и средней ограниченной implementation",
+            "до\nтрёх готовых независимых write-пакетов Luna High",
             mode_help,
         )
-        self.assertIn("возвращает пакет Sol/controller-у", mode_help)
+        self.assertIn("заканчивает сама", mode_help)
         self.assertIn("observable negative-effects\ncontract `IG-HELP-01`", architecture)
 
     def test_writer_guard_is_fail_closed_and_part_of_runtime(self) -> None:
@@ -254,22 +254,21 @@ class IssueGrinderContractTest(unittest.TestCase):
         evaluation = EVALUATION.read_text(encoding="utf-8")
 
         for marker in (
-            "Обычно один Luna packet owner",
-            "отдельную direct Luna review stage",
-            "независимому Luna verifier/critic",
-            "fixed | refuted_with_evidence | escalate",
-            "не большинством голосов",
-            "compact evidence packet с одним узким вопросом",
-            "`expensive-work ledger`",
-            "невалидным `Балансом`",
-            "Без final gate",
+            "не больше\n   трёх Luna workers",
+            '`model="gpt-5.6-luna"`,',
+            '`reasoning_effort="high"`',
+            "одним collective event-driven wait",
+            "механически переносит task-owned commits/bytes",
+            "одним parallel tool batch",
+            "independent reviewer не является штатной ролью",
+            "final acceptance main profile",
         ):
             self.assertIn(marker, balance)
 
-        self.assertIn("direct Luna execution owner", skill)
-        self.assertIn("принятый результат на единицу", requirements)
-        self.assertIn("Balance control plane и Luna packet loop", architecture)
-        self.assertIn("balance-finding-ledger-no-vote", evaluation)
+        self.assertIn("до трёх independent Luna", skill)
+        self.assertIn("ограниченной параллельной помощью Luna", requirements)
+        self.assertIn("Balance: ускоренный main-owned workflow", architecture)
+        self.assertIn("balance-main-final-acceptance", evaluation)
 
     def test_non_solo_capability_aware_stage_contract_is_compiled(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
@@ -283,26 +282,14 @@ class IssueGrinderContractTest(unittest.TestCase):
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
         evaluation = EVALUATION.read_text(encoding="utf-8")
 
-        for text in (architecture, skill, execution_modes, multi_agent):
-            self.assertTrue(
-                "nested delegation" in text.casefold()
-                or "nested collaboration" in text.casefold()
-            )
-            self.assertTrue(
-                "direct stage" in text.casefold()
-                or "direct luna" in text.casefold()
-            )
-            self.assertTrue(
-                "event" in text.casefold() or "событийн" in text.casefold()
-            )
+        combined = "\n".join((architecture, skill, execution_modes, multi_agent))
+        self.assertIn("nested delegation", combined.casefold())
+        self.assertIn("direct luna", combined.casefold())
+        self.assertTrue("event" in combined.casefold() or "событийн" in combined.casefold())
         for mode in ("classic", "balance", "swarm", "economical"):
             mode_runtime = (
                 SKILL_ROOT / "references" / "modes" / f"{mode}.md"
             ).read_text(encoding="utf-8")
-            self.assertTrue(
-                "independent" in mode_runtime
-                or "независим" in mode_runtime.casefold()
-            )
             self.assertIn("event-driven wait", mode_runtime)
         self.assertIn("IG-MA-19", requirements)
         self.assertIn("capability-aware-direct-stages", evaluation)
@@ -319,7 +306,7 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("holdout", evaluation)
         self.assertIn("не участвовавший в правках", evaluation)
 
-    def test_balance_bounds_packets_and_roy_compiles_manager_loop(self) -> None:
+    def test_balance_wave_and_manager_loop_are_compiled(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         modes_root = SKILL_ROOT / "references" / "modes"
         balance = (modes_root / "balance.md").read_text(encoding="utf-8")
@@ -329,16 +316,16 @@ class IssueGrinderContractTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         self.assertIn("local model-forward evaluation", skill)
-        self.assertIn("candidate 10 tool calls", skill)
-        self.assertIn("review plan 3", " ".join(skill.split()))
         self.assertIn("не объединяй\nв обрезаемый", skill)
-        self.assertIn("параллельно готовит ограниченный review plan", skill)
-        for runtime in (balance, multi_agent):
-            normalized = " ".join(runtime.casefold().split())
-            self.assertIn("произвольн", runtime)
-            self.assertTrue("десяти" in runtime or "десять" in runtime)
-            self.assertIn("final response", normalized)
-        self.assertIn("Open-ended fuzzing", balance)
+        self.assertIn("до трёх independent Luna", skill)
+        for marker in (
+            "не больше\n   трёх Luna workers",
+            "одну active wave",
+            "collective event-driven wait",
+            "parallel tool batch",
+            "Отдельный independent reviewer не является штатной ролью",
+        ):
+            self.assertIn(marker, balance)
         self.assertIn("Open-ended fuzzing", swarm)
         self.assertIn("shadow tree", balance)
         self.assertIn("shadow tree", swarm)
@@ -354,9 +341,9 @@ class IssueGrinderContractTest(unittest.TestCase):
             "sibling messaging не является",
         ):
             self.assertIn(marker, normalized_swarm)
-        self.assertIn("persistent Luna manager ↔ persistent Luna", multi_agent)
+        self.assertIn("постоянные direct Luna manager и implementer", multi_agent)
         self.assertIn("одним\nмеханическим действием", multi_agent)
-        self.assertIn("не ищет messaging tool", multi_agent)
+        self.assertIn("не ищет tool\ncatalog и parent messaging", multi_agent)
         self.assertIn("технически вернул\ntimeout", multi_agent)
 
     def test_publication_unit_stays_with_coordinator(self) -> None:

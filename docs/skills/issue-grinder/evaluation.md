@@ -76,22 +76,28 @@ prompt; подготовка обязана остановиться при ра
 | `IG-AUTO-04` | `SKILL.md` §4; environment harness | default-uat; unknown-uat-before-effect |
 | `IG-AUTO-05` | `autonomy-and-environments.md` | security-selector; narrow-always-readback |
 | `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | five-canonical-modes; mode-does-not-expand-authority |
-| `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; luna-any-effort-economical; non-luna-classic; mode-persists-after-model-change |
+| `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; default-solo-all-models-and-efforts; other-modes-explicit-only; mode-persists-after-model-change |
 | `IG-MODE-03` | `modes/classic.md`; `multi-agent-execution.md`; mode harness | classic-sol-does-almost-all; classic-luna-trivial-only; classic-high-judgment-owner; classic-simple-independent-review; classic-final-review-terminal |
-| `IG-MODE-04` | `modes/balance.md`; `multi-agent-execution.md`; routing guard; mode harness | balance-control-brief; balance-direct-execution-review; balance-concurrent-review-planning; balance-bounded-review-envelope; balance-full-routine-loop; balance-independent-economical-verifier-always; balance-adaptive-candidates; balance-finding-ledger-no-vote; balance-narrow-escalation; balance-rework-targeted-only; balance-expensive-work-ledger; balance-routing-invalid-despite-functional-success; balance-final-gate-no-exploration-replay |
-| `IG-MODE-05` | `modes/swarm.md`; `multi-agent-execution.md`; routing guard; mode harness | roy-control-brief; roy-persistent-manager-implementer; roy-manager-no-source-tools; roy-one-active-phase; roy-one-candidate; roy-review-after-manager-complete; roy-reviewer-no-delegation; roy-rework-reuses-sessions; roy-bounded-stop; roy-final-gate-no-exploration-replay |
+| `IG-MODE-04` | `modes/balance.md`; `multi-agent-execution.md`; routing guard; mode harness | balance-main-owned-terminal; balance-one-wave-up-to-three-luna-high; balance-useful-main-overlap; balance-mechanical-fan-in; balance-parallel-tool-gates; balance-main-final-acceptance |
+| `IG-MODE-05` | `modes/swarm.md`; `multi-agent-execution.md`; routing guard; mode harness | manager-control-brief; manager-persistent-manager-implementer; manager-no-source-tools; manager-one-active-phase; manager-one-candidate; manager-review-after-complete; manager-reviewer-no-delegation; manager-rework-reuses-sessions; manager-bounded-stop |
 | `IG-MODE-06` | `SKILL.md` §5; `modes/economical.md`; mode/routing guards; mode harness | economical-all-substantive-luna; non-luna-root-shell-only; economical-independent-luna-review; economical-terminal-when-proven; economical-partial-review-checkpoint; economical-resumable-candidate; no-false-done; no-false-blocked |
-| `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md`; mode/routing guards | luna-profile-collapse; explicit-luna-max-child; bounded-fork; observed-profile-match; agent-label-neutral; luna-low-root-luna-max-supervisor; role-override-wins |
+| `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md`; mode/routing guards | balance-luna-high-worker; manager-and-economical-luna-max; bounded-fork; observed-profile-match; agent-label-neutral; role-override-wins |
 | `IG-MODE-08` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | economical-handoff-preserves-evidence; roy-targeted-rework-or-one-recovery-path; same-retry-rejected |
 | `IG-MODE-09` | `modes/{balance,swarm,economical}.md` | one-review-candidate; dissent-preserved; finding-disposition-preserved; material-defect-beats-generic-approvals; raw-loop-transcript-not-required; rework-reviewed-again |
 | `IG-MODE-10` | `execution-modes.md`; `multi-agent-execution.md`; mode harness | explicit-switch-barrier; automatic-no-switch; switch-preserves-candidates-and-scope |
 | `IG-MODE-11` | `SKILL.md` §1-3; `modes/solo.md`; `strategic-explainer.md`; mode/solo-topology harnesses | solo-one-issue; solo-many-issues-sequential; solo-current-profile-after-model-change; solo-no-execution-delegation; solo-provider-allowed; solo-terminal-only |
 | `IG-MODE-12` | `execution-modes.md`; `multi-agent-execution.md`; `strategic-explainer.md`; solo-topology harness | outer-controller-not-counted; provider-transport-not-counted; provider-doing-delivery-becomes-execution-agent; explicit-global-opt-out-wins; topology-boundary-all-modes |
+| `IG-MODE-13` | `modes/balance.md`; `multi-agent-execution.md`; mode harness | balance-two-packet-minimum; balance-dependency-ready; balance-disjoint-write-surfaces; balance-stable-interface; balance-local-oracle; no-filler-packets |
+| `IG-MODE-14` | `modes/balance.md`; routing guard; mode harness | balance-self-contained-packet; balance-luna-high; balance-no-manager-reviewer-or-descendants; balance-compact-handoff |
+| `IG-MODE-15` | `modes/balance.md`; mode harness | balance-single-dispatch-window; balance-useful-main-work; balance-no-duplicate-work; balance-one-collective-wait; balance-no-polling |
+| `IG-MODE-16` | `modes/balance.md`; `multi-agent-execution.md`; mode harness | balance-candidate-identity; balance-ownership-check; balance-mechanical-fan-in; balance-preserve-partial-handoff; balance-no-reimplementation |
+| `IG-MODE-17` | `modes/balance.md`; mode harness | balance-worker-quick-check; balance-parallel-integration-tool-gates; no-orphan-long-process |
+| `IG-MODE-18` | `modes/balance.md`; mode harness | balance-main-exact-diff-review; balance-main-fixes-findings; balance-no-default-independent-reviewer; balance-terminal-evidence |
 | `IG-HELP-01` | `SKILL.md` §0; `mode-help.md` | all-five-modes-brief; default-is-resolver; narrow-difference-answer; help-has-no-task-manager-goal-title-or-subagents; mixed-help-delivery-preserves-gates |
 | `IG-MA-01` | `SKILL.md` §2; `multi-agent-execution.md` | two-independent-packets; useful-critic; intentional-candidate; one-lane-no-filler; solo-delegation-forbidden |
 | `IG-MA-02` | `multi-agent-execution.md` | disjoint-surfaces; ordinary-conflicting-surfaces; isolated-intentional-overlap |
 | `IG-MA-03` | `multi-agent-execution.md` | dependency-ready-frontier |
-| `IG-MA-04` | `multi-agent-execution.md` | adaptive-width; roy-one-active-phase; no-filler-packet |
+| `IG-MA-04` | `multi-agent-execution.md` | adaptive-width; balance-max-three-workers-one-wave; manager-one-active-phase; no-filler-packet |
 | `IG-MA-05` | `SKILL.md` §2; `multi-agent-execution.md` | coordinator-only-fan-in-and-writes |
 | `IG-MA-06` | `multi-agent-execution.md`; `writer_worktree_guard.py` | two-phase-admission; shared-main-rejected; integration-canary; read-only-git-preflight; sequential-patch-return-no-guard-source-read |
 | `IG-MA-07` | `multi-agent-execution.md`; `writer_worktree_guard.py` | exclusive-writable-owner; duplicate-branch-and-path-rejected |
@@ -102,11 +108,11 @@ prompt; подготовка обязана остановиться при ра
 | `IG-MA-12` | `SKILL.md` §2; `multi-agent-execution.md`; `writer_worktree_guard.py`; trace harness | startup-inventory-before-fresh-work; branch-only-restored; dirty-checkpoint-resumed; active-owner-rejected; ambiguous-preserved; intentional-candidate-not-replacement |
 | `IG-MA-13` | `multi-agent-execution.md` | explicit-profile-preserved |
 | `IG-MA-14` | `modes/classic.md`; `multi-agent-execution.md` | classic-simple-luna-max; classic-small-diff-not-simple |
-| `IG-MA-15` | `modes/*.md`; `multi-agent-execution.md`; routing guard | solo-current-main-only; classic-material-controller; balance-economical-packet-loop; balance-packet-lead-no-effect-ownership; roy-economical-manager-implementer-reviewer; economical-economical-controller; no-inherited-sol-child |
-| `IG-MA-16` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | luna-uncertainty-evidence-handoff; balance-one-question-escalation; balance-decision-then-luna-redispatch; inseparable-judgment-reason-recorded; mode-specific-next-route; same-luna-retry-rejected |
-| `IG-MA-17` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; routing guard | classic-luna-unavailable-controller; economical-capacity-loss-no-sol-substitution; routing-failure-stops-wave |
+| `IG-MA-15` | `modes/*.md`; `multi-agent-execution.md`; routing guard | solo-current-main-only; classic-material-controller; balance-main-owner-and-luna-high-workers; manager-economical-roles; economical-economical-controller |
+| `IG-MA-16` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md` | luna-uncertainty-evidence-handoff; balance-main-completes-partial-packet; mode-specific-next-route; same-luna-retry-rejected |
+| `IG-MA-17` | `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; routing guard | selected-profiles-assumed-available; no-automatic-mode-switch-or-profile-substitution; routing-failure-stops-wave |
 | `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing; worker-evidence-coordinator-facade; nested-facade-no-new-task; solo-provider-outside-execution-topology |
-| `IG-MA-19` | `SKILL.md` §2; `execution-modes.md`; `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; mode harness | non-solo-simple-independent-review; capability-aware-direct-stages; one-guard-spawn-per-owner; full-stage-deadline-wait; technical-timeout-no-probe; unchanged-state-polling-rejected; final-response-handoff; bounded-review-actions; read-only-reviewer-no-cleanup; large-scope-risk-lenses; material-rework-reuses-reviewer; economical-deadline-partial-ledger-only |
+| `IG-MA-19` | `SKILL.md` §2; `execution-modes.md`; `modes/{classic,balance,swarm,economical}.md`; `multi-agent-execution.md`; mode harness | capability-aware-direct-stages; balance-collective-wait; one-guard-spawn-per-owner; full-stage-deadline-wait; technical-timeout-no-probe; unchanged-state-polling-rejected; final-response-handoff; manager-reviewer-no-delegation; economical-deadline-partial-ledger-only |
 
 ## Быстрый mode corpus
 
@@ -119,53 +125,33 @@ python3 -B -m unittest discover -s tests -p 'test_issue_grinder_mode_harness.py'
 
 Corpus доказывает:
 
-- приоритет явного канонического режима над automatic rule;
-- `Соло` как явный пятый mode, который использует фактически current main
-  profile каждого turn, запрещает рабочую делегацию Issue Grinder, допускает
-  отдельный service/provider agent и ограничивает исполнение одной
+- приоритет явного режима и безусловный `Соло` default для каждой main
+  model/effort;
+- `Соло` с current main profile, нулём execution-subagents и одной
   последовательной lane;
-- `Экономичный` для exact `gpt-5.6-luna` при каждом доступном effort и
-  `Классический` для другого family identity без fuzzy match;
 - сохранение mode record при доказанной continuity и отсутствие переноса
   старого record в новый run;
-- схлопывание Luna-профилей в Luna Max, сохранение non-Luna controller-а и
-  независимый приоритет role overrides;
-- Balance packet readiness: обязательную независимую verification любого exact
-  candidate, packet-bound routing, только узкую escalation, допустимые категории
-  дорогой работы и material finding, который нельзя перевесить общими
-  одобрениями;
-- review lifecycle всех non-Solo modes: независимый review простого scope,
-  single-owner wave при доказанной nested capability и mode-specific direct
-  stages без неё, один guard/spawn на нового owner-а, stage-level event waits,
-  запрет polling неизменившегося state, reuse owner/reviewer после material
-  rework и только economical checkpoint с partial deadline ledger;
-- direct-stage corpus: `Баланс` использует последовательность execution →
-  independent reduction/review до controller final gate и допускает
-  дополнительные purpose-distinct candidates только для material fork; `Рой`
-  сохраняет постоянные manager/implementer sessions, один candidate и одну
-  активную фазу, запрещает manager-у source/tool work и запускает одного
-  independent reviewer без delegation только после manager `complete`;
-  reviewer plan `Баланса` готовится параллельно, но exact
-  review начинается после candidate; в `Балансе` small/medium hard ceilings
-  ограничивают candidate/review-plan/exact-review/recheck/controller значениями
-  `10/3/5/3/3` tool calls; Teams-подобная Balance-работа делится на packets/lenses, а
-  exception одного неделимого риска ограничен `+3` и требует evidence;
-  evaluator отклоняет самовольно завышенный budget, reread runtime policy,
-  directory/parent-messaging discovery, open-ended execution simulation,
-  workspace mutation, технические state probes и повтор exploration final gate;
-  Git-metadata-restricted corpus использует один writable task-owned shadow tree
-  либо, если он недоступен, bounded read-only patch-return без повторной
-  реконструкции проекта; review-plan turn завершается final handoff-ом без
-  messaging discovery, а exact owned files интегрируются одной механической
-  операцией без полного patch в model context;
+- Luna High worker profile `Баланса`, Luna Max baseline других экономичных
+  ролей и независимый приоритет role overrides;
+- Balance wave из двух-трёх dependency-ready self-contained packets с
+  непересекающимися surfaces, одним dispatch window, useful main overlap, одним
+  collective wait, mechanical fan-in, parallel tool gates и main acceptance;
+- отклонение лишнего Balance reviewer-а, nested delegation, serial dispatch,
+  polling, повторения Luna work основной моделью и непроверенной интеграции;
+- independent-review lifecycle режимов, которые его требуют: один guard/spawn
+  на owner-а, event waits, reuse после rework и только economical checkpoint с
+  partial deadline ledger;
+- `Менеджер` с постоянными manager/implementer sessions, одним candidate и
+  одной active phase, без source/tool work у manager-а и с одним independent
+  reviewer после `complete`;
 - полноту resumable checkpoint, запрет ложного `complete`/`blocked` и
-  обязательный активный Task Manager status/Goal;
+  обязательный active Task Manager status/Goal;
 - явный switch только после quiescent writers, неизменного integration checkout,
   reconciliation ownership и сохранения evidence.
 
 Harness принимает уже распознанный канонический mode. Он не доказывает качество
 понимания свободной пользовательской формулировки, декомпозиции, выбора
-полезного агента, качества крупных фаз `Роя`, code review или фактического
+полезного агента, качества крупных фаз `Менеджера`, code review или фактического
 исполнения Markdown runtime. Эти свойства остаются model-forward cases и
 наблюдаемым результатом реальных прогонов.
 
@@ -178,14 +164,13 @@ Bundled `issue-grinder/scripts/model_routing_guard.py` и его unit corpus
 python3 -B -m unittest discover -s tests -p 'test_model_routing_guard.py'
 ```
 
-Corpus механически доказывает, что `Баланс`, `Рой` и `Экономичный` принимают
-substantive Luna Max child только с unique `packet_id`, explicit model/effort,
+Corpus механически доказывает, что `Баланс`, `Менеджер` и `Экономичный`
+принимают mode-specific Luna child только с unique `packet_id`, explicit model/effort,
 bounded fork и `issue-grinder/model-routing/v2` fingerprint точных dispatch
 args, отвергают inherited Sol, `fork_turns=all` и observed profile mismatch, но
-не выводят model/effort из имени либо типа агента. Для `Баланса` отдельно
-сохраняются только узкие controller roles material judgment/integration/final
-  review; packet owner, research, implementation, tests, verifier, critic, reducer
-и rework требуют Luna. Явный пользовательский role override сохраняется и
+не выводят model/effort из имени либо типа агента. `Баланс` требует Luna High
+для worker dispatch, а `Менеджер` и `Экономичный` — Luna Max для своих
+экономичных ролей. Явный пользовательский role override сохраняется и
 сверяется с observed profile. Guard не доказывает честность semantic label,
 фактический вызов child или невозможность raw spawn без preflight — это
 проверяют model-forward canary и recursive thread-tree telemetry.
@@ -309,19 +294,17 @@ fresh model-forward smoke.
   режимах без Task Manager, Goal, title mutation, delivery loop и subagents;
 - правильно различать explicit delivery, implicit exact selector, implicit
   missing selector и read/status/planning negative prompts;
-- на новых synthetic runs выбрать `Экономичный` для Luna при `none`, `low`,
-  `medium`, `high`, `xhigh` и `max`, а для non-Luna — `Классический`; любой явно
-  выбранный канонический режим должен победить automatic rule, а продолжение
+- на новых synthetic runs выбрать `Соло` при каждой top-level model/effort;
+  любой явно выбранный канонический режим должен победить default rule, а продолжение
   после смены модели — сохранить ранее выбранный mode;
 - наблюдаемо различить режимы: в `Классическом` Sol/controller делает почти
    всё, а Luna получает только тривиальные packets; `Соло` сохраняет current
   model, ноль Issue Grinder execution-subagents и допускает отдельный
   Strategic Explainer provider для одного и нескольких issue; в
-  `Балансе` до source mutation появляется observed Luna Max execution owner для
-  обычного research/implementation/test/self-review loop, отдельно
-  наблюдается Luna verification materially changed candidate, а Sol остаётся
-  на control brief, узком material decision, integration decision и final gate;
-  после Sol decision отделимое исполнение снова получает Luna; `Рой` после
+  `Балансе` main profile запускает одним окном два-три independent Luna High
+  write packets, параллельно выполняет свою полезную работу, затем одним
+  collective wait получает handoffs, механически интегрирует, запускает общие
+  долгие checks параллельно и сам принимает exact candidate; `Менеджер` после
   одного Sol control brief держит постоянные Luna manager и implementer
   sessions, механически передаёт одной активной фазе compact packet/evidence,
   сохраняет один candidate и после manager `complete` запускает одного
@@ -329,7 +312,7 @@ fresh model-forward smoke.
   `Экономичный` выполняет весь substantive packet и review на Luna Max, оставляя
   non-Luna root только transport/authority shell, и сохраняет один resumable
   candidate без ложного `Done`/Goal completion;
-- для всех child в `Балансе`, `Рое` и `Экономичном` сохранить packet-bound
+- для всех child в `Балансе`, `Менеджере` и `Экономичном` сохранить packet-bound
   pre-dispatch и observed `issue-grinder/model-routing/v2` receipts с
   совпадающими dispatch fingerprints; ни один substantive child не наследует
   несовместимый profile, а agent name/type не используется как источник

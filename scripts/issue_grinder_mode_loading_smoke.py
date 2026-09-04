@@ -24,7 +24,7 @@ MODE_FILES = {
     "solo": ("Соло", "solo.md"),
     "classic": ("Классический", "classic.md"),
     "balance": ("Баланс", "balance.md"),
-    "swarm": ("Рой", "swarm.md"),
+    "swarm": ("Менеджер", "swarm.md"),
     "economical": ("Экономичный", "economical.md"),
 }
 MODE_FILE_RE = re.compile(

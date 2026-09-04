@@ -14,13 +14,8 @@ from enum import Enum
 
 LUNA_MODEL = "gpt-5.6-luna"
 LUNA_MAX_EFFORT = "max"
+LUNA_HIGH_EFFORT = "high"
 ACTIVE_TASK_STATUSES = frozenset({"In Progress", "In Review"})
-BALANCE_CONTROLLER_ROLES = frozenset(
-    {"material_judgment", "integration_decision", "final_review"}
-)
-BALANCE_FINDING_DISPOSITIONS = frozenset(
-    {"fixed", "refuted_with_evidence", "escalate"}
-)
 FORBIDDEN_UNCHANGED_COORDINATION = frozenset(
     {
         "guard_discovery",
@@ -62,6 +57,7 @@ class Profile:
 
 
 LUNA_MAX = Profile(LUNA_MODEL, LUNA_MAX_EFFORT)
+LUNA_HIGH = Profile(LUNA_MODEL, LUNA_HIGH_EFFORT)
 
 
 @dataclass(frozen=True)
@@ -82,6 +78,7 @@ class ModeRecord:
 class ModeDispatchPolicy:
     issue_grinder_execution_subagents_allowed: bool
     max_active_execution_lanes: int | None
+    max_active_execution_subagents: int | None
     execution_profile: Profile | None
     service_provider_agents_allowed: bool
 
@@ -97,12 +94,22 @@ def mode_dispatch_policy(
         return ModeDispatchPolicy(
             issue_grinder_execution_subagents_allowed=False,
             max_active_execution_lanes=1,
+            max_active_execution_subagents=0,
             execution_profile=current_main_profile,
+            service_provider_agents_allowed=True,
+        )
+    if record.canonical_mode is ExecutionMode.BALANCE:
+        return ModeDispatchPolicy(
+            issue_grinder_execution_subagents_allowed=True,
+            max_active_execution_lanes=4,
+            max_active_execution_subagents=3,
+            execution_profile=record.role_profiles.worker,
             service_provider_agents_allowed=True,
         )
     return ModeDispatchPolicy(
         issue_grinder_execution_subagents_allowed=True,
         max_active_execution_lanes=None,
+        max_active_execution_subagents=None,
         execution_profile=None,
         service_provider_agents_allowed=True,
     )
@@ -111,15 +118,19 @@ def mode_dispatch_policy(
 def normalize_profiles(
     main_profile: Profile,
     *,
+    mode: ExecutionMode = ExecutionMode.CLASSIC,
     controller_override: Profile | None = None,
     worker_override: Profile | None = None,
 ) -> RoleProfiles:
-    """Apply the Luna Max baseline without guessing cross-family ordering."""
+    """Apply the selected mode's worker baseline without guessing ordering."""
 
     default_controller = LUNA_MAX if main_profile.is_luna else main_profile
+    default_worker = LUNA_HIGH if mode is ExecutionMode.BALANCE else LUNA_MAX
+    if mode is ExecutionMode.BALANCE:
+        default_controller = main_profile
     return RoleProfiles(
         controller=controller_override or default_controller,
-        worker=worker_override or LUNA_MAX,
+        worker=worker_override or default_worker,
     )
 
 
@@ -141,13 +152,7 @@ def resolve_mode(
             raise ValueError("an explicit mode switch must pass the switch barrier")
         return saved_record
 
-    canonical_mode = explicit_mode
-    if canonical_mode is None:
-        canonical_mode = (
-            ExecutionMode.ECONOMICAL
-            if main_profile.is_luna
-            else ExecutionMode.CLASSIC
-        )
+    canonical_mode = explicit_mode or ExecutionMode.SOLO
     origin = (
         ModeOrigin.EXPLICIT
         if explicit_mode is not None
@@ -159,78 +164,11 @@ def resolve_mode(
         initial_main_profile=main_profile,
         role_profiles=normalize_profiles(
             main_profile,
+            mode=canonical_mode,
             controller_override=controller_override,
             worker_override=worker_override,
         ),
     )
-
-
-@dataclass(frozen=True)
-class BalanceFinding:
-    finding: str
-    evidence: str
-    material: bool
-    disposition: str
-
-
-@dataclass(frozen=True)
-class BalancePacketDecision:
-    action: str
-    may_enter_final_review: bool
-    defects: tuple[str, ...] = ()
-
-
-def assess_balance_packet(
-    *,
-    packet_id: str,
-    exact_candidate: str,
-    checks: tuple[str, ...],
-    materially_changed: bool,
-    independent_verification_possible: bool,
-    independent_verification_performed: bool,
-    findings: tuple[BalanceFinding, ...],
-    escalation_questions: tuple[str, ...] = (),
-    routing_valid: bool = True,
-    expensive_work_roles: tuple[str, ...] = (),
-) -> BalancePacketDecision:
-    """Validate the mechanical readiness of one Balance evidence packet."""
-
-    defects: list[str] = []
-    if not packet_id.strip():
-        defects.append("blank_packet_id")
-    if not exact_candidate.strip():
-        defects.append("blank_exact_candidate")
-    if not checks or any(not check.strip() for check in checks):
-        defects.append("missing_checks")
-    if not independent_verification_performed:
-        defects.append("independent_verification_missing")
-    if not independent_verification_possible:
-        defects.append("independent_verification_unavailable")
-    if not routing_valid:
-        defects.append("routing_invalid")
-    for role in expensive_work_roles:
-        if role.strip().casefold() not in BALANCE_CONTROLLER_ROLES:
-            defects.append(f"ordinary_expensive_work:{role.strip().casefold()}")
-    if len(escalation_questions) > 1:
-        defects.append("escalation_not_narrow")
-    if any(not question.strip() for question in escalation_questions):
-        defects.append("blank_escalation_question")
-    if len(escalation_questions) == 1 and escalation_questions[0].strip():
-        defects.append("escalation_pending")
-
-    for index, finding in enumerate(findings):
-        if not finding.finding.strip():
-            defects.append(f"finding_{index}:blank_finding")
-        if finding.disposition not in BALANCE_FINDING_DISPOSITIONS:
-            defects.append(f"finding_{index}:invalid_disposition")
-        if finding.material and not finding.evidence.strip():
-            defects.append(f"finding_{index}:missing_material_evidence")
-        if finding.material and finding.disposition == "escalate":
-            defects.append(f"finding_{index}:material_escalation_pending")
-
-    if defects:
-        return BalancePacketDecision("rework_or_escalate", False, tuple(defects))
-    return BalancePacketDecision("ready_for_final_review", True)
 
 
 @dataclass(frozen=True)
@@ -267,210 +205,163 @@ class ReviewWaveDecision:
 
 
 @dataclass(frozen=True)
-class DirectCampaignObservation:
-    """Observed Balance direct stages when execution children cannot delegate."""
+class BalanceWaveObservation:
+    """Observed main-owned Balance wave and its integration gates."""
 
     mode: ExecutionMode
-    stage_order: tuple[str, ...]
-    material_candidate_fork: bool
-    no_fork_reason: str
-    candidate_author_ids: tuple[str, ...]
-    candidate_purposes: tuple[str, ...]
-    reviewer_id: str
-    reducer_id: str
-    routing_guard_owner_ids: tuple[str, ...]
-    dispatched_owner_ids: tuple[str, ...]
-    event_wait_stage_count: int
+    packet_ids: tuple[str, ...]
+    owner_ids: tuple[str, ...]
+    dependency_ready: tuple[bool, ...]
+    self_contained: tuple[bool, ...]
+    isolated_candidates: tuple[bool, ...]
+    stable_interfaces: tuple[bool, ...]
+    local_oracles: tuple[bool, ...]
+    owned_surfaces: tuple[tuple[str, ...], ...]
+    routing_valid: tuple[bool, ...]
+    worker_models: tuple[str, ...]
+    worker_efforts: tuple[str, ...]
+    nested_delegation_counts: tuple[int, ...]
+    dispatch_window_count: int
+    active_wave_count: int
+    peak_luna_workers: int
+    main_useful_work: bool
+    main_repeated_worker_work: bool
+    collective_wait_count: int
+    polling_actions: tuple[str, ...]
+    handoff_candidate_ids: tuple[str, ...]
+    handoff_checks_present: tuple[bool, ...]
     common_exact_base: bool
-    candidate_stage_quiescent_before_review: bool
-    review_complete: bool
-    finding_ledger_returned: bool
-    final_review_started_after_stages: bool
-    unchanged_state_actions: tuple[str, ...] = ()
-    reviewer_plan_prepared_concurrently: bool = False
-    execution_action_counts: tuple[int, ...] = ()
-    execution_action_budgets: tuple[int, ...] = ()
-    execution_budget_exceptions: tuple[str, ...] = ()
-    execution_open_ended_simulation: bool = False
-    execution_searched_parent_messaging: bool = False
-    execution_reloaded_runtime_policy: bool = False
-    execution_directory_discovery: bool = False
-    review_plan_action_count: int = 0
-    review_exact_action_count: int = 0
-    review_action_count: int = 0
-    review_action_budget: int = 0
-    review_open_ended_exploration: bool = False
-    reviewer_workspace_mutation: bool = False
-    reviewer_searched_parent_messaging: bool = False
-    final_review_replayed_exploration: bool = False
-    controller_final_action_count: int = 0
-    controller_final_action_budget: int = 0
-    integration_action_count: int = 0
-    integration_action_budget: int = 0
+    fan_in_complete: bool
+    ownership_verified: bool
     integration_patch_rendered_in_context: bool = False
-    runtime_reference_discovery: bool = False
-    shadow_path_discovery: bool = False
-    technical_wait_state_probes: tuple[str, ...] = ()
+    parallel_tool_gate_count: int = 0
+    integrated_checks_passed: bool = False
+    main_exact_diff_reviewed: bool = False
+    main_final_acceptance: bool = False
+    separate_reviewer_count: int = 0
 
 
 @dataclass(frozen=True)
-class DirectCampaignDecision:
+class BalanceWaveDecision:
     action: str
-    may_enter_controller_final_review: bool
+    may_accept_terminal: bool
     defects: tuple[str, ...] = ()
 
 
-def assess_direct_campaign(
-    observation: DirectCampaignObservation,
-) -> DirectCampaignDecision:
-    """Validate the bounded direct-stage fallback for Balance."""
+def assess_balance_wave(
+    observation: BalanceWaveObservation,
+) -> BalanceWaveDecision:
+    """Validate the accelerated Solo-like Balance topology."""
 
     if observation.mode is not ExecutionMode.BALANCE:
-        raise ValueError("direct campaign applies only to Balance")
+        raise ValueError("balance wave applies only to Balance")
 
     defects: list[str] = []
-    authors = observation.candidate_author_ids
-    owners = (*authors, observation.reviewer_id)
-    if any(not owner.strip() for owner in owners):
-        defects.append("blank_direct_owner")
-    if len(set(owners)) != len(owners):
-        defects.append("direct_owners_not_independent")
-    if tuple(observation.routing_guard_owner_ids) != owners:
-        defects.append("routing_guards_do_not_match_direct_owners")
-    if tuple(observation.dispatched_owner_ids) != owners:
-        defects.append("dispatches_do_not_match_direct_owners")
-    if observation.event_wait_stage_count != len(observation.stage_order):
-        defects.append("event_waits_do_not_match_stages")
-    if not observation.common_exact_base:
-        defects.append("candidate_base_mismatch")
-    if not observation.candidate_stage_quiescent_before_review:
-        defects.append("review_started_before_candidate_quiescence")
-    if not observation.review_complete:
-        defects.append("independent_review_incomplete")
-    if not observation.finding_ledger_returned:
-        defects.append("finding_ledger_missing")
-    if not observation.final_review_started_after_stages:
-        defects.append("controller_final_review_started_early")
-    if len(observation.execution_action_counts) != len(authors):
-        defects.append("execution_action_counts_do_not_match_candidates")
-    if len(observation.execution_action_budgets) != len(authors):
-        defects.append("execution_action_budgets_do_not_match_candidates")
-    elif any(budget <= 0 for budget in observation.execution_action_budgets):
-        defects.append("execution_action_budget_missing")
-    else:
-        if any(budget > 13 for budget in observation.execution_action_budgets):
-            defects.append("execution_action_ceiling_exceeded")
-        if any(budget > 10 for budget in observation.execution_action_budgets):
-            exceptions = observation.execution_budget_exceptions
-            if len(exceptions) != len(authors) or any(
-                budget > 10 and not evidence.strip()
-                for budget, evidence in zip(
-                    observation.execution_action_budgets,
-                    exceptions,
-                    strict=len(exceptions) == len(authors),
-                )
-            ):
-                defects.append("execution_budget_exception_missing")
-        if len(observation.execution_action_counts) == len(authors) and any(
-            count > budget
-            for count, budget in zip(
-                observation.execution_action_counts,
-                observation.execution_action_budgets,
-                strict=True,
-            )
-        ):
-            defects.append("execution_action_budget_exceeded")
-    if observation.execution_open_ended_simulation:
-        defects.append("execution_open_ended_simulation")
-    if observation.execution_searched_parent_messaging:
-        defects.append("execution_searched_parent_messaging")
-    if observation.execution_reloaded_runtime_policy:
-        defects.append("execution_reloaded_runtime_policy")
-    if observation.execution_directory_discovery:
-        defects.append("execution_directory_discovery")
-    if observation.review_action_budget <= 0:
-        defects.append("review_action_budget_missing")
-    elif observation.review_action_budget > 8:
-        defects.append("review_action_budget_above_ceiling")
-    elif observation.review_action_count > observation.review_action_budget:
-        defects.append("review_action_budget_exceeded")
-    if observation.review_plan_action_count > 3:
-        defects.append("balance_review_plan_budget_exceeded")
-    if observation.review_exact_action_count > 5:
-        defects.append("balance_exact_review_budget_exceeded")
-    if (
-        observation.review_plan_action_count + observation.review_exact_action_count
-        != observation.review_action_count
-    ):
-        defects.append("balance_review_action_accounting_mismatch")
-    if observation.review_open_ended_exploration:
-        defects.append("review_open_ended_exploration")
-    if observation.reviewer_workspace_mutation:
-        defects.append("reviewer_workspace_mutation")
-    if observation.reviewer_searched_parent_messaging:
-        defects.append("reviewer_searched_parent_messaging")
-    if observation.final_review_replayed_exploration:
-        defects.append("final_review_replayed_exploration")
-    if observation.controller_final_action_budget <= 0:
-        defects.append("controller_final_action_budget_missing")
-    elif (
-        observation.controller_final_action_count
-        > observation.controller_final_action_budget
-    ):
-        defects.append("controller_final_action_budget_exceeded")
-    if observation.integration_action_budget <= 0:
-        defects.append("integration_action_budget_missing")
-    elif observation.integration_action_count > observation.integration_action_budget:
-        defects.append("integration_action_budget_exceeded")
-    if observation.integration_patch_rendered_in_context:
-        defects.append("integration_patch_rendered_in_context")
-    if observation.runtime_reference_discovery:
-        defects.append("runtime_reference_discovery")
-    if observation.shadow_path_discovery:
-        defects.append("shadow_path_discovery")
-    if observation.technical_wait_state_probes:
-        defects.append("technical_wait_state_probe")
-
-    for action in observation.unchanged_state_actions:
+    packet_count = len(observation.packet_ids)
+    parallel_fields = (
+        observation.owner_ids,
+        observation.dependency_ready,
+        observation.self_contained,
+        observation.isolated_candidates,
+        observation.stable_interfaces,
+        observation.local_oracles,
+        observation.owned_surfaces,
+        observation.routing_valid,
+        observation.worker_models,
+        observation.worker_efforts,
+        observation.nested_delegation_counts,
+        observation.handoff_candidate_ids,
+        observation.handoff_checks_present,
+    )
+    if packet_count < 2:
+        defects.append("balance_parallel_wave_requires_two_packets")
+    if packet_count > 3:
+        defects.append("balance_worker_ceiling_exceeded")
+    if any(len(values) != packet_count for values in parallel_fields):
+        defects.append("balance_packet_evidence_length_mismatch")
+        return BalanceWaveDecision("repair_balance_wave", False, tuple(defects))
+    if any(not value.strip() for value in observation.packet_ids):
+        defects.append("blank_packet_id")
+    if len(set(observation.packet_ids)) != packet_count:
+        defects.append("duplicate_packet_id")
+    if any(not value.strip() for value in observation.owner_ids):
+        defects.append("blank_owner_id")
+    if len(set(observation.owner_ids)) != packet_count:
+        defects.append("owners_not_independent")
+    if not all(observation.dependency_ready):
+        defects.append("packet_dependency_not_ready")
+    if not all(observation.self_contained):
+        defects.append("packet_not_self_contained")
+    if not all(observation.isolated_candidates):
+        defects.append("candidate_not_isolated")
+    if not all(observation.stable_interfaces):
+        defects.append("packet_interface_not_stable")
+    if not all(observation.local_oracles):
+        defects.append("packet_local_oracle_missing")
+    normalized_surfaces = [set(values) for values in observation.owned_surfaces]
+    for index, surfaces in enumerate(normalized_surfaces):
+        if not surfaces or any(not value.strip() for value in surfaces):
+            defects.append(f"packet_{index}:owned_surfaces_missing")
+        for later in normalized_surfaces[index + 1 :]:
+            if surfaces & later:
+                defects.append("balance_write_surfaces_overlap")
+    if not all(observation.routing_valid):
+        defects.append("routing_invalid")
+    if any(model.strip().casefold() != LUNA_MODEL for model in observation.worker_models):
+        defects.append("balance_luna_model_required")
+    if any(effort.strip().casefold() != LUNA_HIGH_EFFORT for effort in observation.worker_efforts):
+        defects.append("balance_luna_high_effort_required")
+    if any(count != 0 for count in observation.nested_delegation_counts):
+        defects.append("balance_nested_delegation_forbidden")
+    if observation.dispatch_window_count != 1:
+        defects.append("balance_dispatch_not_one_window")
+    if observation.active_wave_count != 1:
+        defects.append("balance_active_wave_count_not_one")
+    if observation.peak_luna_workers != packet_count:
+        defects.append("balance_peak_workers_mismatch")
+    if not observation.main_useful_work:
+        defects.append("balance_main_useful_overlap_missing")
+    if observation.main_repeated_worker_work:
+        defects.append("balance_main_repeated_worker_work")
+    if observation.collective_wait_count != 1:
+        defects.append("balance_collective_wait_count_not_one")
+    for action in observation.polling_actions:
         normalized = action.strip().casefold()
         if normalized in FORBIDDEN_UNCHANGED_COORDINATION:
             defects.append(f"unchanged_state_coordination:{normalized}")
+    if any(not value.strip() for value in observation.handoff_candidate_ids):
+        defects.append("balance_candidate_identity_missing")
+    if not all(observation.handoff_checks_present):
+        defects.append("balance_packet_check_missing")
+    if not observation.common_exact_base:
+        defects.append("candidate_base_mismatch")
+    if not observation.fan_in_complete:
+        defects.append("balance_fan_in_incomplete")
+    if not observation.ownership_verified:
+        defects.append("balance_ownership_not_verified")
+    if observation.integration_patch_rendered_in_context:
+        defects.append("integration_patch_rendered_in_context")
+    if observation.parallel_tool_gate_count < 2:
+        defects.append("balance_parallel_tool_gates_missing")
+    if not observation.integrated_checks_passed:
+        defects.append("balance_integrated_checks_failed")
+    if not observation.main_exact_diff_reviewed:
+        defects.append("balance_main_exact_diff_review_missing")
+    if not observation.main_final_acceptance:
+        defects.append("balance_main_final_acceptance_missing")
+    if observation.separate_reviewer_count:
+        defects.append("balance_unexpected_separate_reviewer")
 
-    if observation.stage_order != ("execution", "independent_review"):
-        defects.append("balance_stage_order_invalid")
-    if not authors:
-        defects.append("balance_candidate_missing")
-    if observation.material_candidate_fork:
-        if len(authors) < 2:
-            defects.append("balance_material_fork_requires_multiple_candidates")
-        if observation.reducer_id != observation.reviewer_id:
-            defects.append("balance_adaptive_reducer_reviewer_mismatch")
-    elif len(authors) > 1:
-        defects.append("balance_multiple_candidates_without_material_fork")
-    elif observation.reducer_id.strip():
-        defects.append("balance_unexpected_reducer")
-    if not observation.reviewer_plan_prepared_concurrently:
-        defects.append("balance_concurrent_review_plan_missing")
-
-    purposes = tuple(purpose.strip() for purpose in observation.candidate_purposes)
-    if len(authors) > 1:
-        if len(purposes) != len(authors) or any(not purpose for purpose in purposes):
-            defects.append("candidate_purposes_missing")
-        elif len(set(purposes)) != len(purposes):
-            defects.append("candidate_purposes_not_distinct")
-    elif purposes not in ((), ("default",)):
-        defects.append("single_candidate_purpose_invalid")
-
-    may_enter = not defects
-    return DirectCampaignDecision(
-        "ready_for_controller_final_review" if may_enter else "repair_direct_campaign",
-        may_enter,
+    may_accept = not defects
+    return BalanceWaveDecision(
+        "ready_for_terminal_acceptance" if may_accept else "repair_balance_wave",
+        may_accept,
         tuple(defects),
     )
 
 
 @dataclass(frozen=True)
-class RoyManagerLoopObservation:
+class ManagerLoopObservation:
     """Observed persistent Manager Loop for canonical_mode=swarm."""
 
     control_brief_complete: bool
@@ -503,15 +394,15 @@ class RoyManagerLoopObservation:
 
 
 @dataclass(frozen=True)
-class RoyManagerLoopDecision:
+class ManagerLoopDecision:
     action: str
     may_enter_controller_final_review: bool
     defects: tuple[str, ...] = ()
 
 
-def assess_roy_manager_loop(
-    observation: RoyManagerLoopObservation,
-) -> RoyManagerLoopDecision:
+def assess_manager_loop(
+    observation: ManagerLoopObservation,
+) -> ManagerLoopDecision:
     """Validate stable sessions, sequential phases and final independent review."""
 
     defects: list[str] = []
@@ -521,63 +412,63 @@ def assess_roy_manager_loop(
         observation.reviewer_id,
     )
     if any(not owner.strip() for owner in owners):
-        defects.append("roy_blank_owner")
+        defects.append("manager_blank_owner")
     if len(set(owners)) != len(owners):
-        defects.append("roy_roles_not_independent")
+        defects.append("manager_roles_not_independent")
     if tuple(observation.routing_guard_owner_ids) != owners:
-        defects.append("roy_routing_guards_do_not_match_roles")
+        defects.append("manager_routing_guards_do_not_match_roles")
     if tuple(observation.dispatched_owner_ids) != owners:
-        defects.append("roy_dispatches_do_not_match_roles")
+        defects.append("manager_dispatches_do_not_match_roles")
     if not observation.control_brief_complete:
-        defects.append("roy_control_brief_missing")
+        defects.append("manager_control_brief_missing")
     if not observation.manager_persistent:
-        defects.append("roy_manager_not_persistent")
+        defects.append("manager_session_not_persistent")
     if not observation.implementer_persistent:
-        defects.append("roy_implementer_not_persistent")
+        defects.append("manager_implementer_not_persistent")
     if not observation.reviewer_persistent:
-        defects.append("roy_reviewer_not_persistent")
+        defects.append("manager_reviewer_not_persistent")
     if observation.manager_source_access:
-        defects.append("roy_manager_source_access")
+        defects.append("manager_source_access")
     if observation.manager_work_tool_calls:
-        defects.append("roy_manager_work_tool_use")
+        defects.append("manager_work_tool_use")
     if observation.manager_implementation:
-        defects.append("roy_manager_implemented")
+        defects.append("manager_implemented")
 
     phases = tuple(phase.strip() for phase in observation.phase_ids)
     if not phases or any(not phase for phase in phases):
-        defects.append("roy_phase_plan_missing")
+        defects.append("manager_phase_plan_missing")
     elif len(set(phases)) != len(phases):
-        defects.append("roy_phase_ids_not_stable")
+        defects.append("manager_phase_ids_not_stable")
     if tuple(observation.accepted_phase_ids) != phases:
-        defects.append("roy_phases_not_accepted_in_order")
+        defects.append("manager_phases_not_accepted_in_order")
     if len(observation.implementer_session_ids) != len(phases) or any(
         session_id != observation.implementer_id
         for session_id in observation.implementer_session_ids
     ):
-        defects.append("roy_implementer_session_replaced")
+        defects.append("manager_implementer_session_replaced")
     if len(observation.candidate_ids) != len(phases):
-        defects.append("roy_candidate_trace_incomplete")
+        defects.append("manager_candidate_trace_incomplete")
     elif observation.candidate_ids and len(set(observation.candidate_ids)) != 1:
-        defects.append("roy_candidate_replaced")
+        defects.append("manager_candidate_replaced")
     if observation.max_concurrent_phases != 1:
-        defects.append("roy_parallel_phases")
+        defects.append("manager_parallel_phases")
     if not observation.manager_complete:
-        defects.append("roy_manager_incomplete")
+        defects.append("manager_incomplete")
     if not observation.review_started_after_manager_complete:
-        defects.append("roy_review_started_early")
+        defects.append("manager_review_started_early")
     if observation.reviewer_delegation_count:
-        defects.append("roy_reviewer_delegated")
+        defects.append("manager_reviewer_delegated")
     if not observation.review_complete:
-        defects.append("roy_independent_review_incomplete")
+        defects.append("manager_independent_review_incomplete")
     if not observation.finding_ledger_returned:
-        defects.append("roy_finding_ledger_missing")
+        defects.append("manager_finding_ledger_missing")
     if not observation.controller_final_review_started_after_review:
-        defects.append("roy_controller_final_review_started_early")
+        defects.append("manager_controller_final_review_started_early")
     if observation.material_rework:
         if observation.rework_implementer_id != observation.implementer_id:
-            defects.append("roy_rework_implementer_replaced")
+            defects.append("manager_rework_implementer_replaced")
         if observation.recheck_reviewer_id != observation.reviewer_id:
-            defects.append("roy_recheck_reviewer_replaced")
+            defects.append("manager_recheck_reviewer_replaced")
 
     for action in observation.unchanged_state_actions:
         normalized = action.strip().casefold()
@@ -585,18 +476,18 @@ def assess_roy_manager_loop(
             defects.append(f"unchanged_state_coordination:{normalized}")
 
     may_enter = not defects
-    return RoyManagerLoopDecision(
-        "ready_for_controller_final_review" if may_enter else "repair_roy_manager_loop",
+    return ManagerLoopDecision(
+        "ready_for_controller_final_review" if may_enter else "repair_manager_loop",
         may_enter,
         tuple(defects),
     )
 
 
 def assess_review_wave(observation: ReviewWaveObservation) -> ReviewWaveDecision:
-    """Check the mechanical owner/reviewer/event envelope for one non-Solo wave."""
+    """Check an independent-review envelope for modes that require it."""
 
-    if observation.mode is ExecutionMode.SOLO:
-        raise ValueError("IG-MA-19 does not apply to Solo")
+    if observation.mode in {ExecutionMode.SOLO, ExecutionMode.BALANCE}:
+        raise ValueError("independent review wave is not a default for this mode")
 
     defects: list[str] = []
     if not observation.direct_owner_id.strip():

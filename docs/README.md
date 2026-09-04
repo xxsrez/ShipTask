@@ -83,11 +83,15 @@ Architecture — за «как сейчас этого достигать». С�
 
 - [Режимы исполнения Issue Grinder](specs/issue-grinder-execution-modes.md) —
   rationale и сравнительная модель пяти устойчивых режимов `Соло`,
-  `Классический`, `Баланс`, `Рой` и `Экономичный`. Действующая policy остаётся
+  `Классический`, `Баланс`, `Менеджер` и `Экономичный`. Действующая policy остаётся
   только в локальных Overview, Requirements, Architecture и runtime-проекции.
 
 ## Experiments
 
+- [Ускоренный Solo: параллельные Luna-lanes и tool-bound benchmark](tasks/issue-grinder-solo-parallel-experiment.md)
+  — активный изолированный эксперимент: качество `Соло`, не более `+15%`
+  Sol-токенов и выигрыш не менее `20%` wall-clock за счёт перекрытия
+  содержательных Luna-пакетов и длительных локальных проверок.
 - [Сравнение пяти режимов Issue Grinder](tasks/issue-grinder-five-mode-benchmark.md)
   — история тяжёлого Teams-пилота, отложенный high-fidelity runbook и
   действующая сниженная политика короткого локального benchmark без Task
@@ -243,6 +247,13 @@ Architecture — за «как сейчас этого достигать». С�
 
 ## Reports
 
+- [Issue Grinder: ускоренный Solo на обычном tool-bound стенде](reports/2026-09-04-issue-grinder-solo-parallel-experiment.html)
+  — изолированный `solo_parallel_v2`: 31.72% экономии wall-clock относительно
+  медианы Solo при 8.53% меньшем расходе Sol, с точной таблицей прогонов,
+  профилем coordination tax и ограничениями измерения.
+- [Issue Grinder: подробный профиль Классического на удвоенной синтетике](reports/2026-09-04-issue-grinder-double-workload-classic-profile.html)
+  — request-level разбор Sol/Luna, функциональных фаз, review/rework,
+  ожидания и API-эквивалента в сопоставлении с новым прогоном `Соло`.
 - [Issue Grinder: актуальная таблица пяти режимов](reports/2026-09-02-issue-grinder-five-mode-comparison-table.html)
   — текущий срез без колонок Weekly Use и 5.4; строка Роя перенесена из уже
   завершённого Manager Loop эксперимента и явно не считается свежим замером

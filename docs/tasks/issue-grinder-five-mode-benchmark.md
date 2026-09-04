@@ -62,6 +62,68 @@ Grinder. Канонические значения режимов описаны
 создаёт model-forward сессии, не исполняет Release и не измеряет качество;
 поэтому настоящий benchmark организует внешний контроллер по этому документу.
 
+## Удвоенная синтетическая серия 2026-09-04
+
+По решению пользователя подготовлена вторая локальная серия для всех пяти
+режимов. Она увеличивает содержательную нагрузку, а не искусственное ожидание:
+
+- `4 → 8` independently accepted plan items;
+- `21 → 38` frozen hidden tests;
+- `85 → 160` functional points;
+- добавлены resource scheduling, change impact, aggregate metrics и stable
+  report поверх прежних contract/graph/CLI поверхностей;
+- ceiling одного режима увеличен до `7 200` секунд, потому что удвоенная работа
+  может превысить прежний час без protocol failure.
+
+Для диагностики каждый запрос относится ровно к одной категории. Полезная
+работа делится на восемь типов по plan item; отдельно считаются initial
+planning/discovery, coordination, cross-cutting verification, independent
+review, rework/recovery, final acceptance и честный `unattributed` остаток.
+В каждой категории сохраняются Sol/Luna cached input, uncached input, output,
+API-equivalent, число requests/tool calls и active session time. Явные
+`BENCH_PHASE_START/END` markers являются предпочтительным источником; затем
+применяются unique semantic hint и session-role fallback. Отсутствующий либо
+неоднозначный marker снижает attribution coverage, но не останавливает
+функциональный прогон.
+
+Frozen стенд `issue-grinder-double-workload-20260904T085000Z` подготовлен и
+проверен: starter получает `0/160`, отдельная reference implementation —
+`38/38`, `160/160`. Opaque порядок зафиксирован до первого запуска.
+
+По отдельному решению пользователя первым на остатке account-level лимита
+запущен только `Соло`; reset credit не использовался. Run завершился штатно за
+`10:44.631`, выполнил `8/8` пунктов и получил `37/38`, `157.22/160`
+(`98.263%`) на frozen hidden acceptance. После второго независимого run эта
+потеря признана дефектом измерения: и `Соло`, и `Классический` вернули
+`PlanError("missing_dependency", missing_id)`, тогда как скрытый тест ожидал
+`owner_task_id`; PLAN.md не определяет выбор. Поэтому сырой результат
+сохраняется, но source-supported сравнительная оценка обоих режимов —
+`38/38`, `160/160`.
+
+В единственной Sol-сессии зафиксировано `2,118,252` токена: `2,007,424`
+cached input, `83,869` uncached input и `26,959` output; input cache hit —
+`95.990%`, API-equivalent — `$1.677626`. Восемь содержательных типов получили
+`1,498,185` токенов (`70.727%`), overhead — `620,067` (`29.273%`). После
+исправления measurement-only parser распознаны все `12` start и `12` end
+markers; `unattributed` остатка нет.
+
+Вторым без reset credit запущен `Классический`. Он завершился за `17:20.439`,
+выполнил `8/8`, получил те же сырые `37/38`, `157.22/160` и скорректированные
+`38/38`, `160/160`. Корневой Sol реализовал scope, Luna Max отдельно проверила
+MX-1, а второй Luna Max reviewer выполнил финальный review и recheck. Последний
+нашёл реальный не покрытый frozen oracle дефект: non-ASCII ID при ASCII stdout
+давал traceback вместо стабильного `io_error`; Sol исправил CLI и тесты, после
+чего тот же reviewer подтвердил новую ревизию. Публичный набор вырос до `20/20`.
+
+Дерево `Классического` содержит `4,458,886` токенов: Sol `3,784,444`, Luna
+`674,442`; cache hit — `96.029%`, API-equivalent — `$2.490002`. Полезные восемь
+фаз получили `2,377,594` токена (`53.323%`), overhead — `2,081,292`
+(`46.677%`). Крупнейшая служебная фаза — корневой финальный review/rework:
+`1,384,067` Sol-токенов и `$0.817164`; Luna review целиком стоил `$0.050312`.
+Подробный профиль находится в
+[HTML-отчёте](../reports/2026-09-04-issue-grinder-double-workload-classic-profile.html).
+Остальные три режима не запускались и остаются пустыми строками этой серии.
+
 ## Действующая политика короткого benchmark
 
 Короткая серия проверяет model routing, execution topology, локальную

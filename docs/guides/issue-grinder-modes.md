@@ -1,194 +1,106 @@
 # Режимы Issue Grinder
 
 Issue Grinder поддерживает пять режимов. Они меняют распределение работы между
-моделями, допустимую избыточность и способ финальной проверки, но не меняют
-scope, полномочия, Task Manager lifecycle, запрет Production и требования к
-доказательствам.
+профилями и форму проверки, но не меняют scope, полномочия, Task Manager
+lifecycle, запрет Production и требования к доказательствам.
 
-Во всех режимах topology относится только к агентам, которым Issue Grinder
-передаёт содержательную delivery-работу. Внешний controller, Strategic
-Explainer и другие ограниченные service/provider agents в неё не входят, пока
-не анализируют, не реализуют и не проверяют сам scope.
-
-Во всех режимах, кроме `Соло`, каждый exact candidate получает независимую
-проверку, даже если scope мал или прост. Вложенные авторы и reviewers остаются у
-одного owner-а только когда child действительно умеет создавать agents. Иначе
-`Баланс` использует ограниченные прямые стадии, а `Рой` — постоянные direct
-manager/implementer sessions с одной активной фазой; состояние ожидается
-событийно и не опрашивается по кругу.
-
-Эта страница помогает выбрать режим. Действующий пользовательский контракт
-находится в [Requirements](../skills/issue-grinder/requirements.md), инженерный
-способ исполнения — в
-[Architecture](../skills/issue-grinder/architecture.md), а подробное rationale —
-в [спецификации режимов](../specs/issue-grinder-execution-modes.md).
+Действующий пользовательский контракт находится в
+[Requirements](../skills/issue-grinder/requirements.md), способ исполнения — в
+[Architecture](../skills/issue-grinder/architecture.md).
 
 ## Короткое сравнение
 
 | Режим | Кто выполняет работу | Проверка | Когда заканчивается |
 |---|---|---|---|
-| `Соло` | Текущая основная модель последовательно выполняет всю delivery-работу без рабочих субагентов Issue Grinder | Self-review текущей модели плюс объективные checks | Только terminal result или настоящий blocker |
-| `Классический` | Sol/controller делает почти всё; Luna получает только тривиальные пакеты | Независимый Luna-review exact candidate и итоговая приёмка controller-а | Только terminal result или настоящий blocker |
-| `Баланс` | Luna ведёт полный routine loop пакетов; Sol/controller оставляет material decisions и integration | Независимая Luna-проверка плюс сильный final review exact candidate | Только terminal result или настоящий blocker |
-| `Рой` | Постоянный Luna manager ведёт постоянного Luna implementer-а по крупным последовательным фазам одного candidate | После manager `complete` один Luna reviewer без delegation проверяет candidate целиком, затем Sol/controller проводит final gate | Только terminal result или настоящий blocker |
-| `Экономичный` | Luna выполняет всю содержательную работу; non-Luna root допустим только как transport/authority оболочка | Независимый Luna-review обязателен для terminal result; незавершённый review сохраняется как deferred gate | Terminal result либо честный resumable checkpoint |
+| `Соло` | Текущая основная модель последовательно выполняет всю работу без execution-субагентов | Self-review плюс объективные checks | Terminal result или настоящий blocker |
+| `Классический` | Основная модель делает почти всё; Luna получает только strict-simple packets | Независимый Luna-review и итоговая приёмка основной моделью | Terminal result или настоящий blocker |
+| `Баланс` | Основная модель планирует scope и делает критическую часть; до трёх Luna High параллельно выполняют независимые packets | Общие tool gates и итоговая приёмка основной моделью | Terminal result или настоящий blocker |
+| `Менеджер` | Постоянный Luna manager ведёт постоянного Luna implementer-а по крупным последовательным фазам | После `complete` один Luna reviewer проверяет candidate, затем основная модель проводит final gate | Terminal result или настоящий blocker |
+| `Экономичный` | Luna выполняет содержательную работу; non-Luna root остаётся transport/authority оболочкой | Independent Luna review нужен для terminal result | Terminal result либо resumable checkpoint |
 
 ## Как работает режим по умолчанию
 
-`По умолчанию` — не шестой режим, а правило выбора в начале нового прогона:
-
-- если top-level модель относится к семейству `gpt-5.6-luna`, выбирается
-  `Экономичный` при любом reasoning effort;
-- для любой другой top-level модели выбирается `Классический`.
-
-Явно названный пользователем режим всегда сильнее этого правила. Выбор делается
-один раз и сохраняется внутри непрерывного run через turns, compaction,
-interruption и смену основной модели. Автоматически режим не переключается.
-
-Количество issue не влияет на выбор. В частности, одно issue само по себе не
-включает `Соло`, а большой Release не мешает выбрать `Соло` явно.
+`По умолчанию` — не шестой режим и всегда означает `Соло`. `Классический`,
+`Баланс`, `Менеджер` и `Экономичный` включаются только явной просьбой.
+Модель, effort, размер scope, число issue, capacity и quota это правило не
+меняют. Внутри непрерывного run выбранный mode сохраняется до явного безопасного
+переключения.
 
 ## `Соло`
 
-Выбирайте `Соло`, когда принципиальны один исполнитель Issue Grinder и
-исполнение именно текущей моделью. Она сама анализирует весь scope, затем
-последовательно берёт по одному dependency-ready issue или пакету, реализует,
-интегрирует, проверяет и проводит self-review.
-
-`Соло` не передаёт эту работу supervisor, worker, scout, critic, verifier или
-альтернативным candidates. Strategic Explainer может быть отдельным
-provider-agent для публикационного текста: он не считается вторым исполнителем,
-пока не получает delivery scope. Для scope с несколькими issue всё равно может
-понадобиться Goal: режим меняет рабочую topology, но не общие правила run.
+Текущая основная модель сама анализирует весь scope, последовательно реализует
+по одному dependency-ready issue или packet, интегрирует, проверяет и проводит
+self-review. Issue Grinder не создаёт worker, scout, critic, verifier или
+отдельного reviewer-а. Service/provider agent не считается исполнителем режима,
+пока получает только свой ограниченный semantic request.
 
 ## `Классический`
 
-`Классический` — обычный выбор для уверенного терминального результата.
-Controller/reviewer изучает весь live scope, принимает существенные продуктовые,
-архитектурные, миграционные, security и другие плохо проверяемые решения.
-Он же остаётся основным исполнителем и делает почти всю работу сам. Luna
-получает только действительно тривиальные, самодостаточные пакеты с ясным oracle
-и низким риском.
-
-После fan-in один direct Luna review owner независимо проверяет точную
-интегрированную версию, включая простой scope. Controller принимает exact
-candidate по проверяемому finding ledger. После material rework продолжается та
-же review session. Конкурирующие полные реализации по умолчанию не создаются.
+Основная модель изучает весь live scope, принимает продуктовые, архитектурные,
+миграционные, security и другие плохо проверяемые решения и делает почти всю
+реализацию сама. Luna получает только действительно тривиальные,
+самодостаточные, изолированные и объективно проверяемые packets. Exact
+интегрированный candidate получает independent Luna review, после чего основная
+модель проводит final acceptance.
 
 ## `Баланс`
 
-`Баланс` подходит, когда нужно сохранить автономность и сильный final gate
-`Классического`, но существенно сократить расход проверяющего профиля.
-Controller/reviewer одним целостным проходом задаёт стратегию, acceptance, risk
-map и package boundaries. После этого Luna ведёт полный routine loop лёгких и
-средних ограниченных пакетов: implementation, research, tests, independent
-critique и rework. Дорогой профиль не управляет каждым шагом и не перечитывает
-сырой transcript всех дешёвых waves.
+`Баланс` — ускоренный Solo-подобный режим для сложной задачи. Основная модель
+одним проходом задаёт архитектуру, dependency graph, acceptance, write surfaces
+и integration boundaries. Затем она выделяет от двух до трёх одновременно
+готовых независимых packets и одним окном запускает для них Luna High workers.
 
-Обычная форма — Luna execution owner, который возвращает один candidate, и
-независимый Luna verifier. Verifier параллельно готовит bounded review plan, но
-применяет его только к завершённому exact candidate. При доказанной nested
-delegation роли могут находиться внутри одной owner-wave; без неё это прямые
-одно-ownerные волны, а не checkpoint. Для каждого существенного finding
-требуется одно из трёх: исправление, опровержение evidence или явная передача на
-решение. Несколько ответов «всё хорошо» не перевешивают один воспроизводимый
-дефект.
+Каждый packet имеет self-contained inputs, отдельную write surface, стабильный
+interface, изолированный candidate и локальный oracle. Workers не создают
+descendants, не становятся manager/reviewer и не пишут в integration target.
+Если подходящей ширины нет, основная модель продолжает работу последовательно
+без искусственного дробления.
 
-Дополнительные candidates создаются адаптивно: только при реальной развилке,
-слабом oracle, провале прежнего подхода или высокой ценности отдельной попытки.
-Множество одинаковых Luna prompts не считается независимой проверкой.
+Пока Luna работает, основная модель выполняет собственный critical/integration
+packet, готовит общий test harness или исследует cross-cutting risk. После
+одного collective event-driven wait она механически объединяет handoffs,
+проверяет candidate identity и ownership, а затем одним parallel tool batch
+запускает долгие общие checks. Финальный exact-diff review, исправления и
+acceptance остаются основной модели.
 
-Если сложное решение можно отделить от исполнения, controller принимает
-решение, а worker реализует уже заданный contract. После material rework exact
-candidate снова проходит final review.
+Отдельный independent reviewer не является штатной ролью `Баланса`. Он
+добавляется только по явному требованию пользователя, project policy или exact
+scope. Одновременно active не больше одной Luna wave и трёх Luna workers.
 
-До первой source mutation или targeted test должен наблюдаемо стартовать Luna
-Max child с явно заданными model/effort. Встроенные platform-роли
-`critic`/`reviewer` здесь не используются, потому что они обходят выбранный
-profile; semantic critics запускаются на Luna через обычный agent type.
+## `Менеджер`
 
-Если Luna встречает существенную неопределённость, конфликт contract/context,
-слабый oracle или проблему за границами пакета, она сохраняет изменения,
-проверки, findings и причину остановки и возвращает Sol/controller-у один
-compact evidence packet и узкий вопрос. Sol принимает неделимое material
-decision, уточняет contract и возвращает отделимую implementation в новый
-Luna-пакет; Luna не должна бесконечно повторять ту же попытку.
+Основная модель один раз создаёт control brief. Постоянный Luna manager без
+source/tool access ведёт постоянного Luna implementer-а по небольшому числу
+крупных последовательных фаз одного exact candidate. Coordinator только
+механически пересылает phase/evidence packets и сохраняет Goal, Task Manager,
+fan-in и external effects.
 
-Run валиден именно как `Баланс`, только когда routing receipts и наблюдаемая
-telemetry показывают Luna-owned ordinary work. Успешный функциональный результат
-не скрывает основной Sol-конвейер или routing failure.
-
-## `Рой`
-
-`Рой` полезен для большой связанной задачи, где нужно заметно сократить
-пошаговую работу Sol, но сохранить сильный терминальный результат. Sol/controller
-одним проходом изучает весь scope и создаёт control brief: цель, требования,
-архитектурные границы, зависимости, риски и итоговую приёмку. Затем один
-постоянный Luna manager ведёт одного постоянного Luna implementer-а по крупным
-проверяемым фазам одного exact candidate.
-
-Manager не читает repository, не использует рабочие tools и не реализует код.
-Он получает только control brief и compact evidence implementer-а, сохраняет
-общий plan state и выдаёт одну следующую dependency-ready фазу либо targeted
-rework. Coordinator может механически пересылать эти пакеты между двумя
-сессиями; он не принимает за manager-а решения и не выполняет routine work.
-
-Implementer сохраняет одну session, worktree и candidate на всём пути. Он
-реализует текущую фазу, запускает её checks и возвращает короткий evidence
-handoff. Новая фаза не начинается до принятия предыдущей. Для Teams-подобного
-scope используются несколько крупных dependency/risk sections, а не отдельный
-manager turn на каждый файл, Task или тест.
-
-После manager `complete` один независимый Luna reviewer проверяет exact final
-candidate целиком. Даже на большом scope он проходит risk sections
-последовательно сам и не создаёт собственный рой reviewer-ов. Material defect
-возвращается прежнему implementer-у, а исправленный candidate — прежнему
-reviewer-у. Затем Sol/controller проводит один final gate.
-
-Best-of-N, параллельные реализации, массовые critics и reducer больше не входят
-в штатную схему `Роя`. Один materially иной восстановительный путь допустим
-только после доказанного тупика, с сохранением отрицательного evidence.
+После manager `complete` один independent Luna reviewer последовательно
+проверяет candidate. Material defect возвращается прежнему implementer-у, а
+changed candidate — прежнему reviewer-у. Best-of-N, параллельные реализации и
+массовые critics не входят в штатную topology.
 
 ## `Экономичный`
 
-`Экономичный` нужен, когда проверяющий профиль дефицитен. Luna Max анализирует,
-исследует, реализует, тестирует и критикует, но сводит работу к одному exact
-candidate и сохраняет raw checks, known defects, unknowns и deferred gates.
-Если root запущен на другой модели, он только ведёт Goal/Task Manager/fan-in,
-вызывает одного Luna supervisor, а тот управляет своими внутренними workers;
-для запуска вообще без Sol top-level тоже выбирается Luna Max.
-Недоступность Luna приводит к checkpoint, а не к скрытой Sol/GPT-5.4
-implementation.
+Luna Max анализирует, реализует, тестирует и критикует, сводя работу к одному
+exact candidate. Non-Luna root только хранит Goal/Task Manager authority и
+механически выполняет fan-in/publication. Independent Luna review обязателен для
+terminal result.
 
-Перед terminal acceptance exact candidate обязательно проверяет независимый
-Luna reviewer. Если проверка не завершилась, результат остаётся resumable
-checkpoint с deferred gate, а не объявляется терминальным.
-
-Это единственный режим, где текущая попытка может честно завершиться без
-terminal результата. Такой выход оставляет `In Progress` или действительно
-готовый к review `In Review`, активный Goal и точную точку продолжения. Он
-называется resumable checkpoint, а не `Done`, `complete` или `blocked`.
+Это единственный режим, где попытка может честно закончиться resumable
+checkpoint: с exact candidate, raw checks, known defects, deferred gates,
+правдивым active status и точкой продолжения.
 
 ## Как выбрать
 
-- Нужна строго текущая модель и никаких рабочих субагентов Issue Grinder —
-  `Соло`.
-- Нужен самый прямой уверенный процесс с одной основной реализацией —
-  `Классический`.
-- Нужно перенести bulk work на экономичные profiles, сохранив сильный review —
-  `Баланс`.
-- Большую связанную задачу нужно провести дешёвым manager/implementer loop по
-  крупным фазам и затем независимо проверить целиком — `Рой`.
-- Квота проверяющего профиля почти исчерпана и допустим возобновляемый
-  checkpoint — `Экономичный`.
-
-Режим можно назвать свободной фразой: например, «работай в Соло», «одним
-агентом», «запусти Рой» или «используй режим по умолчанию». В незавершённом run
-режим меняется только явной командой пользователя и только после безопасной
-остановки текущей writer wave; сохранённая работа не создаётся заново.
+- Нужна предсказуемость и один текущий исполнитель — `Соло`.
+- Нужна максимальная обычная уверенность — `Классический`.
+- Нужно ускорить сложную задачу ограниченной параллельной помощью — `Баланс`.
+- Большую связанную задачу нужно провести экономичным manager loop — `Менеджер`.
+- Нужен максимум прогресса за минимум дефицитной квоты — `Экономичный`.
 
 ## Справка без запуска работы
 
-Вопросы вроде «какие есть режимы?», «чем Баланс отличается от Роя?» или «что
-выбирается по умолчанию?» являются чистой справкой. Issue Grinder отвечает на
-них без Task Manager, Goal, title mutation, delivery loop и субагентов.
+Вопросы о режимах, default и различиях не запускают delivery: Issue Grinder не
+обращается к Task Manager, не создаёт Goal, не меняет title и не вызывает
+subagents.
