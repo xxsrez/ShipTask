@@ -618,6 +618,13 @@ packet-е; не ищет manager/reviewer и не запускает long-runnin
 владельца.
 
 Main profile во время wave выполняет собственную независимую полезную работу.
+Подготовка wave должна оставлять время для этого перекрытия. После определения
+границ и interfaces не задерживай готовую волну подробной разработкой чужих
+алгоритмов. Inventory исходного состояния, создание изоляции и routing checks
+собираются в один независимый tool batch, где это допускает среда; неизвестные
+результаты не подменяются предположениями. Используй уже проверенный локальный
+helper, если он сохраняет ownership и identity, вместо повторного сочинения
+копирования и сверок. Это общий принцип, не обязательный инструмент стенда.
 По умолчанию он выбирает downstream integration, CLI, общую test infrastructure,
 risk analysis либо подготовку fan-in, которые используют уже стабильные
 interfaces и не задерживают dispatch upstream writers. Он не забирает себе
@@ -638,8 +645,13 @@ surfaces. Любая другая запись в integration candidate оста
 Это узкое исключение Balance не разрешает Luna писать в integration checkout и
 не применяется к пользовательскому dirty checkout или пересекающимся surfaces.
 
-Fan-in механический: main profile проверяет candidate identity и ownership,
-переносит task-owned bytes/commits в integration candidate, разрешает только
+Fan-in механический: main profile проверяет candidate identity и ownership.
+Один batch собирает identity, changed surfaces и diff всех завершённых packets;
+основной профиль изучает этот diff перед принятием. После механического переноса
+одна сверка интегрированных bytes замыкает эту проверку. Не читай те же файлы
+отдельно целиком до и после копирования, если diff и identity уже дают нужные
+факты; новое чтение оправдано конфликтом, дефектом или неизвестным контекстом.
+Затем переносит task-owned bytes/commits в integration candidate, разрешает только
 реальные конфликты и не пересказывает полный patch в model context. Неполный
 handoff сохраняется, а недостающую часть main profile завершает сам без цепочки
 replacement agents. После fan-in и проверки интегрированной версии новая
