@@ -27,7 +27,7 @@ class IssueGrinderModeLoadingSmokeTest(unittest.TestCase):
         root = "/cache/skills/issue-grinder"
         output = "\n".join(
             (
-                event("thread.started", thread_id="thread-balance"),
+                event("thread.started", thread_id="thread-classic"),
                 event(
                     "item.completed",
                     item={
@@ -46,7 +46,7 @@ class IssueGrinderModeLoadingSmokeTest(unittest.TestCase):
                     "item.completed",
                     item={
                         "type": "command_execution",
-                        "command": f"sed -n '1,260p' {root}/references/modes/balance.md",
+                        "command": f"sed -n '1,260p' {root}/references/modes/classic.md",
                     },
                 ),
                 event(
@@ -55,8 +55,8 @@ class IssueGrinderModeLoadingSmokeTest(unittest.TestCase):
                         "type": "agent_message",
                         "text": json.dumps(
                             {
-                                "canonical_mode": "balance",
-                                "loaded_mode_file": "references/modes/balance.md",
+                                "canonical_mode": "classic",
+                                "loaded_mode_file": "references/modes/classic.md",
                                 "other_mode_files_loaded": [],
                             }
                         ),
@@ -66,10 +66,10 @@ class IssueGrinderModeLoadingSmokeTest(unittest.TestCase):
             )
         )
 
-        observation = SMOKE.observe_case("balance", output=output, exit_code=0)
+        observation = SMOKE.observe_case("classic", output=output, exit_code=0)
 
         self.assertTrue(observation.passed)
-        self.assertEqual(observation.loaded_mode_files, ("balance.md",))
+        self.assertEqual(observation.loaded_mode_files, ("classic.md",))
         self.assertEqual(observation.defects, ())
 
     def test_reading_an_unselected_mode_fails_closed(self) -> None:
@@ -95,22 +95,22 @@ class IssueGrinderModeLoadingSmokeTest(unittest.TestCase):
                     item={
                         "type": "command_execution",
                         "command": (
-                            f"cat {root}/references/modes/balance.md "
-                            f"{root}/references/modes/swarm.md"
+                            f"cat {root}/references/modes/classic.md "
+                            f"{root}/references/modes/economical.md"
                         ),
                     },
                 ),
             )
         )
 
-        observation = SMOKE.observe_case("balance", output=output, exit_code=0)
+        observation = SMOKE.observe_case("classic", output=output, exit_code=0)
 
         self.assertFalse(observation.passed)
         self.assertEqual(
             observation.loaded_mode_files,
-            ("balance.md", "swarm.md"),
+            ("classic.md", "economical.md"),
         )
-        self.assertIn("mode_files_loaded:balance.md,swarm.md", observation.defects)
+        self.assertIn("mode_files_loaded:classic.md,economical.md", observation.defects)
 
     def test_boolean_false_is_an_accepted_empty_self_report(self) -> None:
         root = "/cache/skills/issue-grinder"
@@ -179,9 +179,9 @@ class IssueGrinderModeLoadingSmokeTest(unittest.TestCase):
         prompt = SMOKE.build_prompt("economical")
 
         self.assertIn("references/modes/economical.md", prompt)
-        self.assertIn("остальные четыре mode-файла", prompt)
+        self.assertIn("остальные два mode-файла", prompt)
         self.assertIn("не перечисляй каталог", prompt)
-        for filename in ("solo.md", "classic.md", "balance.md", "swarm.md"):
+        for filename in ("solo.md", "classic.md"):
             self.assertNotIn(filename, prompt)
 
 

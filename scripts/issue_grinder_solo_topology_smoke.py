@@ -30,7 +30,7 @@ EXPECTED_RESULT = {
 }
 MODE_FILE_RE = re.compile(
     r"(?:^|[\s\"'])(?:[^\s\"']*/)?references/modes/"
-    r"(solo|classic|balance|swarm|economical)\.md"
+    r"(solo|classic|economical)\.md"
 )
 BROAD_MODE_DIR_RE = re.compile(
     r"(?:^|[\s\"'])(?:[^\s\"']*/)?references/modes"

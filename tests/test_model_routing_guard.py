@@ -17,8 +17,18 @@ validate_route = MODULE.validate_route
 
 
 class ModelRoutingGuardTest(unittest.TestCase):
+    def test_retired_routes_are_rejected_even_with_profile_override(self) -> None:
+        for mode in ("balance", "swarm", "manager", "roy", "roi"):
+            for override in (False, True):
+                receipt = validate_route(
+                    packet_id="retired-route", mode=mode, semantic_role="implementation",
+                    agent_type="worker", model="gpt-5.6-luna", effort="max",
+                    fork_turns="none", user_profile_override=override)
+                self.assertFalse(receipt.allowed)
+                self.assertIn("unknown_mode", receipt.defects)
+
     def luna_route(self, mode: str, role: str = "implementation"):
-        effort = "high" if mode == "balance" else "max"
+        effort = "max"
         return validate_route(
             packet_id=f"packet-{mode}-{role}",
             mode=mode,
@@ -30,15 +40,15 @@ class ModelRoutingGuardTest(unittest.TestCase):
         )
 
     def test_luna_modes_admit_their_explicit_worker_profiles(self) -> None:
-        for mode in ("balance", "swarm", "economical"):
+        for mode in ("economical",):
             with self.subTest(mode=mode):
                 receipt = self.luna_route(mode)
                 self.assertTrue(receipt.allowed, receipt.defects)
                 self.assertTrue(receipt.luna_required)
                 self.assertEqual(receipt.telemetry_status, "telemetry_pending")
 
-    def test_substantive_inherited_sol_is_rejected_in_all_three_modes(self) -> None:
-        for mode in ("balance", "swarm", "economical"):
+    def test_substantive_inherited_sol_is_rejected_in_economical_mode(self) -> None:
+        for mode in ("economical",):
             with self.subTest(mode=mode):
                 receipt = validate_route(
                     packet_id=f"packet-{mode}-research",
@@ -51,11 +61,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
                 )
                 self.assertFalse(receipt.allowed)
                 self.assertIn("luna_model_required", receipt.defects)
-                expected = (
-                    "luna_high_effort_required"
-                    if mode == "balance"
-                    else "luna_max_effort_required"
-                )
+                expected = "luna_max_effort_required"
                 self.assertIn(expected, receipt.defects)
                 self.assertIn("unbounded_or_missing_fork_turns", receipt.defects)
 
@@ -63,8 +69,8 @@ class ModelRoutingGuardTest(unittest.TestCase):
         for agent_type in ("default", "worker", "explorer", "custom-quality"):
             with self.subTest(agent_type=agent_type):
                 receipt = validate_route(
-                    packet_id=f"packet-swarm-{agent_type}",
-                    mode="swarm",
+                    packet_id=f"packet-economical-{agent_type}",
+                    mode="economical",
                     semantic_role="quality_check",
                     agent_type=agent_type,
                     model="gpt-5.6-luna",
@@ -80,10 +86,10 @@ class ModelRoutingGuardTest(unittest.TestCase):
         self.assertNotIn("FORCED_PROFILE_AGENT_TYPES", guard)
         self.assertNotIn("platform_agent_type_bypasses_mode_profile", guard)
 
-    def test_balance_does_not_admit_a_sol_execution_child(self) -> None:
+    def test_economical_does_not_admit_a_sol_execution_child(self) -> None:
         receipt = validate_route(
-            packet_id="packet-balance-material-judgment",
-            mode="balance",
+            packet_id="packet-economical-material-judgment",
+            mode="economical",
             semantic_role="material_judgment",
             agent_type="default",
             model="gpt-5.6-sol",
@@ -112,15 +118,15 @@ class ModelRoutingGuardTest(unittest.TestCase):
 
     def test_observed_profile_mismatch_fails_closed(self) -> None:
         receipt = validate_route(
-            packet_id="packet-balance-test-author",
-            mode="balance",
+            packet_id="packet-economical-test-author",
+            mode="economical",
             semantic_role="test_author",
             agent_type="default",
             model="gpt-5.6-luna",
             effort="high",
             fork_turns="1",
             actual_model="gpt-5.4",
-            actual_effort="max",
+            actual_effort="high",
         )
         self.assertFalse(receipt.allowed)
         self.assertIn("actual_luna_model_mismatch", receipt.defects)
@@ -142,32 +148,12 @@ class ModelRoutingGuardTest(unittest.TestCase):
         self.assertTrue(receipt.allowed, receipt.defects)
         self.assertFalse(receipt.luna_required)
 
-    def test_balance_worker_roles_require_luna_high(self) -> None:
-        for role in (
-            "research",
-            "implementation",
-            "test_author",
-            "test_runner",
-            "rework",
-        ):
-            with self.subTest(role=role):
-                receipt = self.luna_route("balance", role)
-                self.assertTrue(receipt.allowed, receipt.defects)
-                self.assertTrue(receipt.luna_required)
-
-    def test_manager_implementer_and_reviewer_require_luna_max(self) -> None:
-        for role in ("manager", "implementer", "independent_reviewer", "rework"):
-            with self.subTest(role=role):
-                receipt = self.luna_route("swarm", role)
-                self.assertTrue(receipt.allowed, receipt.defects)
-                self.assertTrue(receipt.luna_required)
-
     def test_receipt_is_bound_to_packet_and_exact_dispatch_args(self) -> None:
-        first = self.luna_route("balance", "implementation")
-        same = self.luna_route("balance", "implementation")
+        first = self.luna_route("economical", "implementation")
+        same = self.luna_route("economical", "implementation")
         other_packet = validate_route(
-            packet_id="packet-balance-implementation-other",
-            mode="balance",
+            packet_id="packet-economical-implementation-other",
+            mode="economical",
             semantic_role="implementation",
             agent_type="worker",
             model="gpt-5.6-luna",
@@ -176,7 +162,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
         )
         other_role = validate_route(
             packet_id=first.packet_id,
-            mode="balance",
+            mode="economical",
             semantic_role="verifier",
             agent_type="worker",
             model="gpt-5.6-luna",
@@ -195,7 +181,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
     def test_blank_packet_identity_is_rejected(self) -> None:
         receipt = validate_route(
             packet_id=" ",
-            mode="balance",
+            mode="economical",
             semantic_role="implementation",
             agent_type="worker",
             model="gpt-5.6-luna",

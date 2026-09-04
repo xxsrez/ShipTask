@@ -17,10 +17,9 @@
 - Current requirements являются конституцией: фиксируйте what, why, evidence и
   authority boundary; не задавайте agent topology, форму context, число
   attempts/options или внутренний reasoning без явного пользовательского
-  требования. ShipTask automatic default, natural-language user topology rules,
-  отдельный worktree каждого implementation writer, Luna Max routing,
-  current-profile escalation и Balance Luna-owned packet loop с узким возвратом
-  отделимого исполнения являются такими явными topology/profile-требованиями.
+  требования. Автовыбор трёх текущих режимов Issue Grinder, пользовательские
+  правила делегации, изоляция writers и Luna Max routing берутся из локальных
+  Requirements и Architecture этой entity, не из исторических стратегий.
 - Оставляйте агенту свободу выбора инструментов, реализации и достаточной
   проверки, если safety/authority не требуют жёсткого порядка.
 - Жёсткий порядок нужен там, где effects необратимо расходятся: для

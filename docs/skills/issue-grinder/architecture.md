@@ -51,8 +51,6 @@ plugins/issue-grinder/
     │   │   ├── modes/
     │   │   │   ├── solo.md
     │   │   │   ├── classic.md
-    │   │   │   ├── balance.md
-    │   │   │   ├── swarm.md
     │   │   │   └── economical.md
     │   │   ├── multi-agent-execution.md
     │   │   └── strategic-explainer.md
@@ -103,7 +101,7 @@ plugin может содержать только skills, а MCP server, UI и l
 - `execution-modes.md` — после однократного выбора режима и перед
   декомпозицией: общий mode resolver, profile normalization, invariants, switch
   barrier и review packet;
-- `modes/{solo,classic,balance,swarm,economical}.md` — ровно один файл после
+- `modes/{solo,classic,economical}.md` — ровно один файл после
   сохранения canonical mode; в нём целиком находятся mode-specific topology,
   role/profile routing, fallback, review и stop promise;
 - `autonomy-and-environments.md` — только для явно вызванного автономного run и
@@ -162,8 +160,8 @@ Goal, lifecycle, verification, reflection и multi-agent dispatch зависят
 
 Наблюдаемые дефекты реальных прогонов доказали две подходящие для механизации
 операции. В первых delivery coordinator прочитал hard invariant worktree, но
-несколько writers всё равно начали запись в общий checkout. Позднее `Баланс`,
-`Менеджер` и `Экономичный` называли Luna предпочтительной, однако substantive agents
+несколько writers всё равно начали запись в общий checkout. В других
+многоагентных прогонах Luna называлась предпочтительной, однако substantive agents
 получали профиль, несовместимый с выбранным режимом. Поэтому runtime содержит
 два узких guard-а.
 
@@ -172,8 +170,7 @@ Goal, lifecycle, verification, reflection и multi-agent dispatch зависят
 - отделяет semantic role от platform `agent_type`;
 - связывает unique packet identity, semantic role, explicit model, effort и
   bounded `fork_turns` в один стабильный dispatch fingerprint;
-- в `Балансе` fail-closed требует Luna High для worker lane, а в
-  `Менеджере` и `Экономичном` — Luna Max для их economical lanes;
+- в `Экономичном` fail-closed требует Luna Max для содержательных ролей;
 - не выводит model/effort из имени либо типа агента;
 - сравнивает requested и observed child profile и выдаёт стабильный receipt
   `issue-grinder/model-routing/v2`.
@@ -333,7 +330,7 @@ coordinator сначала кратко отвечает или называет
 - `explicit invocation` — пользователь назвал `$issue-grinder` в prompt,
   запустившем именно этот run;
 - `run mode` — является ли уже начатый run явно вызванным и поэтому автономным.
-- `execution mode` — один из `Соло`, `Классический`, `Баланс`, `Менеджер` или
+- `execution mode` — один из `Соло`, `Классический` или
   `Экономичный`, его origin `explicit|automatic` и применённая нормализация
   профилей.
 
@@ -471,26 +468,29 @@ eligibility действительно возможна.
 record, а затем полностью читает ровно один файл из
 `issue-grinder/references/modes/`. Во время обычных последующих итераций
 canonical mode берётся из run checkpoint и не проектируется заново; повторно
-загружается тот же выбранный mode-файл, а не все пять спецификаций.
+загружается тот же выбранный mode-файл, а не все три спецификации.
 
 ### 4.1 Однократное разрешение режима
 
-Resolver применяет приоритет `explicit user mode → Solo default`:
+Явный выбор поддерживаемого режима важнее автовыбора. Для нового run после
+разрешения live scope и до декомпозиции посчитай уникальные выбранные задачи:
+не считай сгенерированные рабочие пакеты и не удваивай parent/child containers.
+Сохрани количество и исходный профиль в mode record. При числе задач больше
+одной и main model не `gpt-5.6-luna` выбирай `classic`, иначе `solo`.
+Если инвентарь scope ещё неизвестен, сначала разреши его, не угадывай число.
+`economical` разрешён только явным выбором. Effort и квота не участвуют.
 
-1. Текущий prompt проверяется на явное намерение выбрать `Соло`,
-   `Классический`, `Баланс`, `Менеджер` или `Экономичный`. Для `Соло`
-   принимаются также однозначные формулировки `single`, `сингл`, «одним агентом»
-   и «без субагентов». Случайное слово из описания продукта не считается
-   выбором режима.
-2. Если явного выбора нет, выбирается `Соло` независимо от top-level model,
-   effort, размера scope, числа issue, capacity и quota.
-3. Фиксируются canonical mode, origin `explicit|automatic`, исходный main
-   profile и результат profile normalization.
+Для `Соло` сохраняются aliases `single`, `сингл`, «одним агентом» и
+«без субагентов». Случайное слово в описании продукта не является selector-ом.
+Удалённые `balance`, `swarm`, `manager`, `roy`, `roi`, «Баланс»,
+«Менеджер» и «Рой» при явном mode intent отклоняются с просьбой выбрать
+поддерживаемый режим; автоматическая подмена запрещена.
 
-`По умолчанию` означает `Соло`, а не шестой режим. При доказанном продолжении
-mode record восстанавливается до resolver-а: новый turn, compaction, смена
-модели или восстановленная квота не меняют выбранный режим. Другой режим
-включается только явной командой через switch barrier.
+При доказанном продолжении сначала восстанови сохранённый mode record.
+Уменьшение scope, новый turn, compaction, смена модели и квоты не меняют режим.
+Старый record удалённого режима требует сохранения работы и явного выбора
+пользователем нового режима через switch barrier, а не пересчёта default.
+Прочитай ровно один mode-файл выбранного поддерживаемого режима.
 
 ### 4.2 Нормализация профилей
 
@@ -498,13 +498,10 @@ mode record восстанавливается до resolver-а: новый turn
 execution profile всегда равен exact effective current top-level model и effort;
 никакой supervisor или worker для delivery-работы не создаётся.
 
-Для явно выбранного многоагентного режима:
+Для выбранного многоагентного режима:
 
 - точный пользовательский override конкретной роли применяется первым;
-- `Баланс` использует current main profile для planning, собственной работы,
-  integration и final acceptance, а его worker default — `gpt-5.6-luna` с
-  `reasoning_effort=high`;
-- `Классический`, `Менеджер` и `Экономичный` сохраняют прежний economical
+- `Классический` и `Экономичный` сохраняют прежний economical
   baseline `gpt-5.6-luna` с `reasoning_effort=max` для предусмотренных ими Luna
   ролей;
 - если main profile не сильнее требуемого economical profile, роли могут
@@ -512,7 +509,7 @@ execution profile всегда равен exact effective current top-level mode
 - неизвестное cross-family отношение не угадывается по имени, цене или одному
   benchmark run.
 
-Top-level model в UI не является скрытым выбором режима или override всех ролей.
+Top-level model участвует только в автовыборе нового run и не является override всех ролей.
 Root всегда сохраняет одно владение Goal, Task Manager mutations, integration,
 внешними effects и publication unit.
 
@@ -527,13 +524,9 @@ telemetry туда добавляется observed profile; иначе сохр�
 
 Default child profiles зависят от выбранного mode:
 
-- `Баланс`: только admitted independent implementation packets, Luna High;
 - `Классический`: только его узкие Luna Max packets и independent review;
-- `Менеджер`: постоянные Luna Max manager, implementer и reviewer;
 - `Экономичный`: Luna Max analysis, implementation и review.
 
-У `Баланса` нет штатных Luna manager, supervisor, critic, reviewer или reducer.
-Его main profile сам владеет архитектурой, интеграцией и final acceptance.
 Имя роли не обходит routing: обычная implementation, спрятанная под названием
 `review` или `material_judgment`, остаётся implementation.
 
@@ -543,8 +536,6 @@ Default child profiles зависят от выбранного mode:
 |---|---|---|
 | `solo` | `modes/solo.md` | `IG-MODE-11`, один current profile, terminal-only |
 | `classic` | `modes/classic.md` | `IG-MODE-03`, `IG-MA-14..17`, controller-led terminal result |
-| `balance` | `modes/balance.md` | `IG-MODE-04`, `IG-MODE-13..18`, ускоренный main-owned terminal result |
-| `swarm` | `modes/swarm.md` | `IG-MODE-05`, persistent Manager Loop; внутреннее имя сохранено для continuity |
 | `economical` | `modes/economical.md` | `IG-MODE-06`, части `IG-MODE-08..09`, resumable checkpoint |
 
 Общие resolver, profiles, authority и evidence invariants остаются в
@@ -575,7 +566,6 @@ Solo не исполняет этим способом несколько сод
 Admission учитывает постановку, context transfer, ожидание, интеграцию и review
 без отдельного расчётного отчёта. Classic может оставить simple packet основному
 профилю, если передача не окупается; independent review остаётся обязательным.
-Balance выбирает волну по времени до общего проверенного результата, не слотам.
 
 При Luna top-level Экономичный совмещает operational coordinator,
 последовательного автора и integration owner в текущей сессии. Отдельный writer
@@ -585,202 +575,17 @@ root нужен экономичный substantive owner; root сохраняе�
 boundary и не подменяет Luna работой Sol. Max, изоляция, review и checkpoint
 gate не меняются.
 
-### 4.5 Balance: ускоренный main-owned workflow
-
-`Баланс` берёт `Соло` за функциональную основу: main profile изучает весь scope,
-выбирает архитектуру и отвечает за терминальный результат. Отличие — ограниченная
-параллельная помощь Luna на независимых write surfaces и перекрытие долгих tool
-lanes. Цель — ускорить реальную тяжёлую задачу без отдельного manager/reviewer
-конвейера и без заметного повторения main-context.
-
-После startup recovery main profile одним проходом строит dependency graph,
-write-surface map, acceptance и integration boundaries. Packet допускается в
-параллельную wave, только если он dependency-ready, имеет отдельную поверхность
-записи, стабильный interface, self-contained вход, локальный oracle и не владеет
-общим внешним или необратимым effect. Наличие файлов, Tasks или свободных слотов
-само по себе admission не создаёт.
-
-Admission завершается до первой source mutation и до первого длительного
-packet-local tool gate. Если не менее двух packets прошли admission, один
-dispatch window обязателен: main profile не начинает один из них последовательно
-и не откладывает Luna до следующей frontier. В benefit assessment учитывается не
-только размер diff, но и устранимое последовательное время сборок, тестов,
-анализаторов и других tool-bound процессов. Малый diff с несколькими долгими
-независимыми gates может быть хорошим кандидатом для `Баланса`.
-
-В одной активной wave запускаются от двух до трёх Luna High workers. Все они
-получают packets одним dispatch window, отдельные admitted worktree/shadow roots
-и запрет на nested delegation. Packet содержит цель, exact base/root, owned и
-forbidden surfaces, необходимые source facts, архитектурные ограничения,
-ожидаемый результат, quick check и compact handoff. Child не перечитывает Issue
-Grinder policy, соседние modules или history, если они уже материализованы в
-packet-е; не ищет manager/reviewer и не запускает long-running process без
-владельца.
-
-Main profile во время wave выполняет собственную независимую полезную работу.
-Подготовка wave должна оставлять время для этого перекрытия. После определения
-границ и interfaces не задерживай готовую волну подробной разработкой чужих
-алгоритмов. Inventory исходного состояния, создание изоляции и routing checks
-собираются в один независимый tool batch, где это допускает среда; неизвестные
-результаты не подменяются предположениями. Используй уже проверенный локальный
-helper, если он сохраняет ownership и identity, вместо повторного сочинения
-копирования и сверок. Это общий принцип, не обязательный инструмент стенда.
-По умолчанию он выбирает downstream integration, CLI, общую test infrastructure,
-risk analysis либо подготовку fan-in, которые используют уже стабильные
-interfaces и не задерживают dispatch upstream writers. Он не забирает себе
-пригодный Luna packet, если это превращает дальнейшие writers в последовательную
-очередь, и не повторяет активный Luna packet. После собственной
-работы используется одно коллективное event-driven ожидание оставшихся owners;
-неизменное состояние не вызывает polling, status lists, nudges или
-промежуточную пересборку.
-
-Когда run уже находится в отдельном чистом task-owned checkout, а Luna writers
-получили независимые shadow roots exact base с непересекающимися owned surfaces,
-этот checkout является main-owned integration candidate. Main profile пишет
-свой отдельный downstream packet прямо в него: четвёртый `main` shadow,
-последующая обратная копия всего кандидата и повторная приёмка только из-за этой
-копии запрещены. До dispatch фиксируются exact base, исходное состояние checkout
-и main-owned surfaces; во время wave допустим только ожидаемый main diff на этих
-surfaces. Любая другая запись в integration candidate остаётся ownership defect.
-Это узкое исключение Balance не разрешает Luna писать в integration checkout и
-не применяется к пользовательскому dirty checkout или пересекающимся surfaces.
-
-Fan-in механический: main profile проверяет candidate identity и ownership.
-Один batch собирает identity, changed surfaces и diff всех завершённых packets;
-основной профиль изучает этот diff перед принятием. После механического переноса
-одна сверка интегрированных bytes замыкает эту проверку. Не читай те же файлы
-отдельно целиком до и после копирования, если diff и identity уже дают нужные
-факты; новое чтение оправдано конфликтом, дефектом или неизвестным контекстом.
-При переносе task-owned bytes/commits main profile разрешает только реальные
-конфликты и не пересказывает полный patch в model context. Неполный
-handoff сохраняется, а недостающую часть main profile завершает сам без цепочки
-replacement agents. После fan-in и проверки интегрированной версии новая
-dependency-ready frontier проходит тот же admission и может открыть следующую
-волну. Одновременно активна только одна волна; evidence относится к каждой
-волне отдельно, final acceptance — ко всем волнам. Неполный прежний packet
-завершает main, а не новый replacement worker.
-
-Package-local quick checks выполняют Luna workers. После fan-in main profile
-ровно одним parallel tool batch запускает независимые долгие сборки, тесты и
-анализаторы точной интегрированной версии. Затем он делает один exact-diff pass,
-проверяет requirements, межпакетные решения, known risks и результаты checks,
-исправляет найденное и принимает кандидат. Material rework повторяет только
-затронутые package/integration gates и один минимально необходимый общий
-acceptance; полный batch повторяется только при утрате применимости evidence:
-cross-cutting изменение, изменение среды/зависимостей или неизвестное влияние.
-Отдельный reviewer не является
-штатной ролью Balance; если его требует пользователь, project policy или exact
-scope, он добавляется как внешний обязательный gate, а не как свойство режима.
-
-Mode evidence фиксирует решение admission до первой записи, учёт tool-bound
-critical path, packet/profile receipts, dispatch и
-wait envelope, candidate identities, owned surfaces, fan-in identity,
-main-owned integration receipt, числом полных gate batches, integrated checks и
-final acceptance. Прогон с искусственным дроблением,
-пересекающимися writers, скрытым Luna manager/reviewer, несколькими active waves,
-последовательной source mutation текущей волны до обязательного dispatch,
-main shadow/copy-back, повторным полным gate batch без утраты применимости evidence,
-повтором Luna work основным профилем или без exact integrated acceptance не
-доказывает `Баланс`, даже если случайно получил рабочий результат.
-
-### 4.6 Manager Loop
-
-Внутренний идентификатор `swarm` сохраняется для совместимости mode record и
-continuation, но не является пользовательским именем. Runtime-проекция `Менеджера`
-— один последовательный Manager Loop с тремя постоянными Luna Max sessions и
-дорогим профилем только на границах.
-
-Проверяющий профиль один раз строит полный control brief: Strategic Outcome,
-Human Requirements, Agent Plan, exact scope/base/candidate, dependency map,
-risk map, acceptance/oracles, ограничения, external-effect gates и условие
-final review. Из него заранее получается конечный список крупных phase goals,
-но manager может уточнять следующий phase contract по уже полученному evidence.
-Control brief не требует отдельного manager turn на каждый мелкий checklist
-item.
-
-После startup recovery coordinator один раз создаёт и маршрутизирует:
-
-- постоянного Luna manager без repository paths, source access, shell и
-  implementation authority;
-- постоянного Luna implementer с одним admitted writer worktree либо одним
-  task-owned shadow tree и одним exact candidate на весь loop;
-- независимого Luna reviewer только после того, как manager примет все фазы.
-
-До цикла coordinator разрешает transport без model turn проверяющего профиля
-на каждый переход: наблюдаемый прямой messaging interface либо узкий
-механический relay платформы. Manager получает только messaging capability,
-не repository/shell/work tools. Relay сохраняет адресата, session/phase/message
-ids, подтверждение доставки и deadline; повторная доставка не создаёт новую
-фазу. Он не выбирает фазу, не оценивает качество и не принимает authority
-decisions: это транспорт, не автономный task orchestrator. При ошибке доставки
-сохрани handoff и reconcile delivery прежде retry. Если transport недоступен,
-зафиксируй capability gap: обычная пересылка через Sol не соответствует новому
-контракту и не разрешает молча сменить режим. Существенные эскалации и
-обязательные authority effects остаются у coordinator-а.
-
-Manager turn возвращает ровно одно из состояний:
-
-```text
-phase:<stable id> | goal | acceptance | material dependencies | evidence expected
-rework:<same phase id> | reproduced defect | exact acceptance delta
-complete | accepted phases | remaining unknowns | final-review packet
-escalate | one material question | evidence | blocked decision
-```
-
-Implementer turn применяет только текущий phase/rework packet к тому же exact
-candidate, запускает относящиеся к фазе checks и сразу возвращает
-`phase id | changed surfaces | checks | findings<=3 | unknowns | next`. Новая
-фаза не выдаётся до решения manager-а по предыдущей. Manager не просит raw diff
-или transcript и не перечитывает source; implementer не читает mode policy и не
-заменяет manager-а собственной декомпозицией всего scope. Повтор той же фазы
-без нового reproducer, evidence или materially другого подхода запрещён.
-
-Фазы выбираются по связному проверяемому outcome и dependency/integration
-границе. Большой Teams-подобный scope обычно получает несколько крупных фаз,
-например contract/data model, authorization/API, UI/synchronization и итоговую
-сквозную проверку; это не обязательный шаблон и не деление по числу Tasks или
-файлов. Одновременно активна только одна writing phase. Параллельные candidates,
-массовые critics и reducer запрещены штатным путём `Менеджера`.
-
-После `complete` один независимый Luna reviewer последовательно проходит exact
-candidate по Human Requirements и risk sections. Даже для большого scope он не
-создаёт собственных reviewers: сохраняет одну session, один finding ledger и
-конечный review plan. Material finding возвращается прежнему implementer-у как
-targeted rework; exact changed candidate возвращается тому же reviewer-у. После
-review pass coordinator механически интегрирует task-owned result, запускает
-integrated checks и только затем передаёт сжатый пакет проверяющему профилю для
-одного final gate без повторного исследования всего пути.
-
-Mode evidence содержит identities трёх sessions, stable phase ids и их порядок,
-manager decisions, implementer checks, reviewer ledger, routing receipts,
-candidate identity и expensive-work ledger. Manager с source/tool work,
-replacement implementer без доказанной недоступности, две одновременные фазы,
-review до `complete`, reviewer delegation или routine implementation дорогим
-профилем делают прогон функционально полезным, но невалидным доказательством
-`Менеджера`.
-
 ### 4.7 Capability-aware стадии и событийная координация
 
-Multi-agent campaign состоит из bounded стадий. В `Балансе` стадия — одна
-execution wave из двух или трёх независимых writers; каждый writer имеет одного
-owner-а и отдельный candidate. Main profile остаётся четвёртой содержательной
-lane только когда владеет непересекающейся собственной работой. Внутренняя
-делегация Balance workers запрещена и не зависит от platform capability.
-
-Другие режимы сохраняют свои stage shapes:
+Multi-agent campaign состоит из bounded стадий с одним владельцем каждой волны:
 
 - в `Классическом` direct owner выполняет independent review точного кандидата;
-- в `Менеджере` coordinator держит отдельные постоянные Luna manager и
-  implementer sessions с transport без промежуточных Sol turns; после
-  manager `complete` запускается одна постоянная Luna reviewer session;
 - в `Экономичном` Luna top-level остаётся operational owner, а для exact
   candidate создаёт одного independent Luna review owner; non-Luna transport
   shell использует доступные direct Luna stages и не выполняет substantive work.
 
 На большом scope reviewer `Классического` может создать read-only lenses по
-реальным risk surfaces. Reviewer `Менеджера` проходит sections последовательно
-сам и не делегирует. `Баланс` не создаёт review lenses штатно: main profile
-проверяет integrated candidate после инструментальных gates.
+реальным risk surfaces при доказанной capability вложенной делегации.
 
 Новый direct owner проходит один заранее разрешённый routing guard, один spawn
 и event-driven wait до `complete | needs_attention | deadline`. Wait получает
@@ -794,8 +599,6 @@ messaging tool он не ищет. Deadline короче общего ceiling ru
 После material rework режимы с independent reviewer продолжают существующего
 owner-а и того же reviewer-а с exact changed candidate. Нормальный путь содержит
 один follow-up и один новый event-driven wait без повторного guard/spawn.
-`Баланс` вместо этого исправляет интегрированный candidate основной lane и
-повторяет только затронутые проверки плюс общий acceptance gate.
 
 Эта схема не скрывает platform limitation и ограничивает дорогую coordination
 числом полезных стадий и mode envelope. Она не ослабляет обязательный
@@ -808,12 +611,6 @@ review: меняется форма orchestration, а не evidence gate.
 реальный candidate, после чего coordinator строит и механически применяет exact
 diff. Созданный coordinator-ом shadow artifact удаляется только после проверки.
 Обычно это не Git worktree и поэтому не используется для параллельных authors.
-Узкое исключение — одна Balance wave: coordinator может создать до трёх
-отдельных shadow roots общей exact base для заранее доказанных непересекающихся
-surfaces; main при этом остаётся единственным writer-ом task-owned integration
-checkout и не создаёт собственный shadow. Для любых пересечений либо
-неподтверждённого task-owned checkout остаётся обязательным отдельный admitted
-Git worktree каждому writer-у либо последовательное выполнение.
 Shadow path выводится прямо из packet identity без поиска ignore/cache path.
 Проверенные owned files переносятся в integration checkout одной механической
 операцией с последующей отдельной identity-сверкой; полный patch не проходит
@@ -943,7 +740,7 @@ single-issue run без Goal outcome выводится из current Task, её 
 7. Опубликовать комментарий, изменить статус и перечитать issue.
 8. Заново оценить scope, frontier и необходимость следующей итерации.
 
-Режим не создаёт пять разных lifecycle. Все варианты используют один loop,
+Режим не создаёт три разных lifecycle. Все варианты используют один loop,
 а отличаются dispatch policy, reviewer gates и допустимым выходом. В
 `Экономичном` режиме восьмая фаза может сохранить `IG-MODE-06` checkpoint и
 закончить текущую попытку без terminal claim; остальные режимы продолжают до
@@ -1281,11 +1078,8 @@ service/provider transport.
 1. разрешает live integration target и не подменяет его текущей случайной
    веткой либо dirty root checkout;
 2. строит dependency graph и карту поверхностей записи;
-3. выделяет conflict-free dependency-ready packets, а в `Менеджере` создаёт один
-   exact candidate и конечный plan крупных dependency-ready фаз;
-4. разбивает multi-agent campaign на bounded mode-specific stages и атомарные
-   одно-ownerные рабочие/проверочные волны; `Менеджер` сохраняет отдельные постоянные
-   manager/implementer/reviewer sessions и последовательные phase transitions;
+3. выделяет conflict-free dependency-ready packets;
+4. разбивает campaign на bounded рабочие и проверочные волны с одним owner-ом;
 5. до spawn каждого direct owner-а получает model-routing receipt, переносит
    exact model/effort/fork в фактический dispatch и сверяет observed profile;
    nested owner самостоятельно проводит тот же gate для внутренних children;
@@ -1293,8 +1087,7 @@ service/provider transport.
    отдельные feature branch и Git worktree;
 7. оставляет read-only исследователей без worktree;
 8. запускает столько packet owners, сколько оправдано режимом, доступной
-   capacity и ожидаемой ценностью; в `Менеджере` не размножает implementer или
-   candidate ради свободных слотов;
+   capacity и ожидаемой ценностью;
 9. ожидает stage handoffs без polling неизменившегося состояния;
 10. передаёт compact results предусмотренному independent reviewer-у, но сам
     объединяет изменения;
@@ -1356,13 +1149,7 @@ coordinator исполняет fail-closed protocol:
    затем проверяет `assert-unchanged`. Только после этого отдельный follow-up
    разрешает implementation.
 6. Пока хотя бы один writer активен, integration checkout обычно остаётся
-   read-only. Единственное исключение — Balance с отдельным clean task-owned
-   checkout и изолированными shadow roots: coordinator заранее объявляет
-   непересекающиеся main-owned surfaces и пишет только в них, оставаясь
-   единственным владельцем integration candidate. Для Git-worktree writers,
-   dirty/общего checkout или пересекающихся surfaces coordinator получает
-   отдельную admitted lane. Read-only Git, Task Manager orchestration и
-   проверки, не меняющие checkout, разрешены.
+   read-only; параллельная запись coordinator-а требует собственной admitted writer lane.
 7. После каждого agent interaction/return и перед fan-in coordinator повторяет
    `assert-unchanged`. Любое Git-visible изменение integration checkout
    останавливает wave:
@@ -1393,14 +1180,6 @@ surfaces, Agent Plan, исходные данные, ограничения, о�
 requirements, work или terminal criteria. Сохранившийся task-owned worktree
 является checkpoint: после доказанной остановки прежнего владельца он передаётся
 новому exclusive writer, а не дублируется.
-
-Восстановительный candidate `Менеджера` не является replacement checkpoint. Он
-допустим только после доказанного тупика и решения manager-а. До `prepare`
-coordinator фиксирует найденный existing work, materially иной purpose нового
-варианта, candidate identity и общую base. Новый writer получает отдельную
-branch/worktree и не присваивает историю существующего кандидата; одновременно
-две реализации не работают. Без этой разницы startup recovery запрещает свежую
-реализацию.
 
 Изоляция writer-а подтверждается фактическими `git worktree` и branch refs до
 первой записи. Указание пути только в prompt субагента не является evidence.
@@ -1453,8 +1232,8 @@ Task Manager cancellation statuses от имени Issue Grinder.
 | `IG-SCOPE-*` | selector-as-predicate и контрольные refresh points | новые и исключённые issue учитываются до terminal result |
 | `IG-AUTO-*` | explicit-mode gate, UAT resolver и узкий security selector | нет Production access; разрешённая UAT работа не ждёт рутинного approval |
 | `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint и semantic topology boundary | любой новый run без явного выбора получает `Соло`; `Соло` сохраняет current profile и ноль Issue Grinder execution-subagents; другие режимы включаются только явно и не дрейфуют |
-| `IG-HELP-*` | ранний fast path и компактный `mode-help.md` | чистая справка объясняет пять режимов и default без Task Manager, Goal, title mutations или subagents |
-| `IG-MA-*` | dependency-ready packets, isolated writers, integration owner, profile routing и capability-aware stages | параллельные writers изолированы; Balance ограничен одной wave до трёх Luna High workers и main-owned acceptance; independent review применяется только там, где его требует contract |
+| `IG-HELP-*` | ранний fast path и компактный `mode-help.md` | чистая справка объясняет три режима и default без Task Manager, Goal, title mutations или subagents |
+| `IG-MA-*` | dependency-ready packets, isolated writers, integration owner, profile routing и capability-aware stages | параллельные writers изолированы; independent review применяется только там, где его требует contract |
 
 Группированная таблица является только обзором. Точная coverage map связывает
 каждый отдельный `IG-*` как минимум с одним runtime surface и одним наблюдаемым
@@ -1474,19 +1253,16 @@ ID само по себе не доказывает поведение.
    required/forbidden decisions и их порядок. Blocker/writer trace остаётся в
    `scripts/issue_grinder_trace_harness.py`, а mode resolver, profile
    normalization, economical exit и switch barrier — в
-   `scripts/issue_grinder_mode_harness.py`. Тот же mode harness проверяет
-   механическую готовность Balance wave: admission независимых пакетов,
-   максимум три Luna High workers, одна active wave, useful main overlap,
-   collective wait, fan-in, parallel tool gates и main-owned final acceptance.
-   Оба harness являются oracle отдельных hard
-   invariants и не доказывают, что Markdown runtime вызовет те же effects.
+   `scripts/issue_grinder_mode_harness.py`. Тот же mode harness
+   проверяет матрицу model × число live задач, явный выбор, continuity,
+   отклонение удалённых режимов и обязательные review/checkpoint gates.
 3. **Independent model-forward evaluation.** Запускает реальный skill на
    синтетическом Task Manager и временном Git repository. Детерминированные
    assertions проверяют effects, а отдельный evaluator — стратегический смысл,
    фактологичность и понятность публикационного текста. Generator не получает
    expected answer или rubric с подсказкой нужного решения. Узкий repository
-   runner `scripts/issue_grinder_mode_loading_smoke.py` отдельно запускает пять
-   fresh read-only сессий и по command-execution trace доказывает, что после
+   runner `scripts/issue_grinder_mode_loading_smoke.py` отдельно запускает три
+   fresh read-only сессии и по command-execution trace доказывает, что после
    общего resolver-а агент читает только выбранный mode-файл; обращение к
    соседнему файлу либо всему каталогу закрывает case.
    `scripts/issue_grinder_solo_topology_smoke.py` создаёт локальный synthetic
@@ -1514,16 +1290,7 @@ ID само по себе не доказывает поведение.
   последовательной execution lane, отсутствием Issue Grinder worker delegation
   и допустимым отдельным Strategic Explainer provider; конкретный
   `Классический`, где Sol/controller делает почти всё, а
-  Luna получает только тривиальные packets; `Баланс`, где main profile одним
-  окном запускает два-три независимых Luna High packets, параллельно делает
-  критическую работу, затем механически объединяет handoffs, параллельно
-  запускает долгие tool gates и сам принимает exact candidate; пересечение
-  writers, вторая active wave, отдельный Luna reviewer/manager или отсутствующий
-  receipt делают topology невалидной; `Менеджер` с постоянными
-  Luna manager/implementer sessions, крупными последовательными фазами, одним
-  independent Luna reviewer без delegation и bounded stop;
-  `Экономичный` с independent Luna review перед terminal acceptance и одним
-  resumable candidate без ложного Done/Goal close;
+  Luna получает только тривиальные packets
 - Luna profile normalization, root-shell supervisor, explicit role override и
   неизвестное cross-family ordering без догадки;
 - zero/one/multiple issue, рост и сокращение scope, late matching issue,

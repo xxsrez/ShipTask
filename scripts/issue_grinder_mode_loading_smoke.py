@@ -23,13 +23,11 @@ SCHEMA = "issue-grinder/mode-loading-smoke/v1"
 MODE_FILES = {
     "solo": ("Соло", "solo.md"),
     "classic": ("Классический", "classic.md"),
-    "balance": ("Баланс", "balance.md"),
-    "swarm": ("Менеджер", "swarm.md"),
     "economical": ("Экономичный", "economical.md"),
 }
 MODE_FILE_RE = re.compile(
     r"(?:^|[\s\"'])(?:[^\s\"']*/)?references/modes/"
-    r"(solo|classic|balance|swarm|economical)\.md"
+    r"(solo|classic|economical)\.md"
 )
 BROAD_MODE_DIR_RE = re.compile(
     r"(?:^|[\s\"'])(?:[^\s\"']*/)?references/modes"
@@ -63,7 +61,7 @@ def build_prompt(mode: str) -> str:
         "skill, полностью прочитай его SKILL.md, затем общий "
         "references/execution-modes.md, затем ровно один связанный mode contract "
         f"references/modes/{filename}. Не читай mode-help.md, Architecture, "
-        "Requirements, остальные четыре mode-файла и не перечисляй каталог "
+        "Requirements, остальные два mode-файла и не перечисляй каталог "
         "references/modes. Не обращайся к Task Manager, не создавай Goal или "
         "subagents, не меняй файлы. После чтения сразу остановись и верни одну "
         "строку JSON с ключами canonical_mode, loaded_mode_file, "
@@ -240,7 +238,7 @@ def parse_args() -> argparse.Namespace:
         "--mode",
         action="append",
         choices=tuple(MODE_FILES),
-        help="Run one or more modes; the default is all five.",
+        help="Run one or more modes; the default is all three.",
     )
     parser.add_argument("--codex-bin", default="codex")
     parser.add_argument("--model", default="gpt-5.6-luna")

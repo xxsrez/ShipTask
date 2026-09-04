@@ -84,7 +84,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertEqual(len(rows), len(set(rows)), "duplicate coverage rows")
         self.assertEqual(set(rows), requirement_ids)
-        self.assertEqual(len(requirement_ids), 61)
+        self.assertEqual(len(requirement_ids), 53)
 
     def test_architecture_runtime_layout_exists(self) -> None:
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
@@ -99,8 +99,6 @@ class IssueGrinderContractTest(unittest.TestCase):
             "references/execution-modes.md",
             "references/modes/solo.md",
             "references/modes/classic.md",
-            "references/modes/balance.md",
-            "references/modes/swarm.md",
             "references/modes/economical.md",
             "references/multi-agent-execution.md",
             "references/strategic-explainer.md",
@@ -121,13 +119,11 @@ class IssueGrinderContractTest(unittest.TestCase):
         mode_files = {
             "Соло": "solo.md",
             "Классический": "classic.md",
-            "Баланс": "balance.md",
-            "Менеджер": "swarm.md",
             "Экономичный": "economical.md",
         }
         self.assertEqual(
             re.findall(
-                r"^## (Соло|Классический|Баланс|Менеджер|Экономичный)$",
+                r"^## (Соло|Классический|Экономичный)$",
                 execution_modes,
                 re.MULTILINE,
             ),
@@ -139,7 +135,7 @@ class IssueGrinderContractTest(unittest.TestCase):
             ).read_text(encoding="utf-8")
             self.assertEqual(
                 re.findall(
-                    r"^# (Соло|Классический|Баланс|Менеджер|Экономичный)$",
+                    r"^# (Соло|Классический|Экономичный)$",
                     mode_runtime,
                     re.MULTILINE,
                 ),
@@ -156,7 +152,7 @@ class IssueGrinderContractTest(unittest.TestCase):
             ),
         )
         self.assertIn(
-            "Это правило одинаково для всех пяти execution modes",
+            "Это правило одинаково для всех трёх execution modes",
             (SKILL_ROOT / "references" / "strategic-explainer.md").read_text(
                 encoding="utf-8"
             ),
@@ -188,7 +184,7 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("[краткую справку](references/mode-help.md)", skill)
         self.assertIn("[Run, scope и Goal](references/run-and-goal.md)", skill)
         self.assertLess(len(skill.splitlines()), 190)
-        for mode in ("Соло", "Классический", "Баланс", "Менеджер", "Экономичный"):
+        for mode in ("Соло", "Классический", "Экономичный"):
             self.assertIn(f"`{mode}`", mode_help)
         for forbidden_effect in (
             "не разрешает Task Manager scope",
@@ -197,14 +193,7 @@ class IssueGrinderContractTest(unittest.TestCase):
             "не вызывает subagents",
         ):
             self.assertIn(forbidden_effect, mode_help)
-        self.assertIn("`По умолчанию` — не шестой режим", mode_help)
-        self.assertIn("## Главное различие Классического и Баланса", mode_help)
-        self.assertIn("основной исполнитель делает почти всё", mode_help)
-        self.assertIn(
-            "до\nтрёх готовых независимых write-пакетов Luna High",
-            mode_help,
-        )
-        self.assertIn("заканчивает сама", mode_help)
+        self.assertIn('`Экономичный` включается только явно', mode_help)
         self.assertIn("observable negative-effects\ncontract `IG-HELP-01`", architecture)
 
     def test_writer_guard_is_fail_closed_and_part_of_runtime(self) -> None:
@@ -244,32 +233,6 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("Model routing — hard gate", execution_modes)
         self.assertIn("Model routing admission — hard gate", multi_agent)
 
-    def test_balance_compiles_luna_execution_plane_and_final_control(self) -> None:
-        balance = (
-            SKILL_ROOT / "references" / "modes" / "balance.md"
-        ).read_text(encoding="utf-8")
-        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
-        requirements = REQUIREMENTS.read_text(encoding="utf-8")
-        architecture = ARCHITECTURE.read_text(encoding="utf-8")
-        evaluation = EVALUATION.read_text(encoding="utf-8")
-
-        for marker in (
-            "не больше\n   трёх Luna workers",
-            '`model="gpt-5.6-luna"`,',
-            '`reasoning_effort="high"`',
-            "одним collective event-driven wait",
-            "механически переносит task-owned commits/bytes",
-            "одним parallel tool batch",
-            "independent reviewer не является штатной ролью",
-            "final acceptance main profile",
-        ):
-            self.assertIn(marker, balance)
-
-        self.assertIn("до трёх independent Luna", skill)
-        self.assertIn("ограниченной параллельной помощью Luna", requirements)
-        self.assertIn("Balance: ускоренный main-owned workflow", architecture)
-        self.assertIn("balance-main-final-acceptance", evaluation)
-
     def test_non_solo_capability_aware_stage_contract_is_compiled(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         execution_modes = (
@@ -286,7 +249,7 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("nested delegation", combined.casefold())
         self.assertIn("direct luna", combined.casefold())
         self.assertTrue("event" in combined.casefold() or "событийн" in combined.casefold())
-        for mode in ("classic", "balance", "swarm", "economical"):
+        for mode in ("classic", "economical"):
             mode_runtime = (
                 SKILL_ROOT / "references" / "modes" / f"{mode}.md"
             ).read_text(encoding="utf-8")
@@ -305,46 +268,6 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("десятиминутного checkpoint", evaluation)
         self.assertIn("holdout", evaluation)
         self.assertIn("не участвовавший в правках", evaluation)
-
-    def test_balance_wave_and_manager_loop_are_compiled(self) -> None:
-        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
-        modes_root = SKILL_ROOT / "references" / "modes"
-        balance = (modes_root / "balance.md").read_text(encoding="utf-8")
-        swarm = (modes_root / "swarm.md").read_text(encoding="utf-8")
-        multi_agent = (
-            SKILL_ROOT / "references" / "multi-agent-execution.md"
-        ).read_text(encoding="utf-8")
-
-        self.assertIn("local model-forward evaluation", skill)
-        self.assertIn("не объединяй\nв обрезаемый", skill)
-        self.assertIn("до трёх independent Luna", skill)
-        for marker in (
-            "не больше\n   трёх Luna workers",
-            "одну одновременно активную execution wave",
-            "collective event-driven wait",
-            "parallel tool batch",
-            "Отдельный independent reviewer не является штатной ролью",
-        ):
-            self.assertIn(marker, balance)
-        self.assertIn("Open-ended fuzzing", swarm)
-        self.assertIn("shadow tree", balance)
-        self.assertIn("shadow tree", swarm)
-        self.assertIn("shadow tree", multi_agent)
-        normalized_swarm = " ".join(swarm.split())
-        for marker in (
-            "Manager Loop",
-            "постоянную manager session",
-            "постоянную implementer session",
-            "ровно одна phase/rework wave",
-            "Best-of-N",
-            "не делегирует descendants",
-            "без отдельного Sol/model turn",
-        ):
-            self.assertIn(marker, normalized_swarm)
-        self.assertIn("постоянные direct Luna manager и implementer", multi_agent)
-        self.assertIn("одним\nмеханическим действием", multi_agent)
-        self.assertIn("не ищет tool\ncatalog и parent messaging", multi_agent)
-        self.assertIn("технически вернул\ntimeout", multi_agent)
 
     def test_publication_unit_stays_with_coordinator(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
