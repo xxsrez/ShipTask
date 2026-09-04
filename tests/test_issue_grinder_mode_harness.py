@@ -147,6 +147,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
             review_complete=True,
             finding_ledger_returned=True,
             controller_final_review_started_after_review=True,
+            controller_relay_model_turns=0,
         )
         return replace(observation, **overrides)
 
@@ -258,9 +259,30 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                 tool_wait_in_benefit_assessment=False,
             )
         )
-        self.assertIn("balance_total_execution_wave_count_not_one", decision.defects)
+        self.assertIn("balance_previous_waves_not_accepted", decision.defects)
         self.assertIn("balance_source_change_before_admission_dispatch", decision.defects)
         self.assertIn("balance_tool_wait_ignored_in_admission", decision.defects)
+
+    def test_balance_allows_later_wave_only_after_previous_acceptance(self) -> None:
+        later_wave = assess_balance_wave(self.complete_balance_wave(
+            total_execution_wave_count=2, previous_waves_accepted=1,
+        ))
+        self.assertEqual(later_wave.defects, ())
+        overlapping = assess_balance_wave(self.complete_balance_wave(
+            total_execution_wave_count=2, previous_waves_accepted=1,
+            active_wave_count=2,
+        ))
+        self.assertIn("balance_active_wave_count_not_one", overlapping.defects)
+
+    def test_manager_rejects_expensive_or_unmeasured_relay(self) -> None:
+        for turns, defect in ((1, "manager_expensive_relay"),
+                              (None, "manager_relay_telemetry_missing")):
+            with self.subTest(turns=turns):
+                result = assess_manager_loop(self.complete_manager_loop(
+                    controller_relay_model_turns=turns,
+                ))
+                self.assertFalse(result.may_enter_controller_final_review)
+                self.assertIn(defect, result.defects)
 
     def test_balance_requires_useful_overlap_collective_wait_and_main_acceptance(self) -> None:
         decision = assess_balance_wave(

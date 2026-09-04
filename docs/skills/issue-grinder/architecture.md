@@ -552,6 +552,39 @@ Default child profiles зависят от выбранного mode:
 `multi-agent-execution.md`. Только выбранный mode-файл владеет своей topology,
 fallback, review и stop promise. `mode-help.md` остаётся delivery-free справкой.
 
+### 4.4.1 Проверки, инструменты и стоимость организации
+
+Общие `IG-MODE-09` и `IG-MODE-19` компилируются в `execution-modes.md` и
+применяются также к Solo. Для длительного процесса сохраняй receipt: owner,
+candidate/root, command, входы code/tests/config/environment/dependencies,
+handle, state, exit code и log/result location. Обновляй его рабочим вызовом,
+без отдельного model turn ради bookkeeping. Не теряй session id при сжатии
+ответа до stdout. Пока процесс или результат доступны, восстанови ожидание или
+чтение вместо повторного запуска. Неизвестный внешний effect сначала reconcile.
+
+После изменения сопоставь реальные входы проверок: имя файла или candidate id
+без проверки зависимостей недостаточны. Неизменные применимые результаты
+переиспользуются; changed/unknown inputs требуют адресной либо более широкой
+проверки. Интеграционная приёмка учитывает итоговое сочетание модулей. Reviewer
+получает карту покрытия и raw results, самостоятельно ищет пробелы и при
+необходимости перепроверяет их. Смена роли или фазы не обнуляет evidence.
+Независимые чтения и проверки можно объединять в tool batch при сохранении
+отдельных ошибок и результатов и отсутствии конфликтующих writes/effects.
+Solo не исполняет этим способом несколько содержательных пакетов одновременно.
+
+Admission учитывает постановку, context transfer, ожидание, интеграцию и review
+без отдельного расчётного отчёта. Classic может оставить simple packet основному
+профилю, если передача не окупается; independent review остаётся обязательным.
+Balance выбирает волну по времени до общего проверенного результата, не слотам.
+
+При Luna top-level Экономичный совмещает operational coordinator,
+последовательного автора и integration owner в текущей сессии. Отдельный writer
+или supervisor нужен только при конкретной пользе от независимой работы либо
+изоляции контекста. Независимый Luna reviewer остаётся неавтором. При non-Luna
+root нужен экономичный substantive owner; root сохраняет transport/authority
+boundary и не подменяет Luna работой Sol. Max, изоляция, review и checkpoint
+gate не меняются.
+
 ### 4.5 Balance: ускоренный main-owned workflow
 
 `Баланс` берёт `Соло` за функциональную основу: main profile изучает весь scope,
@@ -609,8 +642,11 @@ Fan-in механический: main profile проверяет candidate ident
 переносит task-owned bytes/commits в integration candidate, разрешает только
 реальные конфликты и не пересказывает полный patch в model context. Неполный
 handoff сохраняется, а недостающую часть main profile завершает сам без цепочки
-replacement agents. За весь run создаётся не более одной execution wave;
-вновь открывшуюся после fan-in frontier main profile завершает сам.
+replacement agents. После fan-in и проверки интегрированной версии новая
+dependency-ready frontier проходит тот же admission и может открыть следующую
+волну. Одновременно активна только одна волна; evidence относится к каждой
+волне отдельно, final acceptance — ко всем волнам. Неполный прежний packet
+завершает main, а не новый replacement worker.
 
 Package-local quick checks выполняют Luna workers. После fan-in main profile
 ровно одним parallel tool batch запускает независимые долгие сборки, тесты и
@@ -629,7 +665,7 @@ wait envelope, candidate identities, owned surfaces, fan-in identity,
 main-owned integration receipt, числом полных gate batches, integrated checks и
 final acceptance. Прогон с искусственным дроблением,
 пересекающимися writers, скрытым Luna manager/reviewer, несколькими active waves,
-последовательной source mutation до обязательного dispatch, второй wave,
+последовательной source mutation текущей волны до обязательного dispatch,
 main shadow/copy-back, повторным полным gate batch без cross-cutting rework,
 повтором Luna work основным профилем или без exact integrated acceptance не
 доказывает `Баланс`, даже если случайно получил рабочий результат.
@@ -657,14 +693,17 @@ item.
   task-owned shadow tree и одним exact candidate на весь loop;
 - независимого Luna reviewer только после того, как manager примет все фазы.
 
-Стандартный transport не зависит от sibling messaging. Coordinator получает от
-manager-а компактный phase packet и без содержательной переработки передаёт его
-той же implementer session; evidence handoff implementer-а тем же способом
-передаётся обратно той же manager session. Это механический relay, а не дорогая
-пошаговая orchestration: coordinator не выбирает следующую фазу, не читает за
-manager-а implementation evidence и не выполняет routine work. Если доказанно
-доступен прямой совместимый transport между этими сессиями, он допустим, но не
-меняет roles, identities или evidence contract.
+До цикла coordinator разрешает transport без model turn проверяющего профиля
+на каждый переход: наблюдаемый прямой messaging interface либо узкий
+механический relay платформы. Manager получает только messaging capability,
+не repository/shell/work tools. Relay сохраняет адресата, session/phase/message
+ids, подтверждение доставки и deadline; повторная доставка не создаёт новую
+фазу. Он не выбирает фазу, не оценивает качество и не принимает authority
+decisions: это транспорт, не автономный task orchestrator. При ошибке доставки
+сохрани handoff и reconcile delivery прежде retry. Если transport недоступен,
+зафиксируй capability gap: обычная пересылка через Sol не соответствует новому
+контракту и не разрешает молча сменить режим. Существенные эскалации и
+обязательные authority effects остаются у coordinator-а.
 
 Manager turn возвращает ровно одно из состояний:
 
@@ -719,7 +758,7 @@ lane только когда владеет непересекающейся с�
 
 - в `Классическом` direct owner выполняет independent review точного кандидата;
 - в `Менеджере` coordinator держит отдельные постоянные Luna manager и
-  implementer sessions и механически пересылает phase/evidence packets; после
+  implementer sessions с transport без промежуточных Sol turns; после
   manager `complete` запускается одна постоянная Luna reviewer session;
 - в `Экономичном` Luna top-level остаётся operational owner, а для exact
   candidate создаёт одного independent Luna review owner; non-Luna transport

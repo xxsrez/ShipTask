@@ -22,7 +22,7 @@ Luna саму по себе.
    непересекающаяся write surface, стабильный interface, изолированный candidate,
    локальный oracle и отсутствие общего external/irreversible effect.
 3. Параллельная wave требует минимум два подходящих пакета. Запусти не больше
-   трёх Luna workers и только одну execution wave за весь run. Число Tasks,
+   трёх Luna workers и одну одновременно активную execution wave. Число Tasks,
    файлов или свободных slots само по себе не создаёт пакет и не оправдывает
    делегацию. Но учитывай устранимое последовательное время tool-bound работы:
    два независимых пакета с долгими build/test/analyzer gates могут окупить
@@ -35,7 +35,7 @@ Luna саму по себе.
    волны обязателен до собственной реализации main profile. Не начинай один
    пригодный пакет последовательно и не откладывай Luna до следующей frontier.
 
-## Одна Luna High wave
+## Одна активная Luna High wave
 
 Каждый worker получает отдельный admitted worktree либо отдельный task-owned
 shadow tree root и один self-contained packet:
@@ -110,8 +110,9 @@ gates и минимальный общий acceptance. Не запускай п�
 Даже тогда main profile сохраняет final acceptance и режим не превращается в
 Manager Loop.
 
-После fan-in новую execution wave не создавай: вновь открывшуюся frontier и
-неполные handoff-ы основной профиль завершает сам. Terminal result требует exact
+После fan-in и проверки версии новая независимая frontier может открыть
+следующую волну после того же admission. Receipts и batches считай по волнам;
+неполный прежний handoff завершает main без replacement workers. Terminal result требует exact
 integrated checks и final acceptance main profile; нетерминальный checkpoint
 `Экономичного` режима недоступен.
 
@@ -137,7 +138,7 @@ acceptance.
 - source mutation или долгий packet-local gate до обязательного dispatch;
 - отдельный main shadow или обратная копия main candidate в task-owned
   integration checkout при доступном безопасном main-owned path;
-- вторая execution wave того же run;
+- новая wave до окончания и приёмки предыдущей либо без нового admission;
 - повтор полного integrated gate batch без cross-cutting material rework;
 - polling и coordination churn вместо одного collective wait;
 - принятие worker self-report без exact integrated checks;

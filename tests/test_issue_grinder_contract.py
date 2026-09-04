@@ -84,7 +84,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertEqual(len(rows), len(set(rows)), "duplicate coverage rows")
         self.assertEqual(set(rows), requirement_ids)
-        self.assertEqual(len(requirement_ids), 60)
+        self.assertEqual(len(requirement_ids), 61)
 
     def test_architecture_runtime_layout_exists(self) -> None:
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
@@ -320,7 +320,7 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("до трёх independent Luna", skill)
         for marker in (
             "не больше\n   трёх Luna workers",
-            "одну execution wave",
+            "одну одновременно активную execution wave",
             "collective event-driven wait",
             "parallel tool batch",
             "Отдельный independent reviewer не является штатной ролью",
@@ -338,7 +338,7 @@ class IssueGrinderContractTest(unittest.TestCase):
             "ровно одна phase/rework wave",
             "Best-of-N",
             "не делегирует descendants",
-            "sibling messaging не является",
+            "без отдельного Sol/model turn",
         ):
             self.assertIn(marker, normalized_swarm)
         self.assertIn("постоянные direct Luna manager и implementer", multi_agent)

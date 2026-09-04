@@ -93,6 +93,7 @@ prompt; подготовка обязана остановиться при ра
 | `IG-MODE-16` | `modes/balance.md`; `multi-agent-execution.md`; mode harness | balance-candidate-identity; balance-ownership-check; balance-mechanical-fan-in; balance-preserve-partial-handoff; balance-no-reimplementation |
 | `IG-MODE-17` | `modes/balance.md`; mode harness | balance-worker-quick-check; balance-parallel-integration-tool-gates; no-orphan-long-process |
 | `IG-MODE-18` | `modes/balance.md`; mode harness | balance-main-exact-diff-review; balance-main-fixes-findings; balance-no-default-independent-reviewer; balance-terminal-evidence |
+| `IG-MODE-19` | `execution-modes.md`; `modes/solo.md`; `modes/balance.md` | process-handle-survives-handoff; completed-result-reused; independent-tools-one-solo-packet; unknown-effect-reconciled |
 | `IG-HELP-01` | `SKILL.md` §0; `mode-help.md` | all-five-modes-brief; default-is-resolver; narrow-difference-answer; help-has-no-task-manager-goal-title-or-subagents; mixed-help-delivery-preserves-gates |
 | `IG-MA-01` | `SKILL.md` §2; `multi-agent-execution.md` | two-independent-packets; useful-critic; intentional-candidate; one-lane-no-filler; solo-delegation-forbidden |
 | `IG-MA-02` | `multi-agent-execution.md` | disjoint-surfaces; ordinary-conflicting-surfaces; isolated-intentional-overlap |
@@ -135,7 +136,7 @@ Corpus доказывает:
   ролей и независимый приоритет role overrides;
 - Balance wave из двух-трёх dependency-ready self-contained packets с
   непересекающимися surfaces, admission и обязательным dispatch до первой
-  source mutation, учётом tool-bound critical path, одной execution wave,
+  source mutation, учётом tool-bound critical path, одной активной execution wave,
   useful main overlap прямо в clean task-owned integration checkout, одним
   collective wait, mechanical fan-in, ровно одним полным parallel tool-gate
   batch и main acceptance;
@@ -235,6 +236,38 @@ action и resume condition обязательны. Для каждой blocking 
 self-resolution boundary и goal value. Model-forward evaluator дополнительно
 проверяет, что каждый ответ естественно объясняет эти три связи и не переносит
 основной смысл во внутренние термины.
+
+## Проверка экономии организации без ослабления приёмки
+
+Трасса согласованных изменений: `IG-MODE-09` и `IG-MODE-19` → Architecture
+§4.4.1 → `execution-modes.md`; `IG-MA-01/04` → §4.4.1 и Classic/Balance;
+`IG-MODE-05`, `IG-MA-19` → §4.6 и `modes/swarm.md`; `IG-MODE-06`,
+`IG-MA-05/19` → §4.4.1 и `modes/economical.md`. Overview о надёжной доставке
+сложного результата сохраняется: экономия не заменяет обязательные gates.
+
+Детерминированный mode harness проверяет следующую принятую волну Balance,
+отклоняет перекрытие и отсутствие приёмки предыдущей; Manager отвергает
+дорогой relay и отсутствие измерения relay turns. Старые прогоны без нового
+поля не считаются доказательством нового Manager contract.
+
+Для следующей независимой model-forward оценки использовать сценарии:
+
+- Только parser изменён, алгоритмы прежние: сохранить применимые module checks,
+  повторить parser и затронутую интеграцию; неизвестная зависимость расширяет gates.
+- Долгий процесс ещё работает после handoff: продолжить по сохранённому handle,
+  не запустить дубль; завершённый процесс читается из сохранённого raw result.
+- Solo запускает независимые проверки одного пакета параллельно, но не начинает
+  вторую содержательную задачу и не создаёт рабочего агента.
+- Classic оставляет неокупающийся simple packet себе и всё равно получает
+  независимый review; Balance учитывает полный путь до интегрированной приёмки.
+- Manager передаёт несколько фаз без промежуточных Sol turns, сохраняет ids и
+  не исполняет повторно доставленный packet; missing transport раскрывается.
+- Luna-root Экономичного реализует сам, затем другой Luna проверяет; автор не
+  заменяет независимого reviewer-а, checkpoint не объявляется Done.
+
+Этот корпус задаёт будущую поведенческую проверку, а не утверждает, что она уже
+пройдена. Unit tests доказывают решения harness по observations, не фактическую
+экономию модели. Новый бенчмарк требуется отдельно для измерения эффекта.
 
 ## Быстрый writer-isolation corpus
 

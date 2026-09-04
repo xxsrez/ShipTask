@@ -247,6 +247,7 @@ class BalanceWaveObservation:
     main_final_acceptance: bool = False
     separate_reviewer_count: int = 0
     targeted_rework_gates_only: bool = True
+    previous_waves_accepted: int = 0
 
 
 @dataclass(frozen=True)
@@ -325,8 +326,10 @@ def assess_balance_wave(
         defects.append("balance_dispatch_not_one_window")
     if observation.active_wave_count != 1:
         defects.append("balance_active_wave_count_not_one")
-    if observation.total_execution_wave_count != 1:
-        defects.append("balance_total_execution_wave_count_not_one")
+    if observation.total_execution_wave_count < 1 or (
+        observation.previous_waves_accepted != observation.total_execution_wave_count - 1
+    ):
+        defects.append("balance_previous_waves_not_accepted")
     if not observation.admission_completed_before_first_source_change:
         defects.append("balance_source_change_before_admission_dispatch")
     if not observation.tool_wait_in_benefit_assessment:
@@ -415,6 +418,7 @@ class ManagerLoopObservation:
     rework_implementer_id: str = ""
     recheck_reviewer_id: str = ""
     unchanged_state_actions: tuple[str, ...] = ()
+    controller_relay_model_turns: int | None = None
 
 
 @dataclass(frozen=True)
@@ -457,6 +461,10 @@ def assess_manager_loop(
         defects.append("manager_work_tool_use")
     if observation.manager_implementation:
         defects.append("manager_implemented")
+    if observation.controller_relay_model_turns is None:
+        defects.append("manager_relay_telemetry_missing")
+    elif observation.controller_relay_model_turns != 0:
+        defects.append("manager_expensive_relay")
 
     phases = tuple(phase.strip() for phase in observation.phase_ids)
     if not phases or any(not phase for phase in phases):

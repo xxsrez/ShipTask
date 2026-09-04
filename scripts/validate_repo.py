@@ -609,7 +609,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         "одну постоянную implementer session",
         "одну независимую reviewer session только после manager `complete`",
         "ровно одна phase/rework wave",
-        "sibling messaging не является\nпредусловием режима",
+        "без\nотдельного Sol/model turn",
         "не\nделегирует descendants",
         "Без independent review и final gate",
     )
@@ -725,7 +725,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         *(f"IG-SCOPE-{number:02d}" for number in range(1, 4)),
         "IG-UI-01",
         *(f"IG-AUTO-{number:02d}" for number in range(1, 6)),
-        *(f"IG-MODE-{number:02d}" for number in range(1, 19)),
+        *(f"IG-MODE-{number:02d}" for number in range(1, 20)),
         "IG-HELP-01",
         *(f"IG-MA-{number:02d}" for number in range(1, 20)),
     ]
