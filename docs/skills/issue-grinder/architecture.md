@@ -651,8 +651,8 @@ Fan-in механический: main profile проверяет candidate ident
 одна сверка интегрированных bytes замыкает эту проверку. Не читай те же файлы
 отдельно целиком до и после копирования, если diff и identity уже дают нужные
 факты; новое чтение оправдано конфликтом, дефектом или неизвестным контекстом.
-Затем переносит task-owned bytes/commits в integration candidate, разрешает только
-реальные конфликты и не пересказывает полный patch в model context. Неполный
+При переносе task-owned bytes/commits main profile разрешает только реальные
+конфликты и не пересказывает полный patch в model context. Неполный
 handoff сохраняется, а недостающую часть main profile завершает сам без цепочки
 replacement agents. После fan-in и проверки интегрированной версии новая
 dependency-ready frontier проходит тот же admission и может открыть следующую

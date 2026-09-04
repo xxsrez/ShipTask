@@ -247,6 +247,10 @@ Architecture — за «как сейчас этого достигать». С�
 
 ## Reports
 
+- [Парная проверка Balance на обычной синтетике](reports/2026-09-04-issue-grinder-balance-paired-normal.md)
+  — исправленный контракт, frozen runtime, две пары Solo/Balance, расход по
+  стадиям и отрицательный результат проверки ускорения.
+
 - [Issue Grinder: ускоренный Solo на обычном tool-bound стенде](reports/2026-09-04-issue-grinder-solo-parallel-experiment.html)
   — изолированный `solo_parallel_v2`: 31.72% экономии wall-clock относительно
   медианы Solo при 8.53% меньшем расходе Sol, с точной таблицей прогонов,
