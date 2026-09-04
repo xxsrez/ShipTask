@@ -319,7 +319,7 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("holdout", evaluation)
         self.assertIn("не участвовавший в правках", evaluation)
 
-    def test_balance_and_swarm_bound_review_and_wait_overhead(self) -> None:
+    def test_balance_bounds_packets_and_roy_compiles_manager_loop(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         modes_root = SKILL_ROOT / "references" / "modes"
         balance = (modes_root / "balance.md").read_text(encoding="utf-8")
@@ -330,10 +330,10 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertIn("local model-forward evaluation", skill)
         self.assertIn("candidate 10 tool calls", skill)
-        self.assertIn("review plan 3", skill)
+        self.assertIn("review plan 3", " ".join(skill.split()))
         self.assertIn("не объединяй\nв обрезаемый", skill)
         self.assertIn("параллельно готовит ограниченный review plan", skill)
-        for runtime in (balance, swarm, multi_agent):
+        for runtime in (balance, multi_agent):
             normalized = " ".join(runtime.casefold().split())
             self.assertIn("произвольн", runtime)
             self.assertTrue("десяти" in runtime or "десять" in runtime)
@@ -343,6 +343,18 @@ class IssueGrinderContractTest(unittest.TestCase):
         self.assertIn("shadow tree", balance)
         self.assertIn("shadow tree", swarm)
         self.assertIn("shadow tree", multi_agent)
+        normalized_swarm = " ".join(swarm.split())
+        for marker in (
+            "Manager Loop",
+            "постоянную manager session",
+            "постоянную implementer session",
+            "ровно одна phase/rework wave",
+            "Best-of-N",
+            "не делегирует descendants",
+            "sibling messaging не является",
+        ):
+            self.assertIn(marker, normalized_swarm)
+        self.assertIn("persistent Luna manager ↔ persistent Luna", multi_agent)
         self.assertIn("одним\nмеханическим действием", multi_agent)
         self.assertIn("не ищет messaging tool", multi_agent)
         self.assertIn("технически вернул\ntimeout", multi_agent)

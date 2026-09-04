@@ -13,8 +13,9 @@ Explainer и другие ограниченные service/provider agents в н
 Во всех режимах, кроме `Соло`, каждый exact candidate получает независимую
 проверку, даже если scope мал или прост. Вложенные авторы и reviewers остаются у
 одного owner-а только когда child действительно умеет создавать agents. Иначе
-`Баланс` и `Рой` используют ограниченные прямые стадии из самостоятельных
-одно-ownerных волн; состояние ожидается событийно и не опрашивается по кругу.
+`Баланс` использует ограниченные прямые стадии, а `Рой` — постоянные direct
+manager/implementer sessions с одной активной фазой; состояние ожидается
+событийно и не опрашивается по кругу.
 
 Эта страница помогает выбрать режим. Действующий пользовательский контракт
 находится в [Requirements](../skills/issue-grinder/requirements.md), инженерный
@@ -29,7 +30,7 @@ Explainer и другие ограниченные service/provider agents в н
 | `Соло` | Текущая основная модель последовательно выполняет всю delivery-работу без рабочих субагентов Issue Grinder | Self-review текущей модели плюс объективные checks | Только terminal result или настоящий blocker |
 | `Классический` | Sol/controller делает почти всё; Luna получает только тривиальные пакеты | Независимый Luna-review exact candidate и итоговая приёмка controller-а | Только terminal result или настоящий blocker |
 | `Баланс` | Luna ведёт полный routine loop пакетов; Sol/controller оставляет material decisions и integration | Независимая Luna-проверка плюс сильный final review exact candidate | Только terminal result или настоящий blocker |
-| `Рой` | Bounded Luna campaign создаёт разные изолированные candidates; отдельный Luna reducer сводит их | Выбранный candidate независимо проверяется Luna и затем Sol/controller | Только terminal result или настоящий blocker |
+| `Рой` | Постоянный Luna manager ведёт постоянного Luna implementer-а по крупным последовательным фазам одного candidate | После manager `complete` один Luna reviewer без delegation проверяет candidate целиком, затем Sol/controller проводит final gate | Только terminal result или настоящий blocker |
 | `Экономичный` | Luna выполняет всю содержательную работу; non-Luna root допустим только как transport/authority оболочка | Независимый Luna-review обязателен для terminal result; незавершённый review сохраняется как deferred gate | Terminal result либо честный resumable checkpoint |
 
 ## Как работает режим по умолчанию
@@ -119,26 +120,34 @@ telemetry показывают Luna-owned ordinary work. Успешный фун
 
 ## `Рой`
 
-`Рой` полезен там, где несколько действительно разных подходов, независимая
-критика или широкий поиск edge cases повышают шанс сильного результата. Sol
-один раз задаёт bounded campaign. При недоступной nested delegation он напрямую
-запускает оправданные Luna candidates от общей exact base, а после их завершения
-— отдельного Luna reducer/reviewer. Каждый пишущий участник остаётся в отдельном
-worktree.
+`Рой` полезен для большой связанной задачи, где нужно заметно сократить
+пошаговую работу Sol, но сохранить сильный терминальный результат. Sol/controller
+одним проходом изучает весь scope и создаёт control brief: цель, требования,
+архитектурные границы, зависимости, риски и итоговую приёмку. Затем один
+постоянный Luna manager ведёт одного постоянного Luna implementer-а по крупным
+проверяемым фазам одного exact candidate.
 
-Для material candidate-friendly развилки хотя бы одна wave содержит минимум два
-намеренно разных Luna candidate. Один writer на Task без конкурирующей wave не
-является достаточным исполнением обещания `Роя`.
+Manager не читает repository, не использует рабочие tools и не реализует код.
+Он получает только control brief и compact evidence implementer-а, сохраняет
+общий plan state и выдаёт одну следующую dependency-ready фазу либо targeted
+rework. Coordinator может механически пересылать эти пакеты между двумя
+сессиями; он не принимает за manager-а решения и не выполняет routine work.
 
-Неудачные дешёвые попытки допустимы, но не должны загрязнять integration target
-или размножать внешние эффекты. Reducer оставляет один рекомендуемый candidate и
-не более одного runner-up при существенной неразрешённой развилке. Final reviewer
-получает сжатый проверяемый пакет, а не весь сырой transcript.
+Implementer сохраняет одну session, worktree и candidate на всём пути. Он
+реализует текущую фазу, запускает её checks и возвращает короткий evidence
+handoff. Новая фаза не начинается до принятия предыдущей. Для Teams-подобного
+scope используются несколько крупных dependency/risk sections, а не отдельный
+manager turn на каждый файл, Task или тест.
 
-Reducer/reviewer получает единые критерии и action budget до запуска campaign:
-он сравнивает compact handoffs, один раз читает выбранный exact candidate,
-запускает основной suite и только ограниченные targeted probes. Он не повторяет
-исследование каждого candidate и не превращает review в открытый fuzzing loop.
+После manager `complete` один независимый Luna reviewer проверяет exact final
+candidate целиком. Даже на большом scope он проходит risk sections
+последовательно сам и не создаёт собственный рой reviewer-ов. Material defect
+возвращается прежнему implementer-у, а исправленный candidate — прежнему
+reviewer-у. Затем Sol/controller проводит один final gate.
+
+Best-of-N, параллельные реализации, массовые critics и reducer больше не входят
+в штатную схему `Роя`. Один materially иной восстановительный путь допустим
+только после доказанного тупика, с сохранением отрицательного evidence.
 
 ## `Экономичный`
 
@@ -168,8 +177,8 @@ terminal результата. Такой выход оставляет `In Prog
   `Классический`.
 - Нужно перенести bulk work на экономичные profiles, сохранив сильный review —
   `Баланс`.
-- Полезны разные candidates, широкая критика и намеренная дешёвая избыточность —
-  `Рой`.
+- Большую связанную задачу нужно провести дешёвым manager/implementer loop по
+  крупным фазам и затем независимо проверить целиком — `Рой`.
 - Квота проверяющего профиля почти исчерпана и допустим возобновляемый
   checkpoint — `Экономичный`.
 

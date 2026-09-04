@@ -606,13 +606,14 @@ def validate_issue_skill(errors: list[str]) -> None:
         ISSUE_MODE_FILES["swarm"],
         "# Рой",
         "canonical_mode=swarm",
-        "большой объём дешёвого поиска",
-        "множество одинаковых prompts",
-        "Best-of-M stage с `M >= 2`",
-        "Все содержательные child roles `Роя` по умолчанию являются Luna Max",
-        "один recommended candidate",
-        "намеренно иной\ncandidate",
-        "Без final review",
+        "current topology —\nManager Loop, а не Best-of-N",
+        "одну постоянную manager session",
+        "одну постоянную implementer session",
+        "одну независимую reviewer session только после manager `complete`",
+        "ровно одна phase/rework wave",
+        "sibling messaging не является\nпредусловием режима",
+        "не\nделегирует descendants",
+        "Без independent review и final gate",
     )
     require(
         errors,
@@ -805,7 +806,7 @@ def validate_issue_skill(errors: list[str]) -> None:
     require(
         errors,
         ISSUE_SPEC,
-        "Статус: current agent-owned Architecture, 2026-09-03",
+        "Статус: current agent-owned Architecture, 2026-09-04",
         "[Overview](overview.md)",
         "[Requirements](requirements.md)",
         "## 0. Compilation contract",
@@ -831,6 +832,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         "### 4.3 Маршрутный admission",
         "model_routing_guard.py",
         "### 4.5 Balance control plane и Luna packet loop",
+        "### 4.6 Roy Manager Loop",
         "dispatch fingerprint",
         "`expensive-work ledger`",
         "не тратил основной контекст на повседневную работу",
@@ -2418,7 +2420,7 @@ def validate_source_layers(errors: list[str]) -> None:
         "Plugin — общий distribution artifact",
     )
     for architecture, prefix, status_marker in (
-        (ISSUE_SPEC, "IG-*", "Статус: current agent-owned Architecture, 2026-09-03"),
+        (ISSUE_SPEC, "IG-*", "Статус: current agent-owned Architecture, 2026-09-04"),
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current agent-owned Architecture, 2026-09-02"),
         (SCOPE_SPEC, "SR-*", "Статус: current agent-owned Architecture, 2026-09-02"),

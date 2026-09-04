@@ -1,6 +1,6 @@
 # Issue Grinder: архитектура
 
-Статус: current agent-owned Architecture, 2026-09-03. Независимые user-owned
+Статус: current agent-owned Architecture, 2026-09-04. Независимые user-owned
 источники находятся в локальных [Overview](overview.md) и
 [Requirements](requirements.md). Эта Architecture описывает current способ
 достижения цели `$issue-grinder` и не может ослаблять, расширять или
@@ -548,9 +548,9 @@ runtime `model_routing_guard.py`; отрицательный receipt запре�
   implementation, tests, independent verification/critique и rework;
   controller оставляет только конкретное material judgment, integration
   decision и final review;
-- `Рой` запускает на Luna Max scouts, candidates, critics, test authors, judges
-  и reducers; на candidate-friendly scope хотя бы одна material wave содержит
-  минимум два намеренно разных candidate;
+- `Рой` запускает на Luna Max по одной постоянной manager, implementer и
+  independent reviewer session; manager ведёт один exact candidate по одной
+  крупной проверяемой фазе и не получает source/tool work;
 - `Экономичный` выполняет на Luna Max весь substantive analysis, delivery и
   review. Non-Luna root допустим только как transport/authority оболочка,
   которая переносит решения supervisor-а в direct worker dispatch; end-user
@@ -582,7 +582,7 @@ promise:
 | `solo` | `modes/solo.md` | `IG-MODE-11`, один current profile, terminal-only |
 | `classic` | `modes/classic.md` | `IG-MODE-03`, `IG-MA-14..17`, controller-led terminal result |
 | `balance` | `modes/balance.md` | `IG-MODE-04`, части `IG-MODE-08..09`, Luna packet loop, adaptive verification и final gate |
-| `swarm` | `modes/swarm.md` | `IG-MODE-05`, части `IG-MODE-08..09`, bounded candidate waves |
+| `swarm` | `modes/swarm.md` | `IG-MODE-05`, части `IG-MODE-08..09`, persistent Manager Loop |
 | `economical` | `modes/economical.md` | `IG-MODE-06`, части `IG-MODE-08..09`, resumable checkpoint |
 
 Общие resolver, normalized profiles, authority и evidence invariants остаются в
@@ -696,12 +696,86 @@ packet-bound routing receipts, фактические profiles и expensive-work
 implementation является полезным candidate, но routing-invalid результатом, а
 не доказательством `Баланса`.
 
-### 4.6 Capability-aware стадии и событийная координация
+### 4.6 Roy Manager Loop
+
+Внутренний идентификатор `swarm` сохраняется для совместимости mode record и
+continuation, но больше не означает Best-of-N campaign. Runtime-проекция `Роя`
+— один последовательный Manager Loop с тремя постоянными Luna Max sessions и
+дорогим профилем только на границах.
+
+Проверяющий профиль один раз строит полный control brief: Strategic Outcome,
+Human Requirements, Agent Plan, exact scope/base/candidate, dependency map,
+risk map, acceptance/oracles, ограничения, external-effect gates и условие
+final review. Из него заранее получается конечный список крупных phase goals,
+но manager может уточнять следующий phase contract по уже полученному evidence.
+Control brief не требует отдельного manager turn на каждый мелкий checklist
+item.
+
+После startup recovery coordinator один раз создаёт и маршрутизирует:
+
+- постоянного Luna manager без repository paths, source access, shell и
+  implementation authority;
+- постоянного Luna implementer с одним admitted writer worktree либо одним
+  task-owned shadow tree и одним exact candidate на весь loop;
+- независимого Luna reviewer только после того, как manager примет все фазы.
+
+Стандартный transport не зависит от sibling messaging. Coordinator получает от
+manager-а компактный phase packet и без содержательной переработки передаёт его
+той же implementer session; evidence handoff implementer-а тем же способом
+передаётся обратно той же manager session. Это механический relay, а не дорогая
+пошаговая orchestration: coordinator не выбирает следующую фазу, не читает за
+manager-а implementation evidence и не выполняет routine work. Если доказанно
+доступен прямой совместимый transport между этими сессиями, он допустим, но не
+меняет roles, identities или evidence contract.
+
+Manager turn возвращает ровно одно из состояний:
+
+```text
+phase:<stable id> | goal | acceptance | material dependencies | evidence expected
+rework:<same phase id> | reproduced defect | exact acceptance delta
+complete | accepted phases | remaining unknowns | final-review packet
+escalate | one material question | evidence | blocked decision
+```
+
+Implementer turn применяет только текущий phase/rework packet к тому же exact
+candidate, запускает относящиеся к фазе checks и сразу возвращает
+`phase id | changed surfaces | checks | findings<=3 | unknowns | next`. Новая
+фаза не выдаётся до решения manager-а по предыдущей. Manager не просит raw diff
+или transcript и не перечитывает source; implementer не читает mode policy и не
+заменяет manager-а собственной декомпозицией всего scope. Повтор той же фазы
+без нового reproducer, evidence или materially другого подхода запрещён.
+
+Фазы выбираются по связному проверяемому outcome и dependency/integration
+границе. Большой Teams-подобный scope обычно получает несколько крупных фаз,
+например contract/data model, authorization/API, UI/synchronization и итоговую
+сквозную проверку; это не обязательный шаблон и не деление по числу Tasks или
+файлов. Одновременно активна только одна writing phase. Параллельные candidates,
+массовые critics и reducer запрещены штатным путём `Роя`.
+
+После `complete` один независимый Luna reviewer последовательно проходит exact
+candidate по Human Requirements и risk sections. Даже для большого scope он не
+создаёт собственных reviewers: сохраняет одну session, один finding ledger и
+конечный review plan. Material finding возвращается прежнему implementer-у как
+targeted rework; exact changed candidate возвращается тому же reviewer-у. После
+review pass coordinator механически интегрирует task-owned result, запускает
+integrated checks и только затем передаёт сжатый пакет проверяющему профилю для
+одного final gate без повторного исследования всего пути.
+
+Mode evidence содержит identities трёх sessions, stable phase ids и их порядок,
+manager decisions, implementer checks, reviewer ledger, routing receipts,
+candidate identity и expensive-work ledger. Manager с source/tool work,
+replacement implementer без доказанной недоступности, две одновременные фазы,
+review до `complete`, reviewer delegation или routine implementation дорогим
+профилем делают прогон функционально полезным, но невалидным доказательством
+`Роя`.
+
+### 4.7 Capability-aware стадии и событийная координация
 
 Multi-agent campaign состоит из bounded стадий; каждая direct рабочая или
 проверочная волна внутри стадии имеет одного owner-а и один outcome. Несколько
-direct candidates являются отдельными атомарными волнами от общей base, а не
-внутренними авторами одной скрытой волны. Один child может владеть
+direct candidates, когда их адаптивно разрешает `Баланс`, являются отдельными
+атомарными волнами от общей base, а не внутренними авторами одной скрытой волны.
+Один child может владеть
 внутренними ролями только при наблюдаемой nested collaboration capability; имя,
 тип и намерение spawn её не доказывают. Если capability отсутствует, runtime не
 выдаёт это за blocker и использует только mode-specific direct stages:
@@ -711,18 +785,20 @@ direct candidates являются отдельными атомарными в�
   оправдать несколько одно-ownerных candidate waves, после которых один direct
   Luna owner сводит варианты и проводит independent review до controller final
   gate;
-- в `Рое` bounded direct Luna candidates работают от общей exact base, после
-  quiescence один direct Luna reducer/reviewer сводит их к одному candidate;
+- в `Рое` coordinator держит отдельные постоянные Luna manager и implementer
+  sessions и механически пересылает между ними phase/evidence packets; после
+  manager `complete` запускается одна постоянная Luna reviewer session;
 - в `Экономичном` Luna top-level остаётся operational owner, а для exact
   candidate создаёт одного independent Luna review owner; non-Luna transport
   shell использует доступные direct Luna stages и не выполняет substantive work.
 
 На простом scope review owner самостоятельно читает candidate и возвращает
-ledger. На большом scope, например Teams, он может создать read-only lenses по
-реальным risk surfaces: data model/migrations, ACL/authorization, API/filtering,
-UI/synchronization и tests/UAT. Деление по числу Tasks без независимой
-поверхности не создаёт lens. В любом случае parent получает один candidate и
-один объединённый ledger, а не сообщения всех внутренних reviewers.
+ledger. На большом scope reviewer `Классического` и `Баланса` может создать
+read-only lenses по реальным risk surfaces: data model/migrations,
+ACL/authorization, API/filtering, UI/synchronization и tests/UAT. Reviewer
+`Роя` проходит эти sections последовательно сам и не делегирует. Деление по
+числу Tasks без независимой поверхности не создаёт lens. В любом случае parent
+получает один candidate и один объединённый ledger.
 
 Новый direct owner проходит один заранее разрешённый routing guard, один spawn
 и event-driven wait до `complete | needs_attention | deadline`. Wait получает
@@ -742,7 +818,7 @@ reviewer допустим только после доказанной недо�
 gate resumable checkpoint.
 
 Эта схема не скрывает platform limitation и ограничивает дорогую coordination
-числом полезных стадий и candidate envelope. Она не ослабляет обязательный
+числом полезных стадий и mode envelope. Она не ослабляет обязательный
 review: меняется форма orchestration, а не evidence gate.
 
 Если sandbox разрешает запись в рабочие файлы, но запрещает Git metadata,
@@ -762,7 +838,7 @@ Shadow path выводится прямо из packet identity без поиск
 всех `apply_patch`/write-вызовах; случайная запись в integration checkout
 считается ownership defect и требует reconciliation до review или fan-in.
 
-### 4.7 Review packet и переключение
+### 4.8 Review packet и переключение
 
 Expensive review packet содержит exact scope/base/candidate identity,
 acceptance, integrated diff и source anchors, выполненные checks, material
@@ -1171,7 +1247,7 @@ UAT либо другая непроизводственная среда; не�
 
 Делегация работы Issue Grinder применяется при наличии минимум двух независимых полезных пакетов
 либо когда выбранный режим оправдывает независимого critic/verifier или
-намеренно различимые candidates одной работы. Это решение не включает
+постоянный manager loop одной большой работы. Это решение не включает
 максимальную автономность в неявном run и не расширяет authority. Если subagent
 capability или изолированная writable capacity недоступны, coordinator
 адаптирует работу по mode contract: `Классический` может выполнить frontier
@@ -1213,22 +1289,22 @@ service/provider transport.
 1. разрешает live integration target и не подменяет его текущей случайной
    веткой либо dirty root checkout;
 2. строит dependency graph и карту поверхностей записи;
-3. выделяет conflict-free dependency-ready packets, а в `Рое` отдельно
-   регистрирует intentional candidates с purpose и candidate identity;
+3. выделяет conflict-free dependency-ready packets, а в `Рое` создаёт один
+   exact candidate и конечный plan крупных dependency-ready фаз;
 4. разбивает multi-agent campaign на bounded mode-specific stages и атомарные
-   одно-ownerные рабочие/проверочные волны; внутренние роли остаются у owner-а
-   только при доказанной nested delegation, иначе `Баланс` и `Рой` используют
-   предусмотренные direct waves;
+   одно-ownerные рабочие/проверочные волны; `Рой` сохраняет отдельные постоянные
+   manager/implementer/reviewer sessions и последовательные phase transitions;
 5. до spawn каждого direct owner-а получает model-routing receipt, переносит
    exact model/effort/fork в фактический dispatch и сверяет observed profile;
    nested owner самостоятельно проводит тот же gate для внутренних children;
 6. создаёт branches от подтверждённой integration base и выдаёт каждому writer
    отдельные feature branch и Git worktree;
 7. оставляет read-only исследователей без worktree;
-8. запускает столько packet/candidate owners, сколько оправдано режимом,
-   доступной capacity и ожидаемой ценностью, не размножая одинаковые подходы;
+8. запускает столько packet owners, сколько оправдано режимом, доступной
+   capacity и ожидаемой ценностью; в `Рое` не размножает implementer или
+   candidate ради свободных слотов;
 9. ожидает stage handoffs без polling неизменившегося состояния;
-10. передаёт compact results одному предусмотренному reviewer/reducer, но сам
+10. передаёт compact results предусмотренному independent reviewer-у, но сам
     объединяет изменения;
 11. проверяет exact integrated result;
 12. после каждого результата или изменения scope пересчитывает frontier.
@@ -1322,11 +1398,13 @@ requirements, work или terminal criteria. Сохранившийся task-own
 является checkpoint: после доказанной остановки прежнего владельца он передаётся
 новому exclusive writer, а не дублируется.
 
-Intentional candidate `Роя` не является replacement checkpoint. До `prepare`
-coordinator фиксирует найденный existing work, отличающий purpose нового
+Восстановительный candidate `Роя` не является replacement checkpoint. Он
+допустим только после доказанного тупика и решения manager-а. До `prepare`
+coordinator фиксирует найденный existing work, materially иной purpose нового
 варианта, candidate identity и общую base. Новый writer получает отдельную
-branch/worktree и не присваивает историю существующего кандидата. Без этой
-разницы startup recovery запрещает свежую параллельную реализацию.
+branch/worktree и не присваивает историю существующего кандидата; одновременно
+две реализации не работают. Без этой разницы startup recovery запрещает свежую
+реализацию.
 
 Изоляция writer-а подтверждается фактическими `git worktree` и branch refs до
 первой записи. Указание пути только в prompt субагента не является evidence.
@@ -1446,8 +1524,9 @@ ID само по себе не доказывает поведение.
   materially changed candidate, findings не голосуются, а узкий Sol decision
   возвращает отделимое исполнение в новую Luna wave; raw Sol implementation
   либо отсутствующий packet-bound receipt делает case routing-invalid даже при
-  функциональном успехе; оба сохраняют exact final review; `Рой` с bounded
-  direct candidate campaign, intentional identity, Luna reduction и bounded stop;
+  функциональном успехе; оба сохраняют exact final review; `Рой` с постоянными
+  Luna manager/implementer sessions, крупными последовательными фазами, одним
+  independent Luna reviewer без delegation и bounded stop;
   `Экономичный` с independent Luna review перед terminal acceptance и одним
   resumable candidate без ложного Done/Goal close;
 - Luna profile normalization, root-shell supervisor, explicit role override и

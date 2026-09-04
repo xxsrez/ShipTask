@@ -12,9 +12,11 @@ from scripts.issue_grinder_mode_harness import (
     ModeOrigin,
     Profile,
     ReviewWaveObservation,
+    RoyManagerLoopObservation,
     assess_balance_packet,
     assess_direct_campaign,
     assess_review_wave,
+    assess_roy_manager_loop,
     decide_mode_switch,
     decide_run_exit,
     mode_dispatch_policy,
@@ -256,148 +258,116 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         )
         self.assertIn("execution_action_ceiling_exceeded", oversized_exception.defects)
 
-    def test_swarm_direct_campaign_keeps_distinct_candidates_and_reducer(self) -> None:
-        decision = assess_direct_campaign(
-            DirectCampaignObservation(
-                mode=ExecutionMode.SWARM,
-                stage_order=("candidates", "reduction_review"),
-                material_candidate_fork=True,
-                no_fork_reason="",
-                candidate_author_ids=("candidate-a", "candidate-b", "candidate-c"),
-                candidate_purposes=("minimal", "reliability", "simple-api"),
-                reviewer_id="reducer-reviewer",
-                reducer_id="reducer-reviewer",
-                routing_guard_owner_ids=(
-                    "candidate-a",
-                    "candidate-b",
-                    "candidate-c",
-                    "reducer-reviewer",
-                ),
-                dispatched_owner_ids=(
-                    "candidate-a",
-                    "candidate-b",
-                    "candidate-c",
-                    "reducer-reviewer",
-                ),
-                event_wait_stage_count=2,
-                common_exact_base=True,
-                candidate_stage_quiescent_before_review=True,
-                review_complete=True,
-                finding_ledger_returned=True,
-                final_review_started_after_stages=True,
-                execution_action_counts=(8, 9, 8),
-                execution_action_budgets=(10, 10, 10),
-                review_action_count=6,
-                review_action_budget=8,
-                controller_final_action_count=2,
-                controller_final_action_budget=3,
-                integration_action_count=1,
-                integration_action_budget=1,
-            )
+    def complete_roy_manager_loop(self, **overrides: object) -> RoyManagerLoopObservation:
+        observation = RoyManagerLoopObservation(
+            control_brief_complete=True,
+            manager_id="luna-manager",
+            implementer_id="luna-implementer",
+            reviewer_id="luna-reviewer",
+            routing_guard_owner_ids=(
+                "luna-manager",
+                "luna-implementer",
+                "luna-reviewer",
+            ),
+            dispatched_owner_ids=(
+                "luna-manager",
+                "luna-implementer",
+                "luna-reviewer",
+            ),
+            manager_persistent=True,
+            implementer_persistent=True,
+            reviewer_persistent=True,
+            manager_source_access=False,
+            manager_work_tool_calls=0,
+            manager_implementation=False,
+            phase_ids=("contract", "core", "integration", "acceptance"),
+            accepted_phase_ids=("contract", "core", "integration", "acceptance"),
+            implementer_session_ids=(
+                "luna-implementer",
+                "luna-implementer",
+                "luna-implementer",
+                "luna-implementer",
+            ),
+            candidate_ids=("candidate-1",) * 4,
+            max_concurrent_phases=1,
+            manager_complete=True,
+            review_started_after_manager_complete=True,
+            reviewer_delegation_count=0,
+            review_complete=True,
+            finding_ledger_returned=True,
+            controller_final_review_started_after_review=True,
         )
+        return replace(observation, **overrides)
+
+    def test_roy_manager_loop_keeps_sessions_candidate_and_phase_order(self) -> None:
+        decision = assess_roy_manager_loop(self.complete_roy_manager_loop())
 
         self.assertTrue(decision.may_enter_controller_final_review)
         self.assertEqual(decision.defects, ())
 
-    def test_direct_campaign_rejects_fake_swarm_and_early_final_review(self) -> None:
-        decision = assess_direct_campaign(
-            DirectCampaignObservation(
-                mode=ExecutionMode.SWARM,
-                stage_order=("candidates", "reduction_review"),
-                material_candidate_fork=True,
-                no_fork_reason="",
-                candidate_author_ids=("candidate-a",),
-                candidate_purposes=("same",),
-                reviewer_id="candidate-a",
-                reducer_id="candidate-a",
-                routing_guard_owner_ids=("candidate-a", "candidate-a"),
-                dispatched_owner_ids=("candidate-a", "candidate-a"),
-                event_wait_stage_count=1,
-                common_exact_base=False,
-                candidate_stage_quiescent_before_review=False,
+    def test_roy_manager_loop_rejects_old_swarm_and_early_review(self) -> None:
+        decision = assess_roy_manager_loop(
+            self.complete_roy_manager_loop(
+                manager_source_access=True,
+                manager_work_tool_calls=2,
+                manager_implementation=True,
+                accepted_phase_ids=("contract", "integration", "core"),
+                implementer_session_ids=(
+                    "implementer-a",
+                    "implementer-b",
+                    "implementer-c",
+                    "implementer-d",
+                ),
+                candidate_ids=("a", "b", "c", "d"),
+                max_concurrent_phases=4,
+                manager_complete=False,
+                review_started_after_manager_complete=False,
+                reviewer_delegation_count=4,
                 review_complete=False,
                 finding_ledger_returned=False,
-                final_review_started_after_stages=False,
+                controller_final_review_started_after_review=False,
                 unchanged_state_actions=("status_poll",),
-                execution_action_counts=(12,),
-                execution_action_budgets=(10,),
-                execution_open_ended_simulation=True,
-                execution_searched_parent_messaging=True,
-                execution_reloaded_runtime_policy=True,
-                execution_directory_discovery=True,
-                review_plan_action_count=9,
-                review_exact_action_count=3,
-                review_action_count=12,
-                review_action_budget=5,
-                review_open_ended_exploration=True,
-                reviewer_workspace_mutation=True,
-                reviewer_searched_parent_messaging=True,
-                final_review_replayed_exploration=True,
-                controller_final_action_count=5,
-                controller_final_action_budget=3,
-                integration_action_count=3,
-                integration_action_budget=1,
-                integration_patch_rendered_in_context=True,
-                runtime_reference_discovery=True,
-                shadow_path_discovery=True,
-                technical_wait_state_probes=("list_agents",),
             )
         )
 
         self.assertFalse(decision.may_enter_controller_final_review)
-        self.assertIn("direct_owners_not_independent", decision.defects)
-        self.assertIn("swarm_material_fork_requires_multiple_candidates", decision.defects)
-        self.assertIn("controller_final_review_started_early", decision.defects)
-        self.assertIn("unchanged_state_coordination:status_poll", decision.defects)
-        self.assertIn("execution_action_budget_exceeded", decision.defects)
-        self.assertIn("execution_open_ended_simulation", decision.defects)
-        self.assertIn("execution_searched_parent_messaging", decision.defects)
-        self.assertIn("execution_reloaded_runtime_policy", decision.defects)
-        self.assertIn("execution_directory_discovery", decision.defects)
-        self.assertIn("review_action_budget_exceeded", decision.defects)
-        self.assertIn("integration_action_budget_exceeded", decision.defects)
-        self.assertIn("integration_patch_rendered_in_context", decision.defects)
-        self.assertIn("runtime_reference_discovery", decision.defects)
-        self.assertIn("shadow_path_discovery", decision.defects)
-        self.assertIn("review_open_ended_exploration", decision.defects)
-        self.assertIn("reviewer_workspace_mutation", decision.defects)
-        self.assertIn("reviewer_searched_parent_messaging", decision.defects)
-        self.assertIn("final_review_replayed_exploration", decision.defects)
-        self.assertIn("controller_final_action_budget_exceeded", decision.defects)
-        self.assertIn("technical_wait_state_probe", decision.defects)
+        for defect in (
+            "roy_manager_source_access",
+            "roy_manager_work_tool_use",
+            "roy_manager_implemented",
+            "roy_phases_not_accepted_in_order",
+            "roy_implementer_session_replaced",
+            "roy_candidate_replaced",
+            "roy_parallel_phases",
+            "roy_manager_incomplete",
+            "roy_review_started_early",
+            "roy_reviewer_delegated",
+            "roy_independent_review_incomplete",
+            "roy_finding_ledger_missing",
+            "roy_controller_final_review_started_early",
+            "unchanged_state_coordination:status_poll",
+        ):
+            self.assertIn(defect, decision.defects)
 
-    def test_swarm_does_not_invent_candidates_without_a_material_fork(self) -> None:
-        decision = assess_direct_campaign(
-            DirectCampaignObservation(
-                mode=ExecutionMode.SWARM,
-                stage_order=("candidates", "reduction_review"),
-                material_candidate_fork=False,
-                no_fork_reason="The API and oracle admit one bounded implementation shape.",
-                candidate_author_ids=("candidate-a",),
-                candidate_purposes=("default",),
-                reviewer_id="reducer-reviewer",
-                reducer_id="reducer-reviewer",
-                routing_guard_owner_ids=("candidate-a", "reducer-reviewer"),
-                dispatched_owner_ids=("candidate-a", "reducer-reviewer"),
-                event_wait_stage_count=2,
-                common_exact_base=True,
-                candidate_stage_quiescent_before_review=True,
-                review_complete=True,
-                finding_ledger_returned=True,
-                final_review_started_after_stages=True,
-                execution_action_counts=(7,),
-                execution_action_budgets=(10,),
-                review_action_count=5,
-                review_action_budget=8,
-                controller_final_action_count=2,
-                controller_final_action_budget=3,
-                integration_action_count=1,
-                integration_action_budget=1,
+    def test_roy_rework_reuses_implementer_and_reviewer(self) -> None:
+        accepted = assess_roy_manager_loop(
+            self.complete_roy_manager_loop(
+                material_rework=True,
+                rework_implementer_id="luna-implementer",
+                recheck_reviewer_id="luna-reviewer",
+            )
+        )
+        rejected = assess_roy_manager_loop(
+            self.complete_roy_manager_loop(
+                material_rework=True,
+                rework_implementer_id="replacement-implementer",
+                recheck_reviewer_id="replacement-reviewer",
             )
         )
 
-        self.assertTrue(decision.may_enter_controller_final_review)
-        self.assertEqual(decision.defects, ())
+        self.assertTrue(accepted.may_enter_controller_final_review)
+        self.assertIn("roy_rework_implementer_replaced", rejected.defects)
+        self.assertIn("roy_recheck_reviewer_replaced", rejected.defects)
 
     def test_balance_can_use_bounded_adaptive_candidates(self) -> None:
         decision = assess_direct_campaign(

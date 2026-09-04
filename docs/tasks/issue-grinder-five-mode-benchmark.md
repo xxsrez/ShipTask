@@ -1,10 +1,17 @@
 # Сравнение пяти режимов Issue Grinder
 
-Статус: первый пилот завершён 2026-09-01 и признан непригодным для ранжирования;
-итог зафиксирован в
-[сравнительном отчёте](../reports/2026-09-01-issue-grinder-five-mode-benchmark.md).
-Текущая редакция — исправленный runbook для следующей полной серии. Она не
-переоценивает результаты первого пилота.
+Статус: тяжёлый Teams-пилот завершён 2026-09-01 и признан непригодным для
+ранжирования; итог зафиксирован в
+[первом сравнительном отчёте](../reports/2026-09-01-issue-grinder-five-mode-benchmark.md).
+Повтор полной Teams-серии отложен из-за её стоимости. По решению пользователя
+2026-09-02 вместо неё выполнен локальный benchmark пяти режимов на одном
+синтетическом scope из четырёх пунктов; первоначальный десятиминутный checkpoint
+оказался слишком коротким, поэтому пользователь поднял общий ceiling до одного
+часа, а четыре оборванных run были продолжены в тех же thread и workspace.
+Фактические результаты находятся в
+[отчёте короткой серии](../reports/2026-09-02-issue-grinder-five-mode-synthetic-benchmark.md).
+Оставшийся ниже Teams-runbook сохраняется как отложенный вариант более сильной
+проверки и не переоценивает ни первый пилот, ни короткую серию.
 Delivery оставляла candidate до post-run capture, а очистку Team-данных и
 возврат UAT baseline выполняла центральная сессия через временный узкий UAT
 endpoint. После пяти прогонов и слепой оценки endpoint, flag, secret, тесты и
@@ -33,6 +40,19 @@ Task и совпадающая локальная session/worktree telemetry. П
 из этих свидетельств контроллер не вправе считать прогон созданным или
 выполнять Release в собственной сессии.
 
+Уточнение от 2026-09-02: агрегированный `list_threads` не является источником
+истины о существовании Project Task. Live-проверка показала рабочие,
+неархивированные и связанные с клиентом Tasks, которые доступны через
+`read_thread` и локальную telemetry, но отсутствуют в этом каталоге. Поэтому
+`list_threads` допускается только как best-effort inventory и не входит в
+session-identity gate.
+
+Тем же решением пользователя параллельные Codex/ChatGPT Work Tasks исключены из
+стартовых blocker-ов. Основной token accounting строится по exact root delivery
+thread и его descendants. Account-level quota delta при пересекающейся
+активности сохраняется только как низкоуверенный общий контекст и не участвует в
+сравнении режимов.
+
 Это экспериментальный runbook, а не новый источник действующей policy Issue
 Grinder. Канонические значения режимов описаны в
 [пользовательском руководстве](../guides/issue-grinder-modes.md), а граница
@@ -42,7 +62,39 @@ Grinder. Канонические значения режимов описаны
 создаёт model-forward сессии, не исполняет Release и не измеряет качество;
 поэтому настоящий benchmark организует внешний контроллер по этому документу.
 
-## Назначение
+## Действующая политика короткого benchmark
+
+Короткая серия проверяет model routing, execution topology, локальную
+реализацию, самопроверку, wall-time и token cost без Task Manager, Goal, UAT,
+сети и внешних эффектов. Пять сессий получают byte-identical копии маленького
+Python-проекта с графом работ `MF-1 → {MF-2, MF-3} → MF-4`; в prompt меняется
+только явное имя режима. Для каждого run действует ceiling `3 600` секунд до
+terminal handoff. Планового десятиминутного checkpoint нет: runner timeout,
+manifest и текст измеряемого prompt получают одно значение `3 600`, а
+противоречие между ними останавливает подготовку до run. Упоминание прежних
+`600 + 3 000` секунд сохраняется только как история первой серии и не является
+действующей инструкцией. Сохранённый candidate после завершения либо настоящего
+непредвиденного timeout проходит общий внешний набор скрытых тестов.
+
+Точность измерения намеренно снижена относительно полного Teams-протокола:
+
+- локальный дефект или шум замера, который не мешает безопасно выполнить и
+  проверить candidate, не останавливает run; его записывают как nuance этой
+  строки таблицы;
+- искажение, одинаково влияющее на всю серию, записывают рядом с итоговой
+  таблицей и не скрывают в одной строке;
+- непредвиденный timeout, незавершённый финальный текст, грубый account quota counter,
+  параллельная посторонняя Codex-активность или неполный blind review не
+  обнуляют independently accepted candidate и не прекращают оставшиеся runs;
+- run останавливается только когда продолжение небезопасно, модель либо
+  обязательный локальный oracle фактически недоступны, frozen fixture повреждён
+  или результат невозможно сохранить и проверить.
+
+Такой benchmark является model-forward evaluation режимов, но не Issue Grinder
+delivery proof. Он не доказывает Task Manager lifecycle, UAT, ACL, Release
+closure, publication и recovery внешних эффектов.
+
+## Отложенный high-fidelity Teams-runbook
 
 Этот документ является заданием для отдельной центральной Codex-сессии. Она
 должна подготовить воспроизводимый стенд, строго последовательно запустить пять
@@ -169,8 +221,8 @@ baseline не входит.
 | Task Manager visible-state reset | Ready | Обычные versioned mutations; history/version не откатываются |
 | `TM-329`/`TM-334` handoff semantics | Ready | Task versions `36`/`32`: baseline deploy идёт до Team-only очистки, candidate остаётся до capture |
 | Mode top-level profiles и wall-time ceiling | Требует повторной проверки | Sol/xhigh для Соло/Классического/Баланса/Роя, Luna/max для Экономичного; standard Task, максимум 8 часов |
-| Identity каждой measured delivery Task | Требует live proof для каждого run | Raw `create_thread` receipt + `list_threads` + `read_thread` + root `session_meta` + новый worktree на frozen SHA; self-report запрещён как proof |
-| Model routing canary | Ready | 2026-09-01 live canaries: `Баланс` передал research/test в Luna Max; `Рой` создал двух независимых Luna Max candidates и Luna Max critic/reducer; Luna Max top-level автоматически выбрал `Экономичный` и выполнил substantive serial packet. Для `Соло` добавлена отдельная проверка: вся substantive delivery остаётся у одного execution owner, а service-provider agent сам по себе не считается нарушением. Перед серией повторить четыре canary на её frozen installed snapshot |
+| Identity каждой measured delivery Task | Требует live proof для каждого run | Raw `create_thread` receipt + `read_thread` + root `session_meta` + новый worktree на frozen SHA; self-report и `list_threads` запрещены как единственный proof |
+| Model routing canary | Ready | 2026-09-02 live canaries на installed snapshot `20260902083649`: `Соло` оставил всю substantive work у одного Sol/xhigh owner; `Баланс` передал research/test в Luna Max; `Рой` создал двух независимых Luna Max candidates и отдельные Luna Max critic/reducer; Luna Max top-level автоматически выбрал `Экономичный` и выполнил исполняемый serial packet с 11 тестами. Перед серией повторять canary только после изменения installed snapshot |
 | Самопроверка delivery и независимая приёмка | Ready | Каждый режим свободно запускает безопасные локальные тесты; controller после handoff повторно выполняет одинаковый frozen acceptance suite exact candidate |
 | Action-time access policy | Ready | Живая Browser ACL mutation исключена из unattended acceptance; Team-grant доказывается exact-candidate server/UI tests, а optional attended smoke не входит в ranking |
 | Blind evaluator | Ready | Отдельная шестая `gpt-5.6-sol`/`xhigh` сессия после пяти delivery-runs |
@@ -189,9 +241,9 @@ existing tables разрешены и не требуют симметрично
 
 Пользователь уже выбрал Release 0.4 и поручил центральной сессии очистку только
 трёх Team-таблиц в UAT между прогонами. Он запускает контроллер на
-`gpt-5.6-sol` с `xhigh` в standard Task mode и не использует Codex или ChatGPT
-Work до итогового отчёта. Благодаря этому interval token telemetry и недельная
-quota delta не смешиваются с его параллельной активностью. Task Manager
+`gpt-5.6-sol` с `xhigh` в standard Task mode. Другие Codex или ChatGPT Work
+Tasks не блокируют серию и не входят в delivery-tree token totals; при их
+пересечении account-level quota delta получает low-confidence. Task Manager
 возвращается в исходное видимое состояние только обычными versioned mutations.
 Product Production не изменяется.
 
@@ -411,21 +463,22 @@ mode/process metadata packets `A..E`. Этот путь не является д
    schema rollback. Product Production не читать и не изменять.
 6. Проверяет доступность именно `create_thread` для создания fresh Codex
    Project Task с `target.type=project`, точным `projectId` Task Manager и
-   `environment.type=worktree`, а также `list_threads`, `read_thread` и
-   локальной session telemetry для независимого read-back. `spawn_agent`,
+   `environment.type=worktree`, а также `read_thread` и локальной session
+   telemetry для независимого read-back. `list_threads` используется только
+   как необязательная инвентаризация. `spawn_agent`,
    `fork_thread` и projectless target не считаются заменой этого contract.
 7. Проверяет доступность локальной token telemetry и account usage/reset
    evidence, включая `rate_limits.primary.used_percent` и `resets_at` для
-   недельного окна. Если точное распределение по thread tree невозможно,
-   включает строгий запрет любой другой Codex/ChatGPT Work активности на время
-   каждого измерительного окна и явно маркирует interval totals как
-   приближение.
+   недельного окна. Exact delivery-tree attribution является обязательным;
+   account usage при параллельной активности остаётся только supplementary
+   low-confidence evidence.
 8. Фиксирует ожидаемый weekly reset. Не начинает прогон в окне, где reset
    вероятен до его завершения.
-9. Подтверждает, что во время каждого измерительного окна нет другой
-   model-forward или пользовательской Codex/ChatGPT Work активности. Контроллер
-   выполняет только минимальные wait/status и измерительные calls; их токены
-   считаются overhead и не выдаются за токены delivery thread tree.
+9. Снимает best-effort snapshot другой model-forward и пользовательской
+   Codex/ChatGPT Work активности. Её наличие не блокирует запуск, но исключает
+   account-level quota delta из сравнительных метрик. Контроллер выполняет
+   только минимальные wait/status и измерительные calls; их токены считаются
+   overhead и не выдаются за токены delivery thread tree.
 10. На установленном snapshot запускает mode-loading smoke для всех пяти
     режимов и четыре fresh routing canary: `Соло`, `Баланс`, `Рой`,
     `Экономичный`. Каждый canary создаётся отдельным projectless
@@ -589,14 +642,10 @@ Self-report root или controller ни одно из этих полей не �
     "host_id": "<host>"
   },
   "created_thread_directive_emitted": true,
-  "list_threads_readback": {
-    "id": "<same measured root>",
-    "kind": "codex",
-    "project_id": "<same project>",
-    "cwd": "<new worktree>"
-  },
   "read_thread_readback": {
     "id": "<same measured root>",
+    "kind": "codex",
+    "cwd": "<new worktree>",
     "initial_prompt_sha256": "<frozen prompt hash>"
   },
   "root_session_meta": {
@@ -781,61 +830,18 @@ terminal reconciliation. Он не вызывает `request_user_input`, не �
 byte-identical после подстановки одного поля `<MODE>`:
 
 ```text
-Выполни точно выбранный Task Manager Release <TARGET_RELEASE> через
-$issue-grinder в явном режиме <MODE>.
-
-Repository, Task Manager Project, UAT target, baseline, разрешённые полномочия
-и acceptance перечислены ниже. Product Production полностью запрещён; обычный
-подтверждённый UAT workflow разрешён. Работай автономно в пределах Issue
-Grinder contract до terminal результата, настоящего blocker либо допустимого
-контрактом Экономичного режима resumable checkpoint.
-
-Не меняй выбранный режим. Не читай и не переиспользуй никакие benchmark-ветки,
-worktrees, сессии, отчёты или результаты других прогонов. Не изменяй main и не
-сливай результат в него. Внутреннюю topology выбирай только по контракту
-указанного режима.
-
-До содержательной child-work соблюдай model-routing gate установленного Issue
-Grinder: сохрани requested и observed profile receipts. Несовпадение model,
-effort, platform agent type или semantic role не исправляй дорогой root-работой;
-останови wave и верни evidence контроллеру.
-
-Не читай Task Manager Activity. Monotonic Task versions и timestamps являются
-только transport metadata, а не контекстом задачи; используй current Task
-descriptions, hierarchy, relations и видимый comment list.
-
-Teams schema уже является частью baseline. Не изменяй db/schema.ts, drizzle/**,
-D1 schema или migration journal и не выполняй runtime DDL. До UAT publication
-докажи zero protected-schema diff; при недостаточной schema честно остановись
-с blocker.
-
-Заверши handoff с exact candidate, доступным для post-run capture. Для TM-334
-докажи изоляцию, rows и read-back таблиц teams, team_memberships и team_grants
-обязательными автоматическими тестами exact candidate; live UAT read-back
-фиксирует фактически созданные строки, но наличие живой team_grants строки не
-является hard gate unattended-прогона. Обычные row-level изменения в прочих UAT
-D1 tables разрешены, не являются delivery/reset gate и не требуют доказательства
-полного non-Team zero diff. Не трать время на такой fingerprint или ремонт. Не
-реализуй и не запускай межпрогонный cleanup; его после capture выполняет
-центральный controller только для трёх Team-таблиц.
-
-Самостоятельно выбери и запусти достаточные безопасные локальные проверки exact
-candidate. Можно использовать любые test files, test runners, полный набор и
-обоснованные повторы; не рассчитывай, что последующая независимая проверка
-контроллера заменит твою самопроверку. В measured run не создавай, не меняй и не
-отзывай permissions/access через Browser. Такой live submit не входит в
-acceptance: докажи Team-grant автоматическими server integration и UI/component
-tests exact candidate. Если interactive surface требует action-time
-confirmation, пропусти только этот live check, запиши предел evidence и
-продолжай до terminal результата без вопроса пользователю и без blocker.
-
-<FROZEN_RELEASE_AND_ENVIRONMENT_PACKET>
+Выполни Task Manager Release 0.4
+(`00000000-0000-4000-8000-923bce110ea6`) через $issue-grinder в режиме <MODE>.
+Работай автономно по контракту выбранного режима до terminal результата.
+Product Production полностью запрещён; подтверждённый UAT разрешён. Не читай и
+не используй benchmark-артефакты других прогонов.
 ```
 
-`<TARGET_RELEASE>` и `<FROZEN_RELEASE_AND_ENVIRONMENT_PACKET>` предварительно
-подставляются один раз в общий текст. При создании пяти prompt меняется только
-`<MODE>`. Titles, opaque branch labels и app metadata не должны раскрывать mode
-будущему blind evaluator.
+При создании пяти prompt меняется только `<MODE>`. Остальной runbook является
+контрактом контроллера и не вклеивается в delivery prompt: acceptance уже хранится
+в live Task Manager scope, environment boundaries — в Project context, а
+topology — в установленном Issue Grinder. Titles, opaque branch labels и app
+metadata не должны раскрывать mode будущему blind evaluator.
 
 Не добавлять mode-specific советы, лимиты агентов, способы декомпозиции или
 подсказки по реализации. Это изменило бы предмет эксперимента.
@@ -852,8 +858,8 @@ Task Manager versions `TM-329@36` и `TM-334@32` уже содержат то ж
 
 ### 4.1 Pre-run gate
 
-1. Убедиться, что ни одна другая Codex/ChatGPT Work задача не активна на этом
-   account, кроме контроллера.
+1. Снять best-effort snapshot активных Codex/ChatGPT Work Tasks для пояснения
+   account-level quota delta; наличие других Tasks не блокирует run.
 2. Подтвердить clean frozen `main`. Старые worktrees остаются на месте и не
    считаются загрязнением сами по себе.
 3. Сверить Task Manager visible-content fingerprint с baseline; монотонные
@@ -876,14 +882,10 @@ Task Manager versions `TM-329@36` и `TM-334@32` уже содержат то ж
 8. Немедленно опубликовать структурированный клиентский указатель
    `::created-thread` для возвращённого `threadId` либо ожидающего setup
    `clientThreadId`. Обычный текст с идентификатором не является заменой.
-9. Через `list_threads` доказать появление новой user-visible Codex Project Task
-   с тем же `threadId`, точным `projectId` и новым worktree. Если Project Task
-   не появляется в обычном списке, это fail-closed `session_identity_missing`,
-   даже если controller или child утверждают обратное.
-10. Через `read_thread` независимо подтвердить тот же `threadId`, начальный
+9. Через `read_thread` независимо подтвердить тот же `threadId`, начальный
    frozen prompt и фактический top-level status. Затем найти root
    `session_meta`: его `id` обязан равняться `threadId`, а cwd — новому worktree.
-11. В новом worktree подтвердить clean `HEAD == baseline_sha`, уникальные path и
+10. В новом worktree подтвердить clean `HEAD == baseline_sha`, уникальные path и
     branch, не совпадающие ни с одним сохранённым benchmark artifact. Записать
     всё перечисленное в `runs/<A..E>/session-creation.json` вместе с SHA-256.
 
@@ -1244,16 +1246,14 @@ artifacts, delivery threads и остальные benchmark worktrees; он чи
   `fork_thread`, внутреннем subagent или другой сущности вместо новой
   user-visible Project Task;
 - отсутствует raw `create_thread` receipt либо не совпадают `threadId`,
-  `list_threads`, `read_thread`, root `session_meta`, worktree или baseline SHA;
+  `read_thread`, root `session_meta`, worktree или baseline SHA;
 - не опубликован структурированный клиентский указатель `created-thread`, из-за
   чего Task существует по ID, но не передана клиенту как созданная сессия;
-- controller заявил о создании Task, но она не появилась в независимом
-  `list_threads` read-back;
 - не восстановленный Task Manager/UAT state;
 - потеря связи с thread или worktree из-за controller failure;
 - недоступность общего для всех обязательного tool/service;
-- посторонняя account activity, делающая основные usage measurements
-  неразделимыми;
+- недоступна exact delivery-tree token attribution, а параллельная account
+  activity делает usage measurements неразделимыми;
 - weekly reset или изменение common profile/runtime посреди прогона;
 - общий prompt/acceptance defect, который одинаково лишил бы все режимы
   необходимого факта.

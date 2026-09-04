@@ -89,9 +89,9 @@ Architecture — за «как сейчас этого достигать». С�
 ## Experiments
 
 - [Сравнение пяти режимов Issue Grinder](tasks/issue-grinder-five-mode-benchmark.md)
-  — завершённый протокол пяти строго последовательных model-forward прогонов,
-  Team-only reset, доказуемого восстановления Task Manager/Git/UAT и слепой
-  итоговой оценки.
+  — история тяжёлого Teams-пилота, отложенный high-fidelity runbook и
+  действующая сниженная политика короткого локального benchmark без Task
+  Manager.
 
 ## Decisions
 
@@ -243,6 +243,15 @@ Architecture — за «как сейчас этого достигать». С�
 
 ## Reports
 
+- [Issue Grinder: актуальная таблица пяти режимов](reports/2026-09-02-issue-grinder-five-mode-comparison-table.html)
+  — текущий срез без колонок Weekly Use и 5.4; строка Роя перенесена из уже
+  завершённого Manager Loop эксперимента и явно не считается свежим замером
+  нового runtime.
+- [Issue Grinder: Balance и Manager Loop](reports/2026-09-04-issue-grinder-manager-loop-balance-experiment.html)
+  — синтетический forward-test постоянных manager/implementer sessions:
+  подтверждённое снижение Sol при неприемлемом росте времени, Luna и общей
+  стоимости; после обсуждения ядро схемы принято как новая topology `Роя`, а не
+  замена `Баланса`.
 - [Issue Grinder: проверка единого владельца review-wave](reports/2026-09-03-issue-grinder-review-wave-owner-benchmark.md)
   — повторный синтетический benchmark после изменения Requirements,
   Architecture и runtime: подтверждённая экономия Классического, несостоявшиеся
@@ -250,6 +259,10 @@ Architecture — за «как сейчас этого достигать». С�
 - [Issue Grinder: rollback-kit для review-wave owner](reports/2026-09-03-issue-grinder-review-wave-owner-rollback.md)
   — неисполненный безопасный runbook возврата source, Marketplace package и
   installed snapshot без потери пользовательских изменений.
+- [Issue Grinder: короткое сравнение пяти режимов](reports/2026-09-02-issue-grinder-five-mode-synthetic-benchmark.md)
+  — пять изолированных десятиминутных local model-forward runs, одинаковый
+  21-test oracle, exact recursive token trees и сравнение terminal discipline,
+  topology и стоимости при явно сниженной точности измерения.
 - [Issue Grinder: аудит пяти режимов и маршрутизации моделей](reports/2026-09-01-issue-grinder-five-mode-benchmark.md)
   — исправленный tree-only расход, отзыв прежнего ranking, фактические роли
   Sol/Luna/GPT-5.4, protocol defects и требования к повторному benchmark.

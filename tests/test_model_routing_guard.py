@@ -152,6 +152,13 @@ class ModelRoutingGuardTest(unittest.TestCase):
                 self.assertTrue(receipt.allowed, receipt.defects)
                 self.assertTrue(receipt.luna_required)
 
+    def test_roy_manager_implementer_and_reviewer_require_luna(self) -> None:
+        for role in ("manager", "implementer", "independent_reviewer", "rework"):
+            with self.subTest(role=role):
+                receipt = self.luna_route("swarm", role)
+                self.assertTrue(receipt.allowed, receipt.defects)
+                self.assertTrue(receipt.luna_required)
+
     def test_receipt_is_bound_to_packet_and_exact_dispatch_args(self) -> None:
         first = self.luna_route("balance", "implementation")
         same = self.luna_route("balance", "implementation")

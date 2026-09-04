@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ru" xml:lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.11" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Issue Grinder: короткое сравнение пяти режимов</title>
+  <style>
+
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+</style>
+  <style type="text/css">:root{color-scheme:light;--ink:#172033;--line:#dfe4ec;--soft:#f5f7fa;--accent:#3156d3}*{box-sizing:border-box}html{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#eef1f6;line-height:1.58}body{max-width:1180px;margin:32px auto;padding:48px 56px 64px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 16px 48px rgba(23,32,51,.08)}h1,h2{line-height:1.2;letter-spacing:-.02em}h1{margin-top:0;font-size:2.25rem}h2{margin-top:2.4rem;padding-top:.4rem;border-top:1px solid var(--line)}p,li{max-width:86ch}a{color:var(--accent);text-underline-offset:2px}code{padding:.12rem .32rem;border-radius:5px;background:var(--soft);font-size:.92em}nav#TOC{margin:2rem 0 2.5rem;padding:1.1rem 1.4rem;border-left:4px solid var(--accent);background:var(--soft);border-radius:0 10px 10px 0}nav#TOC::before{content:"Содержание";display:block;margin-bottom:.55rem;font-weight:700}nav#TOC ul{margin:0;padding-left:1.2rem;columns:2;column-gap:2rem}nav#TOC li{break-inside:avoid;margin:.2rem 0}table{display:block;width:100%;overflow-x:auto;border-collapse:collapse;margin:1.25rem 0 1.6rem;font-size:.91rem}th,td{padding:.68rem .76rem;border:1px solid var(--line);vertical-align:top}th{position:sticky;top:0;background:#e9edf7;text-align:left;white-space:nowrap}tbody tr:nth-child(even){background:#fafbfc}ul,ol{padding-left:1.35rem}li+li{margin-top:.35rem}@media(max-width:760px){body{margin:0;padding:28px 20px 44px;border:0;border-radius:0}h1{font-size:1.75rem}nav#TOC ul{columns:1}}@media print{html{background:#fff}body{max-width:none;margin:0;padding:0;border:0;box-shadow:none}nav#TOC{break-after:page}a{color:inherit;text-decoration:none}table{display:table;overflow:visible;font-size:8.5pt}h2{break-after:avoid}}
+</style>
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#issue-grinder-короткое-сравнение-пяти-режимов" id="toc-issue-grinder-короткое-сравнение-пяти-режимов">Issue Grinder:
+короткое сравнение пяти режимов</a>
+<ul>
+<li><a href="#итог" id="toc-итог">Итог</a></li>
+<li><a href="#общие-нюансы-серии" id="toc-общие-нюансы-серии">Общие
+нюансы серии</a></li>
+<li><a href="#scope-и-oracle" id="toc-scope-и-oracle">Scope и
+oracle</a></li>
+<li><a href="#наблюдаемая-topology" id="toc-наблюдаемая-topology">Наблюдаемая topology</a></li>
+<li><a href="#практическое-сравнение" id="toc-практическое-сравнение">Практическое сравнение</a></li>
+<li><a href="#полный-tree-only-расход-пяти-режимов" id="toc-полный-tree-only-расход-пяти-режимов">Полный tree-only расход
+пяти режимов</a></li>
+<li><a href="#evidence" id="toc-evidence">Evidence</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="issue-grinder-короткое-сравнение-пяти-режимов">Issue Grinder:
+короткое сравнение пяти режимов</h1>
+<p>Дата наблюдения: 2026-09-02.</p>
+<h2 id="итог">Итог</h2>
+<p>На маленьком локальном scope все пять режимов создали кандидаты,
+прошли одинаковые 21/21 скрытых теста и вернули terminal handoff в
+пределах исправленного часового ceiling. <code>Соло</code> завершился
+быстрее и с наименьшим общим расходом токенов. <code>Экономичный</code>
+сохранил нулевой расход Sol и дал тот же функциональный результат
+примерно за <code>$0,09</code> API-equivalent. <code>Рой</code> получил
+лучшую слепую оценку, но выиграл у <code>Баланса</code> лишь
+<code>0,3</code> балла при более чем двукратном расходе токенов и
+стоимости.</p>
+<table>
+<thead>
+<tr>
+<th>Режим</th>
+<th>Итог</th>
+<th style="text-align: right;">Качество</th>
+<th style="text-align: right;">Functional</th>
+<th style="text-align: right;">Blind review</th>
+<th style="text-align: right;">Sol, токены</th>
+<th style="text-align: right;">Luna, токены</th>
+<th style="text-align: right;">Время</th>
+<th>Объём работы</th>
+<th style="text-align: right;">API-equivalent, USD</th>
+<th>Нюанс режима</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Соло</td>
+<td><code>PASS terminal</code></td>
+<td style="text-align: right;"><strong>98,8</strong></td>
+<td style="text-align: right;">85/85</td>
+<td style="text-align: right;">13,8/15</td>
+<td style="text-align: right;">865 476</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"><strong>5:57</strong></td>
+<td>0 аг. · 19 выз. · 0 ком. · 55 тест.</td>
+<td style="text-align: right;"><strong>0,866</strong></td>
+<td>Завершился до первого десятиминутного checkpoint; 14 public
+tests</td>
+</tr>
+<tr>
+<td>Классический</td>
+<td><code>PASS terminal</code></td>
+<td style="text-align: right;">98,1</td>
+<td style="text-align: right;">85/85</td>
+<td style="text-align: right;">13,1/15</td>
+<td style="text-align: right;">1 449 767</td>
+<td style="text-align: right;">984 160</td>
+<td style="text-align: right;">10:42</td>
+<td>1 аг. · 45 выз. · 0 ком. · 69 тест.</td>
+<td style="text-align: right;">1,443</td>
+<td>После checkpoint понадобилось ещё 0:40; один Luna Max reviewer</td>
+</tr>
+<tr>
+<td>Баланс</td>
+<td><code>PASS terminal</code></td>
+<td style="text-align: right;"><strong>98,9</strong></td>
+<td style="text-align: right;">85/85</td>
+<td style="text-align: right;">13,9/15</td>
+<td style="text-align: right;">1 824 138</td>
+<td style="text-align: right;">1 388 885</td>
+<td style="text-align: right;">17:45</td>
+<td>2 аг. · 68 выз. · 0 ком. · 44 тест.</td>
+<td style="text-align: right;">1,320</td>
+<td>Luna worker и reviewer; продолжение заняло 7:43</td>
+</tr>
+<tr>
+<td>Рой</td>
+<td><code>PASS terminal</code></td>
+<td style="text-align: right;"><strong>99,2</strong></td>
+<td style="text-align: right;">85/85</td>
+<td style="text-align: right;"><strong>14,2/15</strong></td>
+<td style="text-align: right;">4 671 551</td>
+<td style="text-align: right;">2 372 789</td>
+<td style="text-align: right;">20:05</td>
+<td>9 аг. · 140 выз. · 0 ком. · 63 тест.</td>
+<td style="text-align: right;">3,186</td>
+<td>Лучший blind review; дополнительная critique/reducer wave после
+checkpoint</td>
+</tr>
+<tr>
+<td>Экономичный</td>
+<td><code>PASS terminal</code></td>
+<td style="text-align: right;">96,6</td>
+<td style="text-align: right;">85/85</td>
+<td style="text-align: right;">11,6/15</td>
+<td style="text-align: right;"><strong>0</strong></td>
+<td style="text-align: right;">2 065 918</td>
+<td style="text-align: right;">10:38</td>
+<td>0 аг. · 36 выз. · 0 ком. · 37 тест.</td>
+<td style="text-align: right;"><strong>0,091</strong></td>
+<td>После checkpoint понадобилось ещё 0:36; весь run остался у
+Luna/max</td>
+</tr>
+</tbody>
+</table>
+<p><code>Объём работы</code> использует рекурсивное дерево измеряемой
+сессии. <code>Тест.</code> — число наблюдаемых test-case executions с
+учётом повторных прогонов; внешний набор из 21 hidden tests сюда не
+включён.</p>
+<h2 id="общие-нюансы-серии">Общие нюансы серии</h2>
+<ul>
+<li>Первоначальный десятиминутный ceiling был признан слишком коротким.
+Четыре оборванных run продолжены в тех же thread и workspace с общим
+потолком один час. Для них время в таблице является суммой двух
+измеренных интервалов. <code>Соло</code> не получал дополнительного
+turn; четыре продолжения получили один одинаковый prompt «продолжить,
+проверить и вернуть handoff». Это небольшая асимметрия протокола, но
+повтор с нуля потребовал бы лишнего расхода.</li>
+<li>Все пять получили одинаковые <code>85/85</code> от frozen functional
+oracle. Оставшиеся до 15 баллов дал один слепой Sol/xhigh reviewer по
+читаемости, устойчивости, публичным тестам и дисциплине scope. Это
+полезная, но субъективная оценка без повторов и межэкспертного
+согласования.</li>
+<li>Reviewer сначала запустил test discovery из общего blind-каталога и
+зацепил посторонний <code>site-packages/tests</code>. Ошибка не
+участвовала в баллах: затем он отдельно запустил правильный public suite
+каждого кандидата, все пять прошли.</li>
+<li>Во время серии наблюдалась другая account-level Codex-активность.
+Основная таблица использует только рекурсивно атрибутированные root +
+child sessions. Грубый weekly counter во время продолжений и review
+остался <code>77→77</code>, но из-за округления и параллельной
+активности не участвует в ranking.</li>
+<li>Runner не фиксировал точное время первого зелёного candidate. Время
+означает полный путь до terminal handoff, а не время появления первого
+рабочего кода.</li>
+<li>Выполнен один стохастический run каждого режима. Результат
+показывает эти пять сессий, а не статистически устойчивую универсальную
+иерархию.</li>
+<li>Scope полностью локальный. Он не проверяет Task Manager lifecycle,
+UAT, ACL, Release closure, publication или recovery внешнего
+состояния.</li>
+</ul>
+<h2 id="scope-и-oracle">Scope и oracle</h2>
+<p>Каждый run получил новую byte-identical Git-копию одного
+Python-проекта:</p>
+<ol type="1">
+<li><code>MF-1</code> — JSON loading и validation;</li>
+<li><code>MF-2</code> — deterministic dependency waves;</li>
+<li><code>MF-3</code> — weighted critical path с lexicographic
+tie-break;</li>
+<li><code>MF-4</code> — CLI, stable JSON, atomic output и public
+tests.</li>
+</ol>
+<p>Dependency graph <code>MF-1 → {MF-2, MF-3} → MF-4</code> давал
+<code>Балансу</code> естественный bounded packet, а <code>Рою</code> —
+реальную candidate-friendly развилку. Task Manager, Goal, network и
+внешние сервисы были запрещены одинаково для всех режимов.</p>
+<p>Frozen hidden oracle состоял из 21 tests и 85 функциональных
+баллов:</p>
+<table>
+<thead>
+<tr>
+<th>Область</th>
+<th style="text-align: right;">Tests</th>
+<th style="text-align: right;">Баллы</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Loading/validation</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td>Dependency waves</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td>Critical path</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr>
+<td>CLI/integration</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">20</td>
+</tr>
+</tbody>
+</table>
+<p>Эталон до старта серии получил <code>21/21</code> и
+<code>85/85</code>, исходная TODO-заготовка — <code>0/85</code>. После
+пяти runs все сохранённые public suites, hidden oracle,
+<code>compileall</code> и <code>git diff --check</code> прошли. Текст
+<code>PLAN.md</code> у каждого candidate остался неизменным кроме
+разрешённых status-checkboxes; после продолжения все пять отметили 4/4
+пункта. Запрещённых Task Manager, Goal или web tool calls в пяти
+рекурсивных деревьях не обнаружено.</p>
+<h2 id="наблюдаемая-topology">Наблюдаемая topology</h2>
+<table>
+<thead>
+<tr>
+<th>Режим</th>
+<th>Root</th>
+<th style="text-align: right;">Execution children</th>
+<th>Вывод</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Соло</td>
+<td>Sol/xhigh</td>
+<td style="text-align: right;">0</td>
+<td>Точная single-lane topology</td>
+</tr>
+<tr>
+<td>Классический</td>
+<td>Sol/xhigh</td>
+<td style="text-align: right;">1 Luna/max reviewer</td>
+<td>Sol остался основным исполнителем; bounded critique вынесена
+наружу</td>
+</tr>
+<tr>
+<td>Баланс</td>
+<td>Sol/xhigh</td>
+<td style="text-align: right;">1 worker + 1 reviewer, Luna/max</td>
+<td>Implementation и финальная проверка переданы дешёвому profile</td>
+</tr>
+<tr>
+<td>Рой</td>
+<td>Sol/xhigh</td>
+<td style="text-align: right;">9 Luna/max</td>
+<td>Два scouts, два candidates и пять critique/test/reducer
+reviewers</td>
+</tr>
+<tr>
+<td>Экономичный</td>
+<td>Luna/max</td>
+<td style="text-align: right;">0</td>
+<td>Ноль Sol/GPT-5.4 во всём дереве</td>
+</tr>
+</tbody>
+</table>
+<h2 id="практическое-сравнение">Практическое сравнение</h2>
+<ul>
+<li>Если важен быстрый законченный результат, в этой серии победил
+<code>Соло</code>: 5:57, наименьший общий token volume и
+<code>98,8/100</code>.</li>
+<li>Если главным ограничением является дорогая Sol-квота, победил
+<code>Экономичный</code>: ноль Sol и примерно в 9,5 раза меньший
+API-equivalent cost, чем у <code>Соло</code>, при том же functional
+oracle. Blind review ниже прежде всего из-за усложнения маленькой
+реализации и более слабого публичного покрытия.</li>
+<li><code>Баланс</code> дал лучший компромисс, если важна дополнительная
+независимая проверка: <code>98,9/100</code>, дешевле
+<code>Классического</code> по API-equivalent, но занял 17:45 и потратил
+в 3,7 раза больше токенов, чем <code>Соло</code>. Разница качества с
+<code>Соло</code> всего <code>0,1</code> балла одного reviewer-а и не
+является устойчивым эффектом.</li>
+<li><code>Классический</code> не дал преимущества над <code>Соло</code>
+на этом scope: дольше, дороже и на <code>0,7</code> blind-review балла
+ниже.</li>
+<li><code>Рой</code> действительно получил лучший blind review
+(<code>99,2/100</code>) благодаря более строгим инвариантам и тестам, но
+выигрыш над <code>Балансом</code> составил только <code>0,3</code> балла
+при 2,2-кратном token volume и 2,4-кратной цене. Для маленькой задачи
+это плохая эффективность, хотя теперь наблюдается небольшой выигрыш
+качества.</li>
+</ul>
+<h2 id="полный-tree-only-расход-пяти-режимов">Полный tree-only расход
+пяти режимов</h2>
+<p>Интервалы измеряемых runs с продолжениями:
+<code>2026-09-02T17:17:36.789Z</code> —
+<code>2026-09-02T19:08:45.082Z</code>; в таблицу входят только root
+sessions и их рекурсивные descendants пяти режимов, а не прочая account
+activity и не отдельный blind reviewer. <code>Input</code> — полный
+input за вычетом cached input.</p>
+<table>
+<thead>
+<tr>
+<th>Категория / модель</th>
+<th style="text-align: right;">Токены</th>
+<th style="text-align: right;">% всех токенов</th>
+<th style="text-align: right;">Цена</th>
+<th style="text-align: right;">% общей цены</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cached input</strong></td>
+<td style="text-align: right;">14 487 040</td>
+<td style="text-align: right;">92,731%</td>
+<td style="text-align: right;">$3,440</td>
+<td style="text-align: right;">49,822%</td>
+</tr>
+<tr>
+<td>↳ Sol</td>
+<td style="text-align: right;">8 290 560</td>
+<td style="text-align: right;">53,067%</td>
+<td style="text-align: right;">$3,316</td>
+<td style="text-align: right;">48,027%</td>
+</tr>
+<tr>
+<td>↳ Luna</td>
+<td style="text-align: right;">6 196 480</td>
+<td style="text-align: right;">39,663%</td>
+<td style="text-align: right;">$0,124</td>
+<td style="text-align: right;">1,795%</td>
+</tr>
+<tr>
+<td><strong>Input</strong></td>
+<td style="text-align: right;">942 283</td>
+<td style="text-align: right;">6,032%</td>
+<td style="text-align: right;">$1,896</td>
+<td style="text-align: right;">27,453%</td>
+</tr>
+<tr>
+<td>↳ Sol</td>
+<td style="text-align: right;">449 248</td>
+<td style="text-align: right;">2,876%</td>
+<td style="text-align: right;">$1,797</td>
+<td style="text-align: right;">26,025%</td>
+</tr>
+<tr>
+<td>↳ Luna</td>
+<td style="text-align: right;">493 035</td>
+<td style="text-align: right;">3,156%</td>
+<td style="text-align: right;">$0,099</td>
+<td style="text-align: right;">1,428%</td>
+</tr>
+<tr>
+<td><strong>Output</strong></td>
+<td style="text-align: right;">193 361</td>
+<td style="text-align: right;">1,238%</td>
+<td style="text-align: right;">$1,569</td>
+<td style="text-align: right;">22,725%</td>
+</tr>
+<tr>
+<td>↳ Sol</td>
+<td style="text-align: right;">71 124</td>
+<td style="text-align: right;">0,455%</td>
+<td style="text-align: right;">$1,422</td>
+<td style="text-align: right;">20,601%</td>
+</tr>
+<tr>
+<td>↳ Luna</td>
+<td style="text-align: right;">122 237</td>
+<td style="text-align: right;">0,782%</td>
+<td style="text-align: right;">$0,147</td>
+<td style="text-align: right;">2,124%</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align: right;">15 622 684</td>
+<td style="text-align: right;"><strong>100,000%</strong></td>
+<td style="text-align: right;"><strong>$6,905</strong></td>
+<td style="text-align: right;"><strong>100,000%</strong></td>
+</tr>
+<tr>
+<td>↳ Sol</td>
+<td style="text-align: right;">8 810 932</td>
+<td style="text-align: right;">56,398%</td>
+<td style="text-align: right;">$6,536</td>
+<td style="text-align: right;">94,653%</td>
+</tr>
+<tr>
+<td>↳ Luna</td>
+<td style="text-align: right;">6 811 752</td>
+<td style="text-align: right;">43,602%</td>
+<td style="text-align: right;">$0,369</td>
+<td style="text-align: right;">5,347%</td>
+</tr>
+</tbody>
+</table>
+<p>Слепой reviewer из основной суммы режимов исключён: ещё
+<code>601 445</code> Sol-токенов и <code>$0,629</code>
+API-equivalent.</p>
+<h2 id="evidence">Evidence</h2>
+<ul>
+<li>Benchmark ID:
+<code>issue-grinder-five-mode-synthetic-20260902T170841Z</code>.</li>
+<li>Installed snapshot:
+<code>issue-grinder/0.1.0+codex.20260902180914</code>.</li>
+<li>Frozen fixture SHA-256:
+<code>da385bd99ff82d836db16655a5881901726d6161e09c9fd4b6150f1c4f3df430</code>.</li>
+<li>Frozen prompt SHA-256:
+<code>af01e345c8daff04b03c05da9ff2f3c6a77d476bf5b74bf51aad8f20d7c495e1</code>.</li>
+<li>Timeout policy: первоначальный checkpoint <code>600</code> секунд,
+затем общий ceiling повышен до <code>3 600</code> секунд; четыре run
+продолжены без смены thread/workspace.</li>
+<li>Blind reviewer thread:
+<code>00000000-0000-4000-8000-41c8cb8741d9</code>; schema-valid ranking
+финальных opaque candidates:
+<code>A &gt; B &gt; D &gt; C &gt; E</code>.</li>
+<li>Raw local artifacts:
+<code>~/.codex/benchmarks/issue-grinder-five-mode-synthetic-20260902T170841Z</code>.</li>
+<li>Root thread IDs: <code>Рой</code>
+<code>00000000-0000-4000-8000-9b105ef7dc24</code>; <code>Баланс</code>
+<code>00000000-0000-4000-8000-b1913a6ebee5</code>;
+<code>Классический</code>
+<code>00000000-0000-4000-8000-53dc208201f9</code>; <code>Соло</code>
+<code>00000000-0000-4000-8000-2f7a8032d94f</code>;
+<code>Экономичный</code>
+<code>00000000-0000-4000-8000-812c3bcdcfb6</code>.</li>
+</ul>
+<p>API-equivalent рассчитан по официальным ценам OpenAI на дату
+наблюдения: <a href="https://developers.openai.com/api/docs/models/gpt-5.6-sol">Sol</a>
+<code>$4/$0,40/$20</code> и <a href="https://developers.openai.com/api/docs/models/gpt-5.6-luna">Luna</a>
+<code>$0,20/$0,02/$1,20</code> за миллион обычных input, cached input и
+output tokens соответственно. Ни один запрос пяти деревьев не превысил
+long-context threshold <code>272 000</code> input tokens.</p>
+</body>
+</html>

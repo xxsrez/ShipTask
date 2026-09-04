@@ -1,6 +1,6 @@
 # Режимы исполнения Issue Grinder
 
-Статус: реализованный проект решения, 2026-09-03. Документ объясняет замысел,
+Статус: реализованный проект решения, 2026-09-04. Документ объясняет замысел,
 но не является отдельным источником действующей policy.
 
 Согласованы пять пользовательских режимов и их постоянные названия: `Соло`,
@@ -65,8 +65,9 @@ effort.
 3. Дать предсказуемый режим `Баланс`, который переносит основную массу
    ограниченной реализации на экономичные профили, но сохраняет дорогие точки
    решения и итоговую проверку.
-4. Дать режим `Рой`, в котором намеренно разрешены массовые параллельные и
-   конкурирующие попытки экономичных агентов с последующим отбором.
+4. Дать режим `Рой`, в котором постоянный экономичный менеджер ведёт
+   постоянного экономичного исполнителя по крупным фазам одного кандидата, а
+   отдельный экономичный reviewer проверяет его целиком.
 5. Дать `Экономичный` режим для активного продвижения работы при почти
    исчерпанной дефицитной квоте, включая честный нетерминальный результат.
 6. Разрешить безопасное переключение режима без потери либо дублирования уже
@@ -113,8 +114,8 @@ effort.
 - Только integration owner объединяет результаты в общий кандидат.
 - Existing task-owned checkpoint продолжается либо явно используется как база;
   случайный replacement не создаётся.
-- Спекулятивный кандидат имеет явную candidate identity. Поэтому намеренный
-  вариант `Роя` отличается от ошибочного дублирования незавершённой работы.
+- Восстановительный кандидат имеет явную candidate identity и появляется
+  только после доказанного тупика, не параллельно прежнему варианту.
 
 ### 4.3 Проверка
 
@@ -123,20 +124,20 @@ effort.
   workers.
 - Критичные факты, diff, raw check results и unresolved risks остаются доступны
   проверяющему профилю напрямую.
-- Несогласные выводы и отрицательное evidence не исчезают при сжатии swarm
-  results в один review packet.
+- Несогласные выводы и отрицательное evidence не исчезают при сжатии Manager
+  Loop в один review packet.
 - Во всех режимах, кроме `Соло`, каждый exact candidate получает независимого
   reviewer-а, включая малый и простой scope.
 - Campaign состоит из bounded стадий; каждая direct рабочая или проверочная
   волна внутри стадии имеет одного owner-а и один outcome. Внутренние authors,
-  critics, reviewers и reducers остаются за одним owner-ом только при
+  critics и reviewers остаются за одним owner-ом только при
   доказанной nested delegation; иначе используются предусмотренные режимом
   direct stages без остановки terminal run.
 - Нормальный путь каждого нового direct owner-а ограничен одним заранее
   разрешённым guard, одним dispatch и событийным ожиданием до переданного stage
   deadline; произвольный десятиминутный timeout не является deadline. После material
   rework продолжаются тот же candidate owner и та же reviewer session.
-- Reviewer/reducer работает внутри заранее заданного action budget: один
+- Reviewer работает внутри заранее заданного action budget: один
   source/diff pass, основной suite и ограниченные targeted probes; его final
   response является handoff, open-ended fuzzing и поиск parent messaging не
   входят в review.
@@ -166,7 +167,7 @@ branches и изолированные worktrees. Спекулятивная и�
 | `Соло` | Простое последовательное исполнение без внутренней topology | Текущая основная модель выполняет по одному issue или пакету за раз | Нет | Отдельного reviewer-а нет; current model делает self-review по объективному evidence | Terminal result |
 | `Классический` | Максимальную уверенность | Full-scope strategy и material judgment — проверяющему профилю; только strict-simple packets — экономичному | По умолчанию нет competing full implementations | Независимый Luna-review exact candidate и итоговая приёмка controller-а | Terminal result |
 | `Баланс` | Принятый результат на единицу дефицитной квоты | Luna-owned полный routine packet loop | Адаптивно при развилке, слабом oracle или высокой ожидаемой ценности | Стратегия, material decisions, integration и финал | Terminal result |
-| `Рой` | Пользу массового дешёвого поиска и проверки | Bounded Luna candidate campaign и отдельное economical reduction | Норма режима | Независимый Luna-review и итоговый review controller-а | Terminal result только после финального gate |
+| `Рой` | Экономию дефицитного профиля на большой связанной задаче | Постоянный Luna manager ведёт постоянного Luna implementer-а по крупным фазам одного candidate | По умолчанию нет; только один recovery path после доказанного тупика | Один independent Luna reviewer без delegation и итоговый review controller-а | Terminal result только после финального gate |
 | `Экономичный` | Максимальный безопасный прогресс без доступной дорогой квоты | Экономичный coordinator и workers | Допустимы, но сворачиваются в один рекомендуемый candidate | Независимый economical review обязателен для terminal result; partial review может стать deferred gate | Resumable non-terminal result допустим |
 
 ## 6. Режим `Соло`
@@ -276,88 +277,53 @@ terminal blocker-а.
 
 ### Назначение
 
-Намеренно потратить много дешёвых токенов и допускаемого времени на поиск,
-реализацию, критику и проверку вариантов, чтобы сократить дорогую работу либо
-увеличить вероятность сильного итогового кандидата. Неудачные экономичные
-попытки являются допустимой ценой режима.
+Сократить пошаговую работу дефицитного профиля на большой связанной задаче, не
+теряя терминальное обещание. Sol/controller один раз задаёт весь control brief,
+после чего один постоянный Luna manager ведёт одного постоянного Luna
+implementer-а по крупным последовательным фазам одного exact candidate.
 
-Потеря становится дефектом режима только когда swarm:
+### Manager Loop
 
-- застрял без конечного состояния;
-- загрязнил integration target или чужую работу;
-- размножил внешний эффект;
-- оставил неразрешимое множество кандидатов;
-- заставил дорогого reviewer-а читать сырой поток всех попыток;
-- скрыл существенное отрицательное evidence.
+1. Sol/controller целиком изучает live scope и задаёт цель, requirements,
+   architecture boundaries, dependency/risk maps, acceptance и final gate.
+2. Manager получает этот brief без repository paths, source access, shell и
+   implementation authority. Он хранит plan state и выдаёт одну следующую
+   dependency-ready фазу либо targeted rework.
+3. Implementer сохраняет одну session, worktree и exact candidate, реализует
+   текущую фазу, запускает checks и возвращает compact evidence handoff.
+4. Coordinator механически пересылает phase/evidence между теми же sessions и
+   не принимает за manager-а решений.
+5. Новая фаза начинается только после принятия предыдущей. Фазы объединяют
+   крупный связный outcome и не создаются по одному на файл, Task или тест.
+6. После manager `complete` один independent Luna reviewer проверяет exact
+   candidate целиком. Даже для Teams-подобного scope он проходит risk sections
+   последовательно сам и не создаёт descendants.
+7. Material finding возвращается прежнему implementer-у; exact changed
+   candidate — прежнему reviewer-у. После pass Sol/controller проводит final
+   integrated gate.
 
-### Организация волн
-
-`Рой` не означает тысячу одновременно пишущих агентов. Он поддерживает
-безопасную доступную capacity занятой последовательными волнами и может
-суммарно выполнить очень большое количество attempts.
-
-Волны используют разные роли и намеренно разные углы атаки:
-
-- scouts и hypothesis researchers;
-- implementation candidates;
-- minimal-diff и reliability-oriented alternatives;
-- adversarial critics;
-- independent test authors;
-- candidate judges и evidence reducers;
-- один integration owner.
-
-Одинаковый prompt для множества одинаковых agents создаёт коррелированные
-ошибки и не считается достаточным разнообразием сам по себе.
-
-### Турнир и сжатие результата
-
-1. Проверяющий профиль, когда он доступен, задаёт исходную problem boundary,
-   acceptance и опасные surfaces. Для уже однозначного bounded scope это может
-   сделать coordinator по mode contract.
-2. При доказанной nested delegation один economical swarm owner ведёт campaign.
-   Без неё coordinator запускает bounded batch самостоятельных одно-ownerных
-   direct candidate waves от общей exact base, а после quiescence — отдельного
-   economical reducer/reviewer.
-3. Детерминированные checks удаляют явно несостоятельные варианты.
-4. Экономичные judges сравнивают оставшихся candidates, сохраняя dissent и
-   provenance.
-5. В интеграционный fan-in проходит один рекомендуемый candidate и, только при
-   существенной неразрешённой развилке, один runner-up.
-6. Проверяющий профиль читает exact candidate, существенный source context,
-   raw evidence и unresolved objections, а не весь transcript `Роя`.
-7. После замечаний новая экономичная wave делает rework; повторный gate
-   применяется к точному изменённому кандидату.
-
-### Best-of-N
-
-Полные конкурирующие реализации полезны, когда работа изолирована, варианты
-реально различаются, сравнение дешевле дорогого review и проигравший candidate
-можно безопасно отбросить. Для большой связной feature предпочтительнее
-несколько designs, одна implementation, независимые critics и дополнительные
-tests, чем несколько огромных полных реализаций.
-
-Для текстов, локальных algorithms, test strategies, bounded prototypes и
-поиска edge cases допустим более широкий Best-of-N.
+Best-of-N, параллельные реализации, массовые critics и reducer не являются
+штатной схемой. Один materially иной recovery path допустим только после
+доказанного тупика, с отдельной identity и сохранением negative evidence.
 
 ### Остановка
 
-`Рой` должен иметь конечный compute envelope. Его задаёт явный пользовательский
-budget либо выбранная coordinator-ом конечная серия waves. Run прекращает
-генерацию, когда:
+`Рой` имеет конечный phase envelope, outcome-specific budgets и общий deadline.
+Run прекращает новые фазы, когда:
 
 - exact candidate прошёл acceptance и final reviewer gate;
-- дальнейшие attempts перестали добавлять независимые гипотезы или evidence;
+- manager принял все фазы и reviewer вернул полный ledger;
+- повтор фазы перестал добавлять новый reproducer, подход или evidence;
 - исчерпан заданный budget;
 - продолжение упёрлось в authority, environment или другой настоящий blocker.
 
-Свободные слоты сами по себе не требуют создавать новые candidates после
-достижения stop condition.
+Свободные слоты не создают новых candidates, managers или reviewers.
 
 ### Завершение
 
 `Рой` остаётся terminal delivery mode только при доступном final reviewer gate.
-Если этот gate становится недоступен, run не выдаёт swarm consensus за
-принятый результат и может явно перейти в `Экономичный`.
+Если этот gate становится недоступен, run не выдаёт принятие фаз manager-ом за
+готовый результат и может явно перейти в `Экономичный`.
 
 ## 10. Режим `Экономичный`
 
@@ -446,8 +412,8 @@ startup recovery, подхватывает exact candidate, независимо
 - точный вопрос проверяющему профилю.
 
 Summary помогает навигации, но reviewer самостоятельно читает существенный
-код и evidence. Candidate author либо swarm judge не является окончательным
-источником истины о собственной работе.
+код и evidence. Candidate author либо manager, принявший фазы, не является
+окончательным источником истины о собственной работе.
 
 ## 13. Наблюдаемая эффективность
 
@@ -491,11 +457,12 @@ Summary помогает навигации, но reviewer самостояте�
    независимую дешёвую проверку и compact finding ledger, но сохраняет
    high-judgment decision и final integrated review; после узкого Sol decision
    отделимая implementation снова уходит Luna.
-6. `Рой` создаёт намеренно различимые candidates, изолирует writers, сокращает
-   результаты до одного exact candidate и не передаёт reviewer-у весь сырой
-   transcript.
-7. Неудачные swarm candidates не загрязняют integration target и не создают
-   повторные внешние эффекты.
+6. `Рой` сохраняет постоянные Luna manager/implementer sessions, один exact
+   candidate и одну активную крупную фазу, а после manager `complete` запускает
+   одного independent Luna reviewer без delegation.
+7. Targeted rework `Роя` переиспользует implementer/reviewer sessions; один
+   recovery candidate после доказанного тупика не загрязняет integration target
+   и не создаёт повторные внешние эффекты.
 8. `Экономичный` способен завершиться правдивым `In Progress` или `In Review`,
    сохранив один resumable candidate и deferred gates без ложного `Done`.
 9. Переключение `Экономичный → Классический|Баланс` подхватывает checkpoint без

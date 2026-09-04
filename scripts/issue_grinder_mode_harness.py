@@ -1,7 +1,7 @@
 """Deterministic oracle for the mechanical Issue Grinder mode decisions.
 
 The oracle covers the parts of IG-MODE-02, IG-MODE-04..07,
-IG-MODE-10, IG-MODE-11 and IG-MA-19 that can be decided from structured state.  It
+IG-MODE-10, IG-MODE-11 and IG-MA-19 that can be decided from structured state. It
 deliberately does not parse natural language, orchestrate agents or stand in for
 a model-forward run of the skill.
 """
@@ -268,7 +268,7 @@ class ReviewWaveDecision:
 
 @dataclass(frozen=True)
 class DirectCampaignObservation:
-    """Observed direct-stage fallback when execution children cannot delegate."""
+    """Observed Balance direct stages when execution children cannot delegate."""
 
     mode: ExecutionMode
     stage_order: tuple[str, ...]
@@ -323,10 +323,10 @@ class DirectCampaignDecision:
 def assess_direct_campaign(
     observation: DirectCampaignObservation,
 ) -> DirectCampaignDecision:
-    """Validate the bounded direct-stage fallback for Balance and Swarm."""
+    """Validate the bounded direct-stage fallback for Balance."""
 
-    if observation.mode not in (ExecutionMode.BALANCE, ExecutionMode.SWARM):
-        raise ValueError("direct campaign applies only to Balance and Swarm")
+    if observation.mode is not ExecutionMode.BALANCE:
+        raise ValueError("direct campaign applies only to Balance")
 
     defects: list[str] = []
     authors = observation.candidate_author_ids
@@ -394,16 +394,15 @@ def assess_direct_campaign(
         defects.append("review_action_budget_above_ceiling")
     elif observation.review_action_count > observation.review_action_budget:
         defects.append("review_action_budget_exceeded")
-    if observation.mode is ExecutionMode.BALANCE:
-        if observation.review_plan_action_count > 3:
-            defects.append("balance_review_plan_budget_exceeded")
-        if observation.review_exact_action_count > 5:
-            defects.append("balance_exact_review_budget_exceeded")
-        if (
-            observation.review_plan_action_count + observation.review_exact_action_count
-            != observation.review_action_count
-        ):
-            defects.append("balance_review_action_accounting_mismatch")
+    if observation.review_plan_action_count > 3:
+        defects.append("balance_review_plan_budget_exceeded")
+    if observation.review_exact_action_count > 5:
+        defects.append("balance_exact_review_budget_exceeded")
+    if (
+        observation.review_plan_action_count + observation.review_exact_action_count
+        != observation.review_action_count
+    ):
+        defects.append("balance_review_action_accounting_mismatch")
     if observation.review_open_ended_exploration:
         defects.append("review_open_ended_exploration")
     if observation.reviewer_workspace_mutation:
@@ -437,35 +436,21 @@ def assess_direct_campaign(
         if normalized in FORBIDDEN_UNCHANGED_COORDINATION:
             defects.append(f"unchanged_state_coordination:{normalized}")
 
-    if observation.mode is ExecutionMode.BALANCE:
-        if observation.stage_order != ("execution", "independent_review"):
-            defects.append("balance_stage_order_invalid")
-        if not authors:
-            defects.append("balance_candidate_missing")
-        if observation.material_candidate_fork:
-            if len(authors) < 2:
-                defects.append("balance_material_fork_requires_multiple_candidates")
-            if observation.reducer_id != observation.reviewer_id:
-                defects.append("balance_adaptive_reducer_reviewer_mismatch")
-        elif len(authors) > 1:
-            defects.append("balance_multiple_candidates_without_material_fork")
-        elif observation.reducer_id.strip():
-            defects.append("balance_unexpected_reducer")
-        if not observation.reviewer_plan_prepared_concurrently:
-            defects.append("balance_concurrent_review_plan_missing")
-    else:
-        if observation.stage_order != ("candidates", "reduction_review"):
-            defects.append("swarm_stage_order_invalid")
-        if not authors:
-            defects.append("swarm_candidate_missing")
-        if observation.material_candidate_fork and len(authors) < 2:
-            defects.append("swarm_material_fork_requires_multiple_candidates")
-        if not observation.material_candidate_fork and not observation.no_fork_reason.strip():
-            defects.append("swarm_no_fork_reason_missing")
-        if not observation.material_candidate_fork and len(authors) > 1:
-            defects.append("swarm_multiple_candidates_without_material_fork")
+    if observation.stage_order != ("execution", "independent_review"):
+        defects.append("balance_stage_order_invalid")
+    if not authors:
+        defects.append("balance_candidate_missing")
+    if observation.material_candidate_fork:
+        if len(authors) < 2:
+            defects.append("balance_material_fork_requires_multiple_candidates")
         if observation.reducer_id != observation.reviewer_id:
-            defects.append("swarm_reducer_reviewer_mismatch")
+            defects.append("balance_adaptive_reducer_reviewer_mismatch")
+    elif len(authors) > 1:
+        defects.append("balance_multiple_candidates_without_material_fork")
+    elif observation.reducer_id.strip():
+        defects.append("balance_unexpected_reducer")
+    if not observation.reviewer_plan_prepared_concurrently:
+        defects.append("balance_concurrent_review_plan_missing")
 
     purposes = tuple(purpose.strip() for purpose in observation.candidate_purposes)
     if len(authors) > 1:
@@ -479,6 +464,129 @@ def assess_direct_campaign(
     may_enter = not defects
     return DirectCampaignDecision(
         "ready_for_controller_final_review" if may_enter else "repair_direct_campaign",
+        may_enter,
+        tuple(defects),
+    )
+
+
+@dataclass(frozen=True)
+class RoyManagerLoopObservation:
+    """Observed persistent Manager Loop for canonical_mode=swarm."""
+
+    control_brief_complete: bool
+    manager_id: str
+    implementer_id: str
+    reviewer_id: str
+    routing_guard_owner_ids: tuple[str, ...]
+    dispatched_owner_ids: tuple[str, ...]
+    manager_persistent: bool
+    implementer_persistent: bool
+    reviewer_persistent: bool
+    manager_source_access: bool
+    manager_work_tool_calls: int
+    manager_implementation: bool
+    phase_ids: tuple[str, ...]
+    accepted_phase_ids: tuple[str, ...]
+    implementer_session_ids: tuple[str, ...]
+    candidate_ids: tuple[str, ...]
+    max_concurrent_phases: int
+    manager_complete: bool
+    review_started_after_manager_complete: bool
+    reviewer_delegation_count: int
+    review_complete: bool
+    finding_ledger_returned: bool
+    controller_final_review_started_after_review: bool
+    material_rework: bool = False
+    rework_implementer_id: str = ""
+    recheck_reviewer_id: str = ""
+    unchanged_state_actions: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class RoyManagerLoopDecision:
+    action: str
+    may_enter_controller_final_review: bool
+    defects: tuple[str, ...] = ()
+
+
+def assess_roy_manager_loop(
+    observation: RoyManagerLoopObservation,
+) -> RoyManagerLoopDecision:
+    """Validate stable sessions, sequential phases and final independent review."""
+
+    defects: list[str] = []
+    owners = (
+        observation.manager_id,
+        observation.implementer_id,
+        observation.reviewer_id,
+    )
+    if any(not owner.strip() for owner in owners):
+        defects.append("roy_blank_owner")
+    if len(set(owners)) != len(owners):
+        defects.append("roy_roles_not_independent")
+    if tuple(observation.routing_guard_owner_ids) != owners:
+        defects.append("roy_routing_guards_do_not_match_roles")
+    if tuple(observation.dispatched_owner_ids) != owners:
+        defects.append("roy_dispatches_do_not_match_roles")
+    if not observation.control_brief_complete:
+        defects.append("roy_control_brief_missing")
+    if not observation.manager_persistent:
+        defects.append("roy_manager_not_persistent")
+    if not observation.implementer_persistent:
+        defects.append("roy_implementer_not_persistent")
+    if not observation.reviewer_persistent:
+        defects.append("roy_reviewer_not_persistent")
+    if observation.manager_source_access:
+        defects.append("roy_manager_source_access")
+    if observation.manager_work_tool_calls:
+        defects.append("roy_manager_work_tool_use")
+    if observation.manager_implementation:
+        defects.append("roy_manager_implemented")
+
+    phases = tuple(phase.strip() for phase in observation.phase_ids)
+    if not phases or any(not phase for phase in phases):
+        defects.append("roy_phase_plan_missing")
+    elif len(set(phases)) != len(phases):
+        defects.append("roy_phase_ids_not_stable")
+    if tuple(observation.accepted_phase_ids) != phases:
+        defects.append("roy_phases_not_accepted_in_order")
+    if len(observation.implementer_session_ids) != len(phases) or any(
+        session_id != observation.implementer_id
+        for session_id in observation.implementer_session_ids
+    ):
+        defects.append("roy_implementer_session_replaced")
+    if len(observation.candidate_ids) != len(phases):
+        defects.append("roy_candidate_trace_incomplete")
+    elif observation.candidate_ids and len(set(observation.candidate_ids)) != 1:
+        defects.append("roy_candidate_replaced")
+    if observation.max_concurrent_phases != 1:
+        defects.append("roy_parallel_phases")
+    if not observation.manager_complete:
+        defects.append("roy_manager_incomplete")
+    if not observation.review_started_after_manager_complete:
+        defects.append("roy_review_started_early")
+    if observation.reviewer_delegation_count:
+        defects.append("roy_reviewer_delegated")
+    if not observation.review_complete:
+        defects.append("roy_independent_review_incomplete")
+    if not observation.finding_ledger_returned:
+        defects.append("roy_finding_ledger_missing")
+    if not observation.controller_final_review_started_after_review:
+        defects.append("roy_controller_final_review_started_early")
+    if observation.material_rework:
+        if observation.rework_implementer_id != observation.implementer_id:
+            defects.append("roy_rework_implementer_replaced")
+        if observation.recheck_reviewer_id != observation.reviewer_id:
+            defects.append("roy_recheck_reviewer_replaced")
+
+    for action in observation.unchanged_state_actions:
+        normalized = action.strip().casefold()
+        if normalized in FORBIDDEN_UNCHANGED_COORDINATION:
+            defects.append(f"unchanged_state_coordination:{normalized}")
+
+    may_enter = not defects
+    return RoyManagerLoopDecision(
+        "ready_for_controller_final_review" if may_enter else "repair_roy_manager_loop",
         may_enter,
         tuple(defects),
     )

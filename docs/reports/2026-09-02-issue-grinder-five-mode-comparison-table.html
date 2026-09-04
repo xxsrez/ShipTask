@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Issue Grinder — сравнение пяти режимов</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #687286;
+      --line: #dce2ec;
+      --head: #e9edf7;
+      --stripe: #f8f9fc;
+      --accent: #3156d3;
+    }
+    * { box-sizing: border-box; }
+    html {
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #eef1f6;
+    }
+    body {
+      max-width: 1440px;
+      margin: 32px auto;
+      padding: 42px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 16px 48px rgba(23, 32, 51, .08);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.6rem, 3vw, 2.25rem);
+      line-height: 1.15;
+      letter-spacing: -.025em;
+    }
+    .subtitle { margin: 0 0 26px; color: var(--muted); }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+    table { width: 100%; min-width: 2200px; border-collapse: collapse; font-size: .88rem; }
+    th, td { padding: 13px 14px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); vertical-align: top; }
+    th:last-child, td:last-child { border-right: 0; }
+    tbody tr:last-child td { border-bottom: 0; }
+    th { background: var(--head); text-align: left; white-space: nowrap; }
+    th.number, td.number { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    tbody tr:nth-child(even) { background: var(--stripe); }
+    td:first-child { font-weight: 650; white-space: nowrap; }
+    .pass { color: #177245; font-weight: 700; }
+    .proxy { color: #8a5b00; font-weight: 700; }
+    .best { color: var(--accent); font-weight: 750; }
+    .note { margin: 18px 0 0; color: var(--muted); font-size: .9rem; }
+    @media (max-width: 760px) {
+      body { margin: 0; padding: 24px 16px 36px; border: 0; border-radius: 0; }
+    }
+    @media print {
+      @page { size: landscape; margin: 10mm; }
+      html { background: #fff; }
+      body { max-width: none; margin: 0; padding: 0; border: 0; box-shadow: none; }
+      table { min-width: 0; font-size: 8pt; }
+      th, td { padding: 6px 7px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Issue Grinder: сравнение пяти режимов</h1>
+    <p class="subtitle">Актуальный срез на 2026-09-04 · без нового прогона после смены схемы Роя</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Режим</th>
+            <th>Статус данных</th>
+            <th class="number">Качество</th>
+            <th class="number">Oracle</th>
+            <th class="number">Слепой обзор</th>
+            <th class="number">Sol, токены</th>
+            <th class="number">Luna, токены</th>
+            <th class="number">Время</th>
+            <th>Объём работы</th>
+            <th class="number">API-equivalent, USD</th>
+            <th>Основание</th>
+            <th>Нюанс</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Соло</td>
+            <td class="pass">PASS · базовый прогон</td>
+            <td class="number">98,8/100</td>
+            <td class="number">85/85</td>
+            <td class="number">13,8/15</td>
+            <td class="number">865 476</td>
+            <td class="number">0</td>
+            <td class="number">5:57</td>
+            <td>0 аг. · 19 выз. · 0 ком. · 55 тест.</td>
+            <td class="number">0,866</td>
+            <td>Базовый прогон до текущей правки</td>
+            <td>Контроль уверенного однопоточного режима; после текущей правки не перемерялся.</td>
+          </tr>
+          <tr>
+            <td>Классический</td>
+            <td class="pass">PASS · базовый прогон</td>
+            <td class="number">98,1/100</td>
+            <td class="number">85/85</td>
+            <td class="number">13,1/15</td>
+            <td class="number">1 449 767</td>
+            <td class="number">984 160</td>
+            <td class="number">10:42</td>
+            <td>1 аг. · 45 выз. · 0 ком. · 69 тест.</td>
+            <td class="number">1,443</td>
+            <td>Базовый прогон до текущей правки</td>
+            <td>Сильный терминальный режим; в этом цикле не оптимизировался.</td>
+          </tr>
+          <tr>
+            <td>Баланс</td>
+            <td class="pass">PASS · актуальный A5</td>
+            <td class="number">97,0/100</td>
+            <td class="number">85/85</td>
+            <td class="number">12/15</td>
+            <td class="number">1 305 240</td>
+            <td class="number">683 594</td>
+            <td class="number">14:39</td>
+            <td>2 аг. · 42 выз. · 0 ком. · 28 тест.</td>
+            <td class="number">1,051</td>
+            <td>A5 confirm + blind review, runtime 0.1.0+codex.20260903143251</td>
+            <td>Blind review снизил балл за NaN/Infinity, повторение топологического прохода и неполную матрицу отрицательных тестов.</td>
+          </tr>
+          <tr>
+            <td>Рой</td>
+            <td class="proxy">PASS · перенос Manager Loop</td>
+            <td class="number">98,0/100</td>
+            <td class="number">85/85</td>
+            <td class="number">13/15</td>
+            <td class="number best">792 544</td>
+            <td class="number">12 905 200</td>
+            <td class="number">41:49</td>
+            <td>8 сесс. · 188 выз. · 0 ком. · 422 тест.</td>
+            <td class="number">1,402</td>
+            <td>Manager Loop experiment 2026-09-04; существующие данные, без повторного замера нового runtime</td>
+            <td>Финальные 85/85 и 13/15 подтверждены. В расход включены четыре лишних reviewer-descendant; sibling transport проверялся внешними persistent sessions. Поэтому строка — лучший имеющийся proxy новой схемы, а не fresh runtime proof.</td>
+          </tr>
+          <tr>
+            <td>Экономичный</td>
+            <td class="pass">PASS · базовый прогон</td>
+            <td class="number">96,6/100</td>
+            <td class="number">85/85</td>
+            <td class="number">11,6/15</td>
+            <td class="number">0</td>
+            <td class="number">2 065 918</td>
+            <td class="number">10:38</td>
+            <td>0 аг. · 36 выз. · 0 ком. · 37 тест.</td>
+            <td class="number best">0,091</td>
+            <td>Базовый прогон до текущей правки</td>
+            <td>Контроль минимального расхода дефицитного профиля; в этом цикле не оптимизировался.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Качество: 85 функциональных баллов и до 15 баллов слепого обзора. Колонки Weekly Use и 5.4 намеренно отсутствуют. Строка Роя перенесена из уже завершённого Manager Loop эксперимента и не выдаётся за новый замер установленного runtime.</p>
+  </main>
+</body>
+</html>
