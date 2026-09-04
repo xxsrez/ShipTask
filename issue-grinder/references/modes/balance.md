@@ -103,7 +103,8 @@ Package-local quick checks принадлежат Luna; общие, длител
 checks — основной lane. Параллельность инструментов не создаёт новых agents.
 Если exact-diff review потребовал material rework, повтори только затронутые
 gates и минимальный общий acceptance. Не запускай полный уже зелёный batch снова
-без cross-cutting изменения и не повторяй его только из-за механического fan-in.
+без утраты применимости evidence (cross-cutting изменение, среда/зависимости
+или неизвестное влияние). Механический fan-in сам по себе не требует повтора.
 
 Отдельный independent reviewer не является штатной ролью `Баланса`. Добавляй
 его только по явному требованию пользователя, project policy или exact scope.
@@ -139,7 +140,7 @@ acceptance.
 - отдельный main shadow или обратная копия main candidate в task-owned
   integration checkout при доступном безопасном main-owned path;
 - новая wave до окончания и приёмки предыдущей либо без нового admission;
-- повтор полного integrated gate batch без cross-cutting material rework;
+- повтор полного integrated gate batch без утраты применимости evidence;
 - polling и coordination churn вместо одного collective wait;
 - принятие worker self-report без exact integrated checks;
 - отсутствие итогового exact-diff review основным профилем.

@@ -284,6 +284,15 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
                 self.assertFalse(result.may_enter_controller_final_review)
                 self.assertIn(defect, result.defects)
 
+    def test_balance_expands_checks_when_evidence_loses_applicability(self) -> None:
+        for reason in ("cross_cutting_change", "environment_or_dependency_change", "unknown_impact"):
+            with self.subTest(reason=reason):
+                result = assess_balance_wave(self.complete_balance_wave(
+                    full_integrated_gate_batch_count=2,
+                    targeted_rework_gates_only=False, full_recheck_reason=reason,
+                ))
+                self.assertEqual(result.defects, ())
+
     def test_balance_requires_useful_overlap_collective_wait_and_main_acceptance(self) -> None:
         decision = assess_balance_wave(
             self.complete_balance_wave(

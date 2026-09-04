@@ -654,7 +654,8 @@ Package-local quick checks выполняют Luna workers. После fan-in ma
 проверяет requirements, межпакетные решения, known risks и результаты checks,
 исправляет найденное и принимает кандидат. Material rework повторяет только
 затронутые package/integration gates и один минимально необходимый общий
-acceptance; уже зелёный полный batch не повторяется без cross-cutting изменения.
+acceptance; полный batch повторяется только при утрате применимости evidence:
+cross-cutting изменение, изменение среды/зависимостей или неизвестное влияние.
 Отдельный reviewer не является
 штатной ролью Balance; если его требует пользователь, project policy или exact
 scope, он добавляется как внешний обязательный gate, а не как свойство режима.
@@ -666,7 +667,7 @@ main-owned integration receipt, числом полных gate batches, integrat
 final acceptance. Прогон с искусственным дроблением,
 пересекающимися writers, скрытым Luna manager/reviewer, несколькими active waves,
 последовательной source mutation текущей волны до обязательного dispatch,
-main shadow/copy-back, повторным полным gate batch без cross-cutting rework,
+main shadow/copy-back, повторным полным gate batch без утраты применимости evidence,
 повтором Luna work основным профилем или без exact integrated acceptance не
 доказывает `Баланс`, даже если случайно получил рабочий результат.
 

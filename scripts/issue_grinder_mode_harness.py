@@ -248,6 +248,7 @@ class BalanceWaveObservation:
     separate_reviewer_count: int = 0
     targeted_rework_gates_only: bool = True
     previous_waves_accepted: int = 0
+    full_recheck_reason: str = ""
 
 
 @dataclass(frozen=True)
@@ -364,7 +365,12 @@ def assess_balance_wave(
         defects.append("balance_main_copy_back_forbidden")
     if observation.integration_patch_rendered_in_context:
         defects.append("integration_patch_rendered_in_context")
-    if observation.full_integrated_gate_batch_count != 1:
+    justified_full_recheck = observation.full_recheck_reason in {
+        "cross_cutting_change", "environment_or_dependency_change", "unknown_impact",
+    }
+    if observation.full_integrated_gate_batch_count < 1 or (
+        observation.full_integrated_gate_batch_count > 1 and not justified_full_recheck
+    ):
         defects.append("balance_full_gate_batch_count_not_one")
     if observation.parallel_tool_gate_count < 2:
         defects.append("balance_parallel_tool_gates_missing")
@@ -376,7 +382,7 @@ def assess_balance_wave(
         defects.append("balance_main_final_acceptance_missing")
     if observation.separate_reviewer_count:
         defects.append("balance_unexpected_separate_reviewer")
-    if not observation.targeted_rework_gates_only:
+    if not observation.targeted_rework_gates_only and not justified_full_recheck:
         defects.append("balance_rework_repeated_full_gate_batch")
 
     may_accept = not defects

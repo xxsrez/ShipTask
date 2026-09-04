@@ -166,7 +166,7 @@ wave + useful main work directly in a clean task-owned integration checkout →
 one collective wait → mechanical fan-in → one full parallel tool-gate batch →
 main exact-diff review and acceptance`; новая frontier допускает следующую волну
 после нового admission. Main shadow/copy-back и повтор полного
-зелёного gate batch без cross-cutting rework в normal path не входят. В `Менеджере`
+зелёного gate batch без утраты применимости evidence в normal path не входят. В `Менеджере`
 normal order — `control brief → persistent Luna manager ↔ persistent Luna
 implementer по одной фазе → manager complete → одна independent Luna reviewer
 session → integration → controller final review`. Coordinator может механически
