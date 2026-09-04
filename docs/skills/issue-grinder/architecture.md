@@ -594,6 +594,17 @@ interfaces и не задерживают dispatch upstream writers. Он не �
 неизменное состояние не вызывает polling, status lists, nudges или
 промежуточную пересборку.
 
+Когда run уже находится в отдельном чистом task-owned checkout, а Luna writers
+получили независимые shadow roots exact base с непересекающимися owned surfaces,
+этот checkout является main-owned integration candidate. Main profile пишет
+свой отдельный downstream packet прямо в него: четвёртый `main` shadow,
+последующая обратная копия всего кандидата и повторная приёмка только из-за этой
+копии запрещены. До dispatch фиксируются exact base, исходное состояние checkout
+и main-owned surfaces; во время wave допустим только ожидаемый main diff на этих
+surfaces. Любая другая запись в integration candidate остаётся ownership defect.
+Это узкое исключение Balance не разрешает Luna писать в integration checkout и
+не применяется к пользовательскому dirty checkout или пересекающимся surfaces.
+
 Fan-in механический: main profile проверяет candidate identity и ownership,
 переносит task-owned bytes/commits в integration candidate, разрешает только
 реальные конфликты и не пересказывает полный patch в model context. Неполный
@@ -602,19 +613,24 @@ replacement agents. За весь run создаётся не более одн�
 вновь открывшуюся после fan-in frontier main profile завершает сам.
 
 Package-local quick checks выполняют Luna workers. После fan-in main profile
-одним parallel tool batch запускает независимые долгие сборки, тесты и
+ровно одним parallel tool batch запускает независимые долгие сборки, тесты и
 анализаторы точной интегрированной версии. Затем он делает один exact-diff pass,
 проверяет requirements, межпакетные решения, known risks и результаты checks,
-исправляет найденное и принимает кандидат. Отдельный reviewer не является
+исправляет найденное и принимает кандидат. Material rework повторяет только
+затронутые package/integration gates и один минимально необходимый общий
+acceptance; уже зелёный полный batch не повторяется без cross-cutting изменения.
+Отдельный reviewer не является
 штатной ролью Balance; если его требует пользователь, project policy или exact
 scope, он добавляется как внешний обязательный gate, а не как свойство режима.
 
 Mode evidence фиксирует решение admission до первой записи, учёт tool-bound
 critical path, packet/profile receipts, dispatch и
 wait envelope, candidate identities, owned surfaces, fan-in identity,
-integrated checks и final acceptance. Прогон с искусственным дроблением,
+main-owned integration receipt, числом полных gate batches, integrated checks и
+final acceptance. Прогон с искусственным дроблением,
 пересекающимися writers, скрытым Luna manager/reviewer, несколькими active waves,
 последовательной source mutation до обязательного dispatch, второй wave,
+main shadow/copy-back, повторным полным gate batch без cross-cutting rework,
 повтором Luna work основным профилем или без exact integrated acceptance не
 доказывает `Баланс`, даже если случайно получил рабочий результат.
 
@@ -739,8 +755,13 @@ review: меняется форма orchestration, а не evidence gate.
 `.git` внутри разрешённого sandbox и закрепляет его за одним owner-ом. Writer правит и тестирует этот
 реальный candidate, после чего coordinator строит и механически применяет exact
 diff. Созданный coordinator-ом shadow artifact удаляется только после проверки.
-Это не Git worktree и поэтому не используется для параллельных authors; при двух
-writing lanes остаётся обязательным отдельный admitted worktree каждому.
+Обычно это не Git worktree и поэтому не используется для параллельных authors.
+Узкое исключение — одна Balance wave: coordinator может создать до трёх
+отдельных shadow roots общей exact base для заранее доказанных непересекающихся
+surfaces; main при этом остаётся единственным writer-ом task-owned integration
+checkout и не создаёт собственный shadow. Для любых пересечений либо
+неподтверждённого task-owned checkout остаётся обязательным отдельный admitted
+Git worktree каждому writer-у либо последовательное выполнение.
 Shadow path выводится прямо из packet identity без поиска ignore/cache path.
 Проверенные owned files переносятся в integration checkout одной механической
 операцией с последующей отдельной identity-сверкой; полный patch не проходит
@@ -1274,10 +1295,14 @@ coordinator исполняет fail-closed protocol:
    git dir, common dir, branch, HEAD, lock и clean/approved-checkpoint state,
    затем проверяет `assert-unchanged`. Только после этого отдельный follow-up
    разрешает implementation.
-6. Пока хотя бы один writer активен, integration checkout остаётся read-only.
-   Если coordinator хочет писать параллельно, он становится отдельной writer
-   lane с собственными branch/worktree и тем же admission. Read-only Git,
-   Task Manager orchestration и проверки, не меняющие checkout, разрешены.
+6. Пока хотя бы один writer активен, integration checkout обычно остаётся
+   read-only. Единственное исключение — Balance с отдельным clean task-owned
+   checkout и изолированными shadow roots: coordinator заранее объявляет
+   непересекающиеся main-owned surfaces и пишет только в них, оставаясь
+   единственным владельцем integration candidate. Для Git-worktree writers,
+   dirty/общего checkout или пересекающихся surfaces coordinator получает
+   отдельную admitted lane. Read-only Git, Task Manager orchestration и
+   проверки, не меняющие checkout, разрешены.
 7. После каждого agent interaction/return и перед fan-in coordinator повторяет
    `assert-unchanged`. Любое Git-visible изменение integration checkout
    останавливает wave:

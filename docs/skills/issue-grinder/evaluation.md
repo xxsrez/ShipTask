@@ -136,10 +136,13 @@ Corpus доказывает:
 - Balance wave из двух-трёх dependency-ready self-contained packets с
   непересекающимися surfaces, admission и обязательным dispatch до первой
   source mutation, учётом tool-bound critical path, одной execution wave,
-  useful main overlap, одним collective wait, mechanical fan-in, parallel tool
-  gates и main acceptance;
+  useful main overlap прямо в clean task-owned integration checkout, одним
+  collective wait, mechanical fan-in, ровно одним полным parallel tool-gate
+  batch и main acceptance;
 - отклонение лишнего Balance reviewer-а, nested delegation, serial dispatch,
-  polling, повторения Luna work основной моделью и непроверенной интеграции;
+  polling, main shadow/copy-back, повторного полного gate batch без
+  cross-cutting rework, повторения Luna work основной моделью и непроверенной
+  интеграции;
 - independent-review lifecycle режимов, которые его требуют: один guard/spawn
   на owner-а, event waits, reuse после rework и только economical checkpoint с
   partial deadline ledger;

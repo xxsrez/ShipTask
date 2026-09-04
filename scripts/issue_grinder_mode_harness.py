@@ -236,12 +236,17 @@ class BalanceWaveObservation:
     common_exact_base: bool
     fan_in_complete: bool
     ownership_verified: bool
+    main_owns_integration_checkout: bool
+    main_shadow_candidate_created: bool
+    integration_copy_back_count: int
+    full_integrated_gate_batch_count: int
     integration_patch_rendered_in_context: bool = False
     parallel_tool_gate_count: int = 0
     integrated_checks_passed: bool = False
     main_exact_diff_reviewed: bool = False
     main_final_acceptance: bool = False
     separate_reviewer_count: int = 0
+    targeted_rework_gates_only: bool = True
 
 
 @dataclass(frozen=True)
@@ -348,8 +353,16 @@ def assess_balance_wave(
         defects.append("balance_fan_in_incomplete")
     if not observation.ownership_verified:
         defects.append("balance_ownership_not_verified")
+    if not observation.main_owns_integration_checkout:
+        defects.append("balance_main_not_integration_owner")
+    if observation.main_shadow_candidate_created:
+        defects.append("balance_main_shadow_forbidden")
+    if observation.integration_copy_back_count:
+        defects.append("balance_main_copy_back_forbidden")
     if observation.integration_patch_rendered_in_context:
         defects.append("integration_patch_rendered_in_context")
+    if observation.full_integrated_gate_batch_count != 1:
+        defects.append("balance_full_gate_batch_count_not_one")
     if observation.parallel_tool_gate_count < 2:
         defects.append("balance_parallel_tool_gates_missing")
     if not observation.integrated_checks_passed:
@@ -360,6 +373,8 @@ def assess_balance_wave(
         defects.append("balance_main_final_acceptance_missing")
     if observation.separate_reviewer_count:
         defects.append("balance_unexpected_separate_reviewer")
+    if not observation.targeted_rework_gates_only:
+        defects.append("balance_rework_repeated_full_gate_batch")
 
     may_accept = not defects
     return BalanceWaveDecision(

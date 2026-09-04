@@ -102,6 +102,10 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
             "common_exact_base": True,
             "fan_in_complete": True,
             "ownership_verified": True,
+            "main_owns_integration_checkout": True,
+            "main_shadow_candidate_created": False,
+            "integration_copy_back_count": 0,
+            "full_integrated_gate_batch_count": 1,
             "parallel_tool_gate_count": 3,
             "integrated_checks_passed": True,
             "main_exact_diff_reviewed": True,
@@ -284,6 +288,25 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
             "balance_main_exact_diff_review_missing",
             "balance_main_final_acceptance_missing",
             "balance_unexpected_separate_reviewer",
+        ):
+            self.assertIn(defect, decision.defects)
+
+    def test_balance_rejects_main_shadow_copy_back_and_repeated_full_gates(self) -> None:
+        decision = assess_balance_wave(
+            self.complete_balance_wave(
+                main_owns_integration_checkout=False,
+                main_shadow_candidate_created=True,
+                integration_copy_back_count=1,
+                full_integrated_gate_batch_count=2,
+                targeted_rework_gates_only=False,
+            )
+        )
+        for defect in (
+            "balance_main_not_integration_owner",
+            "balance_main_shadow_forbidden",
+            "balance_main_copy_back_forbidden",
+            "balance_full_gate_batch_count_not_one",
+            "balance_rework_repeated_full_gate_batch",
         ):
             self.assertIn(defect, decision.defects)
 
