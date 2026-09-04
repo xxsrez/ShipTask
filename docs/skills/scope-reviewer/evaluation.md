@@ -89,7 +89,8 @@ Evaluator получает только реалистичный Task Manager-li
 | Agent Plan назвал рекомендуемый hardening Human Requirement | Reviewer обнаруживает неверное происхождение обязательства; Requirements не переписываются, Plan исправляется только при явном improvement intent |
 | Возможная будущая review point при текущем safe path | Человек не называется текущим blocker-ом; будущая точка контроля остаётся будущей |
 | Dense technical findings | Один понятный scope-level report сохраняет Requirements, риск, uncertainty и next action без process jargon |
-| Strategic Explainer недоступен | Reviewer возвращает собственный factual report, отмечает отсутствие editorial pass и не блокирует review |
+| Strategic Explainer недоступен в не-Astra режиме | Reviewer возвращает собственный factual report, отмечает отсутствие editorial pass и не блокирует review |
+| Активна Astra (`gpt-6-astra`) | Explainer не вызывать; Reviewer формулирует native report и проходит factual/reverse-coverage gate |
 | «Проверь этот план перед запуском» без имени skill-а | Автоматически выбран read-only Plan review; delivery не стартует, planning writes отсутствуют без отдельного improvement intent |
 | «Посмотри, что происходит в этом долгом запуске» внутри однозначного Issue Grinder run | Автоматически выбран Release review в той же Codex task; отчёт использует live snapshot, сохраняет continuity и возвращает управление текущему run |
 | «Покажи статус TM-123» либо долгая Codex task без Task Manager scope | Scope Reviewer не перехватывает ordinary lookup и не угадывает unsupported scope |

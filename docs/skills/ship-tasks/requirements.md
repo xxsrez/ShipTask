@@ -154,17 +154,22 @@ comment с текущими фактами. Уже произошедший stat
 
 ### `ST-07` — Понятное объяснение через выбранный Explainer или native mode
 
-В начале run ShipTask определяет один communication mode по live skill catalog и
-effective user rule. Mode сохраняется для следующих publication units этого run,
-пока пользователь явно не изменит правило или выбранный provider не завершится
+В начале run ShipTask сначала проверяет активную модель. При Astra
+(`gpt-6-astra`) автоматический communication mode всегда `native`: Strategic
+Explainer не вызывается, потому что Astra сама формулирует текст. Этот guard
+имеет приоритет над наличием provider-а, effective user rule и ранее сохранённым
+mode и повторяется для каждой новой publication unit. В остальных случаях
+ShipTask определяет один communication mode по live skill catalog и effective
+user rule. Mode сохраняется для следующих publication units этого run, пока
+пользователь явно не изменит правило или выбранный provider не завершится
 ошибкой:
 
 1. обычный `$strategic-explainer:strategic-explainer`, если он доступен и
    разрешён;
 2. иначе native ShipTask writing.
 
-Таким образом, установленный и разрешённый ordinary выбирает provider mode, а
-его отсутствие или opt-out выбирает native. Ни одна комбинация сама по себе не
+Таким образом, в не-Astra режиме установленный и разрешённый ordinary выбирает
+provider mode, а его отсутствие или opt-out выбирает native. Ни одна комбинация сама по себе не
 является warning, capability failure или blocker. Для одной publication unit
 вызывается не более одного provider; availability fallback ведёт только в
 native, а не в другой communication provider или скрытый quality/error retry.
@@ -177,7 +182,8 @@ updates и рабочее общение provider не запускают. В pr
 authoritative sources; изменившиеся facts, scope или anchors требуют нового
 прохода того же выбранного provider.
 
-Обычный Strategic Explainer остаётся opaque terminal provider. ShipTask не
+Обычный Strategic Explainer остаётся opaque terminal provider. В автоматической
+Astra-ветке он не вызывается. В остальных случаях ShipTask не
 читает и не применяет его provider-internal contract, не пишет explanation
 candidate, не передаёт strategic summary, требования к структуре или стилю и не
 оценивает result внутренним quality checklist. Для каждой publication unit он
@@ -202,7 +208,7 @@ Task comment provider-а либо другой publication unit не являе�
 не публикуется как замена fresh semantic call. Caller не дописывает source basis
 в comment и не возвращает результат на свой технический язык.
 
-В native mode ShipTask сразу формулирует publication unit по собственным
+В native mode, включая обязательную Astra-ветку, ShipTask сразу формулирует publication unit по собственным
 truth/lifecycle/reporting requirements, публикует обязательный комментарий,
 выполняет его read-back и продолжает разрешённый status transition. Native mode
 не загружает, не применяет и не имитирует внутренний метод ordinary и
@@ -315,7 +321,8 @@ worktree с правом записи принадлежит ровно одно
 ветку, worktree или ветку другой Task.
 
 Субагентам, которые только собирают сведения, проводят проверку или готовят
-комментарий через Strategic Explainer, отдельный worktree не нужен. Один
+комментарий через Strategic Explainer (когда Astra не активна), отдельный
+worktree не нужен. Один
 владелец интеграции собирает изменения и проверяет точный интегрированный
 результат.
 
@@ -582,8 +589,9 @@ candidate аннулируется, Task/Goal не блокируются и р�
 
 Для одной общей блокировки допустим единый сводный отчёт без повторяющихся
 комментариев. Отчёт публикуется и в чате Codex, и в нативном комментарии Task
-Manager. Он проходит отдельный Strategic Explainer, если пользователь не
-отключил эту роль. Explainer помогает сформулировать обоснованную рекомендацию,
+Manager. Он проходит отдельный Strategic Explainer, если Astra не активна и
+пользователь не отключил эту роль. При активной Astra report формулируется
+native без вызова provider-а. Explainer помогает сформулировать обоснованную рекомендацию,
 но не получает права менять состояние, объём работ или статус.
 
 Task остаётся в достоверном незавершённом состоянии, пока обычная приёмка не

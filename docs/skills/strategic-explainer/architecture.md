@@ -42,6 +42,12 @@ Marketplace компилирует его как самостоятельный 
 `strategic-explainer:strategic-explainer`. Package вызывающего workflow или
 adapter не получает provider reference.
 
+Автоматические вызывающие workflows делают model preflight до обращения к
+facade. При активной Astra (`gpt-6-astra`) они не создают semantic invocation и
+формулируют publication unit самостоятельно; это guard маршрутизации, а не
+изменение generic provider contract. Явный прямой запрос пользователя к
+`$strategic-explainer:strategic-explainer` по-прежнему проходит обычный facade.
+
 ## 1. Конституционный принцип
 
 Overview независимо определяет Strategic Explainer как уточнитель общего

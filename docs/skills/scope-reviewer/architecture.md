@@ -313,7 +313,9 @@ Strategic Outcome, формальную модель обязательств, �
 repairs, Requirements questions, risks/dependencies, review/human attention и
 readiness. Lens transcripts и process diary в draft не копируются.
 
-Затем coordinator передаёт этот factual target text отдельному
+Затем coordinator проверяет active model. При Astra (`gpt-6-astra`) он не
+вызывает Strategic Explainer и формулирует native report. В остальных случаях
+он передаёт этот factual target text отдельному
 `$strategic-explainer:strategic-explainer` как explicit editing task с exact
 scope, языком и resolvable anchors. Strategic Explainer отвечает только за
 publication-ready редакторскую реконструкцию и не получает право менять
@@ -322,9 +324,10 @@ findings, planning decisions или Task Manager state.
 Coordinator проверяет ready text на material factual conflict и reverse
 coverage. Он не переписывает результат ради вкуса. Потерянный факт или ошибка
 исправляются новым clean editing invocation с корректным target/source. Если
-Strategic Explainer недоступен, Scope Reviewer возвращает собственный factual
-report и явно отмечает отсутствие независимого editorial pass, не заявляя
-эквивалентное качество.
+Strategic Explainer недоступен в не-Astra режиме, Scope Reviewer возвращает
+собственный factual report и явно отмечает отсутствие независимого editorial
+pass, не заявляя эквивалентное качество. В Astra-режиме native report проходит
+тот же factual и reverse-coverage gate без provider-а.
 
 Publication — один целостный ответ. Возможные смысловые вопросы `SR-10` и
 `SR-11` не становятся обязательными заголовками; главный вывод и требуемое

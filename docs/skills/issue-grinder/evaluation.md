@@ -55,7 +55,7 @@ prompt; подготовка обязана остановиться при ра
 |---|---|---|
 | `IG-FLOW-01` | `SKILL.md` §1; `task-manager-flow.md` | active-status-filter; backlog-rejected |
 | `IG-FLOW-02` | `SKILL.md` §2; `task-manager-flow.md` | all-lifecycle-transitions |
-| `IG-FLOW-03` | `SKILL.md` §3; `strategic-explainer.md` | trivial-start; required-comment; native-fallback; fresh-facade-per-unit; completed-provider-not-reused |
+| `IG-FLOW-03` | `SKILL.md` §3; `strategic-explainer.md` | trivial-start; required-comment; astra-native-routing; native-fallback; fresh-facade-per-unit; completed-provider-not-reused |
 | `IG-FLOW-04` | `SKILL.md` §3; `strategic-explainer.md` | comment-reveals-work; optional-follow-up |
 | `IG-FLOW-05` | `SKILL.md` §2; `task-manager-flow.md` | integrated-blocked-by; late-reopen-recheck |
 | `IG-FLOW-06` | `SKILL.md` §5; `execution-modes.md`; `modes/economical.md`; mode harness | active-scope-prevents-completion; economical-checkpoint-is-nonterminal |
@@ -335,10 +335,14 @@ fresh model-forward smoke.
 - на новых synthetic runs выбрать `Соло` при каждой top-level model/effort;
   любой явно выбранный канонический режим должен победить default rule, а продолжение
   после смены модели — сохранить ранее выбранный mode;
+- при активной модели Astra (`gpt-6-astra`) для каждой автоматической
+  publication unit не вызывать Strategic Explainer и сформулировать native
+  текст самой Astra, даже если provider установлен и предыдущий mode был
+  `ordinary`;
 - наблюдаемо различить режимы: в `Классическом` Sol/controller делает почти
    всё, а Luna получает только тривиальные packets; `Соло` сохраняет current
-  model, ноль Issue Grinder execution-subagents и допускает отдельный
-  Strategic Explainer provider для одного и нескольких issue; в
+  model, ноль Issue Grinder execution-subagents и в не-Astra ветке допускает
+  отдельный Strategic Explainer provider для одного и нескольких issue; в
   `Балансе` main profile запускает одним окном два-три independent Luna High
   write packets, параллельно выполняет свою полезную работу, затем одним
   collective wait получает handoffs, механически интегрирует, запускает общие

@@ -269,10 +269,13 @@ transport, известный до create scope не создаётся част
 
 ## 5. Strategic Explainer
 
-Перед созданием каждого Epic его problem-first описание составляется с помощью
-отдельно установленного `$strategic-explainer:strategic-explainer`. Каждый Epic
-description является отдельным publication unit: Task Composer делает один
-semantic call qualified skill-а и передаёт только назначение description,
+Перед созданием каждого Epic сначала проверь active model. При Astra
+(`gpt-6-astra`) Strategic Explainer не вызывай: coordinator формулирует
+problem-first description native. В остальных случаях описание составляется с
+помощью отдельно установленного `$strategic-explainer:strategic-explainer`.
+Каждый Epic description является отдельным publication unit. В не-Astra
+provider-ветке Task Composer делает один semantic call qualified skill-а и
+передаёт только назначение description,
 исходный вопрос, exact planning scope, язык, material constraints и resolvable
 read-only anchors. Никакие другие invocation parameters или provider
 instructions в Task Composer contract не входят. Готовый strategic view,
@@ -282,8 +285,8 @@ labels, relations или write authority. Task Composer не читает
 provider-internal contract, не пишет description candidate и не знает, как
 provider должен анализировать или формулировать result.
 
-Operational unavailability возвращается Task Composer как финальный failure
-semantic facade; внутренняя обработка caller-у не раскрывается.
+Operational unavailability в provider-ветке возвращается Task Composer как
+финальный failure semantic facade; внутренняя обработка caller-у не раскрывается.
 Готовый text и отдельно обозначенный source basis проверяются только на material
 factual conflict с authoritative planning sources. В Epic description попадает
 только text, а не basis. Factual correction также получает новый clean
@@ -293,9 +296,10 @@ semantic call; caller не читает internal quality checklist и не ул�
 Основной Task Composer остаётся ответственным за factual accuracy, полноту
 coverage и соответствие подготовленной hierarchy. Если Strategic Explainer
 выявил material context gap, write не маскирует его гладкой формулировкой. Если
-Explainer недоступен или не может подготовить grounded Epic description,
-создание Epic не начинается; single Task, которой Epic не нужен, от этого не
-блокируется.
+Explainer недоступен или не может подготовить grounded Epic description в
+не-Astra provider-ветке, создание Epic не начинается; single Task, которой Epic
+не нужен, от этого не блокируется. В Astra-ветке native description проходит
+тот же factual gate и не считается provider result.
 
 ## 6. Labels, hierarchy и relations
 

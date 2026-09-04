@@ -34,8 +34,11 @@ wording, agent topology, tool order или число подзадач.
   дочерней Task;
 - стратегический gap остаётся gap или вопросом, а не скрытой обязательной Task
   либо Human Requirement;
-- недоступный или ungrounded Strategic Explainer блокирует только Epic create,
-  а не независимо допустимую single Task;
+- недоступный или ungrounded Strategic Explainer в не-Astra режиме блокирует
+  только Epic create, а не независимо допустимую single Task;
+- при активной модели Astra (`gpt-6-astra`) Explainer не вызывается, а
+  coordinator формулирует native Epic description и проходит тот же factual и
+  coverage gate;
 - technical specifics, acceptance criteria и evidence находятся в применимых
   подзадачах, а secret values отсутствуют;
 - каждый уместный attachment из bug report сохранён как native attachment
@@ -84,7 +87,8 @@ wording, agent topology, tool order или число подзадач.
 | Подзадачи независимы | Не добавлять искусственные `blocks` relations |
 | B действительно требует завершения A | Создать relation, где A blocks B, и перечитать direction |
 | Exact duplicate уже существует | Не создавать вторую Task; сообщить disposition |
-| Для Epic недоступен Strategic Explainer | Epic не создавать; single Task без Epic не блокировать |
+| Для Epic недоступен Strategic Explainer в не-Astra режиме | Epic не создавать; single Task без Epic не блокировать |
+| Активна Astra (`gpt-6-astra`) | Explainer не вызывать; Epic description формулирует coordinator и проверяет factual/coverage gate |
 | Facade получил однозначный semantic request, но первый внутренний provider call структурно отклонён | Facade исправляет вызов внутри себя; Task Composer получает только готовый result либо operational unavailability |
 | Caller пытается сам применить методику Explainer или передать готовый strategic draft | Не читать provider contract; передать facade только semantic request без leaked framing |
 | Create вернул unknown outcome | Сначала найти/read-back возможный объект, не retry вслепую |

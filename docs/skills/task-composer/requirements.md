@@ -108,23 +108,29 @@ Tasks могут ссылаться на имя credential, secret store или 
 
 ### `TC-09` — Strategic Explainer для каждого Epic
 
-Problem-first описание каждого Epic проходит sibling Strategic Explainer,
-который является opaque provider и не выбирает decomposition, metadata, writes
-или authority. Task Composer остаётся ответственным за factual accuracy и
-полное покрытие. Если grounded provider result недоступен, Epic create не
-начинается; независимо допустимая single Task от этого не блокируется.
+Problem-first описание каждого Epic в обычном режиме проходит sibling
+Strategic Explainer, который является opaque provider и не выбирает decomposition,
+metadata, writes или authority. При активной модели Astra (`gpt-6-astra`)
+Strategic Explainer для автоматического Epic create не вызывается: основной
+coordinator сам формулирует описание native. Это условие имеет приоритет над
+наличием provider-а. Task Composer остаётся ответственным за factual accuracy и
+полное покрытие. Если grounded provider result недоступен в не-Astra режиме,
+Epic create не начинается; независимо допустимая single Task от этого не
+блокируется.
 
-Каждый Epic description является отдельным пользовательским результатом и
-получает один semantic call `$strategic-explainer:strategic-explainer`. Task
-Composer передаёт только назначение description, исходный вопрос, exact planning
-scope, язык, material constraints и разрешимые read-only source anchors. Никакие
-другие invocation parameters или provider instructions в Task Composer не
-передаются и не описываются: внутренним исполнением владеет facade Explainer.
+Каждый Epic description является отдельным пользовательским результатом. В
+не-Astra provider-ветке он получает один semantic call
+`$strategic-explainer:strategic-explainer`; Task Composer передаёт только
+назначение description, исходный вопрос, exact planning scope, язык, material
+constraints и разрешимые read-only source anchors. Никакие другие invocation
+parameters или provider instructions в Task Composer не передаются и не
+описываются: внутренним исполнением владеет facade Explainer. В Astra-ветке
+semantic call отсутствует, а native description проверяется тем же контрактом.
 Task Composer не читает provider-internal contract, не передаёт требования к
 форме description, не пишет explanation draft и не применяет методику Explainer
 самостоятельно. Готовый text проверяется только на material factual conflict с
 authoritative planning sources. Исправленный source/anchor получает новый
-semantic call; старый result самостоятельно не улучшается и обязательная
+semantic call в provider-ветке; старый result самостоятельно не улучшается и обязательная
 независимость не обходится.
 
 ### `TC-10` — Независимая planning distribution

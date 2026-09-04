@@ -955,10 +955,17 @@ evidence. Один старый status не доказывает наличие 
 ## 7. Комментарий и status transition как публикационная операция
 
 Для каждого перехода, кроме `To Do → In Progress`, coordinator сначала собирает
-проверенные факты и формирует semantic request к доступному
-`$strategic-explainer:strategic-explainer`. В запрос входят назначение текста,
-исходная ситуация, exact scope, язык, существенные ограничения и разрешимые
-read-only anchors. Внутреннюю методику provider-а coordinator не воспроизводит.
+проверенные факты и проверяет активную модель. При Astra (`gpt-6-astra`) он
+выбирает native writing и не вызывает Strategic Explainer. Иначе он формирует
+semantic request к доступному `$strategic-explainer:strategic-explainer`. В
+запрос входят назначение текста, исходная ситуация, exact scope, язык,
+существенные ограничения и разрешимые read-only anchors. Внутреннюю методику
+provider-а coordinator не воспроизводит.
+
+Astra guard имеет приоритет над наличием provider-а и ранее сохранённым
+communication mode и применяется к каждой новой publication unit. Явный
+отдельный пользовательский вызов Strategic Explainer остаётся direct request,
+но не меняет автоматический маршрут Issue Grinder.
 
 Publication unit целиком остаётся у основного coordinator-а. Worker, reviewer
 или scout может вернуть проверенные facts, evidence и resolvable read-only
@@ -1023,7 +1030,8 @@ ref или idempotency key adapter-а, exact target issue/version и digest го
 Одинаковая повторная проверка без изменения live state не создаёт нового права
 на запись.
 
-Если Strategic Explainer отсутствует, сразу используется native writing. Если
+Если активна Astra (`gpt-6-astra`) или Strategic Explainer отсутствует, сразу
+используется native writing. Если
 установленный facade вернул caller error, coordinator исправляет semantic call
 по сообщённой причине. Настоящая техническая ошибка provider-а раскрывается как
 таковая и не переименовывается в caller error. По умолчанию coordinator

@@ -63,9 +63,11 @@ candidate с обязательным честным comment. Marketplace source
 отдельный distribution step: локальная компиляция сама по себе не доказывает,
 что новый runtime уже released или загружен fresh Codex session.
 
-ShipTask package не содержит runtime Explainer. В начале run live catalog
-выбирает отдельно установленный `$strategic-explainer:strategic-explainer`,
-иначе native ShipTask writing. Manifest не умеет автоматически устанавливать
+ShipTask package не содержит runtime Explainer. В начале run active model имеет
+приоритет: при Astra (`gpt-6-astra`) выбирается native ShipTask writing без
+вызова provider-а; иначе live catalog выбирает отдельно установленный
+`$strategic-explainer:strategic-explainer`, иначе native ShipTask writing.
+Manifest не умеет автоматически устанавливать
 plugin dependency, но отсутствие provider-а является нормальным native mode по
 `ST-07`, а не fail-closed ветвью или встроенной копией.
 
@@ -309,8 +311,9 @@ ShipTask всегда создаёт и перечитывает обязате�
 по adapter contract; пока comment фактически не существует, связанный
 существенный transition не завершён.
 
-Каждый комментарий проходит выбранный communication mode: ordinary independent
-provider, иначе native ShipTask writing. Opt-out и
+Каждый комментарий проходит выбранный communication mode: при Astra
+(`gpt-6-astra`) native ShipTask writing без вызова provider-а; иначе ordinary
+independent provider, либо native при opt-out и
 provider failure также переводят mode в native. Во всех случаях основной агент
 публикует и перечитывает обязательный grounded comment; отсутствие Explainer не
 останавливает зависящий transition. Native mode следует собственному truth
@@ -676,12 +679,14 @@ comment предшествует reopen, после чего обычный rewo
 
 Каждый comment, отдельный Task/scope report, blocker report и final является
 самостоятельной publication unit. Routine chat и progress updates unit не
-создают. В начале run ShipTask читает live skill catalog и выбирает mode:
-ordinary `$strategic-explainer:strategic-explainer`, если он доступен и разрешён,
-иначе native. Выбор сохраняется до explicit rule change или failure выбранного
-provider-а.
+создают. В начале run ShipTask проверяет active model. При Astra
+(`gpt-6-astra`) выбирается native без вызова Strategic Explainer; guard имеет
+приоритет над availability и сохранённым mode. Иначе ShipTask читает live skill
+catalog и выбирает mode: ordinary `$strategic-explainer:strategic-explainer`, если
+он доступен и разрешён, иначе native. Выбор сохраняется до explicit rule change
+или failure выбранного provider-а.
 
-Ordinary path является одним вызовом semantic facade
+В не-Astra режиме Ordinary path является одним вызовом semantic facade
 `$strategic-explainer:strategic-explainer`. ShipTask передаёт только назначение
 publication unit, исходный вопрос, exact scope, язык, material constraints и
 resolvable read-only anchors. Никакие другие invocation parameters или provider
@@ -781,8 +786,9 @@ synthetic/ephemeral замена в current scope. Completed related Tasks и п
 project sources проверяются до вывода, что identity/session отсутствует; старое
 `not_available` не заменяет live read/attempt.
 Если нет, это authority blocker, а не просьба «прислать файл» или голый
-«нужен principal». До defer coordinator фиксирует self-service attempts и
-готовит blocker decision report через Strategic Explainer: recommended path,
+«нужен principal». До defer coordinator фиксирует self-service attempts и,
+если Astra не активна, готовит blocker decision report через Strategic Explainer:
+recommended path,
 material alternatives, prerequisites, success signal, safe continuation и exact
 resume condition. Это не разрешает создавать внешнюю identity, менять ACL или
 обходить privacy boundary.
@@ -962,7 +968,8 @@ acceptance, даёт объективно проверяемый результ�
 неопределённости окружения. Остальные implementation/research packets наследуют
 current profile; внешне механическая, но рискованная или связанная работа простой
 не считается. Strategic Explainer не относится к этой классификации: по разделу
-6 ShipTask вызывает только его semantic facade; operational unavailability
+6 ShipTask вызывает только его semantic facade, кроме автоматической Astra-ветки
+(`gpt-6-astra`), где provider не вызывается; operational unavailability
 переводит communication mode в native writing.
 
 Если Luna обнаружила неоднозначность, конфликт контекста или task contract,
