@@ -87,7 +87,7 @@ prompt; подготовка обязана остановиться при ра
 | `IG-MODE-11` | `SKILL.md` §1-3; `modes/solo.md`; `strategic-explainer.md`; mode/solo-topology harnesses | solo-one-issue; solo-many-issues-sequential; solo-current-profile-after-model-change; solo-no-execution-delegation; solo-provider-allowed; solo-terminal-only |
 | `IG-MODE-12` | `execution-modes.md`; `multi-agent-execution.md`; `strategic-explainer.md`; solo-topology harness | outer-controller-not-counted; provider-transport-not-counted; provider-doing-delivery-becomes-execution-agent; explicit-global-opt-out-wins; topology-boundary-all-modes |
 | `IG-MODE-19` | `execution-modes.md`; `modes/solo.md` | process-handle-survives-handoff; completed-result-reused; independent-tools-one-solo-packet; unknown-effect-reconciled |
-| `IG-MODE-20` | `SKILL.md`; `execution-modes.md`; mode harness | wrong-model-refused; wrong-effort-refused; unknown-refused; resume-profile-gate; switch-profile-gate; no-wrapper-or-effects; legacy-balance-refused |
+| `IG-MODE-20` | `SKILL.md`; `execution-modes.md`; `main_profile.py`; mode harness | own-latest-turn-profile; no-config-fallback; wrong-model-refused; wrong-effort-refused; unknown-refused; resume-profile-gate; switch-profile-gate; no-wrapper-or-effects; legacy-balance-refused |
 | `IG-HELP-01` | `SKILL.md` §0; `mode-help.md` | all-four-modes-brief; default-is-resolver; narrow-difference-answer; help-has-no-task-manager-effects; mixed-help-delivery-preserves-gates |
 | `IG-MA-01` | `SKILL.md` §2; `multi-agent-execution.md` | two-independent-packets; useful-critic; intentional-candidate; one-lane-no-filler; solo-delegation-forbidden |
 | `IG-MA-02` | `multi-agent-execution.md` | disjoint-surfaces; ordinary-conflicting-surfaces; isolated-intentional-overlap |
