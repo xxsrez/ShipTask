@@ -1,0 +1,1693 @@
+{
+  "date": "2026-09-06",
+  "plugin_version": "0.1.0+codex.20260906202000",
+  "source_commit": "8abba9925d351f13931b7b8fc066563d97af6ff5",
+  "marketplace_commit": "75333634c1dee17de218ec27723b4c410ed81976",
+  "manifest": {
+    "base_tree_sha256": "499783573d718599cc07746e5245f748974e630e64a2693aab6c938797000377",
+    "baseline_shas": {
+      "B1": "96c6891eedb030d3a7996af546c8c5d3409773cf",
+      "C1": "96c6891eedb030d3a7996af546c8c5d3409773cf",
+      "E1": "96c6891eedb030d3a7996af546c8c5d3409773cf",
+      "S1": "96c6891eedb030d3a7996af546c8c5d3409773cf"
+    },
+    "benchmark_id": "issue-grinder-installed-balance-20260906-v2",
+    "created_at": "2026-09-06T20:19:41.378+00:00",
+    "frozen_files": {
+      "base/PLAN.md": "3e50511cff8fa9036e5e4f12132e8fcc6e06c7f2c027d51831819fd37fd32f25",
+      "base/tools/lane_gate.py": "a55451de1636dd3c504fd410916979877ab05f61a56bde9a4f58f30c05c02158",
+      "base/tools/shadow_lanes.py": "cc9a84d70e3e71ac4abc83f78ecd5aea1d2da5c496ac031078991605aa77663c",
+      "measurement-plan.json": "d293b3680f3ee8d3c0cfd998c283a8b7b5104c0214771a6eae3ef75361d1a117",
+      "oracle/run_acceptance.py": "b7927463eb23f8b79986cfe035ce9b7204bf0fca4b222a321d178f1c3a08b920",
+      "prompt-template.txt": "56226881b8f1dcb264ea5a945c029add0a720c8caaf13345c4fb586fbadb9872"
+    },
+    "frozen_skill_sha256": "51e00105f5d81eb92a7d228177f5086241e7b85a0bba5530e7414a504600d893",
+    "luna_profile": {
+      "effort": "max",
+      "model": "gpt-5.6-luna"
+    },
+    "prepare_evidence": {
+      "base_acceptance_exit_code": 1,
+      "gate_quick_checks": {
+        "critical": {
+          "digest": "a1e6253e8fb10b8fd810b5f651cfd74d4f1d125805f25e99509a591d496bf193",
+          "iterations": 70,
+          "work_seconds": 0.050309
+        },
+        "integration": {
+          "digest": "059194fe56a301b26021fb7235b01387fca46d3db8a5e342e8ab284b82b2967a",
+          "iterations": 80,
+          "work_seconds": 0.050335
+        },
+        "parser": {
+          "digest": "3bf56fb9f1ec37b5a7d5cae9eb7e715374a5fdce3a538acab5338598151eae2e",
+          "iterations": 75,
+          "work_seconds": 0.050704
+        },
+        "waves": {
+          "digest": "eda20b11f56a889a2c14307ecab3d54cf96ea0531d8dfcdf890c01679fe92291",
+          "iterations": 89,
+          "work_seconds": 0.050306
+        }
+      },
+      "reference_acceptance_exit_code": 0,
+      "reference_public_tests": "pass"
+    },
+    "run_order": [
+      "B1",
+      "S1",
+      "C1",
+      "E1"
+    ],
+    "run_specs": {
+      "B1": {
+        "effort": "max",
+        "mode": "balance",
+        "mode_ru": "Баланс",
+        "model": "gpt-5.6-luna"
+      },
+      "C1": {
+        "effort": "xhigh",
+        "mode": "classic",
+        "mode_ru": "Классический",
+        "model": "gpt-5.6-sol"
+      },
+      "E1": {
+        "effort": "max",
+        "mode": "economical",
+        "mode_ru": "Экономичный",
+        "model": "gpt-5.6-luna"
+      },
+      "S1": {
+        "effort": "xhigh",
+        "mode": "solo",
+        "mode_ru": "Соло",
+        "model": "gpt-5.6-sol"
+      }
+    },
+    "schema": "issue-grinder/five-mode-normal/v6",
+    "timeout_seconds_per_run": 3600,
+    "top_level_profiles": {
+      "B1": {
+        "effort": "max",
+        "model": "gpt-5.6-luna"
+      },
+      "C1": {
+        "effort": "xhigh",
+        "model": "gpt-5.6-sol"
+      },
+      "E1": {
+        "effort": "max",
+        "model": "gpt-5.6-luna"
+      },
+      "S1": {
+        "effort": "xhigh",
+        "model": "gpt-5.6-sol"
+      }
+    }
+  },
+  "profile_checks": [
+    {
+      "case": "balance_wrong_model",
+      "model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "exit": 0,
+      "result_file_exists": false,
+      "messages": [
+        "Использую только указанный Issue Grinder и проверю его условия запуска для явно выбранного режима «Баланс». Профиль сессии менять не буду; память, другие skills и родительские каталоги читать не стану.",
+        "Skill требует до чтения плана получить фактический receipt профиля основной сессии. Сейчас запускаю единственную обязательную проверку для `balance`; при несовпадении условия прямо запрещают читать и выполнять `PLAN.md`.",
+        "{\n  \"canonical_mode\": \"balance\",\n  \"disposition\": \"refused\",\n  \"reason\": \"Текущий профиль gpt-5.6-sol/xhigh; режим требует gpt-5.6-luna/max. PLAN.md не читался и не выполнялся.\"\n}"
+      ],
+      "receipts": [
+        {
+          "admission": "main_profile_required",
+          "allowed": false,
+          "effort": "xhigh",
+          "mode": "balance",
+          "model": "gpt-5.6-sol",
+          "source": "current_session_latest_turn_context",
+          "status": "observed",
+          "thread_id": "00000000-0000-4000-8000-70cb3ba2ac8c"
+        }
+      ],
+      "child_events": 0
+    },
+    {
+      "case": "eco_wrong_effort",
+      "model": "gpt-5.6-luna",
+      "effort": "high",
+      "exit": 0,
+      "result_file_exists": false,
+      "messages": [
+        "Использую указанный `issue-grinder` и проверю только локальные файлы текущего evaluation-профиля и условия запуска режима «Экономичный». Память, другие skills и родительские каталоги читать не буду; профиль сессии не изменяю.",
+        "`PLAN.md` содержит один локальный результат: создать `result.txt` с текстом `completed`; сеть, Task Manager и Goal запрещены. Перед запуском проверяю обязательный профиль режима «Экономичный».",
+        "{\"canonical_mode\":\"economical\",\"disposition\":\"refused\",\"reason\":\"Профиль не допускает режим: обнаружен gpt-5.6-luna с effort=high вместо обязательного max. Профиль сессии не изменён; PLAN.md не выполнялся.\"}"
+      ],
+      "receipts": [
+        {
+          "admission": "main_profile_required",
+          "allowed": false,
+          "effort": "high",
+          "mode": "economical",
+          "model": "gpt-5.6-luna",
+          "source": "current_session_latest_turn_context",
+          "status": "observed",
+          "thread_id": "00000000-0000-4000-8000-06bd23082bc0"
+        }
+      ],
+      "child_events": 0
+    },
+    {
+      "case": "eco_wrong_model",
+      "model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "exit": 0,
+      "result_file_exists": false,
+      "messages": [
+        "Использую только указанный Issue Grinder и локальный `PLAN.md`; профиль сессии, модель и выбранный режим не меняю. Сначала сверю условия запуска «Экономичного» режима, затем либо выполню разрешённый план, либо верну отказ с точной причиной.",
+        "{\n  \"canonical_mode\": \"economical\",\n  \"disposition\": \"refused\",\n  \"reason\": \"Основная сессия имеет профиль gpt-5.6-sol/xhigh; для режима «Экономичный» требуется gpt-5.6-luna/max. PLAN.md не выполнялся, профиль не изменён.\"\n}"
+      ],
+      "receipts": [
+        {
+          "admission": "main_profile_required",
+          "allowed": false,
+          "effort": "xhigh",
+          "mode": "economical",
+          "model": "gpt-5.6-sol",
+          "source": "current_session_latest_turn_context",
+          "status": "observed",
+          "thread_id": "00000000-0000-4000-8000-2d75f6cb648d"
+        }
+      ],
+      "child_events": 0
+    },
+    {
+      "case": "default_luna",
+      "model": "gpt-5.6-luna",
+      "effort": "max",
+      "exit": 0,
+      "result_file_exists": false,
+      "messages": [
+        "Использую указанный `issue-grinder` skill только для resolver в новом изолированном run; исполнение плана и субагентов не запускаю.",
+        "{\"canonical_mode\":\"balance\",\"disposition\":\"selected\",\"reason\":\"Режим не выбран явно; профиль gpt-5.6-luna/max автоматически разрешает balance, admission=true. Resolver завершён без исполнения PLAN и без субагентов.\"}"
+      ],
+      "receipts": [
+        {
+          "admission": "allowed",
+          "allowed": true,
+          "effort": "max",
+          "mode": null,
+          "model": "gpt-5.6-luna",
+          "source": "current_session_latest_turn_context",
+          "status": "observed",
+          "thread_id": "00000000-0000-4000-8000-346c38476e81"
+        },
+        {
+          "admission": "allowed",
+          "allowed": true,
+          "effort": "max",
+          "mode": "balance",
+          "model": "gpt-5.6-luna",
+          "source": "current_session_latest_turn_context",
+          "status": "observed",
+          "thread_id": "00000000-0000-4000-8000-346c38476e81"
+        }
+      ],
+      "child_events": 0
+    },
+    {
+      "case": "default_sol",
+      "model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "exit": 0,
+      "result_file_exists": false,
+      "messages": [
+        "Использую ровно указанный Issue Grinder: прочитаю его `SKILL.md`, выполню только resolver для нового локального run и остановлюсь до `PLAN`, без субагентов и изменений профиля.",
+        "{\"canonical_mode\":\"classic\",\"disposition\":\"selected\",\"reason\":\"Режим явно не выбран; фактический профиль gpt-5.6-sol/xhigh автоматически выбирает classic. Требование не запускать субагентов относится к остановке после resolver.\"}"
+      ],
+      "receipts": [
+        {
+          "admission": "allowed",
+          "allowed": true,
+          "effort": "xhigh",
+          "mode": null,
+          "model": "gpt-5.6-sol",
+          "source": "current_session_latest_turn_context",
+          "status": "observed",
+          "thread_id": "00000000-0000-4000-8000-445d9f6987d3"
+        }
+      ],
+      "child_events": 0
+    }
+  ],
+  "parity": {
+    "issue-grinder": {
+      "source_market_cache_equal": true,
+      "files": 17
+    },
+    "task-composer": {
+      "source_market_cache_equal": true,
+      "files": 2
+    },
+    "scope-reviewer": {
+      "source_market_cache_equal": true,
+      "files": 7
+    },
+    "strategic-explainer": {
+      "source_market_cache_equal": true,
+      "files": 4
+    }
+  },
+  "runs": [
+    {
+      "name": "Соло",
+      "id": "S1",
+      "run": {
+        "acceptance_exit_code": 0,
+        "all_receipts_valid": true,
+        "baseline_sha": "96c6891eedb030d3a7996af546c8c5d3409773cf",
+        "diff_stat": "PLAN.md               |  8 +++---\n microflow/cli.py      | 70 +++++++++++++++++++++++++++++++++++++++++++++++++-\n microflow/critical.py | 71 +++++++++++++++++++++++++++++++++++++++++++++++++--\n microflow/parser.py   | 65 ++++++++++++++++++++++++++++++++++++++++++++--\n microflow/waves.py    | 36 ++++++++++++++++++++++++--\n 5 files changed, 239 insertions(+), 11 deletions(-)",
+        "duration_seconds": 522.392,
+        "exit_code": 0,
+        "finished_at": "2026-09-06T20:52:44.483+00:00",
+        "frozen_file_drift": [],
+        "frozen_skill_drift": false,
+        "frozen_skill_sha256": "51e00105f5d81eb92a7d228177f5086241e7b85a0bba5530e7414a504600d893",
+        "git_status": [
+          "M PLAN.md",
+          " M microflow/cli.py",
+          " M microflow/critical.py",
+          " M microflow/parser.py",
+          " M microflow/waves.py"
+        ],
+        "head_sha": "96c6891eedb030d3a7996af546c8c5d3409773cf",
+        "last_message_present": true,
+        "mode": "solo",
+        "plan_checked_items": 4,
+        "plan_semantic_drift": false,
+        "profile": {
+          "effort": "xhigh",
+          "model": "gpt-5.6-sol"
+        },
+        "receipts": {
+          "critical": {
+            "candidate_sha256": "1d469dab83b0aa3089480ad11709324c85ca434b3f592bd996a36ac9badb7cae",
+            "cpu_seconds": 44.692535,
+            "digest": "4341f618acb35c98e4dd96f56b053e51e390a99b8736cb335349576bfd79adfb",
+            "duration_seconds": 45.00586,
+            "finished_at": "2026-09-06T20:49:35.247+00:00",
+            "iterations": 118594,
+            "present": true,
+            "started_at": "2026-09-06T20:48:50.241+00:00",
+            "valid": true,
+            "work_seconds": 45.000177
+          },
+          "integration": {
+            "candidate_sha256": "d07aa1965d8cecce2a4c3db511d601cdd7ff608740a267b79c0812fbdaf8a20a",
+            "cpu_seconds": 44.71665,
+            "digest": "e0e6762a56ed206565854741afc57a5fb4beaf7fda00a637a3084d7e89afb0e2",
+            "duration_seconds": 45.233858,
+            "finished_at": "2026-09-06T20:51:15.507+00:00",
+            "iterations": 96788,
+            "present": true,
+            "started_at": "2026-09-06T20:50:30.274+00:00",
+            "valid": true,
+            "work_seconds": 45.000423
+          },
+          "parser": {
+            "candidate_sha256": "a5aa5114b8470b9eff106c5999845bd9e62e295b9cdc277b5825441a9a6cafa0",
+            "cpu_seconds": 44.099068,
+            "digest": "a86b6bc7d85f9414ca6c5cfc9d9dd6580b6832621dc7ebfe7730c59e88f3863b",
+            "duration_seconds": 45.006055,
+            "finished_at": "2026-09-06T20:47:06.814+00:00",
+            "iterations": 69140,
+            "present": true,
+            "started_at": "2026-09-06T20:46:21.808+00:00",
+            "valid": true,
+            "work_seconds": 45.000189
+          },
+          "waves": {
+            "candidate_sha256": "e6413444f9ada667477a2110c38f1553927ca3662af3f5f073b6c307aa636c68",
+            "cpu_seconds": 44.664319,
+            "digest": "4a69863fd6f5cfd0f8eb774e5c180e21c978758390d3b922947f7393cb3e607b",
+            "duration_seconds": 45.005235,
+            "finished_at": "2026-09-06T20:48:17.005+00:00",
+            "iterations": 83969,
+            "present": true,
+            "started_at": "2026-09-06T20:47:32.000+00:00",
+            "valid": true,
+            "work_seconds": 45.0003
+          }
+        },
+        "run_id": "S1",
+        "schema": "issue-grinder/five-mode-normal-run/v6",
+        "started_at": "2026-09-06T20:44:02.078+00:00",
+        "thread_id": "00000000-0000-4000-8000-d64ebba13cd9",
+        "timed_out": false
+      },
+      "acceptance": {
+        "errors": 0,
+        "failures": 0,
+        "functional_score": 85.0,
+        "functional_score_max": 85,
+        "groups": {
+          "MF1": {
+            "passed": 7,
+            "score": 20.0,
+            "total": 7,
+            "weight": 20
+          },
+          "MF2": {
+            "passed": 4,
+            "score": 20.0,
+            "total": 4,
+            "weight": 20
+          },
+          "MF3": {
+            "passed": 5,
+            "score": 25.0,
+            "total": 5,
+            "weight": 25
+          },
+          "MF4": {
+            "passed": 5,
+            "score": 20.0,
+            "total": 5,
+            "weight": 20
+          }
+        },
+        "passed": true,
+        "schema": "issue-grinder/five-mode-synthetic-acceptance/v1",
+        "skipped": 0,
+        "tests_run": 21
+      },
+      "usage": {
+        "period": {
+          "start": "2026-09-06T20:44:01+00:00",
+          "end": "2026-09-06T20:52:46+00:00",
+          "timezone": "Atlantic/Madeira",
+          "interval": "[start, end)"
+        },
+        "categories": [
+          {
+            "key": "cached_input",
+            "label": "Cached input",
+            "tokens": 1309952,
+            "token_percent": 94.6356250442492,
+            "cost_usd": 0.5239807999999999,
+            "cost_percent": 50.68587073778116,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 1309952,
+                "token_percent": 94.6356250442492,
+                "cost_usd": 0.5239807999999999,
+                "cost_percent": 50.68587073778116
+              }
+            ]
+          },
+          {
+            "key": "input",
+            "label": "Input",
+            "tokens": 60955,
+            "token_percent": 4.403607555522805,
+            "cost_usd": 0.24382000000000004,
+            "cost_percent": 23.585270687944686,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 60955,
+                "token_percent": 4.403607555522805,
+                "cost_usd": 0.24382000000000004,
+                "cost_percent": 23.585270687944686
+              }
+            ]
+          },
+          {
+            "key": "output",
+            "label": "Output",
+            "tokens": 13299,
+            "token_percent": 0.9607674002280008,
+            "cost_usd": 0.26598,
+            "cost_percent": 25.72885857427416,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 13299,
+                "token_percent": 0.9607674002280008,
+                "cost_usd": 0.26598,
+                "cost_percent": 25.72885857427416
+              }
+            ]
+          }
+        ],
+        "total": {
+          "tokens": 1384206,
+          "token_percent": 100.0,
+          "cost_usd": 1.0337808,
+          "cost_percent": 100.0,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 1384206,
+              "token_percent": 100.0,
+              "cost_usd": 1.0337808,
+              "cost_percent": 100.0
+            }
+          ]
+        },
+        "audit": {
+          "files_scanned": 1,
+          "token_events_counted": 32,
+          "first_counted_event": "2026-09-06T20:44:14.663Z",
+          "last_counted_event": "2026-09-06T20:52:43.074Z",
+          "unpriced_models": [],
+          "unreadable_logs": []
+        }
+      },
+      "tree": {
+        "agent_count": 0,
+        "api_equivalent_usd_priced_models": 1.033781,
+        "forbidden_tool_calls": [],
+        "found": true,
+        "guardian_count": 0,
+        "priced_models": [
+          "gpt-5.6-sol"
+        ],
+        "root_thread_id": "00000000-0000-4000-8000-d64ebba13cd9",
+        "schema": "issue-grinder/five-mode-normal-tree/v5",
+        "session_count": 1,
+        "sessions": [
+          {
+            "agent_path": null,
+            "cwd": "/workspace/ShipTask/.codex-tmp/issue-grinder-installed-balance-20260906-v2/runs/S1/workspace",
+            "efforts": [
+              "xhigh"
+            ],
+            "id": "00000000-0000-4000-8000-d64ebba13cd9",
+            "models": [
+              "gpt-5.6-sol"
+            ],
+            "nickname": null,
+            "originator": "Codex Desktop",
+            "parent_thread_id": null,
+            "path": "~/.codex/sessions/2026/09/06/rollout-2026-09-06T21-44-02-00000000-0000-4000-8000-d64ebba13cd9.jsonl",
+            "role": null,
+            "tests_observed": 10,
+            "thread_source": "user",
+            "tool_calls": 31,
+            "tool_names": [
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec"
+            ],
+            "usage": {
+              "gpt-5.6-sol": {
+                "cached_input": 1309952,
+                "input": 60955,
+                "output": 13299
+              }
+            }
+          }
+        ],
+        "tests_observed": 10,
+        "tokens_by_model": {
+          "gpt-5.6-sol": {
+            "cached_input": 1309952,
+            "input": 60955,
+            "output": 13299
+          }
+        },
+        "tool_calls": 31
+      },
+      "sol": 1384206,
+      "luna": 0
+    },
+    {
+      "name": "Классический",
+      "id": "C1",
+      "run": {
+        "acceptance_exit_code": 0,
+        "all_receipts_valid": true,
+        "baseline_sha": "96c6891eedb030d3a7996af546c8c5d3409773cf",
+        "diff_stat": "PLAN.md               |  8 +++---\n microflow/cli.py      | 68 +++++++++++++++++++++++++++++++++++++++++++++++-\n microflow/critical.py | 69 +++++++++++++++++++++++++++++++++++++++++++++++--\n microflow/parser.py   | 71 +++++++++++++++++++++++++++++++++++++++++++++++++--\n microflow/waves.py    | 52 +++++++++++++++++++++++++++++++++++--\n 5 files changed, 257 insertions(+), 11 deletions(-)",
+        "duration_seconds": 820.183,
+        "exit_code": 0,
+        "finished_at": "2026-09-06T21:06:26.499+00:00",
+        "frozen_file_drift": [],
+        "frozen_skill_drift": false,
+        "frozen_skill_sha256": "51e00105f5d81eb92a7d228177f5086241e7b85a0bba5530e7414a504600d893",
+        "git_status": [
+          "M PLAN.md",
+          " M microflow/cli.py",
+          " M microflow/critical.py",
+          " M microflow/parser.py",
+          " M microflow/waves.py"
+        ],
+        "head_sha": "96c6891eedb030d3a7996af546c8c5d3409773cf",
+        "last_message_present": true,
+        "mode": "classic",
+        "plan_checked_items": 4,
+        "plan_semantic_drift": false,
+        "profile": {
+          "effort": "xhigh",
+          "model": "gpt-5.6-sol"
+        },
+        "receipts": {
+          "critical": {
+            "candidate_sha256": "74eba7d93c34f2a4c5f80aaf53765667a71da860a7015fdf6adcd0995b5d491a",
+            "cpu_seconds": 44.675659,
+            "digest": "33ab496ace7d24fb5b7f76b85d669bf34235ac7b2377a0ef6d187c910175d5f5",
+            "duration_seconds": 45.005285,
+            "finished_at": "2026-09-06T20:58:43.378+00:00",
+            "iterations": 120503,
+            "present": true,
+            "started_at": "2026-09-06T20:57:58.373+00:00",
+            "valid": true,
+            "work_seconds": 45.000214
+          },
+          "integration": {
+            "candidate_sha256": "cff4bffd054f22bca7fd07b69c963e4fd2b804377a977566520b8d29f2bfde2d",
+            "cpu_seconds": 44.695258,
+            "digest": "de61223551e949f717b6d1940e07c27edbd10f743b1b89d4e681c3356cea318f",
+            "duration_seconds": 45.243124,
+            "finished_at": "2026-09-06T20:59:57.794+00:00",
+            "iterations": 138421,
+            "present": true,
+            "started_at": "2026-09-06T20:59:12.551+00:00",
+            "valid": true,
+            "work_seconds": 45.000311
+          },
+          "parser": {
+            "candidate_sha256": "b239f8ef37acd4de85c2251c41b150f487a66c1168a19a4752b0c54e2a636741",
+            "cpu_seconds": 44.049495,
+            "digest": "953449d1137ac9af85316788a3a0b08547cc09eb1bacff361ffb42372878c746",
+            "duration_seconds": 45.005172,
+            "finished_at": "2026-09-06T20:56:20.171+00:00",
+            "iterations": 70382,
+            "present": true,
+            "started_at": "2026-09-06T20:55:35.166+00:00",
+            "valid": true,
+            "work_seconds": 45.000384
+          },
+          "waves": {
+            "candidate_sha256": "cc69f708fbf4b05b3c54b81b698b8b49600a1092e66f3e3ed6326f0d4995f04c",
+            "cpu_seconds": 44.673552,
+            "digest": "55fb72d215b89cfd005f736690ecc8d595345d7e00e52b3c7677592d2aa10e81",
+            "duration_seconds": 45.00484,
+            "finished_at": "2026-09-06T20:57:28.762+00:00",
+            "iterations": 212757,
+            "present": true,
+            "started_at": "2026-09-06T20:56:43.757+00:00",
+            "valid": true,
+            "work_seconds": 45.000069
+          }
+        },
+        "run_id": "C1",
+        "schema": "issue-grinder/five-mode-normal-run/v6",
+        "started_at": "2026-09-06T20:52:46.320+00:00",
+        "thread_id": "00000000-0000-4000-8000-9a0a1eb576f4",
+        "timed_out": false
+      },
+      "acceptance": {
+        "errors": 0,
+        "failures": 0,
+        "functional_score": 85.0,
+        "functional_score_max": 85,
+        "groups": {
+          "MF1": {
+            "passed": 7,
+            "score": 20.0,
+            "total": 7,
+            "weight": 20
+          },
+          "MF2": {
+            "passed": 4,
+            "score": 20.0,
+            "total": 4,
+            "weight": 20
+          },
+          "MF3": {
+            "passed": 5,
+            "score": 25.0,
+            "total": 5,
+            "weight": 25
+          },
+          "MF4": {
+            "passed": 5,
+            "score": 20.0,
+            "total": 5,
+            "weight": 20
+          }
+        },
+        "passed": true,
+        "schema": "issue-grinder/five-mode-synthetic-acceptance/v1",
+        "skipped": 0,
+        "tests_run": 21
+      },
+      "usage": {
+        "period": {
+          "start": "2026-09-06T20:52:45+00:00",
+          "end": "2026-09-06T21:06:28+00:00",
+          "timezone": "Atlantic/Madeira",
+          "interval": "[start, end)"
+        },
+        "categories": [
+          {
+            "key": "cached_input",
+            "label": "Cached input",
+            "tokens": 2015232,
+            "token_percent": 93.41627805642342,
+            "cost_usd": 0.6061824,
+            "cost_percent": 52.10332676765368,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 1489152,
+                "token_percent": 69.02978778635863,
+                "cost_usd": 0.5956608,
+                "cost_percent": 51.198961410100324
+              },
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 526080,
+                "token_percent": 24.386490270064805,
+                "cost_usd": 0.0105216,
+                "cost_percent": 0.9043653575533451
+              }
+            ]
+          },
+          {
+            "key": "input",
+            "label": "Input",
+            "tokens": 114441,
+            "token_percent": 5.304923838573004,
+            "cost_usd": 0.23356400000000008,
+            "cost_percent": 20.075576943771818,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 55441,
+                "token_percent": 2.569973021332616,
+                "cost_usd": 0.22176400000000007,
+                "cost_percent": 19.061328994873413
+              },
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 59000,
+                "token_percent": 2.7349508172403882,
+                "cost_usd": 0.011800000000000001,
+                "cost_percent": 1.0142479488984066
+              }
+            ]
+          },
+          {
+            "key": "output",
+            "label": "Output",
+            "tokens": 27587,
+            "token_percent": 1.2787981050035693,
+            "cost_usd": 0.3236772,
+            "cost_percent": 27.821096288574513,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 15456,
+                "token_percent": 0.7164644039197872,
+                "cost_usd": 0.30912,
+                "cost_percent": 26.569858132497913
+              },
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 12131,
+                "token_percent": 0.5623337010837822,
+                "cost_usd": 0.0145572,
+                "cost_percent": 1.2512381560766
+              }
+            ]
+          }
+        ],
+        "total": {
+          "tokens": 2157260,
+          "token_percent": 100.0,
+          "cost_usd": 1.1634236,
+          "cost_percent": 100.0,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 1560049,
+              "token_percent": 72.31622521161103,
+              "cost_usd": 1.1265448,
+              "cost_percent": 96.83014853747166
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 597211,
+              "token_percent": 27.683774788388973,
+              "cost_usd": 0.0368788,
+              "cost_percent": 3.169851462528352
+            }
+          ]
+        },
+        "audit": {
+          "files_scanned": 2,
+          "token_events_counted": 47,
+          "first_counted_event": "2026-09-06T20:53:00.711Z",
+          "last_counted_event": "2026-09-06T21:06:25.084Z",
+          "unpriced_models": [],
+          "unreadable_logs": []
+        }
+      },
+      "tree": {
+        "agent_count": 1,
+        "api_equivalent_usd_priced_models": 1.163424,
+        "forbidden_tool_calls": [],
+        "found": true,
+        "guardian_count": 0,
+        "priced_models": [
+          "gpt-5.6-luna",
+          "gpt-5.6-sol"
+        ],
+        "root_thread_id": "00000000-0000-4000-8000-9a0a1eb576f4",
+        "schema": "issue-grinder/five-mode-normal-tree/v5",
+        "session_count": 2,
+        "sessions": [
+          {
+            "agent_path": null,
+            "cwd": "/workspace/ShipTask/.codex-tmp/issue-grinder-installed-balance-20260906-v2/runs/C1/workspace",
+            "efforts": [
+              "xhigh"
+            ],
+            "id": "00000000-0000-4000-8000-9a0a1eb576f4",
+            "models": [
+              "gpt-5.6-sol"
+            ],
+            "nickname": null,
+            "originator": "Codex Desktop",
+            "parent_thread_id": null,
+            "path": "~/.codex/sessions/2026/09/06/rollout-2026-09-06T21-52-46-00000000-0000-4000-8000-9a0a1eb576f4.jsonl",
+            "role": null,
+            "tests_observed": 5,
+            "thread_source": "user",
+            "tool_calls": 32,
+            "tool_names": [
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "spawn_agent",
+              "wait_agent",
+              "exec"
+            ],
+            "usage": {
+              "gpt-5.6-sol": {
+                "cached_input": 1489152,
+                "input": 55441,
+                "output": 15456
+              }
+            }
+          },
+          {
+            "agent_path": "/root/classic_reviewer",
+            "cwd": "/workspace/ShipTask/.codex-tmp/issue-grinder-installed-balance-20260906-v2/runs/C1/workspace",
+            "efforts": [
+              "max"
+            ],
+            "id": "00000000-0000-4000-8000-943464c15b9d",
+            "models": [
+              "gpt-5.6-luna"
+            ],
+            "nickname": "Delta",
+            "originator": "Codex Desktop",
+            "parent_thread_id": "00000000-0000-4000-8000-9a0a1eb576f4",
+            "path": "~/.codex/sessions/2026/09/06/rollout-2026-09-06T22-01-19-00000000-0000-4000-8000-943464c15b9d.jsonl",
+            "role": "reviewer",
+            "tests_observed": 10,
+            "thread_source": "subagent",
+            "tool_calls": 13,
+            "tool_names": [
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec"
+            ],
+            "usage": {
+              "gpt-5.6-luna": {
+                "cached_input": 526080,
+                "input": 59000,
+                "output": 12131
+              }
+            }
+          }
+        ],
+        "tests_observed": 15,
+        "tokens_by_model": {
+          "gpt-5.6-luna": {
+            "cached_input": 526080,
+            "input": 59000,
+            "output": 12131
+          },
+          "gpt-5.6-sol": {
+            "cached_input": 1489152,
+            "input": 55441,
+            "output": 15456
+          }
+        },
+        "tool_calls": 45
+      },
+      "sol": 1560049,
+      "luna": 597211
+    },
+    {
+      "name": "Баланс",
+      "id": "B1",
+      "run": {
+        "acceptance_exit_code": 0,
+        "all_receipts_valid": true,
+        "baseline_sha": "96c6891eedb030d3a7996af546c8c5d3409773cf",
+        "diff_stat": "PLAN.md               |  8 ++---\n microflow/cli.py      | 66 +++++++++++++++++++++++++++++++++++++-\n microflow/critical.py | 68 ++++++++++++++++++++++++++++++++++++++--\n microflow/parser.py   | 87 +++++++++++++++++++++++++++++++++++++++++++++++++--\n microflow/waves.py    | 33 +++++++++++++++++--\n 5 files changed, 251 insertions(+), 11 deletions(-)",
+        "duration_seconds": 1092.008,
+        "exit_code": 0,
+        "finished_at": "2026-09-06T20:44:00.264+00:00",
+        "frozen_file_drift": [],
+        "frozen_skill_drift": false,
+        "frozen_skill_sha256": "51e00105f5d81eb92a7d228177f5086241e7b85a0bba5530e7414a504600d893",
+        "git_status": [
+          "M PLAN.md",
+          " M microflow/cli.py",
+          " M microflow/critical.py",
+          " M microflow/parser.py",
+          " M microflow/waves.py"
+        ],
+        "head_sha": "96c6891eedb030d3a7996af546c8c5d3409773cf",
+        "last_message_present": true,
+        "mode": "balance",
+        "plan_checked_items": 4,
+        "plan_semantic_drift": false,
+        "profile": {
+          "effort": "max",
+          "model": "gpt-5.6-luna"
+        },
+        "receipts": {
+          "critical": {
+            "candidate_sha256": "2f310d312d984222a0e2f6636f15dab11f5f9c9ec6a409443f319c617d8612cb",
+            "cpu_seconds": 44.679841,
+            "digest": "633ce866326013549610d687179595fbdc1309d387e40ca4ced1d2661074bc04",
+            "duration_seconds": 45.005974,
+            "finished_at": "2026-09-06T20:34:28.542+00:00",
+            "iterations": 144253,
+            "present": true,
+            "started_at": "2026-09-06T20:33:43.536+00:00",
+            "valid": true,
+            "work_seconds": 45.000236
+          },
+          "integration": {
+            "candidate_sha256": "b6aabc16fb2d235d9ddfef94b0541b63dd20fc7b99c7cc7d1a06b24f748bdb96",
+            "cpu_seconds": 44.766439,
+            "digest": "88ae87af8a5af83d22aafd0bfc4621b09dc1e3e8f8ff35f14f0085670ae7eb0a",
+            "duration_seconds": 45.247329,
+            "finished_at": "2026-09-06T20:41:38.472+00:00",
+            "iterations": 120676,
+            "present": true,
+            "started_at": "2026-09-06T20:40:53.225+00:00",
+            "valid": true,
+            "work_seconds": 45.000232
+          },
+          "parser": {
+            "candidate_sha256": "d346317bf22e789c87f83f2d75698030b8455fff3888daa21ba8fb5af3090755",
+            "cpu_seconds": 44.10112,
+            "digest": "bef23bb0fad3b87ee9beea61dcc7363ece8e1739e772953e0efc328c6ccf573b",
+            "duration_seconds": 45.005981,
+            "finished_at": "2026-09-06T20:40:49.513+00:00",
+            "iterations": 64910,
+            "present": true,
+            "started_at": "2026-09-06T20:40:04.507+00:00",
+            "valid": true,
+            "work_seconds": 45.000154
+          },
+          "waves": {
+            "candidate_sha256": "0f1c764f343c98e6b198c35c2253372a765118f5916566cb3858f37bfb17e042",
+            "cpu_seconds": 44.677019,
+            "digest": "1bce2ba5be5e8dd33169a469e622079a24c2d7ed33e42169df8793939ea44d95",
+            "duration_seconds": 45.007066,
+            "finished_at": "2026-09-06T20:33:40.709+00:00",
+            "iterations": 115968,
+            "present": true,
+            "started_at": "2026-09-06T20:32:55.702+00:00",
+            "valid": true,
+            "work_seconds": 45.000133
+          }
+        },
+        "run_id": "B1",
+        "schema": "issue-grinder/five-mode-normal-run/v6",
+        "started_at": "2026-09-06T20:25:48.294+00:00",
+        "thread_id": "00000000-0000-4000-8000-f67257c8f807",
+        "timed_out": false
+      },
+      "acceptance": {
+        "errors": 0,
+        "failures": 0,
+        "functional_score": 85.0,
+        "functional_score_max": 85,
+        "groups": {
+          "MF1": {
+            "passed": 7,
+            "score": 20.0,
+            "total": 7,
+            "weight": 20
+          },
+          "MF2": {
+            "passed": 4,
+            "score": 20.0,
+            "total": 4,
+            "weight": 20
+          },
+          "MF3": {
+            "passed": 5,
+            "score": 25.0,
+            "total": 5,
+            "weight": 25
+          },
+          "MF4": {
+            "passed": 5,
+            "score": 20.0,
+            "total": 5,
+            "weight": 20
+          }
+        },
+        "passed": true,
+        "schema": "issue-grinder/five-mode-synthetic-acceptance/v1",
+        "skipped": 0,
+        "tests_run": 21
+      },
+      "usage": {
+        "period": {
+          "start": "2026-09-06T20:25:47+00:00",
+          "end": "2026-09-06T20:44:02+00:00",
+          "timezone": "Atlantic/Madeira",
+          "interval": "[start, end)"
+        },
+        "categories": [
+          {
+            "key": "cached_input",
+            "label": "Cached input",
+            "tokens": 4364032,
+            "token_percent": 95.12888736203251,
+            "cost_usd": 0.24429056,
+            "cost_percent": 32.79310192259037,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 413184,
+                "token_percent": 9.00674747476509,
+                "cost_usd": 0.1652736,
+                "cost_percent": 22.18601492384082
+              },
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 3950848,
+                "token_percent": 86.12213988726742,
+                "cost_usd": 0.07901696,
+                "cost_percent": 10.607086998749546
+              }
+            ]
+          },
+          {
+            "key": "input",
+            "label": "Input",
+            "tokens": 184006,
+            "token_percent": 4.011035218792657,
+            "cost_usd": 0.22928639999999997,
+            "cost_percent": 30.778971912233626,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 50654,
+                "token_percent": 1.1041758310746566,
+                "cost_usd": 0.202616,
+                "cost_percent": 27.198787948038472
+              },
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 133352,
+                "token_percent": 2.9068593877180002,
+                "cost_usd": 0.026670399999999993,
+                "cost_percent": 3.580183964195153
+              }
+            ]
+          },
+          {
+            "key": "output",
+            "label": "Output",
+            "tokens": 39456,
+            "token_percent": 0.8600774191748262,
+            "cost_usd": 0.27136799999999994,
+            "cost_percent": 36.42792616517601,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 11916,
+                "token_percent": 0.25974965852816373,
+                "cost_usd": 0.23831999999999998,
+                "cost_percent": 31.991625260475622
+              },
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 27540,
+                "token_percent": 0.6003277606466624,
+                "cost_usd": 0.03304799999999999,
+                "cost_percent": 4.436300904700395
+              }
+            ]
+          }
+        ],
+        "total": {
+          "tokens": 4587494,
+          "token_percent": 100.0,
+          "cost_usd": 0.7449449599999999,
+          "cost_percent": 100.0,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 475754,
+              "token_percent": 10.370672964367909,
+              "cost_usd": 0.6062095999999999,
+              "cost_percent": 81.3764281323549
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 4111740,
+              "token_percent": 89.62932703563209,
+              "cost_usd": 0.13873535999999997,
+              "cost_percent": 18.623571867645094
+            }
+          ]
+        },
+        "audit": {
+          "files_scanned": 2,
+          "token_events_counted": 80,
+          "first_counted_event": "2026-09-06T20:26:03.242Z",
+          "last_counted_event": "2026-09-06T20:43:58.811Z",
+          "unpriced_models": [],
+          "unreadable_logs": []
+        }
+      },
+      "tree": {
+        "agent_count": 1,
+        "api_equivalent_usd_priced_models": 0.744945,
+        "forbidden_tool_calls": [],
+        "found": true,
+        "guardian_count": 0,
+        "priced_models": [
+          "gpt-5.6-luna",
+          "gpt-5.6-sol"
+        ],
+        "root_thread_id": "00000000-0000-4000-8000-f67257c8f807",
+        "schema": "issue-grinder/five-mode-normal-tree/v5",
+        "session_count": 2,
+        "sessions": [
+          {
+            "agent_path": null,
+            "cwd": "/workspace/ShipTask/.codex-tmp/issue-grinder-installed-balance-20260906-v2/runs/B1/workspace",
+            "efforts": [
+              "max"
+            ],
+            "id": "00000000-0000-4000-8000-f67257c8f807",
+            "models": [
+              "gpt-5.6-luna"
+            ],
+            "nickname": null,
+            "originator": "Codex Desktop",
+            "parent_thread_id": null,
+            "path": "~/.codex/sessions/2026/09/06/rollout-2026-09-06T21-25-48-00000000-0000-4000-8000-f67257c8f807.jsonl",
+            "role": null,
+            "tests_observed": 15,
+            "thread_source": "user",
+            "tool_calls": 67,
+            "tool_names": [
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "spawn_agent",
+              "exec",
+              "exec",
+              "wait_agent",
+              "wait_agent",
+              "exec",
+              "exec",
+              "exec",
+              "wait_agent",
+              "exec",
+              "wait_agent",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "followup_task",
+              "wait_agent",
+              "exec",
+              "exec",
+              "exec",
+              "exec"
+            ],
+            "usage": {
+              "gpt-5.6-luna": {
+                "cached_input": 3950848,
+                "input": 133352,
+                "output": 27540
+              }
+            }
+          },
+          {
+            "agent_path": "/root/final_review",
+            "cwd": "/workspace/ShipTask/.codex-tmp/issue-grinder-installed-balance-20260906-v2/runs/B1/workspace",
+            "efforts": [
+              "xhigh"
+            ],
+            "id": "00000000-0000-4000-8000-bad6f12d960e",
+            "models": [
+              "gpt-5.6-sol"
+            ],
+            "nickname": "Atlas",
+            "originator": "Codex Desktop",
+            "parent_thread_id": "00000000-0000-4000-8000-f67257c8f807",
+            "path": "~/.codex/sessions/2026/09/06/rollout-2026-09-06T21-35-45-00000000-0000-4000-8000-bad6f12d960e.jsonl",
+            "role": "reviewer",
+            "tests_observed": 10,
+            "thread_source": "subagent",
+            "tool_calls": 10,
+            "tool_names": [
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec"
+            ],
+            "usage": {
+              "gpt-5.6-sol": {
+                "cached_input": 413184,
+                "input": 50654,
+                "output": 11916
+              }
+            }
+          }
+        ],
+        "tests_observed": 25,
+        "tokens_by_model": {
+          "gpt-5.6-luna": {
+            "cached_input": 3950848,
+            "input": 133352,
+            "output": 27540
+          },
+          "gpt-5.6-sol": {
+            "cached_input": 413184,
+            "input": 50654,
+            "output": 11916
+          }
+        },
+        "tool_calls": 77
+      },
+      "sol": 475754,
+      "luna": 4111740
+    },
+    {
+      "name": "Экономичный",
+      "id": "E1",
+      "run": {
+        "acceptance_exit_code": 0,
+        "all_receipts_valid": true,
+        "baseline_sha": "96c6891eedb030d3a7996af546c8c5d3409773cf",
+        "diff_stat": "PLAN.md               |  8 +++---\n microflow/cli.py      | 73 ++++++++++++++++++++++++++++++++++++++++++++++++++-\n microflow/critical.py | 69 ++++++++++++++++++++++++++++++++++++++++++++++--\n microflow/parser.py   | 67 ++++++++++++++++++++++++++++++++++++++++++++--\n microflow/waves.py    | 41 +++++++++++++++++++++++++++--\n 5 files changed, 247 insertions(+), 11 deletions(-)",
+        "duration_seconds": 991.918,
+        "exit_code": 0,
+        "finished_at": "2026-09-06T21:23:00.240+00:00",
+        "frozen_file_drift": [],
+        "frozen_skill_drift": false,
+        "frozen_skill_sha256": "51e00105f5d81eb92a7d228177f5086241e7b85a0bba5530e7414a504600d893",
+        "git_status": [
+          "M PLAN.md",
+          " M microflow/cli.py",
+          " M microflow/critical.py",
+          " M microflow/parser.py",
+          " M microflow/waves.py"
+        ],
+        "head_sha": "96c6891eedb030d3a7996af546c8c5d3409773cf",
+        "last_message_present": true,
+        "mode": "economical",
+        "plan_checked_items": 4,
+        "plan_semantic_drift": false,
+        "profile": {
+          "effort": "max",
+          "model": "gpt-5.6-luna"
+        },
+        "receipts": {
+          "critical": {
+            "candidate_sha256": "d573816336c4fb3be3b9c2b725735f59a921274e80e3788fe8cb674dae6cf64b",
+            "cpu_seconds": 44.684414,
+            "digest": "daae530435f952956c1cfd2207ab09783649a42b2b18f9765f10d0a579587181",
+            "duration_seconds": 45.007198,
+            "finished_at": "2026-09-06T21:14:41.920+00:00",
+            "iterations": 160625,
+            "present": true,
+            "started_at": "2026-09-06T21:13:56.913+00:00",
+            "valid": true,
+            "work_seconds": 45.000118
+          },
+          "integration": {
+            "candidate_sha256": "fb7d8a385ff7e966daf609d34298c23a275974d5685b6fe0c1f03cf07dce39ee",
+            "cpu_seconds": 44.689172,
+            "digest": "257ed8bd5caae96538fc781d212a63b10e4567c9ede4256354505fdf755549a7",
+            "duration_seconds": 45.243534,
+            "finished_at": "2026-09-06T21:15:49.599+00:00",
+            "iterations": 79379,
+            "present": true,
+            "started_at": "2026-09-06T21:15:04.356+00:00",
+            "valid": true,
+            "work_seconds": 45.000548
+          },
+          "parser": {
+            "candidate_sha256": "35980c2222be397009853b3772e6a12a7cd41417a928b2ace3796f2f46978895",
+            "cpu_seconds": 43.40326,
+            "digest": "e5e5599c5efefe1e7842fc839a1fd13b8566b13617ad926ce0f5093ba053c2c2",
+            "duration_seconds": 45.006548,
+            "finished_at": "2026-09-06T21:12:30.561+00:00",
+            "iterations": 70605,
+            "present": true,
+            "started_at": "2026-09-06T21:11:45.554+00:00",
+            "valid": true,
+            "work_seconds": 45.000462
+          },
+          "waves": {
+            "candidate_sha256": "ad7af1298343e3d5e8bf9d98442f2e7d7d8d0245a7bfa70733bffca8da1121e6",
+            "cpu_seconds": 44.682297,
+            "digest": "6e4d1802916c6bc5c4891c42b72487578d1aadb7d1b200ebde8cca8b8964cf1a",
+            "duration_seconds": 45.006526,
+            "finished_at": "2026-09-06T21:13:33.314+00:00",
+            "iterations": 51111,
+            "present": true,
+            "started_at": "2026-09-06T21:12:48.308+00:00",
+            "valid": true,
+            "work_seconds": 45.000684
+          }
+        },
+        "run_id": "E1",
+        "schema": "issue-grinder/five-mode-normal-run/v6",
+        "started_at": "2026-09-06T21:06:28.346+00:00",
+        "thread_id": "00000000-0000-4000-8000-904ed0a190bb",
+        "timed_out": false
+      },
+      "acceptance": {
+        "errors": 0,
+        "failures": 0,
+        "functional_score": 85.0,
+        "functional_score_max": 85,
+        "groups": {
+          "MF1": {
+            "passed": 7,
+            "score": 20.0,
+            "total": 7,
+            "weight": 20
+          },
+          "MF2": {
+            "passed": 4,
+            "score": 20.0,
+            "total": 4,
+            "weight": 20
+          },
+          "MF3": {
+            "passed": 5,
+            "score": 25.0,
+            "total": 5,
+            "weight": 25
+          },
+          "MF4": {
+            "passed": 5,
+            "score": 20.0,
+            "total": 5,
+            "weight": 20
+          }
+        },
+        "passed": true,
+        "schema": "issue-grinder/five-mode-synthetic-acceptance/v1",
+        "skipped": 0,
+        "tests_run": 21
+      },
+      "usage": {
+        "period": {
+          "start": "2026-09-06T21:06:27+00:00",
+          "end": "2026-09-06T21:23:02+00:00",
+          "timezone": "Atlantic/Madeira",
+          "interval": "[start, end)"
+        },
+        "categories": [
+          {
+            "key": "cached_input",
+            "label": "Cached input",
+            "tokens": 2847488,
+            "token_percent": 93.79436104936816,
+            "cost_usd": 0.056949759999999974,
+            "cost_percent": 43.360573583241525,
+            "models": [
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 2847488,
+                "token_percent": 93.79436104936816,
+                "cost_usd": 0.056949759999999974,
+                "cost_percent": 43.360573583241525
+              }
+            ]
+          },
+          {
+            "key": "input",
+            "label": "Input",
+            "tokens": 151685,
+            "token_percent": 4.996403024621494,
+            "cost_usd": 0.03033700000000001,
+            "cost_percent": 23.09807312260489,
+            "models": [
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 151685,
+                "token_percent": 4.996403024621494,
+                "cost_usd": 0.03033700000000001,
+                "cost_percent": 23.09807312260489
+              }
+            ]
+          },
+          {
+            "key": "output",
+            "label": "Output",
+            "tokens": 36711,
+            "token_percent": 1.2092359260103482,
+            "cost_usd": 0.0440532,
+            "cost_percent": 33.54135329415359,
+            "models": [
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 36711,
+                "token_percent": 1.2092359260103482,
+                "cost_usd": 0.0440532,
+                "cost_percent": 33.54135329415359
+              }
+            ]
+          }
+        ],
+        "total": {
+          "tokens": 3035884,
+          "token_percent": 100.0,
+          "cost_usd": 0.13133995999999998,
+          "cost_percent": 100.0,
+          "models": [
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 3035884,
+              "token_percent": 100.0,
+              "cost_usd": 0.13133995999999998,
+              "cost_percent": 100.0
+            }
+          ]
+        },
+        "audit": {
+          "files_scanned": 2,
+          "token_events_counted": 59,
+          "first_counted_event": "2026-09-06T21:06:46.964Z",
+          "last_counted_event": "2026-09-06T21:22:58.659Z",
+          "unpriced_models": [],
+          "unreadable_logs": []
+        }
+      },
+      "tree": {
+        "agent_count": 1,
+        "api_equivalent_usd_priced_models": 0.13134,
+        "forbidden_tool_calls": [],
+        "found": true,
+        "guardian_count": 0,
+        "priced_models": [
+          "gpt-5.6-luna"
+        ],
+        "root_thread_id": "00000000-0000-4000-8000-904ed0a190bb",
+        "schema": "issue-grinder/five-mode-normal-tree/v5",
+        "session_count": 2,
+        "sessions": [
+          {
+            "agent_path": null,
+            "cwd": "/workspace/ShipTask/.codex-tmp/issue-grinder-installed-balance-20260906-v2/runs/E1/workspace",
+            "efforts": [
+              "max"
+            ],
+            "id": "00000000-0000-4000-8000-904ed0a190bb",
+            "models": [
+              "gpt-5.6-luna"
+            ],
+            "nickname": null,
+            "originator": "Codex Desktop",
+            "parent_thread_id": null,
+            "path": "~/.codex/sessions/2026/09/06/rollout-2026-09-06T22-06-29-00000000-0000-4000-8000-904ed0a190bb.jsonl",
+            "role": null,
+            "tests_observed": 10,
+            "thread_source": "user",
+            "tool_calls": 47,
+            "tool_names": [
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "spawn_agent",
+              "wait_agent",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec"
+            ],
+            "usage": {
+              "gpt-5.6-luna": {
+                "cached_input": 2510080,
+                "input": 103899,
+                "output": 28655
+              }
+            }
+          },
+          {
+            "agent_path": "/root/final_review",
+            "cwd": "/workspace/ShipTask/.codex-tmp/issue-grinder-installed-balance-20260906-v2/runs/E1/workspace",
+            "efforts": [
+              "max"
+            ],
+            "id": "00000000-0000-4000-8000-854b630abefa",
+            "models": [
+              "gpt-5.6-luna"
+            ],
+            "nickname": "Atlas",
+            "originator": "Codex Desktop",
+            "parent_thread_id": "00000000-0000-4000-8000-904ed0a190bb",
+            "path": "~/.codex/sessions/2026/09/06/rollout-2026-09-06T22-16-38-00000000-0000-4000-8000-854b630abefa.jsonl",
+            "role": "reviewer",
+            "tests_observed": 0,
+            "thread_source": "subagent",
+            "tool_calls": 10,
+            "tool_names": [
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec",
+              "exec"
+            ],
+            "usage": {
+              "gpt-5.6-luna": {
+                "cached_input": 337408,
+                "input": 47786,
+                "output": 8056
+              }
+            }
+          }
+        ],
+        "tests_observed": 10,
+        "tokens_by_model": {
+          "gpt-5.6-luna": {
+            "cached_input": 2847488,
+            "input": 151685,
+            "output": 36711
+          }
+        },
+        "tool_calls": 57
+      },
+      "sol": 0,
+      "luna": 3035884
+    }
+  ]
+}

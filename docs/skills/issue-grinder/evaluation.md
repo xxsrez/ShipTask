@@ -352,7 +352,7 @@ smoke; если live synthetic run не выполнен, это указыва�
 ```bash
 python3 scripts/issue_grinder_mode_loading_smoke.py \
   --model gpt-5.6-luna \
-  --reasoning-effort low
+  --reasoning-effort max
 ```
 
 Runner создаёт по одной fresh ephemeral read-only Codex-сессии для каждого из
@@ -392,3 +392,16 @@ delivery source/tests/review, должен считаться execution-agent и
 продолжением после изменения модели/числа задач и отклонением удалённых modes.
 Одинарная синтетика остаётся базовым протоколом; изменение маршрутизации само
 по себе не доказывает изменения стоимости и не требует переписывать старые цифры.
+
+## Проверка установленного Баланса 2026-09-06
+
+[Полный отчёт](../../reports/2026-09-06-issue-grinder-balance-installed.md) и
+[данные](../../reports/2026-09-06-issue-grinder-balance-installed.json) фиксируют
+пять fresh profile cases и одинарные S1/C1/B1/E1 установленного payload.
+Все четыре результата проходят 21/21 и исходные 45-second gates. Отказы
+на Sol xhigh и Luna high наблюдены без writes/children; default resolver
+выбирает Balance для Luna Max и Classic для Sol xhigh. Первая версия ошиблась
+на Luna high; обязательный session-backed admission исправлен и перепроверен.
+Баланс снизил стоимость относительно текущих Соло/Классического, но ухудшил
+КПД относительно LC1; это regression evidence, не подтверждение отсутствия
+регрессии. Полный Task Manager lifecycle этим локальным опытом не проверен.
