@@ -498,8 +498,9 @@ exact текущую основную Luna Max. Unknown или mismatch → `mai
 пользователем нового режима через switch barrier, а не пересчёта default.
 Прочитай ровно один mode-файл выбранного поддерживаемого режима.
 
-Если runtime не сообщает exact effective profile, один раз за текущий turn
-вызови bundled `scripts/main_profile.py`. Он читает только журнал по
+До resolver один раз за текущий turn обязательно вызови bundled
+`scripts/main_profile.py`; для balance/economical нужен receipt с `--mode`
+и `allowed=true` до любого effect. Self-report не заменяет receipt. Он читает только журнал по
 `CODEX_THREAD_ID`, проверяет session_meta и берёт последний turn_context;
 config/default и чужая сессия не используются. Unknown остаётся отказом.
 Receipt сохраняется в текущем turn; после resume/model change читается заново.

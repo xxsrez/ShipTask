@@ -10,6 +10,12 @@ module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
 ID='00000000-0000-4000-8000-6d21e55b1d2f'
 
 class MainProfileTest(unittest.TestCase):
+    def test_mode_admission_never_normalizes_wrong_effort(self):
+        for mode in ('balance','economical'):
+            for model,effort,expected in [('gpt-5.6-luna','max',True),('gpt-5.6-luna','high',False),('gpt-5.6-sol','xhigh',False)]:
+                r=module.admit_profile({'status':'observed','model':model,'effort':effort},mode)
+                self.assertEqual(r['allowed'],expected)
+            self.assertFalse(module.admit_profile({'status':'unknown'},mode)['allowed'])
     def test_latest_own_turn_wins_and_incomplete_tail_is_ignored(self):
         with tempfile.TemporaryDirectory() as d:
             p=Path(d)/'sessions';p.mkdir()
