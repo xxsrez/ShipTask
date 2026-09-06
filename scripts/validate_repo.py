@@ -20,6 +20,7 @@ ISSUE_MODE_DIR = ROOT / "issue-grinder" / "references" / "modes"
 ISSUE_MODE_FILES = {
     "solo": ISSUE_MODE_DIR / "solo.md",
     "classic": ISSUE_MODE_DIR / "classic.md",
+    "balance": ISSUE_MODE_DIR / "balance.md",
     "economical": ISSUE_MODE_DIR / "economical.md",
 }
 ISSUE_HELP = ROOT / "issue-grinder" / "references" / "mode-help.md"
@@ -482,7 +483,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         errors,
         ISSUE_HELP,
         "Применяет `IG-HELP-01`",
-        "## Три режима",
+        "## Четыре режима",
         "`Соло`",
         "`Классический`",
         "`Экономичный`",
@@ -547,6 +548,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "## Выбранный режим — обязательная загрузка",
         "[Соло](modes/solo.md)",
         "[Классический](modes/classic.md)",
+        "[Баланс](modes/balance.md)",
+        "IG-MODE-20",
         "[Экономичный](modes/economical.md)",
         "ровно один соответствующий\nфайл",
         "mode_origin=explicit",
@@ -580,7 +583,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         "canonical_mode=economical",
         "почти без расхода более дефицитного",
         "Все содержательные решения и работа режима выполняются Luna Max",
-        "transport/authority оболочкой",
+        "дорогая\nоболочка и supervisor вместо подходящего root запрещены",
         "один exact recommended candidate",
         "resumable checkpoint",
         "update_goal(complete|blocked)",
@@ -684,7 +687,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         *(f"IG-SCOPE-{number:02d}" for number in range(1, 4)),
         "IG-UI-01",
         *(f"IG-AUTO-{number:02d}" for number in range(1, 6)),
-        *(f"IG-MODE-{number:02d}" for number in range(1, 20) if number not in {4, 5, 13, 14, 15, 16, 17, 18}),
+        *(f"IG-MODE-{number:02d}" for number in range(1, 21) if number not in {5, 13, 14, 15, 16, 17, 18}),
         "IG-HELP-01",
         *(f"IG-MA-{number:02d}" for number in range(1, 20)),
     ]
@@ -722,7 +725,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         "Issue Grinder ·",
         "Production",
         "Luna",
-        "### `IG-MODE-01` — Три канонических режима",
+        "### `IG-MODE-01` — Четыре канонических режима",
         "### `IG-MODE-11` — Режим «Соло»",
         "### `IG-MODE-12` — Граница execution topology режима",
         "Сервисные агенты в этот счёт не входят",

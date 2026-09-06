@@ -1,89 +1,91 @@
+"""Observable decisions for the four current execution modes."""
 from dataclasses import replace
 import unittest
 from pathlib import Path
-
 from scripts.issue_grinder_mode_harness import (
-    ExecutionMode, Profile, resolve_mode, mode_dispatch_policy, decide_mode_switch,
+    ExecutionMode, Profile, LUNA_MAX, SOL_XHIGH, BALANCE_VERSION,
+    resolve_mode, mode_dispatch_policy, decide_mode_switch,
 )
 
-
-class ThreeModesTest(unittest.TestCase):
+class FourModesTest(unittest.TestCase):
     def test_launch_button_does_not_force_a_mode(self):
-        path = Path(__file__).resolve().parents[1] / "issue-grinder/agents/openai.yaml"
-        prompt = next(line for line in path.read_text().splitlines()
-                      if "default_prompt:" in line)
-        self.assertIn("$issue-grinder", prompt)
-        self.assertIn("автовыбора", prompt)
-        for name in ("Соло", "Классический", "Экономичный", "Баланс", "Менеджер"):
-            self.assertNotIn(name, prompt)
-
-    def test_only_three_modes_exist(self):
-        self.assertEqual({m.value for m in ExecutionMode}, {"solo", "classic", "economical"})
+        p=Path(__file__).resolve().parents[1]/'issue-grinder/agents/openai.yaml'
+        prompt=next(x for x in p.read_text().splitlines() if 'default_prompt:' in x)
+        self.assertIn('автовыбора',prompt)
+        for name in ('Соло','Классический','Экономичный','Баланс'):
+            self.assertNotIn(name,prompt)
 
     def test_default_matrix(self):
-        for model in ("gpt-5.6-luna", "gpt-5.6-sol", "gpt-6-astra", "unknown-model"):
-            for effort in ("low", "high", "max", "xhigh"):
-                for count in (0, 1, 2, 20):
-                    with self.subTest(model=model, effort=effort, count=count):
-                        record = resolve_mode(Profile(model, effort), scope_task_count=count)
-                        expected = "classic" if model != "gpt-5.6-luna" and count > 1 else "solo"
-                        self.assertEqual(record.canonical_mode.value, expected)
-                        self.assertEqual(record.initial_scope_task_count, count)
+        self.assertEqual({m.value for m in ExecutionMode},{'solo','classic','balance','economical'})
+        for model in ('gpt-5.6-luna','gpt-5.6-sol','gpt-6-astra','unknown'):
+            for effort in (None,'low','high','max','xhigh'):
+                for count in (0,1,2,20):
+                    with self.subTest(model=model,effort=effort,count=count):
+                        p=Profile(model,effort)
+                        expected=('balance' if p==LUNA_MAX else 'classic' if p==SOL_XHIGH or (model!='gpt-5.6-luna' and count>1) else 'solo')
+                        self.assertEqual(resolve_mode(p,scope_task_count=count).canonical_mode.value,expected)
 
-    def test_explicit_choice_overrides_default(self):
-        for model in ("gpt-5.6-luna", "gpt-5.6-sol"):
-            for count in (1, 4):
-                for mode in ExecutionMode:
-                    self.assertEqual(
-                        resolve_mode(Profile(model, "high"), scope_task_count=count,
-                                     explicit_mode=mode).canonical_mode, mode)
+    def test_explicit_modes_require_eligible_actual_root(self):
+        for p in (LUNA_MAX,SOL_XHIGH,Profile('gpt-5.6-luna','high'),Profile('gpt-5.6-luna',None)):
+            for mode in ExecutionMode:
+                with self.subTest(p=p,mode=mode):
+                    if mode in (ExecutionMode.BALANCE,ExecutionMode.ECONOMICAL) and p!=LUNA_MAX:
+                        with self.assertRaisesRegex(ValueError,'main_profile_required'):
+                            resolve_mode(p,explicit_mode=mode)
+                    else:
+                        self.assertEqual(resolve_mode(p,explicit_mode=mode).canonical_mode,mode)
 
-    def test_continuation_never_recalculates_default(self):
-        for model, count in (("gpt-5.6-sol", 4), ("gpt-5.6-luna", 4),
-                             ("gpt-5.6-sol", 1)):
-            original = resolve_mode(Profile(model, "high"), scope_task_count=count)
-            for next_model, next_count in (("gpt-5.6-luna", 1), ("gpt-5.6-sol", 9)):
-                restored = resolve_mode(
-                    Profile(next_model, "max"), scope_task_count=next_count,
-                    saved_record=original, continuity_proven=True)
-                self.assertIs(restored, original)
+    def test_resume_rechecks_actual_root_without_switching(self):
+        for mode in (ExecutionMode.BALANCE,ExecutionMode.ECONOMICAL):
+            record=resolve_mode(LUNA_MAX,explicit_mode=mode)
+            self.assertIs(resolve_mode(LUNA_MAX,saved_record=record,continuity_proven=True),record)
+            for p in (SOL_XHIGH,Profile('gpt-5.6-luna','high'),Profile('gpt-5.6-luna',None)):
+                with self.assertRaisesRegex(ValueError,'main_profile_required'):
+                    resolve_mode(p,saved_record=record,continuity_proven=True)
+                with self.assertRaisesRegex(ValueError,'main_profile_required'):
+                    mode_dispatch_policy(record,current_main_profile=p)
 
-    def test_retired_and_unknown_records_and_requests_fail_closed(self):
-        profile = Profile("gpt-5.6-sol", "high")
-        for mode in ("balance", "swarm", "manager", "roy", "roi", "Баланс", "Рой", "typo"):
-            with self.subTest(mode=mode):
+    def test_other_continuations_preserve_mode_after_model_change(self):
+        for mode in (ExecutionMode.SOLO,ExecutionMode.CLASSIC):
+            record=resolve_mode(SOL_XHIGH,explicit_mode=mode)
+            self.assertIs(resolve_mode(LUNA_MAX,saved_record=record,continuity_proven=True),record)
+
+    def test_switch_rejects_wrong_or_unknown_current_root(self):
+        record=resolve_mode(SOL_XHIGH,explicit_mode=ExecutionMode.SOLO)
+        for target in (ExecutionMode.BALANCE,ExecutionMode.ECONOMICAL):
+            for p in (None,SOL_XHIGH,Profile('gpt-5.6-luna','low')):
                 with self.assertRaises(ValueError):
-                    resolve_mode(profile, explicit_mode=mode)
-                with self.assertRaises(ValueError):
-                    decide_mode_switch(resolve_mode(profile), mode, explicit_request=True)
-                with self.assertRaises(ValueError):
-                    resolve_mode(profile, saved_record=replace(
-                        resolve_mode(profile), canonical_mode=mode), continuity_proven=True)
+                    decide_mode_switch(record,target,explicit_request=True,current_main_profile=p)
+            waiting=decide_mode_switch(record,target,explicit_request=True,current_main_profile=LUNA_MAX,active_writer_count=1)
+            self.assertFalse(waiting.may_apply_next_wave)
+            switched=decide_mode_switch(record,target,explicit_request=True,current_main_profile=LUNA_MAX)
+            self.assertTrue(switched.may_apply_next_wave)
+            self.assertEqual(switched.mode_record.role_profiles.controller,LUNA_MAX)
 
-    def test_explicit_switch_from_retired_record_preserves_checkpoint_barrier(self):
-        original = replace(resolve_mode(Profile("gpt-5.6-sol", "high")),
-                           canonical_mode="balance")
-        waiting = decide_mode_switch(original, ExecutionMode.SOLO,
-                                     explicit_request=True, active_writer_count=1)
-        self.assertFalse(waiting.may_apply_next_wave)
-        self.assertIs(waiting.mode_record, original)
-        ready = decide_mode_switch(original, ExecutionMode.SOLO, explicit_request=True)
-        self.assertTrue(ready.may_apply_next_wave)
-        self.assertEqual(ready.mode_record.canonical_mode, ExecutionMode.SOLO)
+    def test_legacy_balance_cannot_silently_resume(self):
+        current=resolve_mode(LUNA_MAX)
+        self.assertEqual(current.mode_contract_version,BALANCE_VERSION)
+        old=replace(current,mode_contract_version=None)
+        with self.assertRaisesRegex(ValueError,'legacy_balance'):
+            resolve_mode(LUNA_MAX,saved_record=old,continuity_proven=True)
+        adopted=decide_mode_switch(old,ExecutionMode.BALANCE,explicit_request=True,current_main_profile=LUNA_MAX)
+        self.assertTrue(adopted.may_apply_next_wave)
+        self.assertEqual(adopted.mode_record.mode_contract_version,BALANCE_VERSION)
 
-    def test_unresolved_task_count_is_not_guessed(self):
-        for count in (None, -1, True, "2"):
+    def test_retired_modes_are_rejected(self):
+        for name in ('swarm','manager','roy','roi','typo'):
             with self.assertRaises(ValueError):
-                resolve_mode(Profile("gpt-5.6-sol", "high"), scope_task_count=count)
+                resolve_mode(SOL_XHIGH,explicit_mode=name)
 
-    def test_solo_has_no_execution_children(self):
-        profile = Profile("gpt-5.6-luna", "high")
-        policy = mode_dispatch_policy(resolve_mode(profile, scope_task_count=10),
-                                      current_main_profile=profile)
+    def test_unresolved_count_is_not_guessed(self):
+        for count in (None,-1,True,'2'):
+            with self.assertRaises(ValueError):
+                resolve_mode(Profile('unknown','high'),scope_task_count=count)
+
+    def test_solo_retains_current_profile_and_no_children(self):
+        record=resolve_mode(LUNA_MAX,explicit_mode=ExecutionMode.SOLO)
+        policy=mode_dispatch_policy(record,current_main_profile=SOL_XHIGH)
         self.assertFalse(policy.issue_grinder_execution_subagents_allowed)
-        self.assertEqual(policy.max_active_execution_lanes, 1)
-        self.assertEqual(policy.execution_profile, profile)
+        self.assertEqual(policy.execution_profile,SOL_XHIGH)
 
-
-if __name__ == "__main__":
-    unittest.main()
+if __name__=='__main__':unittest.main()

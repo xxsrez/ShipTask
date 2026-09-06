@@ -21,9 +21,9 @@
   multi-agent работой. Strategic Outcome постоянно направляет локальные
   решения, но не создаёт новую задолженность: пустого active Task scope
   достаточно для формального завершения даже при известном стратегическом gap.
-  Три execution mode — `Соло`, `Классический` и `Экономичный`.
-  Без явного выбора non-Luna при нескольких задачах использует Классический,
-  иначе Соло; Экономичный включается только явно. Внешние semantic providers не входят в
+  Четыре execution mode — `Соло`, `Классический`, `Баланс`, `Экономичный`.
+  Luna Max по умолчанию выбирает Баланс, Sol Extra High — Классический.
+  Баланс и Экономичный требуют основную Luna Max; Экономичный только явно. Внешние semantic providers не входят в
   mode topology, чистая справка о режимах не запускает delivery, а runtime
   publication подтверждается distribution проверкой.
 - `$ship-tasks`: [Requirements](skills/ship-tasks/requirements.md) и
@@ -82,8 +82,7 @@ Architecture — за «как сейчас этого достигать». С�
 ## Specifications
 
 - [Режимы исполнения Issue Grinder](specs/issue-grinder-execution-modes.md) —
-  rationale и сравнительная модель пяти устойчивых режимов `Соло`,
-  `Классический`, `Баланс`, `Менеджер` и `Экономичный`. Действующая policy остаётся
+  сравнительная модель четырёх режимов `Соло`, `Классический`, `Баланс` и `Экономичный`. Действующая policy остаётся
   только в локальных Overview, Requirements, Architecture и runtime-проекции.
 
 ## Experiments
@@ -240,12 +239,15 @@ Architecture — за «как сейчас этого достигать». С�
 ## Guides
 
 - [Режимы Issue Grinder](guides/issue-grinder-modes.md) — пользовательский
-  мануал по пяти режимам, default resolver-у, различиям и выбору без запуска
+  мануал по четырём режимам, default resolver-у, различиям и выбору без запуска
   delivery.
 - [Разработка и проверка](guides/development.md) — безопасный цикл изменения
   skill и локальные проверки.
 
 ## Reports
+
+- [Luna-координатор с Sol: экономичность на одинарной синтетике](reports/2026-09-06-issue-grinder-luna-coordinator.md)
+  — один эксперимент, последние исторические замеры, проверка качества и расхода без изменения режимов.
 
 - [Парная проверка Balance на обычной синтетике](reports/2026-09-04-issue-grinder-balance-paired-normal.md)
   — исправленный контракт, frozen runtime, две пары Solo/Balance, расход по

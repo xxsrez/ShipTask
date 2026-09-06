@@ -179,7 +179,7 @@ class IssueGrinderModeLoadingSmokeTest(unittest.TestCase):
         prompt = SMOKE.build_prompt("economical")
 
         self.assertIn("references/modes/economical.md", prompt)
-        self.assertIn("остальные два mode-файла", prompt)
+        self.assertIn("остальные mode-файлы", prompt)
         self.assertIn("не перечисляй каталог", prompt)
         for filename in ("solo.md", "classic.md"):
             self.assertNotIn(filename, prompt)

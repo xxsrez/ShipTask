@@ -468,17 +468,19 @@ eligibility действительно возможна.
 record, а затем полностью читает ровно один файл из
 `issue-grinder/references/modes/`. Во время обычных последующих итераций
 canonical mode берётся из run checkpoint и не проектируется заново; повторно
-загружается тот же выбранный mode-файл, а не все три спецификации.
+загружается тот же выбранный mode-файл, а не все четыре спецификации.
 
 ### 4.1 Однократное разрешение режима
 
-Явный выбор поддерживаемого режима важнее автовыбора. Для нового run после
-разрешения live scope и до декомпозиции посчитай уникальные выбранные задачи:
-не считай сгенерированные рабочие пакеты и не удваивай parent/child containers.
-Сохрани количество и исходный профиль в mode record. При числе задач больше
-одной и main model не `gpt-5.6-luna` выбирай `classic`, иначе `solo`.
-Если инвентарь scope ещё неизвестен, сначала разреши его, не угадывай число.
-`economical` разрешён только явным выбором. Effort и квота не участвуют.
+Новый run: explicit mode имеет приоритет; Luna Max → `balance`, Sol xhigh →
+`classic` независимо от scope size. Для остальных профилей: non-Luna и более
+одной live задачи → `classic`, иначе `solo`. `economical` только явно.
+До эффектов и dispatch проверь `IG-MODE-20`: `balance`/`economical` требуют
+exact текущую основную Luna Max. Unknown или mismatch → `main_profile_required`,
+без Goal, записей, supervisor и автоматического другого режима. Проверка
+повторяется при resume/switch; нормализация не заменяет фактический root.
+Версия нового balance record — `luna-coordinator-v1`; старые balance records
+без неё требуют явного switch, а не скрытого продолжения исторической topology.
 
 Стартовый текст в `agents/openai.yaml` не называет конкретный режим:
 он поручает применить автовыбор при отсутствии явного выбора пользователя.
@@ -486,7 +488,7 @@ canonical mode берётся из run checkpoint и не проектирует
 
 Для `Соло` сохраняются aliases `single`, `сингл`, «одним агентом» и
 «без субагентов». Случайное слово в описании продукта не является selector-ом.
-Удалённые `balance`, `swarm`, `manager`, `roy`, `roi`, «Баланс»,
+Удалённые `swarm`, `manager`, `roy`, `roi`,
 «Менеджер» и «Рой» при явном mode intent отклоняются с просьбой выбрать
 поддерживаемый режим; автоматическая подмена запрещена.
 
@@ -505,7 +507,7 @@ execution profile всегда равен exact effective current top-level mode
 Для выбранного многоагентного режима:
 
 - точный пользовательский override конкретной роли применяется первым;
-- `Классический` и `Экономичный` сохраняют прежний economical
+- `Классический`, `Баланс` и `Экономичный` сохраняют economical
   baseline `gpt-5.6-luna` с `reasoning_effort=max` для предусмотренных ими Luna
   ролей;
 - если main profile не сильнее требуемого economical profile, роли могут
@@ -513,7 +515,7 @@ execution profile всегда равен exact effective current top-level mode
 - неизвестное cross-family отношение не угадывается по имени, цене или одному
   benchmark run.
 
-Top-level model участвует только в автовыборе нового run и не является override всех ролей.
+Top-level model участвует в автовыборе и обязательном admission по `IG-MODE-20` и не является override всех ролей.
 Root всегда сохраняет одно владение Goal, Task Manager mutations, integration,
 внешними effects и publication unit.
 
@@ -529,7 +531,8 @@ telemetry туда добавляется observed profile; иначе сохр�
 Default child profiles зависят от выбранного mode:
 
 - `Классический`: только его узкие Luna Max packets и independent review;
-- `Экономичный`: Luna Max analysis, implementation и review.
+- `Баланс`: Luna Max root и обычная работа; Sol xhigh specialist/final_review;
+- `Экономичный`: Luna Max root, analysis, implementation и review.
 
 Имя роли не обходит routing: обычная implementation, спрятанная под названием
 `review` или `material_judgment`, остаётся implementation.
@@ -540,12 +543,32 @@ Default child profiles зависят от выбранного mode:
 |---|---|---|
 | `solo` | `modes/solo.md` | `IG-MODE-11`, один current profile, terminal-only |
 | `classic` | `modes/classic.md` | `IG-MODE-03`, `IG-MA-14..17`, controller-led terminal result |
+| `balance` | `modes/balance.md` | `IG-MODE-04`, `IG-MODE-20`, Luna coordinator, Sol specialist/reviewer, terminal-only |
 | `economical` | `modes/economical.md` | `IG-MODE-06`, части `IG-MODE-08..09`, resumable checkpoint |
 
 Общие resolver, profiles, authority и evidence invariants остаются в
 `execution-modes.md`; isolation и fan-in mechanics — в
 `multi-agent-execution.md`. Только выбранный mode-файл владеет своей topology,
 fallback, review и stop promise. `mode-help.md` остаётся delivery-free справкой.
+
+### Баланс: компактный цикл Luna → Sol
+
+Luna совмещает coordinator, author и integration owner, не создавая supervisor
+по формальной причине. Sol получает либо конкретную неопределённость, либо
+целый сложный участок. Две разные неуспешные попытки — практический сигнал к
+эскалации; уже локализованное обычное исправление Luna доводит сама. Exact
+candidate до приёмки обязательно проверяет отдельный Sol xhigh неавтор.
+Полная история не наследуется, handoff содержит requirements anchors, diff,
+проверки и неизвестное. После material rework продолжается тот же reviewer.
+Контрактовый `final_review`/`specialist` маршрут Sol проходит обычный guard;
+он не является пользовательским override. Модель не тратит отдельный turn на
+учёт каждого шага. Sol writer получает task-owned worktree через существующий admission либо
+разрешённый read-only patch handoff; общий checkout не передаётся второму writer.
+
+Для local evaluation runtime читает только SKILL, execution-modes, выбранный
+mode и PLAN. Multi-agent mechanics читается перед первым child, когда нужен
+его admission; ссылки позволяют не искать файлы и не читать соседние modes.
+Это тот же установленный skill, без экспериментального заменяющего prompt.
 
 ### 4.4.1 Проверки, инструменты и стоимость организации
 
@@ -744,7 +767,7 @@ single-issue run без Goal outcome выводится из current Task, её 
 7. Опубликовать комментарий, изменить статус и перечитать issue.
 8. Заново оценить scope, frontier и необходимость следующей итерации.
 
-Режим не создаёт три разных lifecycle. Все варианты используют один loop,
+Режим не создаёт четыре разных lifecycle. Все варианты используют один loop,
 а отличаются dispatch policy, reviewer gates и допустимым выходом. В
 `Экономичном` режиме восьмая фаза может сохранить `IG-MODE-06` checkpoint и
 закончить текущую попытку без terminal claim; остальные режимы продолжают до
@@ -1235,8 +1258,8 @@ Task Manager cancellation statuses от имени Issue Grinder.
 | `IG-GOAL-*` | strategic synthesis, persistent execution context, Goal lifecycle, blocker/final reflection | Strategic Outcome направляет локальные решения без новой задолженности; Goal завершается после fresh empty active scope даже при известном strategic gap |
 | `IG-SCOPE-*` | selector-as-predicate и контрольные refresh points | новые и исключённые issue учитываются до terminal result |
 | `IG-AUTO-*` | explicit-mode gate, UAT resolver и узкий security selector | нет Production access; разрешённая UAT работа не ждёт рутинного approval |
-| `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint и semantic topology boundary | любой новый run без явного выбора получает `Соло`; `Соло` сохраняет current profile и ноль Issue Grinder execution-subagents; другие режимы включаются только явно и не дрейфуют |
-| `IG-HELP-*` | ранний fast path и компактный `mode-help.md` | чистая справка объясняет три режима и default без Task Manager, Goal, title mutations или subagents |
+| `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint и semantic topology boundary | Luna Max выбирает `Баланс`, Sol xhigh — `Классический`; недопустимый root отклоняется; `Соло` сохраняет current profile и ноль Issue Grinder execution-subagents; `Экономичный` включается только явно; режимы не дрейфуют |
+| `IG-HELP-*` | ранний fast path и компактный `mode-help.md` | чистая справка объясняет четыре режима и default без Task Manager, Goal, title mutations или subagents |
 | `IG-MA-*` | dependency-ready packets, isolated writers, integration owner, profile routing и capability-aware stages | параллельные writers изолированы; independent review применяется только там, где его требует contract |
 
 Группированная таблица является только обзором. Точная coverage map связывает
@@ -1287,15 +1310,14 @@ ID само по себе не доказывает поведение.
 - чистая и узкая справка о режимах/default/различиях без Task Manager, Goal,
   title mutations, delivery refs и subagents; смешанный help+delivery prompt
   сохраняет обычные scope и authority gates;
-- explicit natural-language mode override, automatic `Соло` при каждой модели
-  и effort, persistence через continuation/model
+- explicit natural-language mode override, profile-aware default и обязательный root admission, persistence через continuation/model
   change и safe explicit switch;
 - `Соло` для одного и нескольких issue с exact current profile, одной
   последовательной execution lane, отсутствием Issue Grinder worker delegation
   и допустимым отдельным Strategic Explainer provider; конкретный
   `Классический`, где Sol/controller делает почти всё, а
   Luna получает только тривиальные packets
-- Luna profile normalization, root-shell supervisor, explicit role override и
+- Luna profile normalization, wrong-root refusal, explicit role override и
   неизвестное cross-family ordering без догадки;
 - zero/one/multiple issue, рост и сокращение scope, late matching issue,
   pagination и concurrent status change;

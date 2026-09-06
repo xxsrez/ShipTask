@@ -1,0 +1,852 @@
+{
+  "schema": "luna-coordinator-comparison/v1",
+  "date": "2026-09-06",
+  "historical": [
+    {
+      "run_id": "S6",
+      "source": "/workspace/ShipTask/.codex-tmp/issue-grinder-paired-normal-v7-20260904T220300Z/runs/S6",
+      "profile": {
+        "effort": "xhigh",
+        "model": "gpt-5.6-sol"
+      },
+      "started_at": "2026-09-04T22:42:25.924+00:00",
+      "finished_at": "2026-09-04T22:51:27.771+00:00",
+      "duration_seconds": 541.852,
+      "tests_passed": 21,
+      "functional_score": 85.0,
+      "tokens_by_model": {
+        "gpt-5.6-sol": {
+          "cached_input": 1293952,
+          "input": 65670,
+          "output": 15134
+        }
+      },
+      "usage": {
+        "period": {
+          "start": "2026-09-04T22:42:25+00:00",
+          "end": "2026-09-04T22:51:27+00:00",
+          "timezone": "Atlantic/Madeira",
+          "interval": "[start, end)"
+        },
+        "categories": [
+          {
+            "key": "cached_input",
+            "label": "Cached input",
+            "tokens": 1293952,
+            "token_percent": 94.12230243039492,
+            "cost_usd": 0.5175808000000001,
+            "cost_percent": 47.79400683767756,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 1293952,
+                "token_percent": 94.12230243039492,
+                "cost_usd": 0.5175808000000001,
+                "cost_percent": 47.79400683767756
+              }
+            ]
+          },
+          {
+            "key": "input",
+            "label": "Input",
+            "tokens": 65670,
+            "token_percent": 4.776847673332576,
+            "cost_usd": 0.26268,
+            "cost_percent": 24.256173559995155,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 65670,
+                "token_percent": 4.776847673332576,
+                "cost_usd": 0.26268,
+                "cost_percent": 24.256173559995155
+              }
+            ]
+          },
+          {
+            "key": "output",
+            "label": "Output",
+            "tokens": 15134,
+            "token_percent": 1.1008498962725022,
+            "cost_usd": 0.30268,
+            "cost_percent": 27.949819602327292,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 15134,
+                "token_percent": 1.1008498962725022,
+                "cost_usd": 0.30268,
+                "cost_percent": 27.949819602327292
+              }
+            ]
+          }
+        ],
+        "total": {
+          "tokens": 1374756,
+          "token_percent": 100.0,
+          "cost_usd": 1.0829408,
+          "cost_percent": 100.0,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 1374756,
+              "token_percent": 100.0,
+              "cost_usd": 1.0829408,
+              "cost_percent": 100.0
+            }
+          ]
+        },
+        "audit": {
+          "files_scanned": 1,
+          "token_events_counted": 29,
+          "first_counted_event": "2026-09-04T22:42:42.009Z",
+          "last_counted_event": "2026-09-04T22:51:26.467Z",
+          "unpriced_models": [],
+          "unreadable_logs": []
+        }
+      }
+    },
+    {
+      "run_id": "C3",
+      "source": "/workspace/ShipTask/.codex-tmp/issue-grinder-five-mode-normal-v6-20260904T200500Z/runs/C3",
+      "profile": {
+        "effort": "xhigh",
+        "model": "gpt-5.6-sol"
+      },
+      "started_at": "2026-09-04T20:21:35.700+00:00",
+      "finished_at": "2026-09-04T20:36:04.152+00:00",
+      "duration_seconds": 868.451,
+      "tests_passed": 21,
+      "functional_score": 85.0,
+      "tokens_by_model": {
+        "gpt-5.6-luna": {
+          "cached_input": 422912,
+          "input": 58799,
+          "output": 13885
+        },
+        "gpt-5.6-sol": {
+          "cached_input": 1643648,
+          "input": 68937,
+          "output": 16309
+        }
+      },
+      "usage": {
+        "period": {
+          "start": "2026-09-04T20:21:35+00:00",
+          "end": "2026-09-04T20:36:04+00:00",
+          "timezone": "Atlantic/Madeira",
+          "interval": "[start, end)"
+        },
+        "categories": [
+          {
+            "key": "cached_input",
+            "label": "Cached input",
+            "tokens": 2066560,
+            "token_percent": 92.90039514675274,
+            "cost_usd": 0.6659174400000002,
+            "cost_percent": 51.371925437226984,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 1643648,
+                "token_percent": 73.88875652396729,
+                "cost_usd": 0.6574592000000002,
+                "cost_percent": 50.71941801136625
+              },
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 422912,
+                "token_percent": 19.011638622785448,
+                "cost_usd": 0.00845824,
+                "cost_percent": 0.6525074258607353
+              }
+            ]
+          },
+          {
+            "key": "input",
+            "label": "Input",
+            "tokens": 127736,
+            "token_percent": 5.742260023645869,
+            "cost_usd": 0.2875078,
+            "cost_percent": 22.17967029699832,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 68937,
+                "token_percent": 3.0990024679814248,
+                "cost_usd": 0.275748,
+                "cost_percent": 21.272465390701377
+              },
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 58799,
+                "token_percent": 2.6432575556644444,
+                "cost_usd": 0.011759799999999999,
+                "cost_percent": 0.9072049062969452
+              }
+            ]
+          },
+          {
+            "key": "output",
+            "label": "Output",
+            "tokens": 30194,
+            "token_percent": 1.3573448296013917,
+            "cost_usd": 0.3428419999999999,
+            "cost_percent": 26.44840426577469,
+            "models": [
+              {
+                "key": "gpt-5.6-sol",
+                "label": "Sol",
+                "tokens": 16309,
+                "token_percent": 0.733156813471852,
+                "cost_usd": 0.3261799999999999,
+                "cost_percent": 25.163021168381906
+              },
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 13885,
+                "token_percent": 0.6241880161295398,
+                "cost_usd": 0.016662,
+                "cost_percent": 1.2853830973927873
+              }
+            ]
+          }
+        ],
+        "total": {
+          "tokens": 2224490,
+          "token_percent": 100.0,
+          "cost_usd": 1.2962672400000002,
+          "cost_percent": 100.0,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 1728894,
+              "token_percent": 77.72091580542057,
+              "cost_usd": 1.2593872000000002,
+              "cost_percent": 97.15490457044953
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 495596,
+              "token_percent": 22.279084194579433,
+              "cost_usd": 0.03688004,
+              "cost_percent": 2.8450954295504682
+            }
+          ]
+        },
+        "audit": {
+          "files_scanned": 2,
+          "token_events_counted": 48,
+          "first_counted_event": "2026-09-04T20:21:51.394Z",
+          "last_counted_event": "2026-09-04T20:36:02.758Z",
+          "unpriced_models": [],
+          "unreadable_logs": []
+        }
+      }
+    },
+    {
+      "run_id": "E3",
+      "source": "/workspace/ShipTask/.codex-tmp/issue-grinder-five-mode-normal-v6-20260904T200500Z/runs/E3",
+      "profile": {
+        "effort": "max",
+        "model": "gpt-5.6-luna"
+      },
+      "started_at": "2026-09-04T21:17:45.799+00:00",
+      "finished_at": "2026-09-04T21:48:34.744+00:00",
+      "duration_seconds": 1848.937,
+      "tests_passed": 19,
+      "functional_score": 77.0,
+      "tokens_by_model": {
+        "gpt-5.6-luna": {
+          "cached_input": 6829312,
+          "input": 262879,
+          "output": 65821
+        }
+      },
+      "usage": {
+        "period": {
+          "start": "2026-09-04T21:17:45+00:00",
+          "end": "2026-09-04T21:48:34+00:00",
+          "timezone": "Atlantic/Madeira",
+          "interval": "[start, end)"
+        },
+        "categories": [
+          {
+            "key": "cached_input",
+            "label": "Cached input",
+            "tokens": 6829312,
+            "token_percent": 95.40794287575936,
+            "cost_usd": 0.13658623999999994,
+            "cost_percent": 50.937029969057285,
+            "models": [
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 6829312,
+                "token_percent": 95.40794287575936,
+                "cost_usd": 0.13658623999999994,
+                "cost_percent": 50.937029969057285
+              }
+            ]
+          },
+          {
+            "key": "input",
+            "label": "Input",
+            "tokens": 262879,
+            "token_percent": 3.67251410028371,
+            "cost_usd": 0.052575800000000006,
+            "cost_percent": 19.607063641602284,
+            "models": [
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 262879,
+                "token_percent": 3.67251410028371,
+                "cost_usd": 0.052575800000000006,
+                "cost_percent": 19.607063641602284
+              }
+            ]
+          },
+          {
+            "key": "output",
+            "label": "Output",
+            "tokens": 65821,
+            "token_percent": 0.9195430239569311,
+            "cost_usd": 0.07898519999999999,
+            "cost_percent": 29.455906389340427,
+            "models": [
+              {
+                "key": "gpt-5.6-luna",
+                "label": "Luna",
+                "tokens": 65821,
+                "token_percent": 0.9195430239569311,
+                "cost_usd": 0.07898519999999999,
+                "cost_percent": 29.455906389340427
+              }
+            ]
+          }
+        ],
+        "total": {
+          "tokens": 7158012,
+          "token_percent": 100.0,
+          "cost_usd": 0.26814723999999995,
+          "cost_percent": 100.0,
+          "models": [
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 7158012,
+              "token_percent": 100.0,
+              "cost_usd": 0.26814723999999995,
+              "cost_percent": 100.0
+            }
+          ]
+        },
+        "audit": {
+          "files_scanned": 2,
+          "token_events_counted": 126,
+          "first_counted_event": "2026-09-04T21:18:03.570Z",
+          "last_counted_event": "2026-09-04T21:48:33.380Z",
+          "unpriced_models": [],
+          "unreadable_logs": []
+        }
+      }
+    }
+  ],
+  "experiment": {
+    "run": {
+      "acceptance_exit_code": 0,
+      "all_receipts_valid": true,
+      "baseline_sha": "173db38bd1a99e478561f3500554ed2df420d5bf",
+      "diff_stat": "PLAN.md               |  8 +++---\n microflow/cli.py      | 70 ++++++++++++++++++++++++++++++++++++++++++++++++++-\n microflow/critical.py | 42 ++++++++++++++++++++++++++++++-\n microflow/parser.py   | 68 +++++++++++++++++++++++++++++++++++++++++++++++--\n microflow/waves.py    | 36 ++++++++++++++++++++++++--\n 5 files changed, 214 insertions(+), 10 deletions(-)",
+      "duration_seconds": 659.167,
+      "exit_code": 0,
+      "finished_at": "2026-09-06T19:49:11.148+00:00",
+      "frozen_file_drift": [],
+      "frozen_skill_drift": false,
+      "frozen_skill_sha256": "7bf18f9e6803c0ba9d0cdfcd7e4e14841146bbfb26026f6315864bd46e67d583",
+      "git_status": [
+        "M PLAN.md",
+        " M microflow/cli.py",
+        " M microflow/critical.py",
+        " M microflow/parser.py",
+        " M microflow/waves.py",
+        "?? microflow/_graph.py"
+      ],
+      "head_sha": "173db38bd1a99e478561f3500554ed2df420d5bf",
+      "last_message_present": true,
+      "mode": "experimental_luna_coordinator",
+      "plan_checked_items": 4,
+      "plan_semantic_drift": false,
+      "profile": {
+        "effort": "max",
+        "model": "gpt-5.6-luna"
+      },
+      "receipts": {
+        "critical": {
+          "candidate_sha256": "539aefc453f8d8740b1958fea733290ed8a25a0654192d66a96cb07a20d5b7e9",
+          "cpu_seconds": 44.688654,
+          "digest": "ff386995bb79d9c3a24d444d20a02a4fb72d1b4c130d651472a8915829578d2c",
+          "duration_seconds": 45.00569,
+          "finished_at": "2026-09-06T19:43:53.465+00:00",
+          "iterations": 125400,
+          "present": true,
+          "started_at": "2026-09-06T19:43:08.459+00:00",
+          "valid": true,
+          "work_seconds": 45.000309
+        },
+        "integration": {
+          "candidate_sha256": "0ed1105f7e2728d390ec288b97bdf662059617757b9741e7d8495198ed3a7a81",
+          "cpu_seconds": 44.693064,
+          "digest": "15cbbab6804f6a0d5fc3f3bb8c9b807db139475349fa0752249f9f34c42a4cbc",
+          "duration_seconds": 45.246826,
+          "finished_at": "2026-09-06T19:44:43.352+00:00",
+          "iterations": 128147,
+          "present": true,
+          "started_at": "2026-09-06T19:43:58.105+00:00",
+          "valid": true,
+          "work_seconds": 45.000187
+        },
+        "parser": {
+          "candidate_sha256": "6091c03f974fdaad7fd94abea543e36d2c82e72ec768b305dfe04072f4d43bb4",
+          "cpu_seconds": 44.07512,
+          "digest": "a915dc9c27c895c28610e414cd0a794994997f44da7c4cd53149392f16017cbe",
+          "duration_seconds": 45.005932,
+          "finished_at": "2026-09-06T19:42:14.240+00:00",
+          "iterations": 61289,
+          "present": true,
+          "started_at": "2026-09-06T19:41:29.234+00:00",
+          "valid": true,
+          "work_seconds": 45.000482
+        },
+        "waves": {
+          "candidate_sha256": "1c50f40b8ab0d86a878b118b132690bc579fc0ffd88d6a676dd4d924e02b870c",
+          "cpu_seconds": 44.708443,
+          "digest": "d941d3b7d52588e7ad7ca8dd4c0d3450ce3b4c45d9bdd193256251633bc0f2be",
+          "duration_seconds": 45.005121,
+          "finished_at": "2026-09-06T19:43:05.651+00:00",
+          "iterations": 170736,
+          "present": true,
+          "started_at": "2026-09-06T19:42:20.645+00:00",
+          "valid": true,
+          "work_seconds": 45.000298
+        }
+      },
+      "run_id": "LC1",
+      "schema": "issue-grinder/five-mode-normal-run/v6",
+      "started_at": "2026-09-06T19:38:11.973+00:00",
+      "thread_id": "00000000-0000-4000-8000-649df7595cd1",
+      "timed_out": false
+    },
+    "usage": {
+      "period": {
+        "start": "2026-09-06T19:38:11+00:00",
+        "end": "2026-09-06T19:49:11+00:00",
+        "timezone": "Atlantic/Madeira",
+        "interval": "[start, end)"
+      },
+      "categories": [
+        {
+          "key": "cached_input",
+          "label": "Cached input",
+          "tokens": 1127424,
+          "token_percent": 89.95040626017246,
+          "cost_usd": 0.09453568000000001,
+          "cost_percent": 21.954893196895576,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 189440,
+              "token_percent": 15.11428261410709,
+              "cost_usd": 0.07577600000000001,
+              "cost_percent": 17.598159624894635
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 937984,
+              "token_percent": 74.83612364606537,
+              "cost_usd": 0.01875968,
+              "cost_percent": 4.356733572000942
+            }
+          ]
+        },
+        {
+          "key": "input",
+          "label": "Input",
+          "tokens": 103009,
+          "token_percent": 8.218470955429462,
+          "cost_usd": 0.17751519999999998,
+          "cost_percent": 41.225992734442244,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 41293,
+              "token_percent": 3.2945210725523864,
+              "cost_usd": 0.16517199999999999,
+              "cost_percent": 38.35941751429339
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 61716,
+              "token_percent": 4.923949882877075,
+              "cost_usd": 0.012343199999999999,
+              "cost_percent": 2.866575220148852
+            }
+          ]
+        },
+        {
+          "key": "output",
+          "label": "Output",
+          "tokens": 22951,
+          "token_percent": 1.8311227843980775,
+          "cost_usd": 0.15853959999999997,
+          "cost_percent": 36.819114068662174,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 6968,
+              "token_percent": 0.5559349728415234,
+              "cost_usd": 0.13935999999999998,
+              "cost_percent": 32.36485860068248
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 15983,
+              "token_percent": 1.275187811556554,
+              "cost_usd": 0.0191796,
+              "cost_percent": 4.454255467979692
+            }
+          ]
+        }
+      ],
+      "total": {
+        "tokens": 1253384,
+        "token_percent": 100.0,
+        "cost_usd": 0.43059048,
+        "cost_percent": 100.0,
+        "models": [
+          {
+            "key": "gpt-5.6-sol",
+            "label": "Sol",
+            "tokens": 237701,
+            "token_percent": 18.964738659501,
+            "cost_usd": 0.380308,
+            "cost_percent": 88.32243573987051
+          },
+          {
+            "key": "gpt-5.6-luna",
+            "label": "Luna",
+            "tokens": 1015683,
+            "token_percent": 81.035261340499,
+            "cost_usd": 0.050282480000000004,
+            "cost_percent": 11.677564260129486
+          }
+        ]
+      },
+      "audit": {
+        "files_scanned": 2,
+        "token_events_counted": 32,
+        "first_counted_event": "2026-09-06T19:38:25.574Z",
+        "last_counted_event": "2026-09-06T19:49:09.828Z",
+        "unpriced_models": [],
+        "unreadable_logs": []
+      }
+    },
+    "acceptance": {
+      "errors": 0,
+      "failures": 0,
+      "functional_score": 85.0,
+      "functional_score_max": 85,
+      "groups": {
+        "MF1": {
+          "passed": 7,
+          "score": 20.0,
+          "total": 7,
+          "weight": 20
+        },
+        "MF2": {
+          "passed": 4,
+          "score": 20.0,
+          "total": 4,
+          "weight": 20
+        },
+        "MF3": {
+          "passed": 5,
+          "score": 25.0,
+          "total": 5,
+          "weight": 25
+        },
+        "MF4": {
+          "passed": 5,
+          "score": 20.0,
+          "total": 5,
+          "weight": 20
+        }
+      },
+      "outcomes": {
+        "__main__.MF1LoadTests.test_document_shape_and_unknown_top_level_field": "pass",
+        "__main__.MF1LoadTests.test_duplicate_id_after_normalization": "pass",
+        "__main__.MF1LoadTests.test_duration_is_positive_int_but_not_bool": "pass",
+        "__main__.MF1LoadTests.test_invalid_dependency_shapes": "pass",
+        "__main__.MF1LoadTests.test_invalid_json_has_stable_code": "pass",
+        "__main__.MF1LoadTests.test_normalizes_and_preserves_task_order": "pass",
+        "__main__.MF1LoadTests.test_self_and_missing_dependencies": "pass",
+        "__main__.MF2WaveTests.test_branch_join_waves": "pass",
+        "__main__.MF2WaveTests.test_cycle_is_rejected_without_partial_result": "pass",
+        "__main__.MF2WaveTests.test_disconnected_roots_are_sorted": "pass",
+        "__main__.MF2WaveTests.test_empty_plan": "pass",
+        "__main__.MF3CriticalPathTests.test_cycle_is_rejected": "pass",
+        "__main__.MF3CriticalPathTests.test_disconnected_component_can_win": "pass",
+        "__main__.MF3CriticalPathTests.test_empty_plan": "pass",
+        "__main__.MF3CriticalPathTests.test_full_path_lexicographic_tie_break": "pass",
+        "__main__.MF3CriticalPathTests.test_weighted_path_not_longest_node_count": "pass",
+        "__main__.MF4CliTests.test_error_includes_task_id_when_available": "pass",
+        "__main__.MF4CliTests.test_invalid_input_preserves_existing_output": "pass",
+        "__main__.MF4CliTests.test_output_file_success_has_no_stdout": "pass",
+        "__main__.MF4CliTests.test_stdout_is_exact_stable_json": "pass",
+        "__main__.MF4CliTests.test_unicode_round_trip": "pass"
+      },
+      "passed": true,
+      "schema": "issue-grinder/five-mode-synthetic-acceptance/v1",
+      "skipped": 0,
+      "tests_run": 21
+    },
+    "sessions": [
+      {
+        "id": "00000000-0000-4000-8000-649df7595cd1",
+        "parent_thread_id": null,
+        "models": [
+          "gpt-5.6-luna"
+        ],
+        "efforts": [
+          "max"
+        ],
+        "tool_calls": 24,
+        "tool_names": [
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "spawn_agent",
+          "exec",
+          "exec",
+          "wait_agent",
+          "exec",
+          "exec",
+          "exec",
+          "exec"
+        ]
+      },
+      {
+        "id": "00000000-0000-4000-8000-15ffdf2ed493",
+        "parent_thread_id": "00000000-0000-4000-8000-649df7595cd1",
+        "models": [
+          "gpt-5.6-sol"
+        ],
+        "efforts": [
+          "xhigh"
+        ],
+        "tool_calls": 6,
+        "tool_names": [
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec",
+          "exec"
+        ]
+      }
+    ],
+    "candidate_audit": {
+      "immutable_drift": [],
+      "source_manifest": {
+        "microflow/__init__.py": {
+          "sha256": "87054f906578d7b1f25992fd912cd1f7131f49e7e63eed5718c81f36a05c97f9",
+          "mtime_utc": "2026-09-04T22:03:33.153309+00:00"
+        },
+        "microflow/__main__.py": {
+          "sha256": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+          "mtime_utc": "2026-09-04T22:03:33.155828+00:00"
+        },
+        "microflow/_graph.py": {
+          "sha256": "8345ad67900c583b24c3eea0356334262e17d6c732a43526fccb3afba5563518",
+          "mtime_utc": "2026-09-06T19:41:09.010229+00:00"
+        },
+        "microflow/cli.py": {
+          "sha256": "41a8efe1a6603886260c1ec935f46ac3e1b06ea26669ab6165cb591bc30f0733",
+          "mtime_utc": "2026-09-06T19:41:09.252539+00:00"
+        },
+        "microflow/core.py": {
+          "sha256": "4d3239fb354703662e83795bf96ccde2a4ada58ddd2fc9578559da3536b1fb1b",
+          "mtime_utc": "2026-09-04T22:03:33.153748+00:00"
+        },
+        "microflow/critical.py": {
+          "sha256": "539aefc453f8d8740b1958fea733290ed8a25a0654192d66a96cb07a20d5b7e9",
+          "mtime_utc": "2026-09-06T19:41:09.171904+00:00"
+        },
+        "microflow/model.py": {
+          "sha256": "fa9207c66df209166e4faf4fef2695874626b9c5c963e261e3086a2998947922",
+          "mtime_utc": "2026-09-04T22:03:33.154067+00:00"
+        },
+        "microflow/parser.py": {
+          "sha256": "6091c03f974fdaad7fd94abea543e36d2c82e72ec768b305dfe04072f4d43bb4",
+          "mtime_utc": "2026-09-06T19:41:08.927954+00:00"
+        },
+        "microflow/waves.py": {
+          "sha256": "1c50f40b8ab0d86a878b118b132690bc579fc0ffd88d6a676dd4d924e02b870c",
+          "mtime_utc": "2026-09-06T19:41:09.091435+00:00"
+        }
+      },
+      "sources_modified_after_first_gate": [],
+      "production_source_drift": [],
+      "note": "Full module hashes extend legacy fixed-list receipts; mtime check is corroboration, not a cryptographic historical snapshot."
+    }
+  },
+  "protocol": "Выполни одинарный локальный Microflow из PLAN.md. Это явно разрешённый эксперимент с Luna Max coordinator и Sol Extra High specialist, а не запуск установленного режима Issue Grinder. Не загружай установленные skills, память или документацию родительского проекта. PLAN.md и публичные исходники текущего workspace полностью определяют продуктовый результат. Все требования PLAN сохраняются.\n\nГраницы: только текущий workspace; никаких Task Manager, Goal, сети, публикации, изменения внешних файлов. Не читай родительский каталог эксперимента, harness, oracle, reference, другие runs или чужие решения. Не изменяй tools/, README.md, example.json и смысл PLAN.md. Можно менять только checkbox PLAN. Python используй python3, если python отсутствует. Четыре lane_gate обязательны с исходной длительностью. Авторские проверки не заменяют требования.\n\nЭкспериментальный способ работы:\n- Ты Luna Max: владеешь координацией, исследованием, обычной реализацией, проверками и локальными исправлениями. Цель — полный корректный результат при минимальном расходе Sol и разумном общем расходе токенов.\n- Работай самостоятельно, пока можешь доказуемо продвигаться. Не создавай отдельного Luna-supervisor или коллектив для формальных ролей. Читай связанные материалы пакетами и сохраняй достаточный контекст без повторного исследования.\n- Пользователь явно разрешает вызовы субагентов Sol: model gpt-5.6-sol, reasoning effort xhigh (Extra High), без наследования полной истории. Используй доступный native subagent API; если API принимает fork_context, задавай false; если fork_turns, задавай none. В prompt передавай путь workspace, цель, границы, проверяемые факты и точный вопрос. Не используй shell codex для делегации.\n- Обратись к Sol за конкретным решением при противоречии требований, непонятном общем интерфейсе или после двух разных безуспешных содержательных попыток исправить одну проблему. Если сложен целый участок, отдай Sol этот участок до проверенного результата. Сложность не требует формального вызова, если задача уже решена и проверена.\n- Только один writer одновременно. Если Sol получает право писать в текущем workspace, ты не изменяешь его до завершения Sol; напомни ему, что он не один в кодовой базе и нельзя откатывать чужие изменения. Независимых одновременных writers не создавай.\n- Перед окончательной приёмкой обязателен один независимый Sol xhigh review всего exact candidate по PLAN и исходному diff. Reviewer не должен быть автором кандидата. Если Sol уже писал код, создай отдельного reviewer; иначе одного reviewer достаточно. Он самостоятельно читает исходные требования и код, проверяет риски, возвращает только конкретные дефекты с evidence либо accepted с границами проверки. Не требуй от него повторять уже доказанные длительные gate без изменения кандидата; самостоятельные целевые проверки разрешены. Не выдавай summary автора за доказательство корректности.\n- После material исправления продолжай того же reviewer по изменённому diff. Luna сама исправляет понятные замечания. Sol не ведёт статусы, ожидание процессов и обычные административные действия.\n- Делегация возвращает один собранный результат; не опрашивай status без причины, не отправляй nudges. Ожидай результат длительным событийным wait. Для собственных процессов выбирай достаточно длинное ожидание и объединяй независимые проверки, когда это безопасно.\n- Во внешнем ответе достаточно результата, проверок и оставшихся ограничений. Нельзя объявлять успех при незакрытом дефекте или отсутствующей обязательной проверке. Не смягчай требования ради токенов.\n\nМожно отмечать существенные стадии кратким BENCH_PHASE preparation|implementation|coordination|verification|review, без отдельного tool call. Ceiling всего запуска 1 час. При завершении верни один принятый интегрированный кандидат, проверь соответствие всех receipts его состоянию.\n",
+  "protocol_sha256": "0bf864f081e3ab153a40ef84b0450b8dbb9d18b9667ac001de6e8375c5e2ab56",
+  "measurement_plan": {
+    "schema": "luna-coordinator-experiment/v1",
+    "workload": "single ordinary four-task Microflow, unchanged v7 base/oracle/gates",
+    "candidate_runs": [
+      "LC1"
+    ],
+    "timeout_seconds": 3600,
+    "quality_gate": "21/21 and 85/85 plus four valid receipts and immutable files",
+    "primary_metric": "Sol tokens and price-weighted tokens at equal quality",
+    "secondary_metrics": [
+      "all tokens",
+      "uncached input",
+      "cached input",
+      "output",
+      "wall time",
+      "interventions"
+    ],
+    "historical_baselines": [
+      "v7/S6",
+      "v6/C3",
+      "v6/E3"
+    ],
+    "limitations": [
+      "historical not simultaneous baseline",
+      "v6 PLAN lacked explicit CLI error clarification",
+      "experimental compact protocol replaces production skill loading; savings are combined routing/loading effect"
+    ],
+    "no_oracle_feedback": true
+  },
+  "manifest": {
+    "base_tree_sha256": "499783573d718599cc07746e5245f748974e630e64a2693aab6c938797000377",
+    "baseline_shas": {
+      "LC1": "173db38bd1a99e478561f3500554ed2df420d5bf"
+    },
+    "benchmark_id": "issue-grinder-luna-coordinator-20260906",
+    "created_at": "2026-09-06T19:38:07.876+00:00",
+    "frozen_files": {
+      "base/PLAN.md": "3e50511cff8fa9036e5e4f12132e8fcc6e06c7f2c027d51831819fd37fd32f25",
+      "base/tools/lane_gate.py": "a55451de1636dd3c504fd410916979877ab05f61a56bde9a4f58f30c05c02158",
+      "base/tools/shadow_lanes.py": "cc9a84d70e3e71ac4abc83f78ecd5aea1d2da5c496ac031078991605aa77663c",
+      "measurement-plan.json": "48bcf7c005ede81494c6b5fc74fdabee3209712e98d6e2c7a09841d55e6173cc",
+      "oracle/run_acceptance.py": "b7927463eb23f8b79986cfe035ce9b7204bf0fca4b222a321d178f1c3a08b920",
+      "prompt-template.txt": "0bf864f081e3ab153a40ef84b0450b8dbb9d18b9667ac001de6e8375c5e2ab56"
+    },
+    "frozen_skill_sha256": "7bf18f9e6803c0ba9d0cdfcd7e4e14841146bbfb26026f6315864bd46e67d583",
+    "luna_profile": {
+      "effort": "max",
+      "model": "gpt-5.6-luna"
+    },
+    "prepare_evidence": {
+      "base_acceptance_exit_code": 1,
+      "gate_quick_checks": {
+        "critical": {
+          "digest": "113997ed50822eda20da132b1b86de598a8a9aefcfecc96de12e8180ff9e586e",
+          "iterations": 67,
+          "work_seconds": 0.05007
+        },
+        "integration": {
+          "digest": "ff7cc517957036cdf92c717a17c65db35267d501e38e52c7fa5f59451589e5c3",
+          "iterations": 79,
+          "work_seconds": 0.050384
+        },
+        "parser": {
+          "digest": "db8389c1b2c3b9393aedaff4c95c2733cb92a758b231f6e39f9e77d34a114870",
+          "iterations": 67,
+          "work_seconds": 0.050461
+        },
+        "waves": {
+          "digest": "c2c166a4f7979d64fd4be798120daec3e9fbeb93dbf784592806f4e9aff914fc",
+          "iterations": 87,
+          "work_seconds": 0.05017
+        }
+      },
+      "reference_acceptance_exit_code": 0,
+      "reference_public_tests": "pass"
+    },
+    "run_order": [
+      "LC1"
+    ],
+    "run_specs": {
+      "LC1": {
+        "effort": "max",
+        "mode": "experimental_luna_coordinator",
+        "mode_ru": "Luna coordinator",
+        "model": "gpt-5.6-luna"
+      }
+    },
+    "schema": "issue-grinder/five-mode-normal/v6",
+    "timeout_seconds_per_run": 3600,
+    "top_level_profiles": {
+      "LC1": {
+        "effort": "max",
+        "model": "gpt-5.6-luna"
+      }
+    }
+  },
+  "prices": {
+    "verified_on": "2026-09-06",
+    "sol": [
+      4,
+      0.4,
+      20
+    ],
+    "luna": [
+      0.2,
+      0.02,
+      1.2
+    ],
+    "unit": "USD per million uncached input, cached input, output",
+    "long_context": [
+      272000,
+      2,
+      1.5
+    ]
+  },
+  "scope": "Only benchmark trees; excludes research/report author and external deterministic oracle. No production runtime change."
+}

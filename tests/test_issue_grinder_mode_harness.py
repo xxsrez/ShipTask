@@ -115,7 +115,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         self.assertFalse(classic.may_checkpoint)
 
     def test_every_explicit_mode_wins(self) -> None:
-        for main_profile in (Profile("gpt-5.6-luna", "low"), SOL):
+        for main_profile in (LUNA_MAX,):
             for mode in ExecutionMode:
                 with self.subTest(main=main_profile, mode=mode):
                     record = resolve_mode(main_profile, explicit_mode=mode)
@@ -126,9 +126,9 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         for effort in LUNA_EFFORTS:
             with self.subTest(effort=effort):
                 record = resolve_mode(Profile("gpt-5.6-luna", effort))
-                self.assertEqual(record.canonical_mode, ExecutionMode.SOLO)
+                self.assertEqual(record.canonical_mode, ExecutionMode.BALANCE if effort == "max" else ExecutionMode.SOLO)
                 self.assertEqual(record.mode_origin, ModeOrigin.AUTOMATIC)
-        self.assertEqual(resolve_mode(SOL).canonical_mode, ExecutionMode.SOLO)
+        self.assertEqual(resolve_mode(SOL).canonical_mode, ExecutionMode.CLASSIC)
 
     def test_other_modes_keep_luna_max_worker_baseline(self) -> None:
         for mode in (
@@ -137,7 +137,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
             ExecutionMode.ECONOMICAL,
         ):
             with self.subTest(mode=mode):
-                self.assertEqual(normalize_profiles(SOL, mode=mode).worker, LUNA_MAX)
+                self.assertEqual(normalize_profiles(LUNA_MAX, mode=mode).worker, LUNA_MAX)
 
     def test_role_overrides_win(self) -> None:
         controller = Profile("gpt-5.6-terra", "high")
@@ -216,7 +216,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         self.assertTrue(accepted.may_complete)
 
     def test_mode_switch_requires_explicit_safe_barrier(self) -> None:
-        current = resolve_mode(SOL)
+        current = resolve_mode(SOL, explicit_mode=ExecutionMode.SOLO)
         automatic = decide_mode_switch(
             current,
             ExecutionMode.CLASSIC,
@@ -237,7 +237,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         self.assertEqual(len(unsafe.defects), 4)
 
     def test_safe_mode_switch_changes_only_mode_and_origin(self) -> None:
-        current = resolve_mode(SOL)
+        current = resolve_mode(SOL, explicit_mode=ExecutionMode.SOLO)
         decision = decide_mode_switch(
             current,
             ExecutionMode.CLASSIC,

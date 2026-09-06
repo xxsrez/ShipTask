@@ -75,18 +75,20 @@ prompt; подготовка обязана остановиться при ра
 | `IG-AUTO-03` | `SKILL.md` §4; environment harness | production-rejected; public-uat-allowed; provider-production-label-does-not-reclassify-uat |
 | `IG-AUTO-04` | `SKILL.md` §4; environment harness | default-uat; unknown-uat-before-effect |
 | `IG-AUTO-05` | `autonomy-and-environments.md` | security-selector; narrow-always-readback |
-| `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | three-canonical-modes; mode-does-not-expand-authority |
-| `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; default-classic-non-luna-multiple-tasks; otherwise-solo; economical-explicit-only; retired-mode-rejected; mode-persists-after-model-change |
+| `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | four-canonical-modes; mode-does-not-expand-authority |
+| `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; default-luna-max-balance; default-sol-xhigh-classic; other-profiles-legacy-default; economical-explicit-only; retired-mode-rejected; mode-persists-after-model-change |
 | `IG-MODE-03` | `modes/classic.md`; `multi-agent-execution.md`; mode harness | classic-sol-does-almost-all; classic-luna-trivial-only; classic-high-judgment-owner; classic-simple-independent-review; classic-final-review-terminal |
-| `IG-MODE-06` | `SKILL.md` §5; `modes/economical.md`; mode/routing guards; mode harness | economical-all-substantive-luna; non-luna-root-shell-only; economical-independent-luna-review; economical-terminal-when-proven; economical-partial-review-checkpoint; economical-resumable-candidate; no-false-done; no-false-blocked |
+| `IG-MODE-04` | `modes/balance.md`; mode/routing harness | luna-root-owns-process; bounded-sol-specialist; independent-sol-xhigh-review; no-cheap-quality-bypass |
+| `IG-MODE-06` | `SKILL.md` §5; `modes/economical.md`; mode/routing guards; mode harness | economical-all-substantive-luna; wrong-root-refused-before-effects; economical-independent-luna-review; economical-terminal-when-proven; economical-partial-review-checkpoint; economical-resumable-candidate; no-false-done; no-false-blocked |
 | `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md`; mode/routing guards | bounded-fork; observed-profile-match; agent-label-neutral; role-override-wins |
-| `IG-MODE-08` | `modes/{classic,economical}.md`; `multi-agent-execution.md` | economical-handoff-preserves-evidence; same-retry-rejected |
-| `IG-MODE-09` | `modes/{solo,classic,economical}.md` | one-review-candidate; dissent-preserved; finding-disposition-preserved; material-defect-beats-generic-approvals; raw-loop-transcript-not-required; rework-reviewed-again |
+| `IG-MODE-08` | `modes/{classic,balance,economical}.md`; `multi-agent-execution.md` | economical-handoff-preserves-evidence; same-retry-rejected |
+| `IG-MODE-09` | `modes/{solo,classic,balance,economical}.md` | one-review-candidate; dissent-preserved; finding-disposition-preserved; material-defect-beats-generic-approvals; raw-loop-transcript-not-required; rework-reviewed-again |
 | `IG-MODE-10` | `execution-modes.md`; `multi-agent-execution.md`; mode harness | explicit-switch-barrier; automatic-no-switch; switch-preserves-candidates-and-scope |
 | `IG-MODE-11` | `SKILL.md` §1-3; `modes/solo.md`; `strategic-explainer.md`; mode/solo-topology harnesses | solo-one-issue; solo-many-issues-sequential; solo-current-profile-after-model-change; solo-no-execution-delegation; solo-provider-allowed; solo-terminal-only |
 | `IG-MODE-12` | `execution-modes.md`; `multi-agent-execution.md`; `strategic-explainer.md`; solo-topology harness | outer-controller-not-counted; provider-transport-not-counted; provider-doing-delivery-becomes-execution-agent; explicit-global-opt-out-wins; topology-boundary-all-modes |
 | `IG-MODE-19` | `execution-modes.md`; `modes/solo.md` | process-handle-survives-handoff; completed-result-reused; independent-tools-one-solo-packet; unknown-effect-reconciled |
-| `IG-HELP-01` | `SKILL.md` §0; `mode-help.md` | all-three-modes-brief; default-is-resolver; narrow-difference-answer; help-has-no-task-manager-effects; mixed-help-delivery-preserves-gates |
+| `IG-MODE-20` | `SKILL.md`; `execution-modes.md`; mode harness | wrong-model-refused; wrong-effort-refused; unknown-refused; resume-profile-gate; switch-profile-gate; no-wrapper-or-effects; legacy-balance-refused |
+| `IG-HELP-01` | `SKILL.md` §0; `mode-help.md` | all-four-modes-brief; default-is-resolver; narrow-difference-answer; help-has-no-task-manager-effects; mixed-help-delivery-preserves-gates |
 | `IG-MA-01` | `SKILL.md` §2; `multi-agent-execution.md` | two-independent-packets; useful-critic; intentional-candidate; one-lane-no-filler; solo-delegation-forbidden |
 | `IG-MA-02` | `multi-agent-execution.md` | disjoint-surfaces; ordinary-conflicting-surfaces; isolated-intentional-overlap |
 | `IG-MA-03` | `multi-agent-execution.md` | dependency-ready-frontier |
@@ -102,10 +104,10 @@ prompt; подготовка обязана остановиться при ра
 | `IG-MA-13` | `multi-agent-execution.md` | explicit-profile-preserved |
 | `IG-MA-14` | `modes/classic.md`; `multi-agent-execution.md` | classic-simple-luna-max; classic-small-diff-not-simple |
 | `IG-MA-15` | `modes/*.md`; `multi-agent-execution.md`; routing guard | solo-current-main-only; classic-material-controller; economical-economical-controller |
-| `IG-MA-16` | `modes/{classic,economical}.md`; `multi-agent-execution.md` | luna-uncertainty-evidence-handoff; mode-specific-next-route; same-luna-retry-rejected |
-| `IG-MA-17` | `modes/{classic,economical}.md`; `multi-agent-execution.md`; routing guard | selected-profiles-assumed-available; no-automatic-mode-switch-or-profile-substitution; routing-failure-stops-wave |
+| `IG-MA-16` | `modes/{classic,balance,economical}.md`; `multi-agent-execution.md` | luna-uncertainty-evidence-handoff; mode-specific-next-route; same-luna-retry-rejected |
+| `IG-MA-17` | `modes/{classic,balance,economical}.md`; `multi-agent-execution.md`; routing guard | selected-profiles-assumed-available; no-automatic-mode-switch-or-profile-substitution; routing-failure-stops-wave |
 | `IG-MA-18` | `multi-agent-execution.md`; `strategic-explainer.md` | explainer-outside-worker-routing; worker-evidence-coordinator-facade; nested-facade-no-new-task; solo-provider-outside-execution-topology |
-| `IG-MA-19` | `SKILL.md` §2; `execution-modes.md`; `modes/{classic,economical}.md`; `multi-agent-execution.md`; mode harness | capability-aware-direct-stages; one-guard-spawn-per-owner; full-stage-deadline-wait; technical-timeout-no-probe; unchanged-state-polling-rejected; final-response-handoff; economical-deadline-partial-ledger-only |
+| `IG-MA-19` | `SKILL.md` §2; `execution-modes.md`; `modes/{classic,balance,economical}.md`; `multi-agent-execution.md`; mode harness | capability-aware-direct-stages; one-guard-spawn-per-owner; full-stage-deadline-wait; technical-timeout-no-probe; unchanged-state-polling-rejected; final-response-handoff; economical-deadline-partial-ledger-only |
 
 ## Быстрый mode corpus
 
@@ -118,8 +120,8 @@ python3 -B -m unittest discover -s tests -p 'test_issue_grinder_mode_harness.py'
 
 Corpus доказывает:
 
-- приоритет явного режима; default Classic только при non-Luna и числе задач >1,
-  иначе Solo, включая Luna при любом effort; Economical только явно;
+- приоритет явного режима; default Luna Max → Balance, Sol xhigh → Classic; прочие профили сохраняют
+  прежнее правило; root admission запрещает неправильные и неизвестные профили; Economical только явно;
 - `Соло` с current main profile, нулём execution-subagents и одной
   последовательной lane;
 - сохранение mode record при доказанной continuity и отсутствие переноса
@@ -296,7 +298,7 @@ fresh model-forward smoke.
   `issue-grinder:scope-reviewer`;
 - не видеть установленный `ship-tasks:ship-tasks`;
 - видеть Task Manager dependency и optional Strategic Explainer;
-- на чистый вопрос о режимах/default/различиях дать краткую справку о трёх
+- на чистый вопрос о режимах/default/различиях дать краткую справку о четырёх
   режимах без Task Manager, Goal, title mutation, delivery loop и subagents;
 - правильно различать explicit delivery, implicit exact selector, implicit
   missing selector и read/status/planning negative prompts;
@@ -354,7 +356,7 @@ python3 scripts/issue_grinder_mode_loading_smoke.py \
 ```
 
 Runner создаёт по одной fresh ephemeral read-only Codex-сессии для каждого из
-трёх explicit mode. По наблюдаемым command-execution events case проходит,
+четырёх explicit mode. По наблюдаемым command-execution events case проходит,
 только если агент полностью открыл installed `SKILL.md`, общий
 `execution-modes.md` и ровно один выбранный файл из `references/modes/`.
 Открытие соседнего mode-файла, broad access ко всему каталогу, отсутствие
@@ -385,7 +387,7 @@ delivery source/tests/review, должен считаться execution-agent и
 ## Исторические замеры
 
 Замеры удалённых режимов сохранены в датированных reports и не являются
-действующей политикой или подтверждением поведения трёх текущих режимов.
+действующей политикой или подтверждением поведения четырёх текущих режимов.
 Новый автовыбор проверяется матрицей profiles × число live задач, явным выбором,
 продолжением после изменения модели/числа задач и отклонением удалённых modes.
 Одинарная синтетика остаётся базовым протоколом; изменение маршрутизации само

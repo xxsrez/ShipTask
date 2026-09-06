@@ -29,6 +29,7 @@ FORBIDDEN_UNCHANGED_COORDINATION = frozenset(
 class ExecutionMode(str, Enum):
     SOLO = "solo"
     CLASSIC = "classic"
+    BALANCE = "balance"
     ECONOMICAL = "economical"
 
 
@@ -54,12 +55,20 @@ class Profile:
 
 
 LUNA_MAX = Profile(LUNA_MODEL, LUNA_MAX_EFFORT)
+SOL_XHIGH = Profile("gpt-5.6-sol", "xhigh")
+BALANCE_VERSION = "luna-coordinator-v1"
+
+def require_main_profile(mode: ExecutionMode, profile: Profile) -> None:
+    if mode in (ExecutionMode.BALANCE, ExecutionMode.ECONOMICAL) and profile != LUNA_MAX:
+        raise ValueError("main_profile_required: gpt-5.6-luna/max")
+
 
 
 @dataclass(frozen=True)
 class RoleProfiles:
     controller: Profile
     worker: Profile
+    specialist: Profile | None = None
 
 
 @dataclass(frozen=True)
@@ -69,6 +78,7 @@ class ModeRecord:
     initial_main_profile: Profile
     role_profiles: RoleProfiles
     initial_scope_task_count: int = 1
+    mode_contract_version: str | None = None
 
 
 @dataclass(frozen=True)
@@ -88,6 +98,7 @@ def mode_dispatch_policy(
     """Return the mechanical topology constraints of the selected mode."""
 
     ExecutionMode(record.canonical_mode)
+    require_main_profile(record.canonical_mode, current_main_profile)
     if record.canonical_mode is ExecutionMode.SOLO:
         return ModeDispatchPolicy(
             issue_grinder_execution_subagents_allowed=False,
@@ -114,11 +125,15 @@ def normalize_profiles(
 ) -> RoleProfiles:
     """Apply the selected mode's worker baseline without guessing ordering."""
 
+    require_main_profile(mode, main_profile)
+    if mode in (ExecutionMode.BALANCE, ExecutionMode.ECONOMICAL) and controller_override not in (None, LUNA_MAX):
+        raise ValueError("main_profile_required: controller override cannot replace root")
     default_controller = LUNA_MAX if main_profile.is_luna else main_profile
     default_worker = LUNA_MAX
     return RoleProfiles(
         controller=controller_override or default_controller,
         worker=worker_override or default_worker,
+        specialist=SOL_XHIGH if mode is ExecutionMode.BALANCE else None,
     )
 
 
@@ -140,12 +155,17 @@ def resolve_mode(
         if explicit_mode is not None:
             raise ValueError("an explicit mode switch must pass the switch barrier")
         ExecutionMode(saved_record.canonical_mode)  # retired records fail closed
+        require_main_profile(saved_record.canonical_mode, main_profile)
+        if saved_record.canonical_mode is ExecutionMode.BALANCE and saved_record.mode_contract_version != BALANCE_VERSION:
+            raise ValueError("legacy_balance_requires_explicit_switch")
         return saved_record
 
     if not isinstance(scope_task_count, int) or isinstance(scope_task_count, bool) or scope_task_count < 0:
         raise ValueError("scope_task_count must be a nonnegative resolved task count")
     canonical_mode = (
         ExecutionMode(explicit_mode) if explicit_mode is not None else
+        ExecutionMode.BALANCE if main_profile == LUNA_MAX else
+        ExecutionMode.CLASSIC if main_profile == SOL_XHIGH else
         ExecutionMode.CLASSIC if not main_profile.is_luna and scope_task_count > 1 else
         ExecutionMode.SOLO
     )
@@ -157,6 +177,7 @@ def resolve_mode(
     return ModeRecord(
         canonical_mode=canonical_mode,
         mode_origin=origin,
+        mode_contract_version=BALANCE_VERSION if canonical_mode is ExecutionMode.BALANCE else None,
         initial_scope_task_count=scope_task_count,
         initial_main_profile=main_profile,
         role_profiles=normalize_profiles(
@@ -373,6 +394,7 @@ def decide_mode_switch(
     target_mode: ExecutionMode,
     *,
     explicit_request: bool,
+    current_main_profile: Profile | None = None,
     active_writer_count: int = 0,
     active_writers_checkpointed: bool = False,
     integration_unchanged: bool = True,
@@ -386,7 +408,11 @@ def decide_mode_switch(
     if not explicit_request:
         return ModeSwitchDecision("keep_mode", current_record, False)
     target_mode = ExecutionMode(target_mode)
-    if target_mode is current_record.canonical_mode:
+    if target_mode in (ExecutionMode.BALANCE, ExecutionMode.ECONOMICAL):
+        if current_main_profile is None:
+            raise ValueError("current_main_profile_required")
+        require_main_profile(target_mode, current_main_profile)
+    if target_mode is current_record.canonical_mode and not (target_mode is ExecutionMode.BALANCE and current_record.mode_contract_version != BALANCE_VERSION):
         return ModeSwitchDecision("already_selected", current_record, False)
 
     defects = []
@@ -407,5 +433,7 @@ def decide_mode_switch(
         current_record,
         canonical_mode=target_mode,
         mode_origin=ModeOrigin.EXPLICIT,
+        mode_contract_version=BALANCE_VERSION if target_mode is ExecutionMode.BALANCE else None,
+        role_profiles=normalize_profiles(current_main_profile or current_record.initial_main_profile, mode=target_mode),
     )
     return ModeSwitchDecision("switch_next_wave", switched_record, True)

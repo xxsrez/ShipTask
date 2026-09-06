@@ -18,7 +18,7 @@ validate_route = MODULE.validate_route
 
 class ModelRoutingGuardTest(unittest.TestCase):
     def test_retired_routes_are_rejected_even_with_profile_override(self) -> None:
-        for mode in ("balance", "swarm", "manager", "roy", "roi"):
+        for mode in ("swarm", "manager", "roy", "roi"):
             for override in (False, True):
                 receipt = validate_route(
                     packet_id="retired-route", mode=mode, semantic_role="implementation",
@@ -26,6 +26,15 @@ class ModelRoutingGuardTest(unittest.TestCase):
                     fork_turns="none", user_profile_override=override)
                 self.assertFalse(receipt.allowed)
                 self.assertIn("unknown_mode", receipt.defects)
+
+    def test_balance_routes_specialist_and_review_to_sol_xhigh(self):
+        for role in ("specialist", "final_review"):
+            for model, effort, allowed in (("gpt-5.6-sol","xhigh",True),("gpt-5.6-sol","high",False),("gpt-5.6-luna","max",False)):
+                receipt=validate_route(packet_id="balance-"+role, mode="balance", semantic_role=role, agent_type="default", model=model, effort=effort, fork_turns="none")
+                self.assertEqual(receipt.allowed,allowed,receipt.defects)
+        self.assertTrue(self.luna_route("balance").allowed)
+        wrong=validate_route(packet_id="balance-worker",mode="balance",semantic_role="implementation",agent_type="worker",model="gpt-5.6-sol",effort="xhigh",fork_turns="none")
+        self.assertFalse(wrong.allowed)
 
     def luna_route(self, mode: str, role: str = "implementation"):
         effort = "max"
