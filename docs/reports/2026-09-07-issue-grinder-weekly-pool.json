@@ -1,0 +1,747 @@
+{
+  "recalculated_at": "2026-09-07",
+  "benchmark_rerun": false,
+  "helper_sha256": "776f88cacd21e9c0b02fa194f144236e3eb5aaa9b18f9ab63bd8737edb534dba",
+  "runs": {
+    "S1": {
+      "period": {
+        "start": "2026-09-06T20:44:01+00:00",
+        "end": "2026-09-06T20:52:46+00:00",
+        "timezone": "Atlantic/Madeira",
+        "interval": "[start, end)"
+      },
+      "categories": [
+        {
+          "key": "cached_input",
+          "label": "Cached input",
+          "tokens": 1309952,
+          "token_percent": 94.6356250442492,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 1309952,
+              "token_percent": 94.6356250442492,
+              "weekly_pool_percent": 0.025867175597257396,
+              "usage_share_percent": 48.20533428128365
+            }
+          ],
+          "weekly_pool_percent": 0.025867175597257396,
+          "usage_share_percent": 48.20533428128365
+        },
+        {
+          "key": "input",
+          "label": "Input",
+          "tokens": 60955,
+          "token_percent": 4.403607555522805,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 60955,
+              "token_percent": 4.403607555522805,
+              "weekly_pool_percent": 0.012036576061800926,
+              "usage_share_percent": 22.431021526862395
+            }
+          ],
+          "weekly_pool_percent": 0.012036576061800926,
+          "usage_share_percent": 22.431021526862395
+        },
+        {
+          "key": "output",
+          "label": "Output",
+          "tokens": 13299,
+          "token_percent": 0.9607674002280008,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 13299,
+              "token_percent": 0.9607674002280008,
+              "weekly_pool_percent": 0.015756649171935738,
+              "usage_share_percent": 29.36364419185395
+            }
+          ],
+          "weekly_pool_percent": 0.015756649171935738,
+          "usage_share_percent": 29.36364419185395
+        }
+      ],
+      "total": {
+        "tokens": 1384206,
+        "token_percent": 100.0,
+        "models": [
+          {
+            "key": "gpt-5.6-sol",
+            "label": "Sol",
+            "tokens": 1384206,
+            "token_percent": 100.0,
+            "weekly_pool_percent": 0.05366040083099406,
+            "usage_share_percent": 100.00000000000001
+          }
+        ],
+        "weekly_pool_percent": 0.05366040083099406,
+        "usage_share_percent": 100.00000000000001
+      },
+      "audit": {
+        "files_scanned": 1,
+        "token_events_counted": 32,
+        "first_counted_event": "2026-09-06T20:44:14.663Z",
+        "last_counted_event": "2026-09-06T20:52:43.074Z",
+        "unpriced_models": [],
+        "unreadable_logs": []
+      },
+      "pricing": {
+        "cost_basis": "weekly_pool_percent",
+        "weekly_pool_units": 2532.073892402249,
+        "percent_scale": "100 means one full weekly pool; not fraction 1.0",
+        "sol_base_rates_per_million": {
+          "input": 5.0,
+          "cached_input": 0.5,
+          "output": 30.0
+        },
+        "astra_multiplier": 1.9208645996368663,
+        "calibration_date": "2026-09-06",
+        "calibration_status": "empirical_not_official",
+        "note": "Sol pre-promotion scale; Astra refitted on that scale. Denominator calibrated on the same observations. Fast not inferred. Not a bill or guaranteed quota."
+      }
+    },
+    "C1": {
+      "period": {
+        "start": "2026-09-06T20:52:45+00:00",
+        "end": "2026-09-06T21:06:28+00:00",
+        "timezone": "Atlantic/Madeira",
+        "interval": "[start, end)"
+      },
+      "categories": [
+        {
+          "key": "cached_input",
+          "label": "Cached input",
+          "tokens": 2015232,
+          "token_percent": 93.41627805642342,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 1489152,
+              "token_percent": 69.02978778635863,
+              "weekly_pool_percent": 0.0294057769101517,
+              "usage_share_percent": 48.909973975586794
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 526080,
+              "token_percent": 24.386490270064805,
+              "weekly_pool_percent": 0.00041553289702844597,
+              "usage_share_percent": 0.6911466152300558
+            }
+          ],
+          "weekly_pool_percent": 0.02982130980718014,
+          "usage_share_percent": 49.60112059081685
+        },
+        {
+          "key": "input",
+          "label": "Input",
+          "tokens": 114441,
+          "token_percent": 5.304923838573004,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 55441,
+              "token_percent": 2.569973021332616,
+              "weekly_pool_percent": 0.010947745278357887,
+              "usage_share_percent": 18.20914095525848
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 59000,
+              "token_percent": 2.7349508172403882,
+              "weekly_pool_percent": 0.00046602115504634875,
+              "usage_share_percent": 0.7751226106024426
+            }
+          ],
+          "weekly_pool_percent": 0.011413766433404235,
+          "usage_share_percent": 18.98426356586092
+        },
+        {
+          "key": "output",
+          "label": "Output",
+          "tokens": 27587,
+          "token_percent": 1.2787981050035693,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 15456,
+              "token_percent": 0.7164644039197872,
+              "weekly_pool_percent": 0.018312261794228048,
+              "usage_share_percent": 30.458377295266146
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 12131,
+              "token_percent": 0.5623337010837822,
+              "weekly_pool_percent": 0.0005749121320542972,
+              "usage_share_percent": 0.9562385480560912
+            }
+          ],
+          "weekly_pool_percent": 0.018887173926282343,
+          "usage_share_percent": 31.414615843322235
+        }
+      ],
+      "total": {
+        "tokens": 2157260,
+        "token_percent": 100.0,
+        "models": [
+          {
+            "key": "gpt-5.6-sol",
+            "label": "Sol",
+            "tokens": 1560049,
+            "token_percent": 72.31622521161103,
+            "weekly_pool_percent": 0.058665783982737627,
+            "usage_share_percent": 97.5774922261114
+          },
+          {
+            "key": "gpt-5.6-luna",
+            "label": "Luna",
+            "tokens": 597211,
+            "token_percent": 27.683774788388973,
+            "weekly_pool_percent": 0.001456466184129092,
+            "usage_share_percent": 2.4225077738885896
+          }
+        ],
+        "weekly_pool_percent": 0.060122250166866724,
+        "usage_share_percent": 100.0
+      },
+      "audit": {
+        "files_scanned": 2,
+        "token_events_counted": 47,
+        "first_counted_event": "2026-09-06T20:53:00.711Z",
+        "last_counted_event": "2026-09-06T21:06:25.084Z",
+        "unpriced_models": [],
+        "unreadable_logs": []
+      },
+      "pricing": {
+        "cost_basis": "weekly_pool_percent",
+        "weekly_pool_units": 2532.073892402249,
+        "percent_scale": "100 means one full weekly pool; not fraction 1.0",
+        "sol_base_rates_per_million": {
+          "input": 5.0,
+          "cached_input": 0.5,
+          "output": 30.0
+        },
+        "astra_multiplier": 1.9208645996368663,
+        "calibration_date": "2026-09-06",
+        "calibration_status": "empirical_not_official",
+        "note": "Sol pre-promotion scale; Astra refitted on that scale. Denominator calibrated on the same observations. Fast not inferred. Not a bill or guaranteed quota."
+      }
+    },
+    "B1": {
+      "period": {
+        "start": "2026-09-06T20:25:47+00:00",
+        "end": "2026-09-06T20:44:02+00:00",
+        "timezone": "Atlantic/Madeira",
+        "interval": "[start, end)"
+      },
+      "categories": [
+        {
+          "key": "cached_input",
+          "label": "Cached input",
+          "tokens": 4364032,
+          "token_percent": 95.12888736203251,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 413184,
+              "token_percent": 9.00674747476509,
+              "weekly_pool_percent": 0.008159003598587733,
+              "usage_share_percent": 21.60829328706204
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 3950848,
+              "token_percent": 86.12213988726742,
+              "weekly_pool_percent": 0.0031206419463941635,
+              "usage_share_percent": 8.264703600972206
+            }
+          ],
+          "weekly_pool_percent": 0.011279645544981898,
+          "usage_share_percent": 29.87299688803425
+        },
+        {
+          "key": "input",
+          "label": "Input",
+          "tokens": 184006,
+          "token_percent": 4.011035218792657,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 50654,
+              "token_percent": 1.1041758310746566,
+              "weekly_pool_percent": 0.010002472706660062,
+              "usage_share_percent": 26.490534196939876
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 133352,
+              "token_percent": 2.9068593877180002,
+              "weekly_pool_percent": 0.001053302594368486,
+              "usage_share_percent": 2.7895650619736454
+            }
+          ],
+          "weekly_pool_percent": 0.011055775301028546,
+          "usage_share_percent": 29.280099258913523
+        },
+        {
+          "key": "output",
+          "label": "Output",
+          "tokens": 39456,
+          "token_percent": 0.8600774191748262,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 11916,
+              "token_percent": 0.25974965852816373,
+              "weekly_pool_percent": 0.014118071398810906,
+              "usage_share_percent": 37.39027979911584
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 27540,
+              "token_percent": 0.6003277606466624,
+              "weekly_pool_percent": 0.00130517518067557,
+              "usage_share_percent": 3.4566240539363875
+            }
+          ],
+          "weekly_pool_percent": 0.015423246579486476,
+          "usage_share_percent": 40.84690385305222
+        }
+      ],
+      "total": {
+        "tokens": 4587494,
+        "token_percent": 100.0,
+        "models": [
+          {
+            "key": "gpt-5.6-sol",
+            "label": "Sol",
+            "tokens": 475754,
+            "token_percent": 10.370672964367909,
+            "weekly_pool_percent": 0.032279547704058706,
+            "usage_share_percent": 85.48910728311776
+          },
+          {
+            "key": "gpt-5.6-luna",
+            "label": "Luna",
+            "tokens": 4111740,
+            "token_percent": 89.62932703563209,
+            "weekly_pool_percent": 0.005479119721438219,
+            "usage_share_percent": 14.510892716882239
+          }
+        ],
+        "weekly_pool_percent": 0.037758667425496925,
+        "usage_share_percent": 100.0
+      },
+      "audit": {
+        "files_scanned": 2,
+        "token_events_counted": 80,
+        "first_counted_event": "2026-09-06T20:26:03.242Z",
+        "last_counted_event": "2026-09-06T20:43:58.811Z",
+        "unpriced_models": [],
+        "unreadable_logs": []
+      },
+      "pricing": {
+        "cost_basis": "weekly_pool_percent",
+        "weekly_pool_units": 2532.073892402249,
+        "percent_scale": "100 means one full weekly pool; not fraction 1.0",
+        "sol_base_rates_per_million": {
+          "input": 5.0,
+          "cached_input": 0.5,
+          "output": 30.0
+        },
+        "astra_multiplier": 1.9208645996368663,
+        "calibration_date": "2026-09-06",
+        "calibration_status": "empirical_not_official",
+        "note": "Sol pre-promotion scale; Astra refitted on that scale. Denominator calibrated on the same observations. Fast not inferred. Not a bill or guaranteed quota."
+      }
+    },
+    "E1": {
+      "period": {
+        "start": "2026-09-06T21:06:27+00:00",
+        "end": "2026-09-06T21:23:02+00:00",
+        "timezone": "Atlantic/Madeira",
+        "interval": "[start, end)"
+      },
+      "categories": [
+        {
+          "key": "cached_input",
+          "label": "Cached input",
+          "tokens": 2847488,
+          "token_percent": 93.79436104936816,
+          "models": [
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 2847488,
+              "token_percent": 93.79436104936816,
+              "weekly_pool_percent": 0.0022491349944756215,
+              "usage_share_percent": 43.360573583241525
+            }
+          ],
+          "weekly_pool_percent": 0.0022491349944756215,
+          "usage_share_percent": 43.360573583241525
+        },
+        {
+          "key": "input",
+          "label": "Input",
+          "tokens": 151685,
+          "token_percent": 4.996403024621494,
+          "models": [
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 151685,
+              "token_percent": 4.996403024621494,
+              "weekly_pool_percent": 0.0011981087949695832,
+              "usage_share_percent": 23.09807312260489
+            }
+          ],
+          "weekly_pool_percent": 0.0011981087949695832,
+          "usage_share_percent": 23.09807312260489
+        },
+        {
+          "key": "output",
+          "label": "Output",
+          "tokens": 36711,
+          "token_percent": 1.2092359260103482,
+          "models": [
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 36711,
+              "token_percent": 1.2092359260103482,
+              "weekly_pool_percent": 0.0017398070463972718,
+              "usage_share_percent": 33.54135329415359
+            }
+          ],
+          "weekly_pool_percent": 0.0017398070463972718,
+          "usage_share_percent": 33.54135329415359
+        }
+      ],
+      "total": {
+        "tokens": 3035884,
+        "token_percent": 100.0,
+        "models": [
+          {
+            "key": "gpt-5.6-luna",
+            "label": "Luna",
+            "tokens": 3035884,
+            "token_percent": 100.0,
+            "weekly_pool_percent": 0.005187050835842476,
+            "usage_share_percent": 100.0
+          }
+        ],
+        "weekly_pool_percent": 0.005187050835842476,
+        "usage_share_percent": 100.0
+      },
+      "audit": {
+        "files_scanned": 2,
+        "token_events_counted": 59,
+        "first_counted_event": "2026-09-06T21:06:46.964Z",
+        "last_counted_event": "2026-09-06T21:22:58.659Z",
+        "unpriced_models": [],
+        "unreadable_logs": []
+      },
+      "pricing": {
+        "cost_basis": "weekly_pool_percent",
+        "weekly_pool_units": 2532.073892402249,
+        "percent_scale": "100 means one full weekly pool; not fraction 1.0",
+        "sol_base_rates_per_million": {
+          "input": 5.0,
+          "cached_input": 0.5,
+          "output": 30.0
+        },
+        "astra_multiplier": 1.9208645996368663,
+        "calibration_date": "2026-09-06",
+        "calibration_status": "empirical_not_official",
+        "note": "Sol pre-promotion scale; Astra refitted on that scale. Denominator calibrated on the same observations. Fast not inferred. Not a bill or guaranteed quota."
+      }
+    },
+    "LC1": {
+      "period": {
+        "start": "2026-09-06T19:38:11+00:00",
+        "end": "2026-09-06T19:49:11+00:00",
+        "timezone": "Atlantic/Madeira",
+        "interval": "[start, end)"
+      },
+      "categories": [
+        {
+          "key": "cached_input",
+          "label": "Cached input",
+          "tokens": 1127424,
+          "token_percent": 89.95040626017246,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 189440,
+              "token_percent": 15.11428261410709,
+              "weekly_pool_percent": 0.0037408071022025547,
+              "usage_share_percent": 16.89897162478545
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 937984,
+              "token_percent": 74.83612364606537,
+              "weekly_pool_percent": 0.0007408820120254141,
+              "usage_share_percent": 3.3469098396331836
+            }
+          ],
+          "weekly_pool_percent": 0.004481689114227969,
+          "usage_share_percent": 20.245881464418634
+        },
+        {
+          "key": "input",
+          "label": "Input",
+          "tokens": 103009,
+          "token_percent": 8.218470955429462,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 41293,
+              "token_percent": 3.2945210725523864,
+              "weekly_pool_percent": 0.008153987947173253,
+              "usage_share_percent": 36.83536926215507
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 61716,
+              "token_percent": 4.923949882877075,
+              "weekly_pool_percent": 0.0004874739255057703,
+              "usage_share_percent": 2.202147239854854
+            }
+          ],
+          "weekly_pool_percent": 0.008641461872679022,
+          "usage_share_percent": 39.037516502009915
+        },
+        {
+          "key": "output",
+          "label": "Output",
+          "tokens": 22951,
+          "token_percent": 1.8311227843980775,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 6968,
+              "token_percent": 0.5559349728415234,
+              "weekly_pool_percent": 0.008255683241600741,
+              "usage_share_percent": 37.29477437125371
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 15983,
+              "token_percent": 1.275187811556554,
+              "weekly_pool_percent": 0.0007574660462141483,
+              "usage_share_percent": 3.421827662317727
+            }
+          ],
+          "weekly_pool_percent": 0.009013149287814888,
+          "usage_share_percent": 40.716602033571434
+        }
+      ],
+      "total": {
+        "tokens": 1253384,
+        "token_percent": 100.0,
+        "models": [
+          {
+            "key": "gpt-5.6-sol",
+            "label": "Sol",
+            "tokens": 237701,
+            "token_percent": 18.964738659501,
+            "weekly_pool_percent": 0.020150478290976548,
+            "usage_share_percent": 91.02911525819422
+          },
+          {
+            "key": "gpt-5.6-luna",
+            "label": "Luna",
+            "tokens": 1015683,
+            "token_percent": 81.035261340499,
+            "weekly_pool_percent": 0.0019858219837453326,
+            "usage_share_percent": 8.970884741805765
+          }
+        ],
+        "weekly_pool_percent": 0.022136300274721882,
+        "usage_share_percent": 100.0
+      },
+      "audit": {
+        "files_scanned": 2,
+        "token_events_counted": 32,
+        "first_counted_event": "2026-09-06T19:38:25.574Z",
+        "last_counted_event": "2026-09-06T19:49:09.828Z",
+        "unpriced_models": [],
+        "unreadable_logs": []
+      },
+      "pricing": {
+        "cost_basis": "weekly_pool_percent",
+        "weekly_pool_units": 2532.073892402249,
+        "percent_scale": "100 means one full weekly pool; not fraction 1.0",
+        "sol_base_rates_per_million": {
+          "input": 5.0,
+          "cached_input": 0.5,
+          "output": 30.0
+        },
+        "astra_multiplier": 1.9208645996368663,
+        "calibration_date": "2026-09-06",
+        "calibration_status": "empirical_not_official",
+        "note": "Sol pre-promotion scale; Astra refitted on that scale. Denominator calibrated on the same observations. Fast not inferred. Not a bill or guaranteed quota."
+      }
+    },
+    "all": {
+      "period": {
+        "start": "2026-09-06T20:25:47+00:00",
+        "end": "2026-09-06T21:23:02+00:00",
+        "timezone": "Atlantic/Madeira",
+        "interval": "[start, end)"
+      },
+      "categories": [
+        {
+          "key": "cached_input",
+          "label": "Cached input",
+          "tokens": 10536704,
+          "token_percent": 94.37394736549834,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 3212288,
+              "token_percent": 28.771454397392386,
+              "weekly_pool_percent": 0.06343195610599683,
+              "usage_share_percent": 40.47254265824199
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 7324416,
+              "token_percent": 65.60249296810596,
+              "weekly_pool_percent": 0.005785309837898233,
+              "usage_share_percent": 3.6912971565029076
+            }
+          ],
+          "weekly_pool_percent": 0.06921726594389506,
+          "usage_share_percent": 44.163839814744904
+        },
+        {
+          "key": "input",
+          "label": "Input",
+          "tokens": 511087,
+          "token_percent": 4.577645688555971,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 167050,
+              "token_percent": 1.4962143671689456,
+              "weekly_pool_percent": 0.03298679404681886,
+              "usage_share_percent": 21.04711112782952
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 344037,
+              "token_percent": 3.0814313213870252,
+              "weekly_pool_percent": 0.0027174325443844174,
+              "usage_share_percent": 1.7338485414151659
+            }
+          ],
+          "weekly_pool_percent": 0.03570422659120328,
+          "usage_share_percent": 22.780959669244684
+        },
+        {
+          "key": "output",
+          "label": "Output",
+          "tokens": 117053,
+          "token_percent": 1.0484069459456844,
+          "models": [
+            {
+              "key": "gpt-5.6-sol",
+              "label": "Sol",
+              "tokens": 40671,
+              "token_percent": 0.3642773692135779,
+              "weekly_pool_percent": 0.048186982364974706,
+              "usage_share_percent": 30.745539300088176
+            },
+            {
+              "key": "gpt-5.6-luna",
+              "label": "Luna",
+              "tokens": 76382,
+              "token_percent": 0.6841295767321066,
+              "weekly_pool_percent": 0.0036198943591271376,
+              "usage_share_percent": 2.3096612159222376
+            }
+          ],
+          "weekly_pool_percent": 0.05180687672410186,
+          "usage_share_percent": 33.055200516010416
+        }
+      ],
+      "total": {
+        "tokens": 11164844,
+        "token_percent": 100.0,
+        "models": [
+          {
+            "key": "gpt-5.6-sol",
+            "label": "Sol",
+            "tokens": 3420009,
+            "token_percent": 30.63194613377491,
+            "weekly_pool_percent": 0.1446057325177904,
+            "usage_share_percent": 92.2651930861597
+          },
+          {
+            "key": "gpt-5.6-luna",
+            "label": "Luna",
+            "tokens": 7744835,
+            "token_percent": 69.3680538662251,
+            "weekly_pool_percent": 0.012122636741409789,
+            "usage_share_percent": 7.734806913840312
+          }
+        ],
+        "weekly_pool_percent": 0.15672836925920017,
+        "usage_share_percent": 100.0
+      },
+      "audit": {
+        "files_scanned": 7,
+        "token_events_counted": 218,
+        "first_counted_event": "2026-09-06T20:26:03.242Z",
+        "last_counted_event": "2026-09-06T21:22:58.659Z",
+        "unpriced_models": [],
+        "unreadable_logs": []
+      },
+      "pricing": {
+        "cost_basis": "weekly_pool_percent",
+        "weekly_pool_units": 2532.073892402249,
+        "percent_scale": "100 means one full weekly pool; not fraction 1.0",
+        "sol_base_rates_per_million": {
+          "input": 5.0,
+          "cached_input": 0.5,
+          "output": 30.0
+        },
+        "astra_multiplier": 1.9208645996368663,
+        "calibration_date": "2026-09-06",
+        "calibration_status": "empirical_not_official",
+        "note": "Sol pre-promotion scale; Astra refitted on that scale. Denominator calibrated on the same observations. Fast not inferred. Not a bill or guaranteed quota."
+      }
+    }
+  }
+}
