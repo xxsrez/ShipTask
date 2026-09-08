@@ -76,6 +76,13 @@ prompt; подготовка обязана остановиться при ра
 | `IG-AUTO-03` | `SKILL.md` §4; environment harness | production-rejected; public-uat-allowed; provider-production-label-does-not-reclassify-uat |
 | `IG-AUTO-04` | `SKILL.md` §4; environment harness | default-uat; unknown-uat-before-effect |
 | `IG-AUTO-05` | `autonomy-and-environments.md` | security-selector; narrow-always-readback |
+| `IG-VERIFY-01` | `SKILL.md`; `verification.md` | small-change-no-full-gate; single-high-risk-full-gate |
+| `IG-VERIFY-02` | `SKILL.md`; `verification.md` | levels-not-ladder; access-check-not-deferred |
+| `IG-VERIFY-03` | `SKILL.md`; `verification.md` | release-label-not-trigger; explicit-full-gate; broad-change-full-gate |
+| `IG-VERIFY-04` | `SKILL.md`; `verification.md` | intermediate-uat-not-final; required-regression-prevents-done |
+| `IG-VERIFY-05` | `SKILL.md`; `verification.md` | exporter-fix-selective-repeat; unknown-impact-expand; repeated-failure-diagnose |
+| `IG-VERIFY-06` | `SKILL.md`; `verification.md` | unchanged-uat-artifact-reused; environment-delta-check; no-production-access |
+| `IG-VERIFY-07` | `SKILL.md`; `verification.md` | existing-profile-adapted; missing-profile-no-blocker; no-per-command-report |
 | `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | four-canonical-modes; mode-does-not-expand-authority |
 | `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; default-luna-max-balance; default-sol-xhigh-classic; other-profiles-legacy-default; economical-explicit-only; retired-mode-rejected; mode-persists-after-model-change |
 | `IG-MODE-03` | `modes/classic.md`; `multi-agent-execution.md`; mode harness | classic-sol-does-almost-all; classic-luna-trivial-only; classic-high-judgment-owner; classic-simple-independent-review; classic-final-review-terminal |
@@ -425,3 +432,37 @@ execution пакет, а явный запрет пользователя на �
 Изменение 08.09.2026 проверяется статическим разбором этой матрицы против
 Requirements, Architecture и runtime; это не новый model-forward прогон и не
 доказательство правильного автоматического обращения на реальной delivery-задаче.
+
+## Проверка соразмерности — 2026-09-08
+
+`IG-VERIFY-01`–`IG-VERIFY-07` → Architecture «Соразмерная проверка и проектный
+профиль» → `SKILL.md` и `references/verification.md` → следующий узкий
+model-forward smoke. Новая ephemeral Codex-сессия
+`00000000-0000-4000-8000-632f01458a85` прочитала установленный snapshot
+`0.1.0+codex.20260908205143`: trace подтвердил чтение только entrypoint и
+verification reference с диска. Prompt содержал синтетические обстоятельства и
+запрос решений, без ожидаемых ответов; Requirements, Architecture и тесты не
+читались. Task Manager, Goal, subagents, изменения файлов и Production не
+использовались. Проверка решений ниже выполнена основным агентом по контракту,
+не независимым blind evaluator.
+
+| Синтетические обстоятельства | Наблюдаемое решение |
+|---|---|
+| Одна UI-подсказка, затронутый тест прошёл, объект называется Release, впереди UAT | Полный gate не нужен; Done только по доказанному acceptance |
+| Одна задача заменяет общую ACL-модель | Проверки границ доступа и полный gate; локальные тесты не доказывают Done |
+| Полностью проверенный артефакт X, впереди выпуск, влияние отличий среды неизвестно | Повтор всей матрицы не автоматический; готовность пока не доказана, среду проверяет владелец выпуска |
+| Исправлен только экспортер, пропускавший строки; исходные измерения сохранены | Проверить полноту и пересчитать затронутые доказательства; без автоматического повтора продукта |
+| Малое изменение без профиля, пользователь явно просит полный gate | Использовать существующие команды и acceptance; полный gate нужен, новый manifest не нужен |
+| В середине UAT scope сломан обязательный путь | Продолжение допустимо по назначению среды; завершение scope недопустимо |
+| После приёмки изменён общий storage adapter, влияние на кэш/восстановление неизвестно | Расширить проверку по риску; переиспользовать только доказанно незатронутые блоки |
+| Третий сбой одного блока из-за среды, кандидат неизменен | Пересмотреть диагностику и повторить нужное; нет разрешения по номеру попытки или обязательного полного перезапуска |
+
+Все восемь решений соответствовали проверяемым ожиданиям. Это ограниченное
+свидетельство выбора проверок, не полный delivery run, не независимая оценка
+всего skill и не измерение экономии времени/токенов. Остальные corpus cases не
+получают PASS по этому прогону. Repository suite: 159 тестов прошли;
+`validate_repo.py`, пять `quick_validate.py`, строгая навигация документации и
+`git diff --check` прошли. Source → Marketplace → installed cache для Issue
+Grinder и соседних entities byte-identical; Issue Grinder и Strategic Explainer
+installed/enabled, legacy ShipTask не установлен, Task Manager adapter-only.
+Marketplace commit: `be918a9`.

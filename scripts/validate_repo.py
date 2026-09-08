@@ -687,6 +687,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         *(f"IG-SCOPE-{number:02d}" for number in range(1, 4)),
         "IG-UI-01",
         *(f"IG-AUTO-{number:02d}" for number in range(1, 6)),
+        *(f"IG-VERIFY-{number:02d}" for number in range(1, 8)),
         *(f"IG-MODE-{number:02d}" for number in range(1, 21) if number not in {5, 13, 14, 15, 16, 17, 18}),
         "IG-HELP-01",
         *(f"IG-MA-{number:02d}" for number in range(1, 20)),
