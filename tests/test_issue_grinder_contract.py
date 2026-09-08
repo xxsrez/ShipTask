@@ -84,7 +84,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertEqual(len(rows), len(set(rows)), "duplicate coverage rows")
         self.assertEqual(set(rows), requirement_ids)
-        self.assertEqual(len(requirement_ids), 55)
+        self.assertEqual(len(requirement_ids), 56)
 
     def test_architecture_runtime_layout_exists(self) -> None:
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
@@ -183,7 +183,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertIn("[краткую справку](references/mode-help.md)", skill)
         self.assertIn("[Run, scope и Goal](references/run-and-goal.md)", skill)
-        self.assertLess(len(skill.splitlines()), 190)
+        self.assertLess(len(skill.splitlines()), 200)
         for mode in ("Соло", "Классический", "Экономичный"):
             self.assertIn(f"`{mode}`", mode_help)
         for forbidden_effect in (

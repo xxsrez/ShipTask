@@ -59,6 +59,7 @@ prompt; подготовка обязана остановиться при ра
 | `IG-FLOW-04` | `SKILL.md` §3; `strategic-explainer.md` | comment-reveals-work; optional-follow-up |
 | `IG-FLOW-05` | `SKILL.md` §2; `task-.md` | integrated-blocked-by; late-reopen-recheck |
 | `IG-FLOW-06` | `SKILL.md` §5; `execution-modes.md`; `modes/economical.md`; mode harness | active-scope-prevents-completion; economical-checkpoint-is-nonterminal |
+| `IG-FLOW-07` | `SKILL.md`; `consultant.md`; `modes/solo.md` | non-astra-hard-question-consults; astra-and-unknown-skip; routine-and-external-blocker-skip; unavailable-continues; solo-advice-only; user-ban-wins |
 | `IG-GOAL-01` | `run-and-goal.md`; `execution-modes.md`; `modes/economical.md`; trace harness | explicit-multi-create; implicit-no-goal; grow-and-keep; economical-checkpoint-keeps-goal |
 | `IG-GOAL-02` | `SKILL.md`; `run-and-goal.md`; `multi-agent-execution.md` | strategic-release-objective; issue-list-rejected; strategic-context-restored; single-issue-parent-context; strategy-does-not-expand-scope |
 | `IG-GOAL-03` | `SKILL.md` §5; `run-and-goal.md`; `modes/economical.md`; trace harness | empty-scope-complete; active-scope-continue; checkpoint-goal-not-complete; completed-tasks-with-strategic-gap-still-complete |
@@ -411,3 +412,16 @@ delivery source/tests/review, должен считаться execution-agent и
 сумма недельных процентов run равна объединённому дереву, API price отдельно
 суммируется по категориям/моделям и не выдаётся за подписочный счётчик. Калибровка принадлежит
 счётчику; отсутствие счётчика не блокирует delivery и не разрешает выдумывать проценты.
+
+## Консультация при затруднении
+
+Сценарии `IG-FLOW-07`: non-Astra с доступным skill и существенным неразрешённым
+вопросом обращается за консультацией; Astra и unknown не обращаются
+автоматически; обычный дефект и известная нехватка доступа не вызывают советчика;
+недоступность skill не создаёт нового blocker. В `Соло` советчик не получает
+execution пакет, а явный запрет пользователя на субагентов исключает вызов.
+После совета исполнение и обязательные проверки остаются у ведущего агента.
+
+Изменение 08.09.2026 проверяется статическим разбором этой матрицы против
+Requirements, Architecture и runtime; это не новый model-forward прогон и не
+доказательство правильного автоматического обращения на реальной delivery-задаче.

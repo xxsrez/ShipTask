@@ -682,7 +682,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         r"^### `(IG-[A-Z]+-\d{2})`", read(ISSUE_REQUIREMENTS), re.MULTILINE
     )
     expected_ids = [
-        *(f"IG-FLOW-{number:02d}" for number in range(1, 7)),
+        *(f"IG-FLOW-{number:02d}" for number in range(1, 8)),
         *(f"IG-GOAL-{number:02d}" for number in range(1, 8)),
         *(f"IG-SCOPE-{number:02d}" for number in range(1, 4)),
         "IG-UI-01",
