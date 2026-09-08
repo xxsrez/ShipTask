@@ -3708,6 +3708,7 @@ def validate_task_source_boundary(errors: list[str]) -> None:
 
 def markdown_files() -> list[Path]:
     files = [ROOT / "README.md", ROOT / "AGENTS.md"]
+    files.extend(sorted((ROOT / "consultant").rglob("*.md")))
     files.extend(sorted((ROOT / "ship-tasks").rglob("*.md")))
     files.extend(sorted((ROOT / "task-composer").rglob("*.md")))
     files.extend(sorted((ROOT / "scope-reviewer").rglob("*.md")))
@@ -3753,6 +3754,16 @@ def validate_artifacts(errors: list[str]) -> None:
 
 def main() -> int:
     errors: list[str] = []
+    for path in (
+        ROOT / "consultant" / "SKILL.md",
+        ROOT / "consultant" / "references" / "consultant-role.md",
+        ROOT / "consultant" / "agents" / "openai.yaml",
+        *(SKILL_SOURCES / "consultant" / name for name in (
+            "overview.md", "requirements.md", "architecture.md", "evaluation.md",
+        )),
+    ):
+        if not path.is_file():
+            fail(errors, f"missing consultant source/runtime file: {relative(path)}")
     for path in CORE_FILES:
         if not path.is_file():
             fail(errors, f"missing required file: {relative(path)}")

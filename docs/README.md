@@ -81,6 +81,13 @@ Architecture — за «как сейчас этого достигать». С�
 
 ## Specifications
 
+- Консультант — отдельный skill в плагине Issue Grinder:
+  [Overview](skills/consultant/overview.md),
+  [Requirements](skills/consultant/requirements.md),
+  [Architecture](skills/consultant/architecture.md) и
+  [Evaluation](skills/consultant/evaluation.md). Запускает read-only субагента
+  Astra/medium для сложного вопроса; в процесс гриндера не интегрирован.
+
 - [Режимы исполнения Issue Grinder](specs/issue-grinder-execution-modes.md) —
   сравнительная модель четырёх режимов `Соло`, `Классический`, `Баланс` и `Экономичный`. Действующая policy остаётся
   только в локальных Overview, Requirements, Architecture и runtime-проекции.

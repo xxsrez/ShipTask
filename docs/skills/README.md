@@ -111,6 +111,12 @@ level, однако plugin packaging не объединяет source contracts 
 
 ## Current packages
 
+- [`$issue-grinder:consultant`](consultant/overview.md) —
+  [Requirements](consultant/requirements.md),
+  [Architecture](consultant/architecture.md) и
+  [Evaluation](consultant/evaluation.md). Отдельный read-only советчик
+  Astra/medium; существующие workflows гриндера его не вызывают.
+
 - [`$issue-grinder`](issue-grinder/overview.md) —
   [Requirements](issue-grinder/requirements.md),
   [Architecture](issue-grinder/architecture.md) и
