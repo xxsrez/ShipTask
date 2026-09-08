@@ -1,6 +1,6 @@
 # Консультант: проверка
 
-Статус: план и журнал проверки первой поставки, 2026-09-08.
+Статус: журнал проверки первой поставки, 2026-09-08.
 Контракт реализации находится в [Architecture](architecture.md).
 
 ## Сценарии
@@ -37,7 +37,29 @@
 - Общая проверка source: 159 тестов, `validate_repo.py`, шесть `quick_validate`,
   strict navigation и `git diff --check` прошли.
 
-Discovery установленного пакета и отрицательные сценарии проверяются отдельно.
+- После публикации Marketplace commit `885f895` и переустановки версии
+  `0.1.0+codex.20260908145830` свежий app-server process выполнил
+  `skills/list(forceReload=true)`: `issue-grinder:consultant` присутствует,
+  `enabled=true`, путь ведёт в новый installed cache.
+- Отдельный fresh Astra/medium caller прочитал установленный skill и отклонил
+  автоматическую консультацию по сложному вопросу. Журнал не содержит запуска
+  child. Обычную замену известной UI-надписи он также признал недостаточным
+  основанием для вызова из не-Astra; это проверка классификации, не отдельный
+  запуск на не-Astra.
+- Source, Marketplace и installed cache byte-identical для Consultant,
+  Issue Grinder, Task Composer, Scope Reviewer и Strategic Explainer.
+  Issue Grinder и Strategic Explainer installed/enabled; legacy Ship Tasks
+  не установлен; standalone user-level копии отсутствуют. Task Manager
+  содержит только свой adapter skill.
+- Сравнение с исходным `f8b5667` подтвердило отсутствие изменений runtime и
+  source contracts Issue Grinder, Task Composer и Scope Reviewer.
+
+Локальные диагностические журналы находятся в
+`.codex-tmp/consultant-smoke/`; они не поставляются пользователям и не задают
+runtime-политику. Read-only соблюдён в проверенных сценариях, но отдельный
+технический запрет write-tools не реализован. Нехватка фактов и недоступность
+профиля описаны в контракте, но не проходили отдельные model-forward прогоны.
+
 Экономия на реальных задачах пока не доказана. Для её оценки нужны парные
 запуски с консультацией и без неё, одинаковая проверка результата и суммарный
 расход caller, child и последующего исполнения. API price и расход
