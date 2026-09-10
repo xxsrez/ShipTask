@@ -512,3 +512,34 @@ repository → Marketplace → installed cache для Issue Grinder, Task Compos
 Scope Reviewer, Consultant и Strategic Explainer. Оба delivery/communication
 plugins installed/enabled, legacy ShipTask и standalone копии отсутствуют,
 Task Manager содержит только adapter skill.
+
+
+## Проверка остановки Goal — 2026-09-10
+
+`IG-GOAL-04/07`, исключение в `IG-FLOW-03/07`, `IG-MODE-12` → Architecture
+«Обязательная проверка перед остановкой Goal» → `SKILL.md`, `consultant.md`,
+`strategic-explainer.md`, `run-and-goal.md` → contract tests
+`tests/test_issue_grinder_blocker_consultant.py` и fresh installed smoke
+`scripts/issue_grinder_blocker_smoke.py`.
+
+Сценарии проверяют решения, а не качество произвольного текста:
+
+- Sol готов остановить Goal из-за известной нехватки доступа: Консультант обязателен,
+  Explainer не используется; очевидность причины не отменяет проверку.
+- Ведущая Astra готова остановиться: самостоятельный разбор и reflection, без child.
+- Unknown profile перед остановкой Goal: исключение Astra не доказано, workflow
+  требует Консультанта; ordinary unknown difficulty само по себе его не вызывает.
+- Совет выявил разрешённую обязательную доработку: отменить blocker, выполнить,
+  проверить; новые факты перед следующей остановкой снова проходят разбор.
+- Самостоятельного пути нет: проверенный общий report и reason answers показываются
+  пользователю, platform audit отдельно ограничивает Goal mutation.
+- Обязательный Консультант недоступен/запрещён: честный checkpoint невыполненной
+  проверки, без native/Explainer подмены и без принятого blocker fingerprint.
+- Уже принятый неизменный blocker: не повторять консультацию и публикацию ради
+  очередного platform audit turn.
+- Обычный comment и single issue без Goal: прежний publication route сохранён.
+
+Smoke выполняется в свежей сессии по установленным runtime-файлам. Он не меняет
+Task Manager, Goal или файлы и не заменяет реальный delivery/UAT. Его receipt
+должен отдельно фиксировать snapshot и наблюдаемые ответы; одни contract tests
+не доказывают успешный запуск provider-а.

@@ -464,7 +464,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         "platform blocker audit",
         "переиспользуй blocker fingerprint",
         "не повторяй проверку, facade, handoff или user request",
-        "Финальный Goal\ncomment возвращай только пользователю в чате",
+        "Goal comment возвращай только пользователю в чате",
         "Production запрещён полностью",
         "[Task Manager flow](references/task-manager-flow.md)",
         "[Autonomy and environments](references/autonomy-and-environments.md)",
@@ -561,7 +561,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         "canonical_mode=solo",
         "Единственный execution profile",
         "Число Issue Grinder execution-subagents и одновременных\n   содержательных execution lanes всегда равно `0` и `1`",
-        "Для publication используй общий Strategic Explainer routing",
+        "Для обычной publication используй общий Strategic Explainer routing",
         "provider-agent не входит в execution topology `Соло`",
         "Resumable checkpoint `Экономичного` режима недоступен",
     )
@@ -764,7 +764,7 @@ def validate_issue_skill(errors: list[str]) -> None:
     require(
         errors,
         ISSUE_SPEC,
-        "Статус: current agent-owned Architecture, 2026-09-04",
+        "Статус: current agent-owned Architecture, 2026-09-10",
         "[Overview](overview.md)",
         "[Requirements](requirements.md)",
         "## 0. Compilation contract",
@@ -2373,7 +2373,7 @@ def validate_source_layers(errors: list[str]) -> None:
         "Plugin — общий distribution artifact",
     )
     for architecture, prefix, status_marker in (
-        (ISSUE_SPEC, "IG-*", "Статус: current agent-owned Architecture, 2026-09-04"),
+        (ISSUE_SPEC, "IG-*", "Статус: current agent-owned Architecture, 2026-09-10"),
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current agent-owned Architecture, 2026-09-02"),
         (SCOPE_SPEC, "SR-*", "Статус: current agent-owned Architecture, 2026-09-02"),
