@@ -57,7 +57,7 @@ prompt; подготовка обязана остановиться при ра
 | `IG-FLOW-02` | `SKILL.md` §2; `task-.md` | all-lifecycle-transitions |
 | `IG-FLOW-03` | `SKILL.md` §3; `strategic-explainer.md` | trivial-start; required-comment; astra-native-routing; native-fallback; fresh-facade-per-unit; completed-provider-not-reused |
 | `IG-FLOW-04` | `SKILL.md` §3; `strategic-explainer.md` | comment-reveals-work; optional-follow-up |
-| `IG-FLOW-05` | `SKILL.md` §2; `task-.md` | integrated-blocked-by; late-reopen-recheck |
+| `IG-FLOW-05` | `SKILL.md` §2; `task-.md` | integrated-blocked-by; late-reopen-recheck; external-acceptance-frontier |
 | `IG-FLOW-06` | `SKILL.md` §5; `execution-modes.md`; `modes/economical.md`; mode harness | active-scope-prevents-completion; economical-checkpoint-is-nonterminal |
 | `IG-FLOW-07` | `SKILL.md`; `consultant.md`; `modes/solo.md` | non-astra-hard-question-consults; astra-and-unknown-skip; routine-and-external-blocker-skip; unavailable-continues; solo-advice-only; user-ban-wins |
 | `IG-GOAL-01` | `run-and-goal.md`; `execution-modes.md`; `modes/economical.md`; trace harness | explicit-multi-create; implicit-no-goal; grow-and-keep; economical-checkpoint-keeps-goal |
@@ -466,3 +466,25 @@ verification reference с диска. Prompt содержал синтетиче
 Grinder и соседних entities byte-identical; Issue Grinder и Strategic Explainer
 installed/enabled, legacy ShipTask не установлен, Task Manager adapter-only.
 Marketplace commit: `be918a9`.
+
+## External acceptance frontier
+
+Сценарий `external-acceptance-frontier` проверяет `IG-FLOW-05` и `IG-GOAL-04`
+по runtime `SKILL.md` и `references/task-manager-flow.md`. Синтетический scope:
+A реализована в integration base, доступные проверки успешны, обязательная
+проверка внешним владельцем ещё не проведена; B связана `blocked by A` и требует
+уже доступный contract; C независима. Отдельный вариант: contract для B
+определяется ещё неизвестным внешним решением. Ещё один вариант содержит
+поздний дефект A, затрагивающий B.
+
+Наблюдаемый oracle: A остаётся `In Review`; B и C выполняются до общего
+blocker-handoff в первом варианте. Во втором B сохраняет реальную зависимость,
+но C выполняется. Поздний дефект требует оценки влияния и повторной проверки
+затронутого результата. Повтор без новых evidence не вызывает ещё одну
+недоступную проверку. Финальный отчёт объединяет внешнюю приёмку, отдельно
+объясняет недоступную разработку и не утверждает completion. Соло не удерживает
+execution lane до внешнего ответа; Экономичный сохраняет свой отдельный
+нетерминальный checkpoint.
+
+Проверка решений в свежей read-only сессии является узким model-forward smoke;
+она не доказывает реальные Task Manager mutations или end-to-end delivery.
