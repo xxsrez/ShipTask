@@ -543,3 +543,22 @@ Smoke выполняется в свежей сессии по установл�
 Task Manager, Goal или файлы и не заменяет реальный delivery/UAT. Его receipt
 должен отдельно фиксировать snapshot и наблюдаемые ответы; одни contract tests
 не доказывают успешный запуск provider-а.
+
+### Receipt установленного маршрута
+
+10.09.2026 fresh ephemeral session `00000000-0000-4000-8000-05a0f6fbadca`
+прочитала installed snapshot `0.1.0+codex.20260910193442` после публикации
+runtime candidate `9a4efc5`. Trace подтвердил чтение entrypoint, трёх routing
+references и `consultant/SKILL.md` из cache. Все 8 решений smoke прошли:
+Sol/unknown → consultant; Astra → native analysis; подтверждённая доработка →
+continue; проверенный blocker до platform threshold → report без Goal mutation;
+unavailable → непроверенный checkpoint; unchanged fingerprint → без повторного
+вызова; обычный single-issue comment → Explainer. Это model-forward проверка
+выбора действий, без фактического вызова советчика или delivery mutations.
+
+Локально прошли 168 unit/contract tests, repository validator, шесть skill
+validators и strict documentation navigation. Marketplace: 28 tests.
+Repository → Marketplace → installed cache byte parity подтверждена для
+Issue Grinder, Task Composer, Scope Reviewer, Consultant и Strategic Explainer;
+оба основных plugins installed/enabled, legacy ShipTask отсутствует,
+Task Manager остаётся adapter-only, standalone user-level copies отсутствуют.
