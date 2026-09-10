@@ -488,3 +488,27 @@ execution lane до внешнего ответа; Экономичный сох
 
 Проверка решений в свежей read-only сессии является узким model-forward smoke;
 она не доказывает реальные Task Manager mutations или end-to-end delivery.
+
+### Результат 2026-09-10
+
+Узкий fresh installed-plugin smoke выполнен для
+`issue-grinder@0.1.0+codex.20260910172949`, repository runtime commit `997564e`,
+Marketplace commit `42977c6`, session `00000000-0000-4000-8000-93a3dcc71ac8`.
+Trace подтвердил чтение нового установленного `SKILL.md` и
+`references/task-manager-flow.md`; других command effects не было.
+
+В ответе A сохранена в `In Review`, B и C выбраны для последовательного
+выполнения до остановки. При неизвестном contract B оставлена в `To Do`, C
+выбрана для выполнения. Поздний дефект привёл к rework A, оценке влияния на B и
+targeted recheck; прежнее evidence не объявлено действующим автоматически.
+Повтор недоступной проверки без новых фактов отклонён. Итоговый handoff
+объединяет остаток приёмки и реальные причины недоступности разработки, без
+ложного completion. Это PASS решений на синтетических фактах, не свидетельство
+реального изменения карточек, исполнения проверок продукта или полного E2E.
+
+Repository validator, 163 unit tests, пять quick validators, strict-navigation
+(89 документов, 387 ссылок) и `git diff --check` прошли. Проверено byte identity
+repository → Marketplace → installed cache для Issue Grinder, Task Composer,
+Scope Reviewer, Consultant и Strategic Explainer. Оба delivery/communication
+plugins installed/enabled, legacy ShipTask и standalone копии отсутствуют,
+Task Manager содержит только adapter skill.
