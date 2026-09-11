@@ -60,6 +60,7 @@ prompt; подготовка обязана остановиться при ра
 | `IG-FLOW-05` | `SKILL.md` §2; `task-.md` | integrated-blocked-by; late-reopen-recheck; external-acceptance-frontier |
 | `IG-FLOW-06` | `SKILL.md` §5; `execution-modes.md`; `modes/economical.md`; mode harness | active-scope-prevents-completion; economical-checkpoint-is-nonterminal |
 | `IG-FLOW-07` | `SKILL.md`; `consultant.md`; `modes/solo.md` | non-astra-hard-question-consults; astra-and-unknown-skip; routine-and-external-blocker-skip; unavailable-continues; solo-advice-only; user-ban-wins |
+| `IG-FLOW-08` | `SKILL.md` §3; `execution-modes.md` | usage-full-model-rows; usage-optional-provider; usage-run-isolation; usage-cutoff; usage-unavailable-nonblocking |
 | `IG-GOAL-01` | `run-and-goal.md`; `execution-modes.md`; `modes/economical.md`; trace harness | explicit-multi-create; implicit-no-goal; grow-and-keep; economical-checkpoint-keeps-goal |
 | `IG-GOAL-02` | `SKILL.md`; `run-and-goal.md`; `multi-agent-execution.md` | strategic-release-objective; issue-list-rejected; strategic-context-restored; single-issue-parent-context; strategy-does-not-expand-scope |
 | `IG-GOAL-03` | `SKILL.md` §5; `run-and-goal.md`; `modes/economical.md`; trace harness | empty-scope-complete; active-scope-continue; checkpoint-goal-not-complete; completed-tasks-with-strategic-gap-still-complete |
@@ -562,3 +563,22 @@ Repository → Marketplace → installed cache byte parity подтвержде�
 Issue Grinder, Task Composer, Scope Reviewer, Consultant и Strategic Explainer;
 оба основных plugins installed/enabled, legacy ShipTask отсутствует,
 Task Manager остаётся adapter-only, standalone user-level copies отсутствуют.
+
+## Итоговый расход: наблюдаемые сценарии
+
+- `usage-full-model-rows`: provider доступен и возвращает две модели, одна
+  встречается только в Output. Итог сохраняет каждую ненулевую строку во всех
+  категориях и после Total; краткость и редактура не удаляют строки.
+- `usage-optional-provider`: без provider delivery завершается без установки,
+  копирования формата и попытки самостоятельно воспроизвести расчёт.
+- `usage-run-isolation`: одновременно есть посторонняя session. Во вход helper-а
+  попадают только подтверждённые root/descendants текущего run; унаследованный
+  fork prefix остаётся для штатной дедупликации.
+- `usage-cutoff`: отчёт показывает период и предел записанных данных, не
+  приписывает себе будущий расход финального ответа.
+- `usage-unavailable-nonblocking`: unreadable log или невозможность выделить run
+  дают честную оговорку; completion, blocker и checkpoint сохраняют delivery
+  outcome, таблица не отправляется в Task Manager.
+
+Это corpus ожидаемого поведения; описание сценариев само по себе не означает
+исполненный model-forward PASS.

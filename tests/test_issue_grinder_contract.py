@@ -84,7 +84,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertEqual(len(rows), len(set(rows)), "duplicate coverage rows")
         self.assertEqual(set(rows), requirement_ids)
-        self.assertEqual(len(requirement_ids), 63)
+        self.assertEqual(len(requirement_ids), 64)
 
     def test_architecture_runtime_layout_exists(self) -> None:
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
