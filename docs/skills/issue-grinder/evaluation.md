@@ -59,12 +59,12 @@ prompt; подготовка обязана остановиться при ра
 | `IG-FLOW-04` | `SKILL.md` §3; `strategic-explainer.md` | comment-reveals-work; optional-follow-up |
 | `IG-FLOW-05` | `SKILL.md` §2; `task-.md` | integrated-blocked-by; late-reopen-recheck; external-acceptance-frontier |
 | `IG-FLOW-06` | `SKILL.md` §5; `execution-modes.md`; `modes/economical.md`; mode harness | active-scope-prevents-completion; economical-checkpoint-is-nonterminal |
-| `IG-FLOW-07` | `SKILL.md`; `consultant.md`; `modes/solo.md` | non-astra-hard-question-consults; astra-and-unknown-skip; routine-and-external-blocker-skip; unavailable-continues; solo-advice-only; user-ban-wins |
+| `IG-FLOW-07` | `SKILL.md`; `consultant.md`; `modes/solo.md` | non-astra-hard-question-consults; astra-and-unknown-skip; routine-skip; intervention-consults; unavailable-continues; solo-advice-only; user-ban-wins |
 | `IG-FLOW-08` | `SKILL.md` §3; `execution-modes.md` | usage-full-model-rows; usage-optional-provider; usage-run-isolation; usage-cutoff; usage-unavailable-nonblocking |
 | `IG-GOAL-01` | `run-and-goal.md`; `execution-modes.md`; `modes/economical.md`; trace harness | explicit-multi-create; implicit-no-goal; grow-and-keep; economical-checkpoint-keeps-goal |
 | `IG-GOAL-02` | `SKILL.md`; `run-and-goal.md`; `multi-agent-execution.md` | strategic-release-objective; issue-list-rejected; strategic-context-restored; single-issue-parent-context; strategy-does-not-expand-scope |
 | `IG-GOAL-03` | `SKILL.md` §5; `run-and-goal.md`; `modes/economical.md`; trace harness | empty-scope-complete; active-scope-continue; checkpoint-goal-not-complete; completed-tasks-with-strategic-gap-still-complete |
-| `IG-GOAL-04` | `SKILL.md` §3; blocker harness | explanation-unlocks; true-external-blocker |
+| `IG-GOAL-04` | `SKILL.md` §3; blocker harness | explanation-unlocks; true-external-blocker; advice-gap; premature-permission |
 | `IG-GOAL-05` | `SKILL.md` §3 | final-reflection-continues; chat-only-final |
 | `IG-GOAL-06` | `SKILL.md` §2; `task-.md` | nonmaterial-gap-transparent-by-issue-contract; material-acceptance-gap-blocks |
 | `IG-GOAL-07` | `SKILL.md` §3; `strategic-explainer.md`; blocker harness | all-causes-overview; one-separate-answer-per-cause; three-lens-completeness; reason-reflection-unlocks; accepted-blocker-auto-continuation-no-repeat; threshold-goal-effect-only |
@@ -74,9 +74,9 @@ prompt; подготовка обязана остановиться при ра
 | `IG-UI-01` | `run-and-goal.md`; `thread-title.md` | fresh-placeholder-renamed; meaningful-title-preserved; ambiguous-candidate-preserved; title-capability-failure-nonblocking |
 | `IG-AUTO-01` | `SKILL.md` §4; `run-and-goal.md`; `autonomy-and-environments.md` | explicit-persistence; implicit-no-extra-authority |
 | `IG-AUTO-02` | `SKILL.md` §3; `modes/economical.md`; blocker harness | preflight-unlock; explanation-unlock; relevant-signal-resumes; sufficient-economical-checkpoint-stops-boundedly |
-| `IG-AUTO-03` | `SKILL.md` §4; environment harness | production-rejected; public-uat-allowed; provider-production-label-does-not-reclassify-uat |
+| `IG-AUTO-03` | `SKILL.md` §4; environment harness | production-rejected; public-uat-allowed; provider-production-label-does-not-reclassify-uat; uat-cycle; uat-recovery |
 | `IG-AUTO-04` | `SKILL.md` §4; environment harness | default-uat; unknown-uat-before-effect |
-| `IG-AUTO-05` | `autonomy-and-environments.md` | security-selector; narrow-always-readback |
+| `IG-AUTO-05` | `autonomy-and-environments.md` | consent-resume; premature-permission; repeat |
 | `IG-VERIFY-01` | `SKILL.md`; `verification.md` | small-change-no-full-gate; single-high-risk-full-gate |
 | `IG-VERIFY-02` | `SKILL.md`; `verification.md` | levels-not-ladder; access-check-not-deferred |
 | `IG-VERIFY-03` | `SKILL.md`; `verification.md` | release-label-not-trigger; explicit-full-gate; broad-change-full-gate |
@@ -210,8 +210,8 @@ candidate blocker
 - совместимый Goal без доказанной continuity был присвоен новому run;
 - одинаковый recovery повторился без нового evidence, изменившегося state или
   bounded fallback;
-- сохранённое `Да всегда` не применилось к эквивалентной future operation либо
-  расширилось на другую категорию/Production;
+- согласованный цикл потребовал повторного апрува после смены модели/инструмента
+  или распространился за согласованные границы;
 - auto-title перезаписал meaningful title, сработал на later turn, передал
   discovery `threadId` в setter, повторил failed setter либо заблокировал
   delivery из-за отсутствующей capability.
@@ -425,7 +425,8 @@ delivery source/tests/review, должен считаться execution-agent и
 
 Сценарии `IG-FLOW-07`: non-Astra с доступным skill и существенным неразрешённым
 вопросом обращается за консультацией; Astra и unknown не обращаются
-автоматически; обычный дефект и известная нехватка доступа не вызывают советчика;
+автоматически в обычной ветке; работа с понятным следующим действием не вызывает советчика;
+перед остановкой или просьбой о вмешательстве применяется обязательный цикл;
 недоступность skill не создаёт нового blocker. В `Соло` советчик не получает
 execution пакет, а явный запрет пользователя на субагентов исключает вызов.
 После совета исполнение и обязательные проверки остаются у ведущего агента.
@@ -582,3 +583,22 @@ Task Manager остаётся adapter-only, standalone user-level copies отс�
 
 Это corpus ожидаемого поведения; описание сценариев само по себе не означает
 исполненный model-forward PASS.
+
+## UAT и повторные консультации — 2026-09-12
+
+Трасса: `IG-FLOW-07`, `IG-GOAL-04`, `IG-AUTO-03/05` → Architecture
+«Консультант при затруднении» и «Автономность и среды» → `SKILL.md`,
+`consultant.md`, `autonomy-and-environments.md`, `strategic-explainer.md` →
+`scripts/issue_grinder_blocker_smoke.py`.
+
+Добавленные независимые случаи: конкретный пробел после первой консультации
+требует следующей; непроверенная совместимость исследуется до запроса разрешения;
+полный цикл UAT и восстановление после собственного сбоя не требуют апрува;
+согласие сохраняется после model change/compaction и смены инструмента; препятствие
+в single-issue run без Goal также проходит консультацию. Неизменный blocker
+не повторяет вопрос. Oracle проверяет решение и отсутствие преждевременного
+`ask_user`, а не только формулировку ответа.
+
+Это расширение decision smoke, не доказательство реального вызова Консультанта,
+изменения UAT или обхода platform gate. Результат fresh installed run фиксируется
+отдельной квитанцией после установки нового snapshot.

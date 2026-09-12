@@ -23,6 +23,18 @@ CASES = [
      'facts': 'Прежний blocker прошёл консультацию и reflection, отчёт опубликован. Следующий automatic turn, fingerprint и все факты неизменны, platform audit ещё не разрешает blocked.'},
     {'id': 'single', 'mode': 'solo', 'profile': 'gpt-5.6-sol', 'goal': False,
      'facts': 'Одиночная задача; готовится обычный closing comment, Strategic Explainer доступен.'},
+    {'id': 'advice-gap', 'mode': 'solo', 'profile': 'gpt-5.6-sol', 'goal': True,
+     'facts': 'Консультант предложил два пути. Первый проверен и не работает; для второго остаётся конкретный вопрос совместимости, который доступные проверки не разрешили. Советчик доступен. Новые результаты ещё не обсуждали.'},
+    {'id': 'premature-permission', 'mode': 'solo', 'profile': 'gpt-5.6-sol', 'goal': True,
+     'facts': 'Советчик предложил получить разрешение на внешнее подключение. Совместимость endpoint ещё неизвестна; агент может сейчас проверить её чтением конфигурации без внешних эффектов.'},
+    {'id': 'uat-cycle', 'mode': 'solo', 'profile': 'gpt-5.6-sol', 'goal': True,
+     'facts': 'Явный run. Проектный UAT точно установлен. Для задачи нужно заменить тестовую схему, перенастроить тестовую авторизацию, воспроизвести сбой и удалить синтетические fixtures. Platform gate отсутствует, посторонние ресурсы не затрагиваются.'},
+    {'id': 'uat-recovery', 'mode': 'solo', 'profile': 'gpt-5.6-sol', 'goal': True,
+     'facts': 'Явный run. Собственный эксперимент сломал подтверждённый UAT. Есть проверенный способ пересоздать тестовые ресурсы и восстановить работу. Platform gate отсутствует.'},
+    {'id': 'consent-resume', 'mode': 'solo', 'profile': 'gpt-6-astra', 'goal': True,
+     'facts': 'Пользователь разрешил полный цикл подключения, проверки и отключения. После смены модели и compaction предстоит отключить то же подключение другим инструментом. Действие внутри согласованных границ; platform gate отсутствует.'},
+    {'id': 'single-obstacle', 'mode': 'solo', 'profile': 'gpt-5.6-sol', 'goal': False,
+     'facts': 'Одиночная задача без Goal. Агент собирается просить вмешательство пользователя из-за предполагаемой нехватки доступа. Самостоятельные варианты ещё не исследованы, Консультант доступен.'},
 ]
 EXPECTED = {
     'solo-external': ('consultant', 'consult'),
@@ -33,6 +45,12 @@ EXPECTED = {
     'unavailable': ('none', 'checkpoint'),
     'repeat': ('none', 'wait'),
     'single': ('explainer', 'publish'),
+    'advice-gap': ('consultant', 'consult'),
+    'premature-permission': ('none', 'continue'),
+    'uat-cycle': ('none', 'continue'),
+    'uat-recovery': ('none', 'continue'),
+    'consent-resume': ('none', 'continue'),
+    'single-obstacle': ('consultant', 'consult'),
 }
 
 
@@ -47,6 +65,8 @@ def assess(payload):
         d = rows[0]
         if (d.get('next_provider'), d.get('action')) != pair or d.get('set_blocked') is not False:
             defects.append(key + ': incorrect decision ' + json.dumps(d, ensure_ascii=False))
+        if d.get('ask_user') is not (key == 'confirmed-stop'):
+            defects.append(key + ': premature or repeated user request')
     return defects
 
 
@@ -58,13 +78,15 @@ def main():
     prompt = ('Изолированный read-only тест, не delivery и не реальное обращение к советчику. '
               'Найди установленный $issue-grinder:issue-grinder и прочитай SKILL.md, '
               'references/consultant.md, references/strategic-explainer.md, references/run-and-goal.md, '
+              'references/autonomy-and-environments.md, '
               'а также установленный consultant/SKILL.md. Не читай repo, tests, Requirements, '
               'Architecture, память и другие сессии. Не вызывай сеть, Task Manager, Goal, '
               'subagents и не изменяй файлы. Для каждого независимого синтетического случая '
               'примени указанный в нём профиль ведущего агента (это данные сценария, не твоя модель). '
               'Верни только JSON с installed_skill_path и decisions. Каждое решение: id, '
               'next_provider (consultant|explainer|native|none), action '
-              '(consult|analyze|continue|publish|checkpoint|wait), set_blocked boolean, reason. '
+              '(consult|analyze|continue|publish|checkpoint|wait), set_blocked boolean, '
+              'ask_user boolean (нужно ли сейчас запрашивать новое решение пользователя), reason. '
               'next_provider означает только следующий необходимый вызов/разбор, а не уже завершённый. '
               'Случаи: ' + json.dumps(CASES, ensure_ascii=False))
     with tempfile.TemporaryDirectory(prefix='ig-blocker-smoke-') as cwd:
@@ -85,7 +107,8 @@ def main():
         payload = {}
     commands = [i.get('command', '') for i in items if i.get('type') == 'command_execution']
     required = ['skills/issue-grinder/SKILL.md', 'references/consultant.md',
-                'references/strategic-explainer.md', 'references/run-and-goal.md', 'skills/consultant/SKILL.md']
+                'references/strategic-explainer.md', 'references/run-and-goal.md',
+                'references/autonomy-and-environments.md', 'skills/consultant/SKILL.md']
     loaded = {path: any(path in c for c in commands) for path in required}
     defects = assess(payload)
     result = {'passed': not defects and proc.returncode == 0 and all(loaded.values()),

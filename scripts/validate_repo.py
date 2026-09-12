@@ -530,7 +530,8 @@ def validate_issue_skill(errors: list[str]) -> None:
         "Пока есть безопасное существенное действие текущего scope",
         "Production запрещён",
         "UAT",
-        "`Да`, `Нет`, `Да всегда`",
+        "Полный цикл UAT без дополнительных апрувов",
+        "Одно согласование за пределами предоставленных полномочий",
     )
     require(
         errors,
@@ -764,7 +765,7 @@ def validate_issue_skill(errors: list[str]) -> None:
     require(
         errors,
         ISSUE_SPEC,
-        "Статус: current agent-owned Architecture, 2026-09-10",
+        "Статус: current agent-owned Architecture, 2026-09-12",
         "[Overview](overview.md)",
         "[Requirements](requirements.md)",
         "## 0. Compilation contract",
@@ -2373,7 +2374,7 @@ def validate_source_layers(errors: list[str]) -> None:
         "Plugin — общий distribution artifact",
     )
     for architecture, prefix, status_marker in (
-        (ISSUE_SPEC, "IG-*", "Статус: current agent-owned Architecture, 2026-09-10"),
+        (ISSUE_SPEC, "IG-*", "Статус: current agent-owned Architecture, 2026-09-12"),
         (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current agent-owned Architecture, 2026-09-02"),
         (SCOPE_SPEC, "SR-*", "Статус: current agent-owned Architecture, 2026-09-02"),

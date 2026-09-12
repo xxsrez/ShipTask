@@ -26,7 +26,7 @@ class BlockerConsultantContract(unittest.TestCase):
         self.assertIn('blocker-report без Goal', entry)
         self.assertIn('Strategic Explainer здесь не вызывается', entry)
         self.assertIn('включая редактуру полученного вывода', ' '.join(routing.split()))
-        self.assertIn('одним запросом Консультанту', routing)
+        self.assertIn('одну publication unit после', routing)
 
     def test_unavailable_advice_cannot_become_accepted_blocker(self):
         routing = read('issue-grinder/references/consultant.md')
