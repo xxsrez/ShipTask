@@ -4,9 +4,9 @@
 
 ## Ключевые документы
 
-- Перед изменением проекта прочитайте [`docs/philosophy.md`](docs/philosophy.md).
-  Это ключевой документ о свободе агента, слоях исходного кода и владельцах
-  решений.
+- Для изменения поведения skill или source model используйте
+  [`docs/philosophy.md`](docs/philosophy.md): свобода агента, слои исходного
+  кода и владельцы решений. Редакционная правка не требует перечитывать её.
 - [`docs/README.md`](docs/README.md) — канонический индекс документации, а
   [`docs/skills/README.md`](docs/skills/README.md) — техническая схема source
   packages.
@@ -133,6 +133,15 @@ evaluation` и возможность восстановить семантич�
 Для docs-only правки без изменения runtime payload переустановка не требуется.
 
 ## Проверка перед commit
+
+Для любого commit выполните `python3 scripts/validate_repo.py` и
+`git diff --check`. Для docs-only правок добавьте docs validator; для локального
+runtime изменения — применимые tests и quick_validate затронутого skill.
+Общий runtime, routing, source model или distribution требуют полного набора
+ниже. После исправления ошибки повторите затронутые проверки; неизменные
+успешные результаты сохраняют силу при неизменных входах и среде.
+
+Полный набор:
 
 ```bash
 python3 scripts/validate_repo.py

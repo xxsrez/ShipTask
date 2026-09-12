@@ -215,7 +215,7 @@ class IssueGrinderContractTest(unittest.TestCase):
     def test_model_routing_guard_is_fail_closed_and_part_of_runtime(self) -> None:
         guard = ROUTING_GUARD.read_text(encoding="utf-8")
         execution_modes = (
-            SKILL_ROOT / "references" / "execution-modes.md"
+            SKILL_ROOT / "references" / "multi-agent-routing.md"
         ).read_text(encoding="utf-8")
         multi_agent = (
             SKILL_ROOT / "references" / "multi-agent-execution.md"
@@ -236,7 +236,7 @@ class IssueGrinderContractTest(unittest.TestCase):
     def test_non_solo_capability_aware_stage_contract_is_compiled(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
         execution_modes = (
-            SKILL_ROOT / "references" / "execution-modes.md"
+            SKILL_ROOT / "references" / "multi-agent-routing.md"
         ).read_text(encoding="utf-8")
         multi_agent = (
             SKILL_ROOT / "references" / "multi-agent-execution.md"

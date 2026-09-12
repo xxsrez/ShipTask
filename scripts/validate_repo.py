@@ -16,6 +16,8 @@ ISSUE_AUTONOMY = (
     ROOT / "issue-grinder" / "references" / "autonomy-and-environments.md"
 )
 ISSUE_MODES = ROOT / "issue-grinder" / "references" / "execution-modes.md"
+ISSUE_ROUTING = ROOT / "issue-grinder" / "references" / "multi-agent-routing.md"
+ISSUE_LOCAL_EVALUATION = ROOT / "issue-grinder" / "references" / "local-evaluation.md"
 ISSUE_MODE_DIR = ROOT / "issue-grinder" / "references" / "modes"
 ISSUE_MODE_FILES = {
     "solo": ISSUE_MODE_DIR / "solo.md",
@@ -55,6 +57,11 @@ ISSUE_SOLO_TOPOLOGY_SMOKE_TEST = (
 SHIP_SKILL = ROOT / "ship-tasks" / "SKILL.md"
 SHIP_METADATA = ROOT / "ship-tasks" / "agents" / "openai.yaml"
 COMPOSER_SKILL = ROOT / "task-composer" / "SKILL.md"
+COMPOSER_REFERENCES = tuple(
+    ROOT / "task-composer" / "references" / name
+    for name in ("epic-planning.md", "epic-publication.md", "attachments.md")
+)
+COMPOSER_RUNTIME = (COMPOSER_SKILL, *COMPOSER_REFERENCES)
 COMPOSER_METADATA = ROOT / "task-composer" / "agents" / "openai.yaml"
 SCOPE_SKILL = ROOT / "scope-reviewer" / "SKILL.md"
 SCOPE_METADATA = ROOT / "scope-reviewer" / "agents" / "openai.yaml"
@@ -213,6 +220,8 @@ CORE_FILES = (
     ISSUE_FLOW,
     ISSUE_AUTONOMY,
     ISSUE_MODES,
+    ISSUE_ROUTING,
+    ISSUE_LOCAL_EVALUATION,
     *ISSUE_MODE_FILES.values(),
     ISSUE_MULTI_AGENT,
     ISSUE_EXPLAINER,
@@ -227,6 +236,7 @@ CORE_FILES = (
     SHIP_SKILL,
     SHIP_METADATA,
     COMPOSER_SKILL,
+    *COMPOSER_REFERENCES,
     COMPOSER_METADATA,
     SCOPE_SKILL,
     SCOPE_METADATA,
@@ -363,12 +373,15 @@ def fail(errors: list[str], message: str) -> None:
     errors.append(message)
 
 
-def require(errors: list[str], path: Path, *terms: str) -> None:
-    text = read(path)
+def require(errors: list[str], path: Path | tuple[Path, ...], *terms: str) -> None:
+    # A contract may be compiled into an entrypoint plus conditional references.
+    paths = (path,) if isinstance(path, Path) else path
+    text = "\n".join(read(source) for source in paths)
+    label = " + ".join(relative(source) for source in paths)
     normalized_text = normalize(text)
     for term in terms:
         if term not in text and normalize(term) not in normalized_text:
-            fail(errors, f"{relative(path)} is missing required concept {term!r}")
+            fail(errors, f"{label} is missing required concept {term!r}")
 
 
 def forbid(errors: list[str], path: Path, *terms: str) -> None:
@@ -535,7 +548,7 @@ def validate_issue_skill(errors: list[str]) -> None:
     )
     require(
         errors,
-        ISSUE_MODES,
+        (ISSUE_MODES, ISSUE_ROUTING),
         "явный выбор поддерживаемого режима",
         "иначе — `solo`",
         "`classic`",
@@ -1010,7 +1023,7 @@ def validate_composer_skill(errors: list[str]) -> None:
     validate_frontmatter(errors, COMPOSER_SKILL, "task-composer", 180)
     require(
         errors,
-        COMPOSER_SKILL,
+        COMPOSER_RUNTIME,
         "$issue-grinder:task-composer",
         "planning mutations",
         "separate create-and-deliver contract",
@@ -1458,7 +1471,7 @@ def validate_strategic_skill(errors: list[str]) -> None:
 def validate_strategic_provider_encapsulation(errors: list[str]) -> None:
     caller_files = (
         SHIP_SKILL,
-        COMPOSER_SKILL,
+        *COMPOSER_RUNTIME,
         HANDOFF,
         REPORT,
         RUN_REPORT,
@@ -1510,7 +1523,7 @@ def validate_strategic_provider_encapsulation(errors: list[str]) -> None:
         (SHIP_SKILL, section(read(SHIP_SKILL), "## 5. Обеспечь человеческое объяснение")),
         (SHIP_REQUIREMENTS, section(read(SHIP_REQUIREMENTS), "### `ST-07` — Понятное объяснение через выбранный Explainer или native mode")),
         (SPEC, section(read(SPEC), "## 6. Человеческое объяснение")),
-        (COMPOSER_SKILL, read(COMPOSER_SKILL)),
+        *((path, read(path)) for path in COMPOSER_RUNTIME),
         (COMPOSER_REQUIREMENTS, section(read(COMPOSER_REQUIREMENTS), "### `TC-09` — Strategic Explainer для каждого Epic")),
         (COMPOSER_SPEC, section(read(COMPOSER_SPEC), "## 5. Strategic Explainer")),
         (SCOPE_SKILL, section(read(SCOPE_SKILL), "## 5. Верни один человекочитаемый отчёт")),
@@ -1552,7 +1565,7 @@ def validate_strategic_provider_encapsulation(errors: list[str]) -> None:
     )
     require(
         errors,
-        COMPOSER_SKILL,
+        COMPOSER_RUNTIME,
         "semantic facade отдельной\npublication unit",
         "никакие другие invocation parameters или provider\ninstructions",
         "Не читай provider-internal contract",

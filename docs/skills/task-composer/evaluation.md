@@ -104,3 +104,22 @@ graph correctness, write authority
 attachment mapping и read-back. Отдельно выбранная child Task должна позволять
 новому исполнителю восстановить её вклад и применимую планку качества без scope
 expansion; bug evidence должно быть доступно на той Task, которой оно помогает.
+
+## Проверка условной загрузки
+
+При изменении description проверять выбор skill на положительных и соседних
+отрицательных запросах с реальным кратким каталогом. Проверять по журналу
+чтений, какие runtime references загрузились, а по результату — сохранение
+scope, authority, native/provider и terminal boundaries. Статические проверки
+ссылок и слов не доказывают поведение модели.
+
+Standalone draft без файлов не читает Epic/attachments references. Epic на Astra
+читает epic-planning, но не epic-publication; не-Astra читает оба. Переданные
+файлы включают attachments до первой mutation. Проверять также отсутствие writes
+при draft intent и сохранение частичного результата после неизвестного bind.
+
+Проверка 2026-09-12: независимый агент подготовил одну Task как текстовый
+черновик об idempotency оплаты, без записи и выдуманных live metadata.
+На стадии выполнения прочитал только SKILL.md; Epic/attachments references
+прочитал позднее отдельно для аудита переноса. Проверены draft boundary и
+условная загрузка для standalone Task, но не live create/bind/provider path.

@@ -625,3 +625,24 @@ standalone user-level копии отсутствуют. Проверка реш
 Общий Marketplace suite имеет пять failures и одну error в неизменённом пакете
 Example Notes. Те же шесть ошибок воспроизведены на предшествующем `c807fa1`;
 к этому обновлению Issue Grinder они не относятся.
+
+## Проверка условной загрузки
+
+При изменении description проверять выбор skill на положительных и соседних
+отрицательных запросах с реальным кратким каталогом. Проверять по журналу
+чтений, какие runtime references загрузились, а по результату — сохранение
+scope, authority, native/provider и terminal boundaries. Статические проверки
+ссылок и слов не доказывают поведение модели.
+
+Изолированные сценарии: справка без delivery effects; явный Соло без чтения
+multi-agent-routing и других modes; Classic с routing до child; смена Соло
+на многоагентный режим с загрузкой routing до dispatch. Local evaluation
+читает свой entrypoint; обычный delivery не загружает evaluation instructions.
+Набор для повторного model-forward запуска: одинаковые входы и acceptance,
+наблюдаемые чтения, dispatch и итог, без Task Manager writes и production.
+
+Проверка 2026-09-12 при переносе условных references: 171 локальный unit test,
+repository validator, docs navigation и quick validation шести skills прошли.
+Независимый read-only агент выбрал ожидаемый маршрут в 9 из 9 запросов по
+кратким descriptions и не обнаружил регрессий в проверенных переносах.
+Это не end-to-end delivery и не полный независимый аудит всех Requirements.

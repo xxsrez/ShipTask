@@ -408,3 +408,10 @@ Runtime получает отдельный evaluation contract с тремя с
 report. Эти свойства подтверждаются только blind model-forward результатом и
 проверкой человеком, знакомым с исходным вопросом, но не с внутренним process
 trace.
+
+## Условная загрузка и краткое описание
+
+Description сохраняет оба автоматических входа: предзапусковое ревью Task Manager плана
+и анализ активного долгого delivery run, а также явное улучшение плана. Luna Max оптики,
+protected Human Requirements и read-only default остаются в runtime; сокращение metadata
+не меняет SR-контракт.

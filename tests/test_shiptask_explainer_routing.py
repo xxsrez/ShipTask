@@ -178,7 +178,7 @@ class ShipTaskExplainerRoutingTest(unittest.TestCase):
                 "## 6. Человеческое объяснение",
                 "## 7. Реализация и проверка",
             ),
-            "composer runtime": COMPOSER.read_text(),
+            "composer runtime": "\n".join(path.read_text() for path in (COMPOSER, *sorted((COMPOSER.parent / "references").glob("*.md")))),
             "composer requirements": between(
                 COMPOSER_REQUIREMENTS.read_text(),
                 "### `TC-09`",

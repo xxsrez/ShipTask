@@ -639,3 +639,10 @@ Regression scenarios проверяются реальным model-forward за�
 behavior в [evaluation contract](../../reference/strategic-explainer-evaluation.md).
 Статическая проверка текста contract подтверждает только wiring и не является
 доказательством понятности generated result.
+
+## Условная загрузка и краткое описание
+
+Description начинается с исключения для автоматического вызова из Astra и сохраняет
+прямой запрос пользователя. Далее обозначает формулировку готового текста через
+изолированный provider и исключает обычный чат. Facade/provider role lock, exact Luna
+Max, semantic API и authority boundaries не меняются.

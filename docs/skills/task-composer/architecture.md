@@ -368,3 +368,15 @@ cleanup без authority: skill перечисляет созданные, по�
 status, hierarchy, labels/label gaps, relations, attachment disposition и любой
 unreconciled outcome. Task Manager read-back доказывает только planning
 projection, а не implementation или delivery.
+
+## Условная загрузка и краткое описание
+
+Description сообщает условия постановки и декомпозиции Task Manager работы, а не поля
+создаваемой модели. SKILL сохраняет planning-only authority, три смысловые роли, live
+refs, duplicate safety, общий create/read-back и критерии результата.
+references/epic-planning.md читается только для составного outcome;
+references/epic-publication.md — только для не-Astra Epic provider-ветки. Astra
+формулирует native description с тем же factual/coverage gate. references/attachments.md
+читается при наличии пользовательских файлов до первой mutation: уместность, native
+route, bind и recovery остаются обязательными. Ни один перенос не делает read-back,
+attachment или Epic contract факультативным.

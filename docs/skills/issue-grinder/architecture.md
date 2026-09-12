@@ -180,8 +180,10 @@ plugin может содержать только skills, а MCP server, UI и l
 - `task-manager-flow.md` — live scope, lifecycle, blocked-by, comment/status
   transaction, read-back и recovery;
 - `execution-modes.md` — после однократного выбора режима и перед
-  декомпозицией: общий mode resolver, profile normalization, invariants, switch
-  barrier и review packet;
+  декомпозицией: общий mode resolver, invariants и switch barrier;
+- `multi-agent-routing.md` — только вне Соло: profile normalization, dispatch
+  receipts, event coordination и review packet, до первого профильного решения;
+- `local-evaluation.md` — только для явно изолированного model-forward запуска;
 - `modes/{solo,classic,economical}.md` — ровно один файл после
   сохранения canonical mode; в нём целиком находятся mode-specific topology,
   role/profile routing, fallback, review и stop promise;
@@ -634,8 +636,9 @@ Default child profiles зависят от выбранного mode:
 | `balance` | `modes/balance.md` | `IG-MODE-04`, `IG-MODE-20`, Luna coordinator, Sol specialist/reviewer, terminal-only |
 | `economical` | `modes/economical.md` | `IG-MODE-06`, части `IG-MODE-08..09`, resumable checkpoint |
 
-Общие resolver, profiles, authority и evidence invariants остаются в
-`execution-modes.md`; isolation и fan-in mechanics — в
+Общие resolver, authority и evidence invariants остаются в
+`execution-modes.md`; multi-agent profiles, dispatch и review packet — в
+`multi-agent-routing.md`; isolation и fan-in mechanics — в
 `multi-agent-execution.md`. Только выбранный mode-файл владеет своей topology,
 fallback, review и stop promise. `mode-help.md` остаётся delivery-free справкой.
 
@@ -653,9 +656,10 @@ candidate до приёмки обязательно проверяет отде
 учёт каждого шага. Sol writer получает task-owned worktree через существующий admission либо
 разрешённый read-only patch handoff; общий checkout не передаётся второму writer.
 
-Для local evaluation runtime читает только SKILL, execution-modes, выбранный
-mode и PLAN. Multi-agent mechanics читается перед первым child, когда нужен
-его admission; ссылки позволяют не искать файлы и не читать соседние modes.
+Для local evaluation `SKILL.md` направляет в `local-evaluation.md`: затем
+читаются execution-modes, выбранный mode и PLAN. Вне Соло добавляется
+multi-agent-routing; multi-agent mechanics читается перед первым child, когда
+нужен его admission. Обычный delivery не загружает evaluation instructions.
 Это тот же установленный skill, без экспериментального заменяющего prompt.
 
 ### 4.4.1 Проверки, инструменты и стоимость организации
@@ -1545,3 +1549,14 @@ invariant. Механический regression из реального прог�
 синтетическому deterministic case; ошибка strategy, language understanding или
 review остаётся model-forward case, а не имитируется fake state machine.
 Проверка наличия терминов в файлах не заменяет model-forward run.
+
+## Условная загрузка и краткое описание
+
+Description содержит только delivery с выбранным Task Manager scope, справку о режимах и
+исключение Backlog/status/planning. Общий execution-modes сохраняет resolver, root
+admission, continuity, authority и evidence; multi-agent-routing хранит прежние
+normalization, receipts, owner coordination и review packet без изменения профилей. В
+Соло этот reference не загружается: работает текущий root, ноль execution-subagents. При
+явном переходе из Соло multi-agent-routing читается до профильного решения. Local
+evaluation имеет отдельный условный entrypoint; ограничения среды, routing, review и
+final gate сохраняются, способ чтения файлов не предписывается.
