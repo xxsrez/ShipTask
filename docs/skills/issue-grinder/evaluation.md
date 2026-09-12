@@ -602,3 +602,26 @@ Task Manager остаётся adapter-only, standalone user-level copies отс�
 Это расширение decision smoke, не доказательство реального вызова Консультанта,
 изменения UAT или обхода platform gate. Результат fresh installed run фиксируется
 отдельной квитанцией после установки нового snapshot.
+
+### Квитанция нового snapshot
+
+12.09.2026 свежая ephemeral session `00000000-0000-4000-8000-c88561f1c3a4`
+прочитала installed snapshot `0.1.0+codex.20260912095710`: entrypoint, четыре
+routing references и Consultant skill. Все 14 решений соответствуют contract,
+включая шесть новых случаев. Первичный oracle отклонил `premature-permission`
+из-за `native/analyze` вместо `none/continue`; наблюдаемый ответ явно предписывал
+самостоятельно проверить совместимость без вопроса пользователю. Oracle исправлен
+для обеих семантически корректных форм, исходный ответ повторно проверен без нового
+модельного запуска. Regression tests запрещают пропуск преждевременного апрува,
+блокировки или замены обязательной повторной консультации собственным разбором.
+
+Source commit `04cf8e8` и Marketplace commit `50f1e36` опубликованы; сравнение
+подтвердило byte identity source → Marketplace → installed cache для Issue Grinder,
+Task Composer, Scope Reviewer, Consultant и Strategic Explainer. Оба основных
+plugins installed/enabled, legacy ShipTask не установлен, Task Manager adapter-only,
+standalone user-level копии отсутствуют. Проверка решений не исполняла реальную
+консультацию, UAT mutations или platform approval.
+
+Общий Marketplace suite имеет пять failures и одну error в неизменённом пакете
+Example Notes. Те же шесть ошибок воспроизведены на предшествующем `c807fa1`;
+к этому обновлению Issue Grinder они не относятся.

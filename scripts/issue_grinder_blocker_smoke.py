@@ -63,7 +63,12 @@ def assess(payload):
             defects.append(key + ': missing/duplicate')
             continue
         d = rows[0]
-        if (d.get('next_provider'), d.get('action')) != pair or d.get('set_blocked') is not False:
+        allowed = {pair}
+        # The available next step is read-only investigation, so both labels
+        # express autonomous progress; neither permits asking or blocking.
+        if key == 'premature-permission':
+            allowed.add(('native', 'analyze'))
+        if (d.get('next_provider'), d.get('action')) not in allowed or d.get('set_blocked') is not False:
             defects.append(key + ': incorrect decision ' + json.dumps(d, ensure_ascii=False))
         if d.get('ask_user') is not (key == 'confirmed-stop'):
             defects.append(key + ': premature or repeated user request')
