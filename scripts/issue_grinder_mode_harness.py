@@ -38,6 +38,13 @@ class ModeOrigin(str, Enum):
     AUTOMATIC = "automatic"
 
 
+class ScopeSize(str, Enum):
+    SMALL = "small"
+    MEDIUM = "medium"
+    LARGE = "large"
+    UNCERTAIN = "uncertain"
+
+
 @dataclass(frozen=True)
 class Profile:
     model: str
@@ -79,6 +86,8 @@ class ModeRecord:
     role_profiles: RoleProfiles
     initial_scope_task_count: int = 1
     mode_contract_version: str | None = None
+    initial_scope_size: ScopeSize = ScopeSize.UNCERTAIN
+    mode_selection_reason: str = ""
 
 
 @dataclass(frozen=True)
@@ -141,6 +150,8 @@ def resolve_mode(
     main_profile: Profile,
     *,
     scope_task_count: int = 1,
+    scope_size: ScopeSize = ScopeSize.UNCERTAIN,
+    scope_assessment_reason: str = "",
     explicit_mode: ExecutionMode | None = None,
     saved_record: ModeRecord | None = None,
     continuity_proven: bool = False,
@@ -162,11 +173,14 @@ def resolve_mode(
 
     if not isinstance(scope_task_count, int) or isinstance(scope_task_count, bool) or scope_task_count < 0:
         raise ValueError("scope_task_count must be a nonnegative resolved task count")
+    # The agent supplies the semantic assessment; this oracle does not infer
+    # size from task count, profile or keywords in a justification.
+    assessed_size = ScopeSize(scope_size)
+    if explicit_mode is None and assessed_size is ScopeSize.LARGE and not scope_assessment_reason.strip():
+        raise ValueError("large scope requires a concrete assessment reason")
     canonical_mode = (
         ExecutionMode(explicit_mode) if explicit_mode is not None else
-        ExecutionMode.BALANCE if main_profile == LUNA_MAX else
-        ExecutionMode.CLASSIC if main_profile == SOL_XHIGH else
-        ExecutionMode.CLASSIC if not main_profile.is_luna and scope_task_count > 1 else
+        ExecutionMode.CLASSIC if assessed_size is ScopeSize.LARGE else
         ExecutionMode.SOLO
     )
     origin = (
@@ -179,6 +193,11 @@ def resolve_mode(
         mode_origin=origin,
         mode_contract_version=BALANCE_VERSION if canonical_mode is ExecutionMode.BALANCE else None,
         initial_scope_task_count=scope_task_count,
+        initial_scope_size=assessed_size,
+        mode_selection_reason=(
+            "explicit mode choice" if explicit_mode is not None else
+            scope_assessment_reason or "large scope is not established"
+        ),
         initial_main_profile=main_profile,
         role_profiles=normalize_profiles(
             main_profile,

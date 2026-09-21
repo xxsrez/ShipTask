@@ -555,9 +555,29 @@ canonical mode берётся из run checkpoint и не проектирует
 
 ### 4.1 Однократное разрешение режима
 
-Новый run: explicit mode имеет приоритет; Luna Max → `balance`, Sol xhigh →
-`classic` независимо от scope size. Для остальных профилей: non-Luna и более
-одной live задачи → `classic`, иначе `solo`. `economical` только явно.
+Новый run: explicit mode имеет приоритет. Иначе оцени содержание live scope:
+небольшой/средний объём → `solo`, обоснованно крупный → `classic`.
+`balance` и `economical` включаются только явно; model/effort, квота и capacity
+не участвуют в оценке объёма.
+
+Оценка предшествует стратегической декомпозиции и опирается на уже доступные
+contracts, затронутые подсистемы и зависимости. Крупный объём требует нескольких
+содержательных направлений с отдельным контекстом реализации и проверки и
+существенной пользы распределения работы или независимой проверки относительно
+координации. Несколько связанных исправлений, множество однотипных правок или
+одна сложная тесно связанная задача сами по себе этого не доказывают. Несколько
+самостоятельных функций либо существенные изменения нескольких подсистем с
+общей интеграцией могут обосновать `classic`.
+
+Не вводи численный порог, балльную модель или обязательное исследование ради
+классификатора. При недостаточных основаниях выбери `solo`; неизвестный contract,
+мешающий самой delivery, разрешается обычным workflow. В mode record сохрани
+`initial_scope_size` (`small`, `medium`, `large` или `uncertain`) и краткое
+`mode_selection_reason`, назвав конкретные работы и, для `large`, пользу
+многоагентного исполнения. Число карточек остаётся описательным полем.
+Механический mode harness принимает эту смысловую оценку как вход и проверяет
+выбор, explicit override и continuity; он не заменяет оценку содержания агентом.
+
 До эффектов и dispatch проверь `IG-MODE-20`: `balance`/`economical` требуют
 exact текущую основную Luna Max. Unknown или mismatch → `main_profile_required`,
 без Goal, записей, supervisor и автоматического другого режима. Проверка
@@ -1448,7 +1468,7 @@ Task Manager cancellation statuses от имени Issue Grinder.
 | `IG-GOAL-*` | strategic synthesis, persistent execution context, Goal lifecycle, blocker/final reflection | Strategic Outcome направляет локальные решения без новой задолженности; Goal завершается после fresh empty active scope даже при известном strategic gap |
 | `IG-SCOPE-*` | selector-as-predicate и контрольные refresh points | новые и исключённые issue учитываются до terminal result |
 | `IG-AUTO-*` | explicit-mode gate, полный UAT цикл и границы согласования | нет Production access; разрешённая UAT работа не ждёт рутинного approval |
-| `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint и semantic topology boundary | Luna Max выбирает `Баланс`, Sol xhigh — `Классический`; недопустимый root отклоняется; `Соло` сохраняет current profile и ноль Issue Grinder execution-subagents; `Экономичный` включается только явно; режимы не дрейфуют |
+| `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint и semantic topology boundary | небольшой/средний и неопределённый объём выбирает `Соло`, обоснованно крупный — `Классический` независимо от модели и числа карточек; недопустимый root отклоняется; `Соло` сохраняет current profile и ноль Issue Grinder execution-subagents; `Баланс` и `Экономичный` включаются только явно; режимы не дрейфуют |
 | `IG-HELP-*` | ранний fast path и компактный `mode-help.md` | чистая справка объясняет четыре режима и default без Task Manager, Goal, title mutations или subagents |
 | `IG-MA-*` | dependency-ready packets, isolated writers, integration owner, profile routing и capability-aware stages | параллельные writers изолированы; independent review применяется только там, где его требует contract |
 
@@ -1500,7 +1520,7 @@ ID само по себе не доказывает поведение.
 - чистая и узкая справка о режимах/default/различиях без Task Manager, Goal,
   title mutations, delivery refs и subagents; смешанный help+delivery prompt
   сохраняет обычные scope и authority gates;
-- explicit natural-language mode override, profile-aware default и обязательный root admission, persistence через continuation/model
+- explicit natural-language mode override, scope-aware default и обязательный root admission, persistence через continuation/model
   change и safe explicit switch;
 - `Соло` для одного и нескольких issue с exact current profile, одной
   последовательной execution lane, отсутствием Issue Grinder worker delegation

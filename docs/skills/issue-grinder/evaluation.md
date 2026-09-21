@@ -85,7 +85,7 @@ prompt; подготовка обязана остановиться при ра
 | `IG-VERIFY-06` | `SKILL.md`; `verification.md` | unchanged-uat-artifact-reused; environment-delta-check; no-production-access |
 | `IG-VERIFY-07` | `SKILL.md`; `verification.md` | existing-profile-adapted; missing-profile-no-blocker; no-per-command-report |
 | `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | four-canonical-modes; mode-does-not-expand-authority |
-| `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; default-luna-max-balance; default-sol-xhigh-classic; other-profiles-legacy-default; economical-explicit-only; retired-mode-rejected; mode-persists-after-model-change |
+| `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; small-medium-uncertain-solo; justified-large-classic; count-and-profile-independent; balance-economical-explicit-only; retired-mode-rejected; mode-persists-after-model-and-scope-change |
 | `IG-MODE-03` | `modes/classic.md`; `multi-agent-execution.md`; mode harness | classic-sol-does-almost-all; classic-luna-trivial-only; classic-high-judgment-owner; classic-simple-independent-review; classic-final-review-terminal |
 | `IG-MODE-04` | `modes/balance.md`; mode/routing harness | luna-root-owns-process; bounded-sol-specialist; independent-sol-xhigh-review; no-cheap-quality-bypass |
 | `IG-MODE-06` | `SKILL.md` §5; `modes/economical.md`; mode/routing guards; mode harness | economical-all-substantive-luna; wrong-root-refused-before-effects; economical-independent-luna-review; economical-terminal-when-proven; economical-partial-review-checkpoint; economical-resumable-candidate; no-false-done; no-false-blocked |
@@ -129,8 +129,9 @@ python3 -B -m unittest discover -s tests -p 'test_issue_grinder_mode_harness.py'
 
 Corpus доказывает:
 
-- приоритет явного режима; default Luna Max → Balance, Sol xhigh → Classic; прочие профили сохраняют
-  прежнее правило; root admission запрещает неправильные и неизвестные профили; Economical только явно;
+- приоритет явного режима; небольшой/средний и неопределённый объём → Solo,
+  обоснованно крупный → Classic независимо от профиля и числа карточек;
+  root admission запрещает недопустимые профили для явно выбранных Balance/Economical;
 - `Соло` с current main profile, нулём execution-subagents и одной
   последовательной lane;
 - сохранение mode record при доказанной continuity и отсутствие переноса
@@ -397,8 +398,25 @@ delivery source/tests/review, должен считаться execution-agent и
 
 Замеры удалённых режимов сохранены в датированных reports и не являются
 действующей политикой или подтверждением поведения четырёх текущих режимов.
-Новый автовыбор проверяется матрицей profiles × число live задач, явным выбором,
-продолжением после изменения модели/числа задач и отклонением удалённых modes.
+Новый автовыбор проверяется матрицей оценки объёма × profiles × число live задач,
+явным выбором, продолжением после изменения модели/объёма и отклонением удалённых
+modes. Механический harness получает оценку объёма от агента: его PASS не
+доказывает правильность смысловой классификации.
+
+Для смысловой проверки установленного runtime используются следующие ситуации:
+
+| Состав live scope без явного режима | Ожидаемое решение |
+|---|---|
+| Три связанных исправления одного механизма с общей проверкой | `solo` |
+| Двадцать однотипных небольших текстовых правок | `solo` |
+| Одна сложная тесно связанная алгоритмическая задача | `solo`: сложность сама по себе не доказывает крупный объём |
+| Несколько самостоятельных существенных функций в разных подсистемах с отдельными тестами и общей интеграцией; распределение и независимая проверка полезны | `classic`, с указанием направлений и пользы |
+| Известно только, что есть десять задач; содержательных оснований для крупного объёма нет | `solo`, оценка `uncertain` |
+
+Повторение этих ситуаций для Luna Max и Sol Extra High не должно менять
+автовыбор. Явное `Соло` для крупного объёма и явный `Классический` для малого
+сохраняют приоритет; `Баланс` и `Экономичный` остаются только явными с проверкой
+основной сессии. Это набор ожидаемых наблюдений, а не запись исполненного smoke.
 Одинарная синтетика остаётся базовым протоколом; изменение маршрутизации само
 по себе не доказывает изменения стоимости и не требует переписывать старые цифры.
 

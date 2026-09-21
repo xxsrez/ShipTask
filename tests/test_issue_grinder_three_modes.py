@@ -3,7 +3,7 @@ from dataclasses import replace
 import unittest
 from pathlib import Path
 from scripts.issue_grinder_mode_harness import (
-    ExecutionMode, Profile, LUNA_MAX, SOL_XHIGH, BALANCE_VERSION,
+    ExecutionMode, ScopeSize, Profile, LUNA_MAX, SOL_XHIGH, BALANCE_VERSION,
     resolve_mode, mode_dispatch_policy, decide_mode_switch,
 )
 
@@ -22,8 +22,35 @@ class FourModesTest(unittest.TestCase):
                 for count in (0,1,2,20):
                     with self.subTest(model=model,effort=effort,count=count):
                         p=Profile(model,effort)
-                        expected=('balance' if p==LUNA_MAX else 'classic' if p==SOL_XHIGH or (model!='gpt-5.6-luna' and count>1) else 'solo')
-                        self.assertEqual(resolve_mode(p,scope_task_count=count).canonical_mode.value,expected)
+                        for size in ScopeSize:
+                            record=resolve_mode(
+                                p, scope_task_count=count, scope_size=size,
+                                scope_assessment_reason='Separate billing and search features with distinct tests; independent review benefits their integration.',
+                            )
+                            expected='classic' if size is ScopeSize.LARGE else 'solo'
+                            self.assertEqual(record.canonical_mode.value,expected)
+                            self.assertEqual(record.initial_scope_size,size)
+
+    def test_task_count_alone_never_establishes_large_scope(self):
+        for p in (LUNA_MAX,SOL_XHIGH,Profile('gpt-6-astra','high')):
+            self.assertEqual(resolve_mode(p,scope_task_count=100).canonical_mode,ExecutionMode.SOLO)
+
+    def test_large_scope_requires_recorded_reason(self):
+        for reason in ('', '   '):
+            with self.assertRaisesRegex(ValueError,'assessment reason'):
+                resolve_mode(SOL_XHIGH,scope_size=ScopeSize.LARGE,scope_assessment_reason=reason)
+
+    def test_explicit_choice_overrides_scope_assessment(self):
+        for size in ScopeSize:
+            for mode in ExecutionMode:
+                record=resolve_mode(LUNA_MAX,scope_size=size,explicit_mode=mode)
+                self.assertEqual(record.canonical_mode,mode)
+
+    def test_scope_reassessment_cannot_change_continuation(self):
+        for initial, later in ((ScopeSize.LARGE,ScopeSize.SMALL),(ScopeSize.SMALL,ScopeSize.LARGE)):
+            record=resolve_mode(SOL_XHIGH,scope_size=initial,scope_assessment_reason='Independent substantial features and integration review.')
+            resumed=resolve_mode(LUNA_MAX,scope_size=later,saved_record=record,continuity_proven=True)
+            self.assertIs(resumed,record)
 
     def test_explicit_modes_require_eligible_actual_root(self):
         for p in (LUNA_MAX,SOL_XHIGH,Profile('gpt-5.6-luna','high'),Profile('gpt-5.6-luna',None)):
@@ -63,7 +90,7 @@ class FourModesTest(unittest.TestCase):
             self.assertEqual(switched.mode_record.role_profiles.controller,LUNA_MAX)
 
     def test_legacy_balance_cannot_silently_resume(self):
-        current=resolve_mode(LUNA_MAX)
+        current=resolve_mode(LUNA_MAX,explicit_mode=ExecutionMode.BALANCE)
         self.assertEqual(current.mode_contract_version,BALANCE_VERSION)
         old=replace(current,mode_contract_version=None)
         with self.assertRaisesRegex(ValueError,'legacy_balance'):

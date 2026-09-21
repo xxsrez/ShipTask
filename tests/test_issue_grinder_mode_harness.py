@@ -126,9 +126,9 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         for effort in LUNA_EFFORTS:
             with self.subTest(effort=effort):
                 record = resolve_mode(Profile("gpt-5.6-luna", effort))
-                self.assertEqual(record.canonical_mode, ExecutionMode.BALANCE if effort == "max" else ExecutionMode.SOLO)
+                self.assertEqual(record.canonical_mode, ExecutionMode.SOLO)
                 self.assertEqual(record.mode_origin, ModeOrigin.AUTOMATIC)
-        self.assertEqual(resolve_mode(SOL).canonical_mode, ExecutionMode.CLASSIC)
+        self.assertEqual(resolve_mode(SOL).canonical_mode, ExecutionMode.SOLO)
 
     def test_other_modes_keep_luna_max_worker_baseline(self) -> None:
         for mode in (

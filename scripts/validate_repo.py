@@ -500,7 +500,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         "`Соло`",
         "`Классический`",
         "`Экономичный`",
-        "`Экономичный` включается только явно",
+        "`Баланс` и `Экономичный` включаются только явно",
         "не обращается к Task Manager",
         "не вызывает subagents либо\nStrategic Explainer",
     )
@@ -550,7 +550,7 @@ def validate_issue_skill(errors: list[str]) -> None:
         errors,
         (ISSUE_MODES, ISSUE_ROUTING),
         "явный выбор поддерживаемого режима",
-        "иначе — `solo`",
+        "небольшой/средний объём → `solo`, обоснованно крупный → `classic`",
         "`classic`",
         "`gpt-5.6-luna`",
         "`economical`",
