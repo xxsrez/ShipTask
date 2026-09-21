@@ -176,10 +176,11 @@ def resolve_mode(
     # The agent supplies the semantic assessment; this oracle does not infer
     # size from task count, profile or keywords in a justification.
     assessed_size = ScopeSize(scope_size)
-    if explicit_mode is None and assessed_size is ScopeSize.LARGE and not scope_assessment_reason.strip():
+    if explicit_mode is None and main_profile != LUNA_MAX and assessed_size is ScopeSize.LARGE and not scope_assessment_reason.strip():
         raise ValueError("large scope requires a concrete assessment reason")
     canonical_mode = (
         ExecutionMode(explicit_mode) if explicit_mode is not None else
+        ExecutionMode.BALANCE if main_profile == LUNA_MAX else
         ExecutionMode.CLASSIC if assessed_size is ScopeSize.LARGE else
         ExecutionMode.SOLO
     )
@@ -196,6 +197,7 @@ def resolve_mode(
         initial_scope_size=assessed_size,
         mode_selection_reason=(
             "explicit mode choice" if explicit_mode is not None else
+            "Luna Max default" if main_profile == LUNA_MAX else
             scope_assessment_reason or "large scope is not established"
         ),
         initial_main_profile=main_profile,

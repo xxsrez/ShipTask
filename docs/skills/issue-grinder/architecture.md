@@ -555,10 +555,11 @@ canonical mode берётся из run checkpoint и не проектирует
 
 ### 4.1 Однократное разрешение режима
 
-Новый run: explicit mode имеет приоритет. Иначе оцени содержание live scope:
+Новый run: explicit mode имеет приоритет. Иначе exact `gpt-5.6-luna/max`
+выбирает `balance` независимо от объёма. Для остальных профилей оцени live scope:
 небольшой/средний объём → `solo`, обоснованно крупный → `classic`.
-`balance` и `economical` включаются только явно; model/effort, квота и capacity
-не участвуют в оценке объёма.
+`economical` включается только явно; model/effort, квота и capacity не участвуют
+в оценке объёма. Неизвестный профиль не подтверждает Luna Max.
 
 Оценка предшествует стратегической декомпозиции и опирается на уже доступные
 contracts, затронутые подсистемы и зависимости. Крупный объём требует нескольких
@@ -574,7 +575,9 @@ contracts, затронутые подсистемы и зависимости. 
 мешающий самой delivery, разрешается обычным workflow. В mode record сохрани
 `initial_scope_size` (`small`, `medium`, `large` или `uncertain`) и краткое
 `mode_selection_reason`, назвав конкретные работы и, для `large`, пользу
-многоагентного исполнения. Число карточек остаётся описательным полем.
+многоагентного исполнения. Для автоматического `balance` запиши причиной Luna Max;
+оценка объёма для этой ветки не нужна, допустимо `uncertain`.
+Число карточек остаётся описательным полем.
 Механический mode harness принимает эту смысловую оценку как вход и проверяет
 выбор, explicit override и continuity; он не заменяет оценку содержания агентом.
 
@@ -1468,7 +1471,7 @@ Task Manager cancellation statuses от имени Issue Grinder.
 | `IG-GOAL-*` | strategic synthesis, persistent execution context, Goal lifecycle, blocker/final reflection | Strategic Outcome направляет локальные решения без новой задолженности; Goal завершается после fresh empty active scope даже при известном strategic gap |
 | `IG-SCOPE-*` | selector-as-predicate и контрольные refresh points | новые и исключённые issue учитываются до terminal result |
 | `IG-AUTO-*` | explicit-mode gate, полный UAT цикл и границы согласования | нет Production access; разрешённая UAT работа не ждёт рутинного approval |
-| `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint и semantic topology boundary | небольшой/средний и неопределённый объём выбирает `Соло`, обоснованно крупный — `Классический` независимо от модели и числа карточек; недопустимый root отклоняется; `Соло` сохраняет current profile и ноль Issue Grinder execution-subagents; `Баланс` и `Экономичный` включаются только явно; режимы не дрейфуют |
+| `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint и semantic topology boundary | Luna Max выбирает `Баланс` независимо от объёма; остальные профили выбирают `Соло` для небольшого/среднего и неопределённого объёма, `Классический` для обоснованно крупного; число карточек не выбирает режим; недопустимый root отклоняется; `Соло` сохраняет current profile и ноль Issue Grinder execution-subagents; `Экономичный` только явно; режимы не дрейфуют |
 | `IG-HELP-*` | ранний fast path и компактный `mode-help.md` | чистая справка объясняет четыре режима и default без Task Manager, Goal, title mutations или subagents |
 | `IG-MA-*` | dependency-ready packets, isolated writers, integration owner, profile routing и capability-aware stages | параллельные writers изолированы; independent review применяется только там, где его требует contract |
 

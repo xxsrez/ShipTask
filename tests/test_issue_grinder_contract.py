@@ -193,7 +193,7 @@ class IssueGrinderContractTest(unittest.TestCase):
             "не вызывает subagents",
         ):
             self.assertIn(forbidden_effect, mode_help)
-        self.assertIn('`Баланс` и `Экономичный` включаются только явно', mode_help)
+        self.assertIn('`Экономичный` включается только явно', mode_help)
         self.assertIn("observable negative-effects\ncontract `IG-HELP-01`", architecture)
 
     def test_writer_guard_is_fail_closed_and_part_of_runtime(self) -> None:

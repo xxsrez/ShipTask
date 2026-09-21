@@ -27,18 +27,24 @@ class FourModesTest(unittest.TestCase):
                                 p, scope_task_count=count, scope_size=size,
                                 scope_assessment_reason='Separate billing and search features with distinct tests; independent review benefits their integration.',
                             )
-                            expected='classic' if size is ScopeSize.LARGE else 'solo'
+                            expected='balance' if p==LUNA_MAX else 'classic' if size is ScopeSize.LARGE else 'solo'
                             self.assertEqual(record.canonical_mode.value,expected)
                             self.assertEqual(record.initial_scope_size,size)
 
     def test_task_count_alone_never_establishes_large_scope(self):
-        for p in (LUNA_MAX,SOL_XHIGH,Profile('gpt-6-astra','high')):
+        for p in (Profile('gpt-5.6-luna','high'),SOL_XHIGH,Profile('gpt-6-astra','high')):
             self.assertEqual(resolve_mode(p,scope_task_count=100).canonical_mode,ExecutionMode.SOLO)
 
     def test_large_scope_requires_recorded_reason(self):
         for reason in ('', '   '):
             with self.assertRaisesRegex(ValueError,'assessment reason'):
                 resolve_mode(SOL_XHIGH,scope_size=ScopeSize.LARGE,scope_assessment_reason=reason)
+
+    def test_luna_max_default_needs_no_scope_assessment(self):
+        for size in ScopeSize:
+            record=resolve_mode(LUNA_MAX,scope_size=size)
+            self.assertEqual(record.canonical_mode,ExecutionMode.BALANCE)
+            self.assertEqual(record.mode_selection_reason,'Luna Max default')
 
     def test_explicit_choice_overrides_scope_assessment(self):
         for size in ScopeSize:
