@@ -70,7 +70,7 @@ class ScopeReviewerContractTest(unittest.TestCase):
         scope = SCOPE.read_text(encoding="utf-8")
         for marker in (
             'fork_turns="none"',
-            'model="gpt-6-luna"',
+            'model="gpt-5.6-luna"',
             'reasoning_effort="max"',
             "built-in `default` subagent",
             "SCOPE_REVIEWER_LENS_V1",

@@ -40,7 +40,7 @@
   работы, полномочия или действие. ShipTask выбирает один provider по live
   catalog: ordinary при его наличии и разрешении; без provider используется
   native writing. Ordinary provider сохраняет opaque protocol:
-  новый `default` subagent с `fork_turns="none"`, `model="gpt-6-luna"`,
+  новый `default` subagent с `fork_turns="none"`, `model="gpt-5.6-luna"`,
   `reasoning_effort="max"`, compact task и resolvable anchors без inherited
   context/candidate и с exact terminal role lock. Current profile не наследуется,
   а недоступность Luna Max переводит ShipTask в native без скрытой подмены Sol. Invalid
@@ -90,7 +90,7 @@ writer/worktree isolation через двухфазный admission receipt и c
 неизменяемого integration checkout, а также один Strategic Explainer при
 разрешённой роли, а
   для ordinary Explainer также exact clean `fork_turns="none"` admission на
-  `gpt-6-luna`/`max`,
+  `gpt-5.6-luna`/`max`,
 self-discovery и один publication unit на invocation; вне этих invariants evals не
 навязывают topology formula, tool sequence или число alternatives. Auto-title является отдельным best-effort UI convenience:
 проверяются попытка только при доказанной first-turn eligibility, сохранение

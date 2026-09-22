@@ -201,7 +201,7 @@ class ShipTaskExplainerRoutingTest(unittest.TestCase):
         implementation_markers = (
             "STRATEGIC_EXPLAINER_PROVIDER_V1",
             'fork_turns="none"',
-            'model="gpt-6-luna"',
+            'model="gpt-5.6-luna"',
             'reasoning_effort="max"',
             "provider-entrypoint",
             "provider-contract.md",

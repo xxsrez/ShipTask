@@ -169,7 +169,7 @@ security/privacy, reliability, performance/cost, integration/release или др
 top-level collaboration surface с:
 
 - `fork_turns="none"`;
-- `model="gpt-6-luna"`;
+- `model="gpt-5.6-luna"`;
 - `reasoning_effort="max"`;
 - одной compact optic task;
 - exact scope/snapshot identity и resolvable read-only anchors;

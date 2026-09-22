@@ -59,7 +59,7 @@ conflict, atomic rollback и сценарии, где технический с�
 не показывают прошлый плохой output, diagnosis, intended wording, scorecard или
 ожидаемый ответ.
 
-Released provider profile проверяется как exact `gpt-6-luna` с
+Released provider profile проверяется как exact `gpt-5.6-luna` с
 `reasoning_effort="max"`. Прогон на SOL может использоваться как сравнительный
 control, но не заменяет Luna gate и не доказывает поведение установленного
 runtime profile.
@@ -158,7 +158,7 @@ browser или специального renderer без переносимого
 ### Fresh invocation admission
 
 - каждый publication unit запущен новым built-in `default` subagent с
-  `fork_turns="none"`, `model="gpt-6-luna"` и
+  `fork_turns="none"`, `model="gpt-5.6-luna"` и
   `reasoning_effort="max"`;
 - facade вызывает `collaboration.spawn_agent` прямым top-level tool call, а не через
   `functions.exec`; отсутствие этого tool в nested `ALL_TOOLS` не разрешает

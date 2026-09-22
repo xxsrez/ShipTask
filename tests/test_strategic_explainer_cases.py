@@ -182,7 +182,7 @@ class StrategicExplainerCasesTest(unittest.TestCase):
         protocol = normalized((SUITE / "README.md").read_text(encoding="utf-8"))
         for concept in (
             'fork_turns="none"',
-            'model="gpt-6-luna"',
+            'model="gpt-5.6-luna"',
             'reasoning_effort="max"',
             "facts.md",
             "rubric.md",

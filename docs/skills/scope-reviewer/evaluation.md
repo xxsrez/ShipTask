@@ -33,7 +33,7 @@ trace и deterministic guards подтверждают формальные ин
 - final conclusions относятся к одному current versioned snapshot;
 - Requirements integrity optic присутствует в каждом plan review;
 - каждая запущенная optic использует `fork_turns="none"`, built-in `default`,
-  `model="gpt-6-luna"` и `reasoning_effort="max"`;
+  `model="gpt-5.6-luna"` и `reasoning_effort="max"`;
 - недоступная оптика даёт coverage gap, а не молчаливый PASS или self-review
   основной моделью;
 - Human Requirements до и после любого repair byte-identical;
