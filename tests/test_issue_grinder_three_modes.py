@@ -17,7 +17,7 @@ class FourModesTest(unittest.TestCase):
 
     def test_default_matrix(self):
         self.assertEqual({m.value for m in ExecutionMode},{'solo','classic','balance','economical'})
-        for model in ('gpt-5.6-luna','gpt-5.6-sol','gpt-6-astra','unknown'):
+        for model in ('gpt-6-luna','gpt-6-sol','gpt-6-astra','unknown'):
             for effort in (None,'low','high','max','xhigh'):
                 for count in (0,1,2,20):
                     with self.subTest(model=model,effort=effort,count=count):
@@ -32,7 +32,7 @@ class FourModesTest(unittest.TestCase):
                             self.assertEqual(record.initial_scope_size,size)
 
     def test_task_count_alone_never_establishes_large_scope(self):
-        for p in (Profile('gpt-5.6-luna','high'),SOL_XHIGH,Profile('gpt-6-astra','high')):
+        for p in (Profile('gpt-6-luna','high'),SOL_XHIGH,Profile('gpt-6-astra','high')):
             self.assertEqual(resolve_mode(p,scope_task_count=100).canonical_mode,ExecutionMode.SOLO)
 
     def test_large_scope_requires_recorded_reason(self):
@@ -59,7 +59,7 @@ class FourModesTest(unittest.TestCase):
             self.assertIs(resumed,record)
 
     def test_explicit_modes_require_eligible_actual_root(self):
-        for p in (LUNA_MAX,SOL_XHIGH,Profile('gpt-5.6-luna','high'),Profile('gpt-5.6-luna',None)):
+        for p in (LUNA_MAX,SOL_XHIGH,Profile('gpt-6-luna','high'),Profile('gpt-6-luna',None)):
             for mode in ExecutionMode:
                 with self.subTest(p=p,mode=mode):
                     if mode in (ExecutionMode.BALANCE,ExecutionMode.ECONOMICAL) and p!=LUNA_MAX:
@@ -72,7 +72,7 @@ class FourModesTest(unittest.TestCase):
         for mode in (ExecutionMode.BALANCE,ExecutionMode.ECONOMICAL):
             record=resolve_mode(LUNA_MAX,explicit_mode=mode)
             self.assertIs(resolve_mode(LUNA_MAX,saved_record=record,continuity_proven=True),record)
-            for p in (SOL_XHIGH,Profile('gpt-5.6-luna','high'),Profile('gpt-5.6-luna',None)):
+            for p in (SOL_XHIGH,Profile('gpt-6-luna','high'),Profile('gpt-6-luna',None)):
                 with self.assertRaisesRegex(ValueError,'main_profile_required'):
                     resolve_mode(p,saved_record=record,continuity_proven=True)
                 with self.assertRaisesRegex(ValueError,'main_profile_required'):
@@ -86,7 +86,7 @@ class FourModesTest(unittest.TestCase):
     def test_switch_rejects_wrong_or_unknown_current_root(self):
         record=resolve_mode(SOL_XHIGH,explicit_mode=ExecutionMode.SOLO)
         for target in (ExecutionMode.BALANCE,ExecutionMode.ECONOMICAL):
-            for p in (None,SOL_XHIGH,Profile('gpt-5.6-luna','low')):
+            for p in (None,SOL_XHIGH,Profile('gpt-6-luna','low')):
                 with self.assertRaises(ValueError):
                     decide_mode_switch(record,target,explicit_request=True,current_main_profile=p)
             waiting=decide_mode_switch(record,target,explicit_request=True,current_main_profile=LUNA_MAX,active_writer_count=1)

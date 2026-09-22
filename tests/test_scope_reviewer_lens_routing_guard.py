@@ -23,7 +23,7 @@ class ScopeReviewerLensRoutingGuardTest(unittest.TestCase):
             "optic": "requirements-integrity",
             "snapshot_id": "project:p1@versions:t1=3,t2=8",
             "agent_type": "default",
-            "model": "gpt-5.6-luna",
+            "model": "gpt-6-luna",
             "effort": "max",
             "fork_turns": "none",
         }
@@ -32,7 +32,7 @@ class ScopeReviewerLensRoutingGuardTest(unittest.TestCase):
 
     def test_exact_fresh_luna_max_route_is_admitted(self) -> None:
         receipt = self.valid(
-            actual_model="gpt-5.6-luna",
+            actual_model="gpt-6-luna",
             actual_effort="max",
         )
         self.assertTrue(receipt.allowed, receipt.defects)
@@ -42,7 +42,7 @@ class ScopeReviewerLensRoutingGuardTest(unittest.TestCase):
     def test_every_fixed_route_dimension_fails_closed(self) -> None:
         cases = {
             "agent_type": ("worker", "default_agent_required"),
-            "model": ("gpt-5.6-sol", "luna_model_required"),
+            "model": ("gpt-6-sol", "luna_model_required"),
             "effort": ("xhigh", "luna_max_effort_required"),
             "fork_turns": ("all", "fresh_fork_required"),
             "optic": ("  ", "blank_optic"),
@@ -63,6 +63,11 @@ class ScopeReviewerLensRoutingGuardTest(unittest.TestCase):
         self.assertIn("actual_luna_model_mismatch", receipt.defects)
         self.assertIn("actual_luna_effort_mismatch", receipt.defects)
 
+    def test_previous_luna_model_is_rejected(self) -> None:
+        receipt = self.valid(model="gpt-5.6-luna")
+        self.assertFalse(receipt.allowed)
+        self.assertIn("luna_model_required", receipt.defects)
+
     def test_cli_returns_nonzero_for_invalid_route(self) -> None:
         completed = subprocess.run(
             [
@@ -73,7 +78,7 @@ class ScopeReviewerLensRoutingGuardTest(unittest.TestCase):
                 "--snapshot-id",
                 "release:r1@v7",
                 "--model",
-                "gpt-5.6-sol",
+                "gpt-6-sol",
                 "--effort",
                 "max",
                 "--fork-turns",

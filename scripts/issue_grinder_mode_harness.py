@@ -12,7 +12,7 @@ from dataclasses import dataclass, replace
 from enum import Enum
 
 
-LUNA_MODEL = "gpt-5.6-luna"
+LUNA_MODEL = "gpt-6-luna"
 LUNA_MAX_EFFORT = "max"
 ACTIVE_TASK_STATUSES = frozenset({"In Progress", "In Review"})
 FORBIDDEN_UNCHANGED_COORDINATION = frozenset(
@@ -62,12 +62,12 @@ class Profile:
 
 
 LUNA_MAX = Profile(LUNA_MODEL, LUNA_MAX_EFFORT)
-SOL_XHIGH = Profile("gpt-5.6-sol", "xhigh")
+SOL_XHIGH = Profile("gpt-6-sol", "xhigh")
 BALANCE_VERSION = "luna-coordinator-v1"
 
 def require_main_profile(mode: ExecutionMode, profile: Profile) -> None:
     if mode in (ExecutionMode.BALANCE, ExecutionMode.ECONOMICAL) and profile != LUNA_MAX:
-        raise ValueError("main_profile_required: gpt-5.6-luna/max")
+        raise ValueError("main_profile_required: gpt-6-luna/max")
 
 
 

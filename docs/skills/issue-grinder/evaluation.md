@@ -362,7 +362,7 @@ smoke; если live synthetic run не выполнен, это указыва�
 
 ```bash
 python3 scripts/issue_grinder_mode_loading_smoke.py \
-  --model gpt-5.6-luna \
+  --model gpt-6-luna \
   --reasoning-effort max
 ```
 
@@ -379,7 +379,7 @@ routing и topology во время полноценной delivery.
 
 ```bash
 python3 scripts/issue_grinder_solo_topology_smoke.py \
-  --model gpt-5.6-sol \
+  --model gpt-6-sol \
   --reasoning-effort low
 ```
 

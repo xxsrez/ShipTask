@@ -223,7 +223,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         for marker in (
             "issue-grinder/model-routing/v2",
-            "gpt-5.6-luna",
+            "gpt-6-luna",
             "dispatch_fingerprint",
             "actual_luna_model_mismatch",
         ):

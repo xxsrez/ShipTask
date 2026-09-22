@@ -73,7 +73,7 @@ Provider после role resolution не оркестрирует agents и не
 Explainer повторно.
 
 Provider profile является ещё одним внутренним routing invariant: facade router
-создаёт subagent на `gpt-5.6-luna` с `reasoning_effort="max"` и не наследует
+создаёт subagent на `gpt-6-luna` с `reasoning_effort="max"` и не наследует
 current model/effort. Если exact profile недоступен, invocation не подменяется
 SOL или другой моделью; facade возвращает provider unavailability, после чего
 внешний client следует собственной policy.
@@ -96,7 +96,7 @@ provider contract или самой publication task.
 понимание редактурой версии caller-а и загружают в provider низкоуровневую
 конкретику, от которой эта архитектура его намеренно изолирует.
 
-Профиль `gpt-5.6-luna`/`max` решает две связанные задачи. В принятом
+Профиль `gpt-6-luna`/`max` решает две связанные задачи. В принятом
 пользовательском слепом сравнении Luna дала для этой роли лучший результат, чем
 SOL. Одновременно fresh subagent не использует cache context вызывающего агента
 и поэтому создаёт дополнительную стоимость; Luna компенсирует её, а `max`
@@ -121,7 +121,7 @@ topology, fork, profile, role lock, entrypoint и retry в этот contract н�
 Catalog metadata и `SKILL.md` образуют второй слой — facade router и
 детерминированный role resolver. Этот слой знает только invocation/admission
 mechanics и не содержит provider method. Facade создаёт новый built-in `default`
-subagent с `fork_turns="none"`, `model="gpt-5.6-luna"` и
+subagent с `fork_turns="none"`, `model="gpt-6-luna"` и
 `reasoning_effort="max"`, затем передаёт отдельной точной строкой
 `STRATEGIC_EXPLAINER_PROVIDER_V1`. Отсутствие marker означает facade mode;
 наличие marker в compact task означает terminal provider mode. История, tool
@@ -215,7 +215,7 @@ Direct request и вызов из другого workflow адресуют од�
 применяет `$strategic-explainer:strategic-explainer` к одной publication task с
 назначением, exact scope, языком, material constraints и resolvable read-only
 anchors. После загрузки skill facade router создаёт новый built-in `default`
-subagent с `fork_turns="none"`, `model="gpt-5.6-luna"` и
+subagent с `fork_turns="none"`, `model="gpt-6-luna"` и
 `reasoning_effort="max"` через внутренний child-only transport из раздела 1.2.
 Единственный provider task содержит внутренний role
 lock `STRATEGIC_EXPLAINER_PROVIDER_V1` и является compact selector, а не brief

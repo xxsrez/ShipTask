@@ -242,7 +242,7 @@ def parse_args() -> argparse.Namespace:
         help="Run one or more modes; the default is all four.",
     )
     parser.add_argument("--codex-bin", default="codex")
-    parser.add_argument("--model", default="gpt-5.6-luna")
+    parser.add_argument("--model", default="gpt-6-luna")
     parser.add_argument("--reasoning-effort", default="max")
     parser.add_argument("--timeout-seconds", type=int, default=120)
     return parser.parse_args()

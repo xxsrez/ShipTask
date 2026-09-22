@@ -555,7 +555,7 @@ canonical mode берётся из run checkpoint и не проектирует
 
 ### 4.1 Однократное разрешение режима
 
-Новый run: explicit mode имеет приоритет. Иначе exact `gpt-5.6-luna/max`
+Новый run: explicit mode имеет приоритет. Иначе exact `gpt-6-luna/max`
 выбирает `balance` независимо от объёма. Для остальных профилей оцени live scope:
 небольшой/средний объём → `solo`, обоснованно крупный → `classic`.
 `economical` включается только явно; model/effort, квота и capacity не участвуют
@@ -621,7 +621,7 @@ execution profile всегда равен exact effective current top-level mode
 
 - точный пользовательский override конкретной роли применяется первым;
 - `Классический`, `Баланс` и `Экономичный` сохраняют economical
-  baseline `gpt-5.6-luna` с `reasoning_effort=max` для предусмотренных ими Luna
+  baseline `gpt-6-luna` с `reasoning_effort=max` для предусмотренных ими Luna
   ролей;
 - если main profile не сильнее требуемого economical profile, роли могут
   схлопнуться в этот profile только по надёжно установленному правилу;

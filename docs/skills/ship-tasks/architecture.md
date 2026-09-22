@@ -962,7 +962,7 @@ Luna Max; большинство packets — current primary profile, обычн
 Ultra. Последние два имени описывают пользовательский operating profile, а не
 право ShipTask скрыто заменить или повысить модель. Только genuinely simple
 packet запускается на
-`gpt-5.6-luna` с `max`: он self-contained и bounded, имеет ясные inputs и
+`gpt-6-luna` с `max`: он self-contained и bounded, имеет ясные inputs и
 acceptance, даёт объективно проверяемый результат, не требует творческого,
 продуктового или архитектурного решения и не несёт material authority/risk или
 неопределённости окружения. Остальные implementation/research packets наследуют

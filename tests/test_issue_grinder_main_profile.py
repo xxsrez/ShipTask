@@ -12,7 +12,7 @@ ID='00000000-0000-4000-8000-6d21e55b1d2f'
 class MainProfileTest(unittest.TestCase):
     def test_mode_admission_never_normalizes_wrong_effort(self):
         for mode in ('balance','economical'):
-            for model,effort,expected in [('gpt-5.6-luna','max',True),('gpt-5.6-luna','high',False),('gpt-5.6-sol','xhigh',False)]:
+            for model,effort,expected in [('gpt-6-luna','max',True),('gpt-6-luna','high',False),('gpt-6-sol','xhigh',False),('gpt-5.6-luna','max',False)]:
                 r=module.admit_profile({'status':'observed','model':model,'effort':effort},mode)
                 self.assertEqual(r['allowed'],expected)
             self.assertFalse(module.admit_profile({'status':'unknown'},mode)['allowed'])
@@ -20,20 +20,20 @@ class MainProfileTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             p=Path(d)/'sessions';p.mkdir()
             records=[{'type':'session_meta','payload':{'id':ID}},
-                     {'type':'turn_context','payload':{'model':'gpt-5.6-sol','effort':'xhigh'}},
-                     {'type':'turn_context','payload':{'model':'gpt-5.6-luna','effort':'max'}}]
+                     {'type':'turn_context','payload':{'model':'gpt-6-sol','effort':'xhigh'}},
+                     {'type':'turn_context','payload':{'model':'gpt-6-luna','effort':'max'}}]
             (p/f'rollout-{ID}.jsonl').write_text('\n'.join(json.dumps(x) for x in records)+'\n{')
             r=module.read_profile(Path(d),ID)
-            self.assertEqual((r['model'],r['effort']),('gpt-5.6-luna','max'))
+            self.assertEqual((r['model'],r['effort']),('gpt-6-luna','max'))
     def test_no_config_or_other_session_fallback(self):
         with tempfile.TemporaryDirectory() as d:
             p=Path(d)/'sessions';p.mkdir()
-            (Path(d)/'config.toml').write_text('model="gpt-5.6-luna"')
+            (Path(d)/'config.toml').write_text('model="gpt-6-luna"')
             (p/f'rollout-{ID}.jsonl').write_text(json.dumps({'type':'session_meta','payload':{'id':'other'}})+'\n')
             self.assertEqual(module.read_profile(Path(d),ID)['status'],'unknown')
             self.assertEqual(module.read_profile(Path(d),'../other')['status'],'unknown')
     def test_missing_effort_is_not_max(self):
         with tempfile.TemporaryDirectory() as d:
             p=Path(d)/'sessions';p.mkdir()
-            (p/f'rollout-{ID}.jsonl').write_text(json.dumps({'type':'session_meta','payload':{'id':ID}})+'\n'+json.dumps({'type':'turn_context','payload':{'model':'gpt-5.6-luna'}})+'\n')
+            (p/f'rollout-{ID}.jsonl').write_text(json.dumps({'type':'session_meta','payload':{'id':ID}})+'\n'+json.dumps({'type':'turn_context','payload':{'model':'gpt-6-luna'}})+'\n')
             self.assertEqual(module.read_profile(Path(d),ID)['status'],'unknown')

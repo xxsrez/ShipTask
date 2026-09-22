@@ -108,7 +108,7 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
         self.assertIn("resolvable read-only source anchors", public)
         self.assertIn("Не требуй от внешнего workflow", public)
         self.assertIn("нового built-in `default` subagent", internal)
-        self.assertIn('model="gpt-5.6-luna"', internal)
+        self.assertIn('model="gpt-6-luna"', internal)
         self.assertIn('reasoning_effort="max"', internal)
         self.assertIn("Не передавай inherited turns", internal)
         self.assertIn("facade исправляет", internal)
@@ -162,7 +162,7 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
         for marker in (
             "STRATEGIC_EXPLAINER_PROVIDER_V1",
             "fork_turns",
-            "gpt-5.6-luna",
+            "gpt-6-luna",
             "reasoning_effort",
         ):
             self.assertNotIn(marker, metadata)
@@ -170,12 +170,12 @@ class StrategicExplainerRuntimeTest(unittest.TestCase):
     def test_clean_call_recipe_uses_luna_max(self) -> None:
         text = SKILL.read_text()
         self.assertIn('fork_turns="none"', text)
-        self.assertIn('model="gpt-5.6-luna"', text)
+        self.assertIn('model="gpt-6-luna"', text)
         self.assertIn('reasoning_effort="max"', text)
 
         entrypoint = ENTRYPOINT.read_text()
         self.assertNotIn('fork_turns="none"', entrypoint)
-        self.assertNotIn('model="gpt-5.6-luna"', entrypoint)
+        self.assertNotIn('model="gpt-6-luna"', entrypoint)
         self.assertNotIn('reasoning_effort="max"', entrypoint)
         self.assertIn("Facade\nсам владеет clean-call recipe", entrypoint)
 

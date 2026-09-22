@@ -22,18 +22,18 @@ class ModelRoutingGuardTest(unittest.TestCase):
             for override in (False, True):
                 receipt = validate_route(
                     packet_id="retired-route", mode=mode, semantic_role="implementation",
-                    agent_type="worker", model="gpt-5.6-luna", effort="max",
+                    agent_type="worker", model="gpt-6-luna", effort="max",
                     fork_turns="none", user_profile_override=override)
                 self.assertFalse(receipt.allowed)
                 self.assertIn("unknown_mode", receipt.defects)
 
     def test_balance_routes_specialist_and_review_to_sol_xhigh(self):
         for role in ("specialist", "final_review"):
-            for model, effort, allowed in (("gpt-5.6-sol","xhigh",True),("gpt-5.6-sol","high",False),("gpt-5.6-luna","max",False)):
+            for model, effort, allowed in (("gpt-6-sol","xhigh",True),("gpt-6-sol","high",False),("gpt-6-luna","max",False),("gpt-5.6-sol","xhigh",False)):
                 receipt=validate_route(packet_id="balance-"+role, mode="balance", semantic_role=role, agent_type="default", model=model, effort=effort, fork_turns="none")
                 self.assertEqual(receipt.allowed,allowed,receipt.defects)
         self.assertTrue(self.luna_route("balance").allowed)
-        wrong=validate_route(packet_id="balance-worker",mode="balance",semantic_role="implementation",agent_type="worker",model="gpt-5.6-sol",effort="xhigh",fork_turns="none")
+        wrong=validate_route(packet_id="balance-worker",mode="balance",semantic_role="implementation",agent_type="worker",model="gpt-6-sol",effort="xhigh",fork_turns="none")
         self.assertFalse(wrong.allowed)
 
     def luna_route(self, mode: str, role: str = "implementation"):
@@ -43,7 +43,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
             mode=mode,
             semantic_role=role,
             agent_type="worker",
-            model="gpt-5.6-luna",
+            model="gpt-6-luna",
             effort=effort,
             fork_turns="none",
         )
@@ -64,7 +64,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
                     mode=mode,
                     semantic_role="research",
                     agent_type="explorer",
-                    model="gpt-5.6-sol",
+                    model="gpt-6-sol",
                     effort="xhigh",
                     fork_turns="all",
                 )
@@ -82,10 +82,10 @@ class ModelRoutingGuardTest(unittest.TestCase):
                     mode="economical",
                     semantic_role="quality_check",
                     agent_type=agent_type,
-                    model="gpt-5.6-luna",
+                    model="gpt-6-luna",
                     effort="max",
                     fork_turns="none",
-                    actual_model="gpt-5.6-luna",
+                    actual_model="gpt-6-luna",
                     actual_effort="max",
                 )
                 self.assertTrue(receipt.allowed, receipt.defects)
@@ -101,10 +101,10 @@ class ModelRoutingGuardTest(unittest.TestCase):
             mode="economical",
             semantic_role="material_judgment",
             agent_type="default",
-            model="gpt-5.6-sol",
+            model="gpt-6-sol",
             effort="xhigh",
             fork_turns="none",
-            actual_model="gpt-5.6-sol",
+            actual_model="gpt-6-sol",
             actual_effort="xhigh",
         )
         self.assertFalse(receipt.allowed)
@@ -118,7 +118,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
             mode="economical",
             semantic_role="final_review",
             agent_type="default",
-            model="gpt-5.6-sol",
+            model="gpt-6-sol",
             effort="xhigh",
             fork_turns="none",
         )
@@ -131,7 +131,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
             mode="economical",
             semantic_role="test_author",
             agent_type="default",
-            model="gpt-5.6-luna",
+            model="gpt-6-luna",
             effort="high",
             fork_turns="1",
             actual_model="gpt-5.4",
@@ -165,7 +165,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
             mode="economical",
             semantic_role="implementation",
             agent_type="worker",
-            model="gpt-5.6-luna",
+            model="gpt-6-luna",
             effort="high",
             fork_turns="none",
         )
@@ -174,7 +174,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
             mode="economical",
             semantic_role="verifier",
             agent_type="worker",
-            model="gpt-5.6-luna",
+            model="gpt-6-luna",
             effort="max",
             fork_turns="none",
         )
@@ -193,7 +193,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
             mode="economical",
             semantic_role="implementation",
             agent_type="worker",
-            model="gpt-5.6-luna",
+            model="gpt-6-luna",
             effort="max",
             fork_turns="none",
         )
@@ -215,7 +215,7 @@ class ModelRoutingGuardTest(unittest.TestCase):
                 "--agent-type",
                 "worker",
                 "--model",
-                "gpt-5.6-sol",
+                "gpt-6-sol",
                 "--effort",
                 "xhigh",
                 "--fork-turns",

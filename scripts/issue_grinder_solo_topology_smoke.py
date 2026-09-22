@@ -347,7 +347,7 @@ def run_case(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--codex-bin", default="codex")
-    parser.add_argument("--model", default="gpt-5.6-sol")
+    parser.add_argument("--model", default="gpt-6-sol")
     parser.add_argument("--reasoning-effort", default="low")
     parser.add_argument("--timeout-seconds", type=int, default=180)
     parser.add_argument(

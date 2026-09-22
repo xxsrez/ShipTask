@@ -178,7 +178,7 @@ Direct и delegated use являются одним публичным сема�
 
 После применения `$strategic-explainer:strategic-explainer` внутренний facade
 router самостоятельно выполняет каждый invocation новым built-in `default`
-subagent с `fork_turns="none"`, моделью `gpt-5.6-luna` и
+subagent с `fork_turns="none"`, моделью `gpt-6-luna` и
 `reasoning_effort="max"`. Профиль текущего client-а не наследуется и не
 подменяет этот provider profile. В model context provider-а находятся только
 system/developer/skill instructions и одна короткая, ёмкая, однозначная задача
@@ -186,7 +186,7 @@ system/developer/skill instructions и одна короткая, ёмкая, о
 transcript, process diary, прежний candidate, рассуждения client-а и несколько
 смешанных задач запрещены.
 
-Недоступность `gpt-5.6-luna`/`max` не разрешает скрытую подмену SOL или другим
+Недоступность `gpt-6-luna`/`max` не разрешает скрытую подмену SOL или другим
 профилем. Такой provider считается недоступным, facade возвращает operational
 unavailability, а client следует собственной явной fallback policy по `SE-16`
 без имитации Strategic Explainer.

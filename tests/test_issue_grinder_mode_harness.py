@@ -20,7 +20,7 @@ from scripts.issue_grinder_mode_harness import (
 
 
 LUNA_EFFORTS = (None, "none", "minimal", "low", "medium", "high", "xhigh", "max")
-SOL = Profile("gpt-5.6-sol", "xhigh")
+SOL = Profile("gpt-6-sol", "xhigh")
 
 
 def complete_checkpoint() -> EconomicalCheckpoint:
@@ -125,7 +125,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
     def test_single_task_default_is_solo_except_luna_max(self) -> None:
         for effort in LUNA_EFFORTS:
             with self.subTest(effort=effort):
-                record = resolve_mode(Profile("gpt-5.6-luna", effort))
+                record = resolve_mode(Profile("gpt-6-luna", effort))
                 self.assertEqual(record.canonical_mode, ExecutionMode.BALANCE if effort == "max" else ExecutionMode.SOLO)
                 self.assertEqual(record.mode_origin, ModeOrigin.AUTOMATIC)
         self.assertEqual(resolve_mode(SOL).canonical_mode, ExecutionMode.SOLO)
@@ -141,7 +141,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
 
     def test_role_overrides_win(self) -> None:
         controller = Profile("gpt-5.6-terra", "high")
-        worker = Profile("gpt-5.6-luna", "medium")
+        worker = Profile("gpt-6-luna", "medium")
         profiles = normalize_profiles(
             SOL,
             mode=ExecutionMode.CLASSIC,
@@ -154,7 +154,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
     def test_proven_continuation_preserves_mode_after_model_change(self) -> None:
         original = resolve_mode(SOL, explicit_mode=ExecutionMode.CLASSIC)
         resumed = resolve_mode(
-            Profile("gpt-5.6-luna", "none"),
+            Profile("gpt-6-luna", "none"),
             saved_record=original,
             continuity_proven=True,
         )
@@ -163,7 +163,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
     def test_unproven_continuity_returns_to_solo_default(self) -> None:
         old = resolve_mode(SOL, explicit_mode=ExecutionMode.CLASSIC)
         new = resolve_mode(
-            Profile("gpt-5.6-luna", "high"),
+            Profile("gpt-6-luna", "high"),
             saved_record=old,
             continuity_proven=False,
         )

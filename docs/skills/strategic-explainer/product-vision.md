@@ -69,7 +69,7 @@ Explainer — понимание читателя, а не отчёт о про�
 Устойчивые требования ниже описывают outcome, factual grounding, понятность и
 authority boundary. Один механизм задан явно: direct и delegated caller
 используют новый built-in `default` subagent с `fork_turns="none"`,
-`model="gpt-5.6-luna"`, `reasoning_effort="max"`, одной compact task и без
+`model="gpt-6-luna"`, `reasoning_effort="max"`, одной compact task и без
 inherited process context. Current caller profile не наследуется, а exact Luna
 Max не подменяется скрыто на Sol. За этим admission barrier tool sequence, форма
 source note, внутренний reasoning и длина ответа остаются свободными.
