@@ -1,5 +1,10 @@
 # Обзор ShipTask
 
+Исторический обзор удалённого legacy-навыка `$ship-tasks`. Действующий
+delivery-навык — [Issue Grinder](skills/issue-grinder/overview.md). Описанное
+ниже поведение сохранено для понимания прежних решений и не является текущим
+runtime contract.
+
 ShipTask — Task Manager-only delivery policy. Он доводит выбранную Task или
 batch до фактически подтверждённого результата и отражает этот результат в
 Task Manager понятным человеку образом.
@@ -303,7 +308,7 @@ smoke evidence. Отсутствующий UAT receipt — proof gap, а не ve
 - [Scope Reviewer Architecture](skills/scope-reviewer/architecture.md)
 - [Scope Reviewer Evaluation](skills/scope-reviewer/evaluation.md)
 
-Runtime sources — `ship-tasks/SKILL.md`, `task-composer/SKILL.md`,
+Действующие runtime sources — `issue-grinder/SKILL.md`, `task-composer/SKILL.md`,
 `scope-reviewer/SKILL.md` и package `strategic-explainer/`. `SKILL.md` Explainer является semantic facade и
 admission layer к fresh provider, а text-improvement contract загружается только
 terminal subagent. Plugin distribution и installed cache должны быть

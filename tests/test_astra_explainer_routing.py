@@ -15,8 +15,6 @@ class AstraExplainerRoutingTest(unittest.TestCase):
             ROOT / "issue-grinder" / "references" / "strategic-explainer.md",
             ROOT / "task-composer" / "SKILL.md",
             ROOT / "scope-reviewer" / "SKILL.md",
-            ROOT / "ship-tasks" / "SKILL.md",
-            ROOT / "ship-tasks" / "references" / "strategic-explainer.md",
         )
         for path in surfaces:
             text = re.sub(r"\s+", " ", path.read_text(encoding="utf-8"))
@@ -24,14 +22,6 @@ class AstraExplainerRoutingTest(unittest.TestCase):
                 self.assertIn("gpt-6-astra", text)
                 self.assertIn("native", text)
                 self.assertRegex(text, r"Astra[^.]{0,180}(?:не вызывает|не вызывай|без вызова)")
-
-    def test_legacy_matrix_prioritizes_astra_before_provider_availability(self) -> None:
-        protocol = (
-            ROOT / "ship-tasks" / "references" / "strategic-explainer.md"
-        ).read_text(encoding="utf-8")
-        matrix = protocol[protocol.index("## Матрица выбора") : protocol.index("## Ordinary path")]
-        self.assertLess(matrix.index("активна Astra (`gpt-6-astra`)") , matrix.index("доступен и разрешён"))
-        self.assertIn("| активна Astra (`gpt-6-astra`) | native |", matrix)
 
     def test_generic_skill_keeps_explicit_direct_request_exception(self) -> None:
         skill = (ROOT / "strategic-explainer" / "SKILL.md").read_text(

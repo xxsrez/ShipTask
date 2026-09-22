@@ -1,6 +1,8 @@
 # ShipTask: канонический контракт
 
-Статус: current Level 2 contract, 2026-08-27. Применимые Level 1 requirements —
+Статус: исторический Level 2 contract. Legacy runtime удалён из репозитория и
+Marketplace. Документ сохранён для истории решений и не определяет действующий
+workflow. Прежние применимые Level 1 requirements —
 `ST-*` в локальных
 [требованиях пользователя](requirements.md). Эта architecture описывает
 current архитектуру достижения и не может ослаблять Level 1. Основан на
@@ -35,8 +37,8 @@ terminal acceptance определено
 
 ## 0. Compilation contract
 
-Эта architecture вместе с локальным `requirements.md` является полным current
-source package `$ship-tasks`. Runtime `ship-tasks/SKILL.md` — производная
+На момент действия эта architecture вместе с локальным `requirements.md` была
+source package `$ship-tasks`. Удалённый runtime `ship-tasks/SKILL.md` был производной
 смысловая компиляция этих двух документов: его можно удалить и собрать заново,
 сохранив все `ST-*` и выбранную здесь реализацию примерно эквивалентными по
 наблюдаемому поведению. ADR, reports и evaluations дают rationale и evidence,
@@ -761,7 +763,7 @@ candidate завершает не опубликованную unit, а correcti
 unit по наблюдаемой comprehension error. Механизм одинаков для blocked Goal и
 для незавершённого run без Goal.
 
-Client protocol: [runtime reference](../../../ship-tasks/references/strategic-explainer.md).
+Client protocol находился в удалённом legacy runtime reference.
 
 ## 7. Реализация и проверка
 

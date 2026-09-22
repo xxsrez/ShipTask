@@ -19,9 +19,6 @@ docs/skills/
 │   ├── requirements.md
 │   ├── architecture.md
 │   └── evaluation.md
-├── ship-tasks/
-│   ├── requirements.md
-│   └── architecture.md
 ├── scope-reviewer/
 │   ├── overview.md
 │   ├── requirements.md
@@ -122,8 +119,8 @@ level, однако plugin packaging не объединяет source contracts 
   [Architecture](issue-grinder/architecture.md) и
   [Evaluation](issue-grinder/evaluation.md); source package и repository runtime
   созданы, а installed state доказывается отдельно.
-- [`$ship-tasks`](ship-tasks/requirements.md) —
-  [Architecture](ship-tasks/architecture.md).
+- Архив удалённого `$ship-tasks`: [Requirements](ship-tasks/requirements.md)
+  и [Architecture](ship-tasks/architecture.md). Они не являются current source.
 - [`$issue-grinder:scope-reviewer`](scope-reviewer/overview.md) —
   [Requirements](scope-reviewer/requirements.md) и
   [Architecture](scope-reviewer/architecture.md),

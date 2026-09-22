@@ -54,8 +54,8 @@ comments отсутствует. Эта capability планируется отд
   `published`, `not-available` либо `write-outcome-unknown`. Не выдавать
   скипнутый report за опубликованный.
 
-Точный runtime format и capability flow находятся в
-[`ship-tasks/references/delivery-report.md`](../../ship-tasks/references/delivery-report.md).
+Точный runtime reference удалён вместе с legacy `$ship-tasks`; это решение
+сохранено как историческое.
 
 ## Последствия
 

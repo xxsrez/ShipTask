@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate ShipTask structure and current behavioral invariants."""
+"""Validate active skills and retirement of the legacy ShipTask runtime."""
 
 from __future__ import annotations
 
@@ -54,8 +54,6 @@ ISSUE_SOLO_TOPOLOGY_SMOKE = (
 ISSUE_SOLO_TOPOLOGY_SMOKE_TEST = (
     ROOT / "tests" / "test_issue_grinder_solo_topology_smoke.py"
 )
-SHIP_SKILL = ROOT / "ship-tasks" / "SKILL.md"
-SHIP_METADATA = ROOT / "ship-tasks" / "agents" / "openai.yaml"
 COMPOSER_SKILL = ROOT / "task-composer" / "SKILL.md"
 COMPOSER_REFERENCES = tuple(
     ROOT / "task-composer" / "references" / name
@@ -117,13 +115,6 @@ TERMINAL_ROUTING_REPORT = (
 )
 ADAPTER = ROOT / "docs" / "reference" / "task-manager-adapter.md"
 VISION = SKILL_SOURCES / "strategic-explainer" / "product-vision.md"
-REPORT = ROOT / "ship-tasks" / "references" / "delivery-report.md"
-RUN_REPORT = ROOT / "ship-tasks" / "references" / "run-report.md"
-AUTONOMY = ROOT / "ship-tasks" / "references" / "autonomy-and-release.md"
-MEMORY = ROOT / "ship-tasks" / "references" / "project-memory.md"
-HANDOFF = ROOT / "ship-tasks" / "references" / "strategic-explainer.md"
-THREAD_TITLE = ROOT / "ship-tasks" / "references" / "thread-title.md"
-CRITICAL_REVIEW = ROOT / "ship-tasks" / "references" / "critical-codebase-review.md"
 
 ADR = {
     number: ROOT / "docs" / "decisions" / name
@@ -233,8 +224,6 @@ CORE_FILES = (
     ISSUE_MODE_LOADING_SMOKE_TEST,
     ISSUE_SOLO_TOPOLOGY_SMOKE,
     ISSUE_SOLO_TOPOLOGY_SMOKE_TEST,
-    SHIP_SKILL,
-    SHIP_METADATA,
     COMPOSER_SKILL,
     *COMPOSER_REFERENCES,
     COMPOSER_METADATA,
@@ -254,7 +243,6 @@ CORE_FILES = (
     ISSUE_HELP,
     ISSUE_RUN,
     ISSUE_MODE_GUIDE,
-    SPEC,
     COMPOSER_SPEC,
     SCOPE_SPEC,
     SCOPE_EVALUATION,
@@ -263,6 +251,7 @@ CORE_FILES = (
     ISSUE_OVERVIEW,
     ISSUE_REQUIREMENTS,
     SHIP_REQUIREMENTS,
+    SPEC,
     COMPOSER_OVERVIEW,
     COMPOSER_REQUIREMENTS,
     SCOPE_OVERVIEW,
@@ -278,84 +267,7 @@ CORE_FILES = (
     STRATEGIC_EVALUATION,
     ADAPTER,
     VISION,
-    REPORT,
-    RUN_REPORT,
-    AUTONOMY,
-    MEMORY,
-    HANDOFF,
-    THREAD_TITLE,
-    CRITICAL_REVIEW,
     *ADR.values(),
-)
-
-# These files describe current behavior. Historical reports and superseded ADRs
-# may retain old wording, but cannot act as fallback policy.
-CURRENT_CONTRACT_FILES = (
-    ROOT / "README.md",
-    ROOT / "AGENTS.md",
-    ISSUE_SKILL,
-    ISSUE_METADATA,
-    ISSUE_SPEC,
-    ISSUE_EVALUATION,
-    ISSUE_OVERVIEW,
-    ISSUE_REQUIREMENTS,
-    ISSUE_WORKTREE_GUARD,
-    ISSUE_HELP,
-    ISSUE_RUN,
-    ISSUE_MODE_GUIDE,
-    SHIP_SKILL,
-    SHIP_METADATA,
-    COMPOSER_SKILL,
-    COMPOSER_METADATA,
-    SCOPE_SKILL,
-    SCOPE_METADATA,
-    SCOPE_REVIEW,
-    SCOPE_REPAIR,
-    SCOPE_REPORTING,
-    SCOPE_SPEC,
-    SCOPE_EVALUATION,
-    SCOPE_OVERVIEW,
-    SCOPE_REQUIREMENTS,
-    STRATEGIC_SKILL,
-    STRATEGIC_METADATA,
-    SPEC,
-    COMPOSER_SPEC,
-    COMPOSER_OVERVIEW,
-    STRATEGIC_SPEC,
-    SOURCE_INDEX,
-    SHIP_REQUIREMENTS,
-    COMPOSER_REQUIREMENTS,
-    STRATEGIC_REQUIREMENTS,
-    STRATEGIC_OVERVIEW,
-    OVERVIEW,
-    DOCS_INDEX,
-    PHILOSOPHY,
-    DEVELOPMENT,
-    REVIEW_MATRIX,
-    COMPOSER_EVALUATION,
-    STRATEGIC_EVALUATION,
-    VISION,
-    REPORT,
-    RUN_REPORT,
-    AUTONOMY,
-    MEMORY,
-    HANDOFF,
-    THREAD_TITLE,
-    ADR["0018"],
-    ADR["0019"],
-    ADR["0020"],
-    ADR["0021"],
-    ADR["0022"],
-    ADR["0023"],
-    ADR["0024"],
-    ADR["0025"],
-    ADR["0026"],
-    ADR["0027"],
-    ADR["0028"],
-    ADR["0029"],
-    ADR["0031"],
-    ADAPTER,
-    CRITICAL_REVIEW,
 )
 
 LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
@@ -812,213 +724,6 @@ def validate_issue_skill(errors: list[str]) -> None:
     )
 
 
-def validate_ship_skill(errors: list[str]) -> None:
-    validate_frontmatter(errors, SHIP_SKILL, "ship-tasks", 330)
-    text = read(SHIP_SKILL)
-    description = text.split("---", 2)[1] if text.count("---") >= 2 else ""
-
-    for term in (
-        "$ship-tasks",
-        "Task Manager scope",
-        "неявно только",
-        "TM-123",
-        "одного delivery-глагола недостаточно",
-        "Create-and-deliver",
-        "Bare invocation определяет mode по live inventory",
-        "Goal нужен только для implementation/rework минимум двух Tasks",
-        "per-Task gate",
-        "периодический review-batch",
-        "exact UAT release",
-        "critical-codebase fallback",
-        "backlog capture",
-    ):
-        if term not in description:
-            fail(errors, f"ship-tasks description is missing routing concept {term!r}")
-
-    required_sections = (
-        "## 1. Выбери mode и exact scope",
-        "## 2. Соблюдай обязательные требования",
-        "## 3. Выполни и проверь result",
-        "## 4. Разбери приёмку по текущим фактам",
-        "## 5. Обеспечь человеческое объяснение",
-        "## 6. Продолжай автономно и финализируй",
-    )
-    for heading in required_sections:
-        if section(text, heading) is None:
-            fail(errors, f"ship-tasks/SKILL.md is missing section {heading!r}")
-
-    require(
-        errors,
-        SHIP_SKILL,
-        "полный exact scope",
-        "принадлежит Task Composer",
-        "current parent chain до ближайшего relevant Epic целиком",
-        "передай bounded context любому implementation/review packet",
-        "Epic задаёт смысл и планку качества, но не расширяет selector/scope",
-        "TASK CONTEXT ALARM",
-        "Доказательство важнее выбранного способа",
-        "Сбой одного выбранного способа",
-        "не делает его обязательным",
-        "Не снижай current acceptance ради удобства",
-        "как обеспечить это, решает агент",
-        "task-contract-conflict",
-        "verified-success",
-        "verified-failure",
-        "verification-blocked",
-        "critical-codebase-accepted",
-        "fork_turns=\"none\"",
-        "In Review → In Progress",
-        "продолжай rework в этом же run",
-        "гарантированная часть current Task Manager adapter",
-        "Не скрывай приёмочный инцидент",
-        "немедленно сообщи в Codex chat",
-        "каждые 10 минут",
-        "краткий перечень существенных инцидентов",
-        "Материальные `blocked by` gates отчитай отдельно",
-        "$strategic-explainer:strategic-explainer",
-        "Canonical `Backlog` не входит в delivery inventory",
-        "closed selectors",
-        "live selectors",
-        "audit snapshot",
-        "не требует approval",
-        "Browser/controller/session switch — диагностика, не repair",
-        "browser logistics не stop condition",
-        "fresh full inventory",
-        "`blocked by` открывает dependent implementation по readiness gate",
-        "fan-in нужного blocking Task contract",
-        "`Done` не требуется",
-        "dependent Task уже runnable",
-        "не инвалидируй независимые Tasks/evidence",
-        "сам release новый Goal не создаёт",
-        "Release-only run Goal не создаёт",
-        "`Duplicate` отдельно не\nисполняй",
-        "После смены session и до новой implementation surface найди task-owned Git state",
-        "unfinished worktree/branch существует",
-        "прежний writer остановлен",
-        "прими тот же artifact и продолжай",
-        "active/unknown ownership не перехватывай",
-        "Исполняй topology rule пользователя, иначе выбирай автоматически",
-        "effective topology rule",
-        "exact/relative число",
-        "Root не входит в явно\nназванное число субагентов",
-        "Только без применимого rule сам решай",
-        "rule не подменяй молча",
-        "Role-scoped rule меняет\nтолько названную роль",
-        "только genuinely simple packet запускай на `gpt-6-luna`/`max`",
-        "Strategic Explainer не относится к этому profile routing",
-        "вызывает\nтолько его semantic facade",
-        "Luna прекращает packet без\ncorrective mutations",
-        "integration\nowner на current profile без повторного cheap Luna loop",
-        "`luna-escalation=not-available` без скрытой подмены Sol",
-        "явный unavailable user profile не подменяй",
-        "единственный integration owner",
-        "владелец Goal, Task Manager\ncomments/status/version writes",
-        "Только основной агент выполняет Task Manager comment/status/version write",
-        "Worker, reviewer, scout",
-        "только facts и evidence",
-        "Прямая запись субагента не считается выполнением обязательной publication unit",
-        "корректирующий comment",
-        "собственную feature branch и собственный Git worktree",
-        "terminal handoff gate",
-        "Basis не компенсирует пропуск",
-        "runnable work: blocker candidate отменяется",
-        "fresh correction unit",
-        "Даже без Goal незавершённый Release/Project/scope",
-        "Один writable worktree принадлежит одному writer",
-        "Только integration owner делает fan-in",
-        "Общий no-subagent rule означает ноль субагентов во всём run",
-        "внутренняя target/width accounting не требуется",
-        "сохраняй unrelated пользовательские изменения",
-        "не используй blind rollback или destructive cleanup",
-        "В начале run выбери communication mode",
-        "ordinary `$strategic-explainer:strategic-explainer`",
-        "иначе native",
-        "не делай второй editorial\nrewrite",
-        "не имитируй внутренний\nметод provider",
-        "Обычный `To Do → In Progress` не запускает publication unit",
-        "Финальный ответ — новая scope-level unit",
-        "Каждый Task Manager comment, отдельный\nTask/scope report, blocker explanation и final",
-        "semantic facade `$strategic-explainer:strategic-explainer`",
-        "назначение publication unit, исходный вопрос, exact scope, язык",
-        "никакие другие invocation parameters или provider instructions",
-        "Operational unavailability или любая другая финальная ошибка facade",
-        "provider explanation/source basis как\nreflection input",
-        "Достаточный путь отменяет\nstale blocker",
-        "до `update_goal(status=blocked)`",
-        "не переиспользует Task comment provider",
-        "первичную причину невозможности продолжать",
-        "наблюдаемый сигнал возобновления",
-        "Периодический UAT batch release",
-        "лёгкий targeted gate",
-        "разумный exact integrated batch",
-        "один exact candidate в verified UAT",
-        "Не деплой UAT после каждой bug/Task",
-        "UAT — разрешённый non-production effect",
-        "UAT read-back/smoke",
-        "`blocked by` открывает dependent implementation",
-        "[title contract](references/thread-title.md)",
-        "доказанный catalog placeholder",
-        "best-effort",
-        "не блокируют",
-    )
-
-    require(
-        errors,
-        THREAD_TITLE,
-        "Best-effort название Codex task",
-        "codex_app__list_threads",
-        "codex_app__read_thread",
-        "codex_app__set_thread_title",
-        "ровно одного кандидата calling task",
-        "Не\n   выбирай просто самый свежий task",
-        "history не paginated",
-        "Meaningful title",
-        "до первой Task Manager mutation",
-        "create-and-deliver ждёт create/read-back exact\nTask",
-        "без `threadId`",
-        "не передавай discovery candidate id",
-        "task-title=renamed",
-        "task-title=preserved",
-        "task-title=not-available",
-    )
-
-    require(
-        errors,
-        SHIP_METADATA,
-        'display_name: "Ship Tasks"',
-        'short_description: "Доставить выбранный Task Manager scope"',
-        "$ship-tasks",
-        'value: "task-manager"',
-        "allow_implicit_invocation: true",
-        "live scope",
-        "task-owned worktree/branch",
-        "natural-language правила пользователя",
-        "без такого правила выбери полезную delegation автоматически",
-        "отдельным feature branches и Git worktrees",
-        "Не ослабляй acceptance",
-        "все remaining In Review verification-blocked",
-        "substantial human verifier, не bounded unlocker",
-        "Ровно один read-only critic",
-        "fork_turns=none",
-        "per-Task verdict",
-        "stale/inconclusive остаётся In Review",
-        "SHIPTASK RUN REPORT",
-        "Периодический UAT batch release",
-        "один exact candidate в verified UAT",
-        "UAT — разрешённый non-production effect",
-        "UAT read-back/smoke",
-    )
-    metadata = read(SHIP_METADATA)
-    prompt_match = re.search(r'^\s*default_prompt:\s*"(.*)"\s*$', metadata, re.MULTILINE)
-    if prompt_match is None:
-        fail(errors, f"{relative(SHIP_METADATA)} is missing one-line default_prompt")
-    elif len(prompt_match.group(1)) > 1024:
-        fail(
-            errors,
-            f"{relative(SHIP_METADATA)} default_prompt exceeds App Server limit of 1024 characters",
-        )
-
-
 def validate_composer_skill(errors: list[str]) -> None:
     validate_frontmatter(errors, COMPOSER_SKILL, "task-composer", 180)
     require(
@@ -1471,15 +1176,7 @@ def validate_strategic_skill(errors: list[str]) -> None:
 
 def validate_strategic_provider_encapsulation(errors: list[str]) -> None:
     caller_files = (
-        SHIP_SKILL,
         *COMPOSER_RUNTIME,
-        HANDOFF,
-        REPORT,
-        RUN_REPORT,
-        AUTONOMY,
-        CRITICAL_REVIEW,
-        SHIP_REQUIREMENTS,
-        SPEC,
         COMPOSER_REQUIREMENTS,
         COMPOSER_SPEC,
         SCOPE_SKILL,
@@ -1520,8 +1217,6 @@ def validate_strategic_provider_encapsulation(errors: list[str]) -> None:
         )
 
     semantic_surfaces = (
-        (HANDOFF, read(HANDOFF)),
-        (SHIP_SKILL, section(read(SHIP_SKILL), "## 5. Обеспечь человеческое объяснение")),
         (SHIP_REQUIREMENTS, section(read(SHIP_REQUIREMENTS), "### `ST-07` — Понятное объяснение через выбранный Explainer или native mode")),
         (SPEC, section(read(SPEC), "## 6. Человеческое объяснение")),
         *((path, read(path)) for path in COMPOSER_RUNTIME),
@@ -1552,18 +1247,6 @@ def validate_strategic_provider_encapsulation(errors: list[str]) -> None:
                     f"{relative(path)} leaks Strategic Explainer implementation {marker!r}",
                 )
 
-    if len(read(HANDOFF).splitlines()) > 130:
-        fail(errors, "ship-tasks Strategic Explainer client reference is not compact")
-
-    require(
-        errors,
-        SHIP_SKILL,
-        "ordinary `$strategic-explainer:strategic-explainer`",
-        "иначе native",
-        "финальная ошибка facade\nпереводит mode в native",
-        "semantic facade `$strategic-explainer:strategic-explainer`",
-        "не имитируй внутренний\nметод provider",
-    )
     require(
         errors,
         COMPOSER_RUNTIME,
@@ -1591,60 +1274,6 @@ def validate_strategic_provider_encapsulation(errors: list[str]) -> None:
         "Только fresh subagent после успешного admission",
         "не включают self-fallback",
     )
-
-
-TRIGGER_CASES = {
-    "$ship-tasks": (
-        "да",
-        "mode по live inventory; Goal только для `batch-implementation`",
-    ),
-    "Выполни TM-123": ("да", "`single` для exact существующей Task"),
-    "Доведи выбранный Task Manager Project Alpha": (
-        "да",
-        "mode по фактической работе; selector не создаёт Goal",
-    ),
-    "Выпусти выбранный Task Manager Release 0.2 на production": (
-        "да",
-        "`release` без Goal; production authority дана exact запросом",
-    ),
-    "Имплементируй все незавершённые Tasks выбранного Release 0.2": (
-        "да",
-        "`batch-implementation` с Goal и `subagents=auto` после live inventory",
-    ),
-    "Имплементируй все незавершённые Tasks выбранного Release 0.2, но без субагентов": (
-        "да",
-        "`batch-implementation` с Goal и `subagents=off`",
-    ),
-    "Доведи текущий Task Manager scope": (
-        "да",
-        "mode по фактической работе; Goal только при имплементации 2+ Tasks",
-    ),
-    "Создай ровно одну Task в Task Manager: исправить импорт, и сразу начни выполнять её": (
-        "да",
-        "`single create-and-deliver`",
-    ),
-    "Почини X сейчас": ("нет", "обычная реализация без Task Manager scope"),
-    "Исправь баг в plugin": ("нет", "обычная реализация без Task Manager scope"),
-    "Реализуй это изменение в коде": ("нет", "обычная реализация без Task Manager scope"),
-    "Покажи статус TM-123": ("нет", "read-only Task Manager adapter"),
-    "Проведи аудит TM-123": ("нет", "read-only Task Manager adapter"),
-    "Создай Task в Task Manager": ("нет", "Task Composer planning write, без delivery flow"),
-    "Просто добавь это в backlog": ("нет", "Task Composer backlog capture, без delivery flow"),
-}
-
-
-def validate_trigger_matrix(errors: list[str]) -> None:
-    rows = table_rows(read(SPEC), "### 1.2 Проверяемая trigger matrix")
-    data = {cells[0].strip("`"): cells[1:] for cells in rows[1:] if len(cells) == 3}
-    if set(data) != set(TRIGGER_CASES):
-        missing = sorted(set(TRIGGER_CASES) - set(data))
-        extra = sorted(set(data) - set(TRIGGER_CASES))
-        fail(errors, f"trigger matrix mismatch; missing={missing}, extra={extra}")
-        return
-    for prompt, expected in TRIGGER_CASES.items():
-        actual = tuple(data[prompt])
-        if actual != expected:
-            fail(errors, f"trigger case {prompt!r} is {actual}, expected {expected}")
 
 
 COMPOSER_TRIGGER_CASES = {
@@ -2098,7 +1727,6 @@ def validate_review_matrix(errors: list[str]) -> None:
 
 def validate_source_layers(errors: list[str]) -> None:
     packages = (
-        (SHIP_REQUIREMENTS, "ST", 29),
         (COMPOSER_REQUIREMENTS, "TC", 12),
         (SCOPE_REQUIREMENTS, "SR", 13),
         (STRATEGIC_REQUIREMENTS, "SE", 19),
@@ -2114,42 +1742,30 @@ def validate_source_layers(errors: list[str]) -> None:
                 f"{relative(requirements)} requirement IDs are missing, duplicated, "
                 f"or out of order: {requirement_ids}",
             )
-        if requirements == SHIP_REQUIREMENTS:
+        level_one_status = {
+            COMPOSER_REQUIREMENTS: "Статус: current Level 1, 2026-08-27",
+            SCOPE_REQUIREMENTS: "Статус: current Level 1, 2026-09-02",
+            STRATEGIC_REQUIREMENTS: "Статус: current Level 1, 2026-09-03",
+        }[requirements]
+        require(
+            errors,
+            requirements,
+            level_one_status,
+            "полный пользовательский исходный код только для",
+            "не могут ослабить, заменить или\nмолча удалить",
+            "Изменение смысла Level 1 требует явного решения пользователя",
+            "`architecture.md` хранит agent-owned current способ достижения",
+            "примерно\nэквивалентен",
+        )
+        if requirements == COMPOSER_REQUIREMENTS:
             require(
                 errors,
                 requirements,
-                "Статус: действующий Level 1.",
-                "полный набор действующих пользовательских требований только к",
-                "не вправе ослаблять, заменять или молча удалять требования",
-                "Смысл Level 1 меняется только по явному решению пользователя",
-                "`architecture.md` описывает текущий инженерный способ",
-                "семантически эквивалентным всем требованиям `ST-*`",
+                "принадлежит пользователю",
+                "указанию изменить именно Requirements",
+                "локальных\nOverview, Requirements и Architecture",
+                "трёх самостоятельных документов",
             )
-        else:
-            level_one_status = {
-                COMPOSER_REQUIREMENTS: "Статус: current Level 1, 2026-08-27",
-                SCOPE_REQUIREMENTS: "Статус: current Level 1, 2026-09-02",
-                STRATEGIC_REQUIREMENTS: "Статус: current Level 1, 2026-09-03",
-            }[requirements]
-            require(
-                errors,
-                requirements,
-                level_one_status,
-                "полный пользовательский исходный код только для",
-                "не могут ослабить, заменить или\nмолча удалить",
-                "Изменение смысла Level 1 требует явного решения пользователя",
-                "`architecture.md` хранит agent-owned current способ достижения",
-                "примерно\nэквивалентен",
-            )
-            if requirements == COMPOSER_REQUIREMENTS:
-                require(
-                    errors,
-                    requirements,
-                    "принадлежит пользователю",
-                    "указанию изменить именно Requirements",
-                    "локальных\nOverview, Requirements и Architecture",
-                    "трёх самостоятельных документов",
-                )
 
     require(
         errors,
@@ -2389,7 +2005,6 @@ def validate_source_layers(errors: list[str]) -> None:
     )
     for architecture, prefix, status_marker in (
         (ISSUE_SPEC, "IG-*", "Статус: current agent-owned Architecture, 2026-09-12"),
-        (SPEC, "ST-*", "Статус: current Level 2 contract, 2026-08-27"),
         (COMPOSER_SPEC, "TC-*", "Статус: current agent-owned Architecture, 2026-09-02"),
         (SCOPE_SPEC, "SR-*", "Статус: current agent-owned Architecture, 2026-09-02"),
         (STRATEGIC_SPEC, "SE-*", "Статус: current agent-owned Architecture, 2026-09-03"),
@@ -2524,21 +2139,11 @@ def validate_source_layers(errors: list[str]) -> None:
         errors,
         ROOT / "README.md",
         "[`docs/skills/<skill>/`](docs/skills/README.md)",
-        "Документы пяти skills не\nобъединяются",
-        "Project, Release и\ncurrent scope остаются live selectors",
-        "без повторного approval",
-        "Browser switch допустим как диагностика",
-        "не как repair",
-        "`blocked by` управляет доступностью реализации",
-        "поздний defect\nинвалидирует только доказанно затронутые downstream results",
-        "[Мануал по режимам](docs/guides/issue-grinder-modes.md)",
-        "сохраняя применимый strategic\ncontext в каждой child Task",
-        "ShipTask перечитывает current Epic",
-        "не расширяет exact child scope",
-        "Scope Reviewer превращает распределённый план или ход Release",
-        "только явная просьба улучшить план разрешает менять",
-        "Human Requirements, delivery lifecycle и рабочие\nстатусы skill не меняет",
-        "новый Explainer result как\nreflection input",
+        "Legacy `$ship-tasks` удалён из runtime и Marketplace",
+        "[мануале по режимам](docs/guides/issue-grinder-modes.md)",
+        "`$issue-grinder:task-composer` формулирует",
+        "`$issue-grinder:scope-reviewer` проверяет план",
+        "`$strategic-explainer:strategic-explainer` готовит текст",
     )
     require(
         errors,
@@ -2585,576 +2190,6 @@ def validate_source_layers(errors: list[str]) -> None:
     )
 
 
-def validate_current_contract(errors: list[str]) -> None:
-    require(
-        errors,
-        SPEC,
-        "Статус: current Level 2 contract, 2026-08-27",
-        "`ST-*` в локальных",
-        "[требованиях пользователя](requirements.md)",
-        "ADR-0018",
-        "ADR-0019",
-        "ADR-0020",
-        "ADR-0021",
-        "ADR-0022",
-        "ADR-0024",
-        "ADR-0025",
-        "ADR-0026",
-        "ADR-0027",
-        "ADR-0028",
-        "ADR-0029",
-        "ADR-0031",
-        "ADR-0033",
-        "### 1.4 Dependency-ready frontier",
-        "`Done` blocking Task в этот gate не входит",
-        "Relation не удаляется",
-        "не возвращает независимые Tasks в rework",
-        "Dependency readiness управляет scheduling, но не release truth",
-        "### 1.5 Epic context gate",
-        "читает полный Epic",
-        "self-contained implementation и review packet",
-        "не добавляет sibling Tasks в selector",
-        "task-contract-conflict` до\nзатронутой mutation",
-        "другая independent runnable work\nпродолжается",
-        "### 7.2 Per-Task gates и периодический UAT batch",
-        "один deploy того же exact candidate в verified UAT",
-        "standing authority периодического release",
-        "не нужно спрашивать approval после каждой Task",
-        "### 1.3 Best-effort название текущей Codex task",
-        "best-effort попытки\nзаменить placeholder",
-        "ровно одного current candidate",
-        "не более одной попытки `codex_app__set_thread_title` без `threadId`",
-        "task-title=not-available",
-        "## 2. Конституция",
-        "### 7.1 Resume-first",
-        "task-owned feature branch и worktree содержат незавершённый candidate",
-        "создавать параллельный replacement worktree",
-        "предыдущий writer всё ещё активен",
-        "Остановка writer или Codex-сессии не превращает task-owned worktree в мусор",
-        "После доказанной quiescence ownership может",
-        "effective topology policy",
-        "точное или относительное число",
-        "Root/coordinator не входит",
-        "Только если применимого user rule нет",
-        "comment",
-        "до записи статуса",
-        "всегда создаёт и перечитывает обязательный comment",
-        "ordinary `$strategic-explainer:strategic-explainer`, если он доступен и",
-        "иначе native",
-        "переводит mode в native",
-        "`To Do → In Progress` комментария не создаёт",
-        "Приёмочный инцидент виден сразу",
-        "примерно каждые 10 минут",
-        "compact ledger всех material incidents",
-        "current acceptance не ослаблен",
-        "не найден достаточный безопасный способ продолжить",
-        "Нет фиксированного числа попыток",
-        "продолжает исправление в том же run",
-        "Goal создаётся только для `batch-implementation`",
-        "production release уже подготовленного candidate",
-        "Release-only run не создаёт",
-        "Delivery inventory исключает canonical status `Backlog`",
-        "Selector и inventory — разные сущности",
-        "Project, Release и resolved current scope\nявляются live selectors",
-        "не замораживает count, диапазон\nrefs или список Tasks",
-        "повторное approval не требуется",
-        "Browser/controller/session switch — один из диагностических способов",
-        "browser logistics сообщаются после установленного product\noutcome",
-        "Goal active и не требует его retarget или approval",
-        "### 0.1 Current compilation status",
-        "`Backlog` исключён из\ndelivery",
-        "natural-language правила о числе, ролях и условиях delegation",
-        "собственные branch/worktree",
-        "Exact count\nозначает обязательное число subagents",
-        "Conditional rule проверяется по указанному\nпользователем условию",
-        "Только genuinely simple packet запускается на\n`gpt-6-luna` с `max`",
-        "Strategic Explainer не относится к этой классификации",
-        "вызывает только его semantic facade",
-        "operational unavailability\nпереводит communication mode в native writing",
-        "повторно отправлять ту же неразрешённую проблему cheap Luna lane\nнельзя",
-        "его собственный выбор несовместимой формы context не делает profile\nunavailable",
-        "`<profile>=not-available` уменьшает\ncapacity соответствующей роли",
-        "Luna-to-current handoff",
-        "единственный integration owner",
-        "владелец Goal, Task Manager\ncomments/status/version writes",
-        "собственную feature branch и собственный Git worktree",
-        "Read-only scouts, reviewers и\ncomment Explainer отдельного worktree не требуют",
-        "Только integration\nowner выполняет fan-in",
-        "Role-scoped rule меняет только названную роль",
-        "effective смысл и\nподтверждают соблюдение либо material deviation",
-        "не читает и не имитирует provider method",
-        "### 5.5 Критическая приёмка по кодовой базе",
-        "every remaining blocker needs a human verifier, not an unlocker",
-        "ровно одного read-only subagent role `critic`",
-        "`fork_turns=\"none\"`",
-        "`critical-codebase-accepted`",
-        "не полноценной\nфункциональной приёмкой",
-        "candidate report и перечитывает explanation/source basis",
-        "candidate blocker не\nпубликуется",
-        "один\nreflection pass",
-    )
-    require(
-        errors,
-        OVERVIEW,
-        "Constitution-first подход",
-        "comment read-back",
-        "агент сам выбирает и меняет инструменты",
-        "не обязывает чинить именно его",
-        "непроведённая\n  functional check остаётся честно видна",
-        "ADR-0018",
-        "ADR-0019",
-        "ADR-0020",
-        "ADR-0021",
-        "ADR-0022",
-        "ADR-0024",
-        "ADR-0025",
-        "ADR-0026",
-        "ADR-0027",
-        "ADR-0028",
-        "`blocked by` открывает dependent implementation",
-        "late attributed defect инвалидирует",
-        "гарантированной adapter capability",
-        "каждый создаваемый ShipTask-комментарий",
-        "durable Task history",
-        "Goal используется только для прогресса массовой имплементации",
-        "production release",
-        "несколько независимых safe lanes",
-        "genuinely simple\n  implementation/research packets получают Luna Max",
-        "Strategic Explainer не входит в caller\n  profile routing",
-        "без повторного Luna loop",
-        "exact/relative count",
-        "root\n  agent не считается названным субагентом",
-        "condition",
-        "собственной feature branch\n  и собственном Git worktree",
-        "interrupted task-owned worktree/branch",
-        "подхватывается следующей сессией",
-        "best-effort",
-        "последующие turns не переименовываются",
-        "Project, Release и\nresolved current scope — live selectors",
-        "без повторного approval",
-        "Browser/controller/session switch — диагностический путь",
-        "product outcome идёт раньше browser/OAuth logistics",
-        "identity/predicate, не стартовый список или count",
-        "лёгкий targeted gate",
-        "один exact UAT deploy",
-        "UAT — обычный разрешённый non-production effect",
-        "`critical-codebase-accepted`",
-        "`fork_turns=\"none\"`",
-        "Task type хранится в Label/hierarchy",
-        "не дублируется\nпрефиксом `BUG:`/`EPIC:`",
-        "stateless API независимого объяснения",
-        "fresh explanation как reflection",
-    )
-    require(
-        errors,
-        REPORT,
-        "Инвариант effects",
-        "До связанного существенного status transition",
-        "transition не завершён",
-        "всегда создаёт и перечитывает обязательный comment",
-        "ordinary, если он доступен и\nразрешён, иначе native",
-        "availability protocol",
-        "native mode основной\nагент сообщает обязательные lifecycle facts",
-        "Если provider отсутствует, отключён или завершился failure",
-        "Обычный старт `To Do → In Progress` комментария не создаёт",
-        "До repair немедленно сообщить incident",
-        "resolution/completion comment",
-        "Приёмка заблокирована",
-        "рекомендуемый feasible способ",
-        "каждые 10 минут",
-        "ответ в Codex не являются durable Task comment",
-        "непроведённую функциональную проверку",
-        "критической проверке кодовой базы",
-    )
-    require(
-        errors,
-        RUN_REPORT,
-        "authoritative source anchors и factual inventory",
-        "В ordinary mode\nосновной агент передаёт semantic facade одну короткую задачу",
-        "terminal handoff gate",
-        "Basis не компенсирует отсутствующий в пользовательском тексте смысл",
-        "расплывчатый ordinary text\nне публикуется",
-        "повторная непригодность/failure переводит run в native",
-        "Если Goal не создан, тот же gate обязателен",
-        "без имитации provider",
-        "краткий перечень существенных инцидентов, включая уже исправленные",
-        "передача задачи с Luna на текущий профиль",
-        "подхваченная незавершённая работа или невозможность безопасно продолжить её",
-        "не совместим с формулировкой полного успеха",
-        "заново перечитать полный список, включая Tasks",
-        "Логистика браузера, OAuth или MFA идёт после этого",
-        "Goal хранит правило принадлежности, а не стартовый список или\nсчётчик",
-        "точка выпуска накопленного пакета",
-        "подтверждение\nразвёртывания с повторным чтением",
-        "пробелом доказательств, а не проверенным выпуском",
-        "Tasks, закрытые через `critical-codebase-accepted`",
-        "blocking/dependent Task refs",
-        "Открытый implementation gate не выдаётся за upstream acceptance",
-        "materially открытые или повторно закрытые dependency gates",
-        "Прежний `not_available`, старый blocker\ncomment или summary не являются current evidence",
-        "используются\nсамим агентом и не запрашиваются у пользователя повторно",
-        "flow фактически дошёл до\nэтого шага. Ложная prerequisite исключается из claim",
-        "self-service path\nоставляет runnable in-scope работу",
-    )
-    require(
-        errors,
-        AUTONOMY,
-        "Свобода способа и качество evidence",
-        "не создаёт обязанности чинить именно его",
-        "итоговый evidence",
-        "выбор технического пути",
-        "Task-local blocker",
-        "Project, Release и resolved\ncurrent scope — live selectors",
-        "не замораживает membership",
-        "не является\nrepair продукта",
-        "browser login либо MFA не отменяет incident",
-        "`gpt-6-luna`/`max` получает только genuinely simple packet",
-        "Luna не выполняет corrective recovery mutations",
-        "Повторный cheap Luna loop запрещён",
-        "выбранная\ncoordinator форма context не создаёт unavailability",
-        "Явный unavailable user profile не\nподменяется",
-        "exact или relative число субагентов",
-        "Role-scoped rule меняет только названную роль",
-        "После ошибки, interrupted run, смены агента/сессии",
-        "прими exclusive ownership этого же\nworktree",
-        "Не делай takeover при живом writer",
-        "Production workflow требует явного approval",
-        "Периодический UAT batch",
-        "не деплоит каждую bug/Task по умолчанию",
-        "один thorough review-batch",
-        "UAT deployment после проверки target",
-        "отсутствие receipt не считается verified",
-        "critical-codebase acceptance",
-        "fresh full inventory без `To Do`/`In Progress`",
-        "ровно один fresh-context\ncritic",
-        "residual risk остаются видимыми",
-        "Dependency-ready работа",
-        "`blocked by` — structural relation и provenance",
-        "Pending verification/effect сохраняет blocking Task",
-        "Non-terminal upstream status",
-    )
-    require(
-        errors,
-        MEMORY,
-        "Exact Task и явный список `task_selectors` задают closed selector",
-        "`kind: project|release`\nи resolved current scope задают live selector",
-        "не становится\nзамороженным списком",
-        "не требует нового approval",
-        "перед новой frontier, ожиданием, blocker/Goal status",
-        "не является alarm либо scope expansion",
-    )
-    require(
-        errors,
-        HANDOFF,
-        "Client protocol выбора Strategic Explainer",
-        "$strategic-explainer:strategic-explainer",
-        "Availability fallback",
-        "Матрица выбора",
-        "ordinary",
-        "native",
-        "Ordinary path",
-        "один semantic call",
-        "назначение и исходный пользовательский вопрос",
-        "exact scope и язык",
-        "material constraints",
-        "resolvable read-only anchors",
-        "никакие другие invocation parameters или provider instructions",
-        "внутренним\nисполнением полностью владеет facade Strategic Explainer",
-        "готовый text и отдельно обозначенный source basis",
-        "переводит\nrun в native mode",
-        "Общий запрет создавать subagents также исключает ordinary",
-        "Native path",
-        "Обязательный comment всё равно публикуется и перечитывается",
-        "Reflection до blocker",
-    )
-    require(
-        errors,
-        CRITICAL_REVIEW,
-        "Eligibility gate",
-        "`To Do == 0`, `In Progress == 0`, `In Review > 0`",
-        "bounded unlocker",
-        "ровно одного read-only subagent role `critic`",
-        "`fork_turns=\"none\"`",
-        "`critical-codebase-accepted`",
-        "Mere absence of findings",
-        "availability-selected Strategic Explainer",
-        "residual knowledge boundary и риск",
-    )
-    require(
-        errors,
-        ADR["0018"],
-        "Конституция управляет результатом, а не инструментами",
-        "не выбирает за агента инструменты",
-        "Сбой одного способа сам по себе не доказывает",
-        "не нашёл достаточного безопасного способа",
-        "не задаёт invocation или tool flow",
-        "Фиксированного числа попыток",
-    )
-    require(
-        errors,
-        ADR["0019"],
-        "Goal только для массовой имплементации Tasks",
-        "минимум две concrete Tasks",
-        "не определяют mode и не разрешают Goal",
-        "Release-only не создаёт",
-        "Production отличается дополнительной authority boundary",
-        "Сам release новый Goal не создаёт",
-    )
-    require(
-        errors,
-        ADR["0020"],
-        "Приёмочные инциденты видимы во всём run",
-        "Comments — гарантированный adapter contract",
-        "Немедленный outcome-first update",
-        "примерно в 10 минут",
-        "Final success не стирает найденный defect",
-        "рекомендует самый сильный feasible",
-    )
-    require(
-        errors,
-        ADR["0021"],
-        "Требования являются конституцией для агентов",
-        "какой пользовательский или системный результат обязателен",
-        "Агент самостоятельно выбирает план",
-        "Когда допустима точность механизма",
-        "Strategic Explainer определяется результатом",
-        "Evals проверяют наблюдаемое поведение",
-        "ADR-0024",
-        "ADR-0025",
-    )
-    require(
-        errors,
-        ADR["0022"],
-        "Каждый комментарий ShipTask проходит независимый Strategic Explainer",
-        "Обычный переход `To Do → In Progress` не создаёт комментарий",
-        "каждый комментарий в Task\n  Manager",
-        "отдельный независимый субагент",
-        "не переписывает одобренный текст",
-        "не публикует комментарий",
-        "самостоятельно выполненная основным агентом",
-        "ADR-0024",
-    )
-    require(
-        errors,
-        ADR["0024"],
-        "Automatic delegation и natural-language topology rules",
-        "Default без user rule",
-        "User topology rule",
-        "Root/coordinator не входит",
-        "Exact count является обязательным count",
-        "role scope",
-        "condition",
-        "Task Manager comments/status/version writes",
-        "Writer isolation",
-        "собственную feature branch и собственный Git worktree",
-        "Writable worktree принадлежит одному writer",
-        "общий opt-out",
-        "role-scoped rule",
-        "Наблюдаемость без scheduler-бухгалтерии",
-        "material deviation",
-        "ADR-0025",
-    )
-    require(
-        errors,
-        ADR["0025"],
-        "Cost-aware профили субагентов с эскалацией на current model",
-        "`gpt-5.6-luna` с `max`",
-        "Текущие model/effort основного агента образуют default profile",
-        "Явное указание пользователя",
-        "все условия",
-        "Strategic Explainer по умолчанию наследует current profile",
-        "Luna прекращает packet",
-        "без Luna retry loop",
-        "повторно\nотправить cheap Luna lane",
-        "собственный выбор incompatible context не делает profile unavailable",
-        "`<profile>=not-available`",
-        "`luna-escalation=not-available`",
-        "Sol Extra High или Sol Ultra как универсальный default",
-    )
-    require(
-        errors,
-        ADR["0026"],
-        "Периодические UAT releases разумными batch-группами",
-        "per-Task targeted gate",
-        "review-batch gate",
-        "один deploy exact candidate в UAT",
-        "standing delivery authority",
-        "не превращает каждую Task в singleton",
-        "UAT receipt/read-back",
-        "Production release и его authority",
-    )
-    require(
-        errors,
-        ADR["0027"],
-        "Критическая приёмка по кодовой базе при исчерпанном frontier",
-        "`To Do == 0`, `In Progress == 0`",
-        "содержательным verifier",
-        "ровно один независимый read-only `critic`",
-        "`fork_turns=\"none\"`",
-        "`critical-codebase-accepted`",
-        "отсутствие findings не равно approval",
-        "отдельный Strategic Explainer",
-        "более слабый, но явно маркированный terminal\noutcome",
-        "не создаёт external effect",
-    )
-    require(
-        errors,
-        ADR["0028"],
-        "Интегрированная реализация удовлетворяет `blocked by`",
-        "Разделить structural relation, implementation readiness и terminal",
-        "fan-in в integration target",
-        "Не требовать terminal status blocking Task",
-        "Dependent Task может достичь `Done`",
-        "status == Done",
-        "contract attribution",
-    )
-    require(
-        errors,
-        ADR["0029"],
-        "Fresh Strategic Explainer и reflection до blocker",
-        "Один stateless API",
-        "fork_turns=\"none\"",
-        "Caller передаёт одну короткую однозначную задачу",
-        "Самостоятельное исследование и короткий result",
-        "одну главную причинную мысль",
-        "Blocker reflection",
-        "не является evidence",
-        "blocker не публикуется и работа продолжается",
-        "один reflection pass",
-    )
-    for path in (
-        ROOT / "AGENTS.md",
-        ROOT / "README.md",
-        SHIP_SKILL,
-        SHIP_METADATA,
-        SPEC,
-        OVERVIEW,
-        DEVELOPMENT,
-        REVIEW_MATRIX,
-        REPORT,
-        RUN_REPORT,
-        AUTONOMY,
-        HANDOFF,
-    ):
-        forbid(
-            errors,
-            path,
-            "active target равен",
-            "весь target bounded workers",
-            "ready independent lanes",
-            "фактическую peak width",
-            "peak width 0",
-        )
-    require(
-        errors,
-        ADAPTER,
-        "повторно сверен 2026-08-22",
-        "Native comment create/list/read являются гарантированной частью adapter",
-        "reconciles через native reads до retry или status transition",
-    )
-
-    contradiction_patterns = {
-        "comment deferred after status": re.compile(
-            r"status\s+write.{0,100}(?:вс[её]\s+равно|после|затем).{0,100}(?:communication remainder|комментари)",
-            re.I | re.S,
-        ),
-        "unclear batch reopened into rework": re.compile(
-            r"неясн\w*\s+attribution.{0,120}(?:весь|все).{0,80}In Progress",
-            re.I | re.S,
-        ),
-        "review status asserted as verified": re.compile(
-            r"In Review.{0,30}(?:targeted-verified|machine-verified)", re.I | re.S
-        ),
-        "mandatory diagram by complexity": re.compile(
-            r"non-trivial.{0,60}(?:получает|требует).{0,30}diagram", re.I | re.S
-        ),
-        "orchestration failure stops reporting": re.compile(
-            r"повторн\w*\s+отказ.{0,80}останавливает\s+report", re.I | re.S
-        ),
-        "stale adapter cutover": re.compile(
-            r"Task Manager skill пока содержит.{0,80}старого delivery", re.I | re.S
-        ),
-    }
-    for path in CURRENT_CONTRACT_FILES:
-        text = read(path)
-        for label, pattern in contradiction_patterns.items():
-            match = pattern.search(text)
-            if match:
-                line = text.count("\n", 0, match.start()) + 1
-                fail(errors, f"{relative(path)} has {label} at line {line}")
-
-    for path in CURRENT_CONTRACT_FILES:
-        forbid(
-            errors,
-            path,
-            "acceptance-required state",
-            "ACCEPTANCE READY report",
-            "reopen получает весь связанный batch",
-            "Tasks с недействительным evidence в `In Progress`",
-            "self-recovery",
-            "Technical Brief",
-            "communication remainder",
-            "batch — с Goal",
-            "Project/Release/bare scope — batch с Goal",
-        )
-
-    for path in CURRENT_CONTRACT_FILES:
-        if path == ADR["0018"]:
-            continue
-        forbid(
-            errors,
-            path,
-            "Необходимый инструмент сначала",
-            "сначала восстанови нужные инструменты",
-            "после material repair повтори",
-            "только затем оцени равноценную альтернативу",
-            "сначала пытается его восстановить",
-        )
-
-    for path in (
-        SHIP_SKILL,
-        SPEC,
-        OVERVIEW,
-        REPORT,
-        RUN_REPORT,
-        AUTONOMY,
-        HANDOFF,
-        ADAPTER,
-    ):
-        forbid(
-            errors,
-            path,
-            "2–4 способа приёмки",
-            "2–4 различных способа",
-            "comment-delivery-unavailable",
-            "terminal-report-channel-unavailable",
-            "comment channel недоступен",
-            "comment channel не работает",
-        )
-
-    for path in (
-        ROOT / "README.md",
-        SHIP_SKILL,
-        STRATEGIC_SKILL,
-        SPEC,
-        STRATEGIC_SPEC,
-        OVERVIEW,
-        DEVELOPMENT,
-        REVIEW_MATRIX,
-        STRATEGIC_EVALUATION,
-        VISION,
-        REPORT,
-        RUN_REPORT,
-        HANDOFF,
-    ):
-        forbid(
-            errors,
-            path,
-            "CONTEXT_INTEGRITY_ERROR",
-            "PROBLEM_CONTEXT_ERROR",
-            "2–4 реально различающихся варианта",
-            "2–4 реально различающихся способа",
-        )
 def validate_strategic_contract(errors: list[str]) -> None:
     require(
         errors,
@@ -3531,8 +2566,7 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "$strategic-explainer:strategic-explainer",
         "plugin-to-plugin dependency",
         "availability-based optional routing",
-        "plugins/ship-tasks/skills/strategic-explainer",
-        "отсутствует",
+        "Legacy `ship-tasks@srez-marketplace` удалён из каталога и runtime",
     )
     require(
         errors,
@@ -3592,8 +2626,6 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         ROOT / "AGENTS.md",
         ROOT / "README.md",
         DEVELOPMENT,
-        SHIP_SKILL,
-        SHIP_METADATA,
         COMPOSER_SKILL,
         COMPOSER_METADATA,
         SCOPE_SKILL,
@@ -3608,22 +2640,12 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         SCOPE_OVERVIEW,
         STRATEGIC_SKILL,
         STRATEGIC_METADATA,
-        SHIP_REQUIREMENTS,
-        SPEC,
         COMPOSER_REQUIREMENTS,
         COMPOSER_SPEC,
         STRATEGIC_REQUIREMENTS,
         STRATEGIC_SPEC,
-        OVERVIEW,
         STRATEGIC_EVALUATION,
         COMPOSER_EVALUATION,
-        REVIEW_MATRIX,
-        REPORT,
-        RUN_REPORT,
-        AUTONOMY,
-        MEMORY,
-        HANDOFF,
-        CRITICAL_REVIEW,
     )
     for path in current_distribution_files:
         forbid(errors, path, "$ship-tasks:strategic-explainer")
@@ -3643,35 +2665,18 @@ def validate_adapter_and_distribution(errors: list[str]) -> None:
         "fresh App Server catalog",
         "issue-grinder:task-composer",
         "existing-only Labels",
-        "один Strategic Explainer при разрешённой роли",
-        "`To Do → In Progress` не создаёт комментарий",
-        "automatic default",
-        "изоляция writers и Luna Max routing",
-        "natural-language exact/relative/role/conditional rules",
-        "до fresh branch/worktree инвентаризирует относящиеся к live\n  scope worktree",
-        "staged/unstaged/untracked changes",
-        "branch-only checkpoint получает linked checkout той же branch",
-        "active или\n  ambiguous ownership не захватывается",
-        "ноль subagents",
-        "Luna Max routing",
-        "не из исторических стратегий",
-        "Project/Release/current scope сохраняют live membership",
-        "initial inventory не\n  превращается в Goal count/list cap",
-        "authenticated product hang остаётся product incident",
-        "browser/OAuth/MFA logistics",
-        "Auto-title является отдельным best-effort UI convenience",
-        "адресация только calling task",
+        "## Forward test",
+        "[Evaluation](../skills/issue-grinder/evaluation.md)",
+        "[мануале](issue-grinder-modes.md)",
+        "Историческая",
         "Type Labels не должны дублироваться в title",
         "legacy-prefixed title участвует в\nduplicate search",
         "Не вычисляйте dependency-ready frontier по `status == Done`",
-        "blocking Task с влитым в exact integration candidate нужным contract",
     )
 
 
 def current_task_source_files() -> tuple[Path, ...]:
     return (
-        SHIP_SKILL,
-        SHIP_METADATA,
         COMPOSER_SKILL,
         COMPOSER_METADATA,
         SCOPE_SKILL,
@@ -3680,7 +2685,6 @@ def current_task_source_files() -> tuple[Path, ...]:
         SCOPE_REPAIR,
         SCOPE_REPORTING,
         SCOPE_REQUIREMENTS,
-        SPEC,
         COMPOSER_SPEC,
         SCOPE_SPEC,
         SCOPE_EVALUATION,
@@ -3689,12 +2693,6 @@ def current_task_source_files() -> tuple[Path, ...]:
         COMPOSER_OVERVIEW,
         COMPOSER_EVALUATION,
         OVERVIEW,
-        REPORT,
-        RUN_REPORT,
-        AUTONOMY,
-        MEMORY,
-        HANDOFF,
-        THREAD_TITLE,
         ADR["0018"],
         ADR["0019"],
         ADR["0020"],
@@ -3726,7 +2724,6 @@ def validate_task_source_boundary(errors: list[str]) -> None:
 def markdown_files() -> list[Path]:
     files = [ROOT / "README.md", ROOT / "AGENTS.md"]
     files.extend(sorted((ROOT / "consultant").rglob("*.md")))
-    files.extend(sorted((ROOT / "ship-tasks").rglob("*.md")))
     files.extend(sorted((ROOT / "task-composer").rglob("*.md")))
     files.extend(sorted((ROOT / "scope-reviewer").rglob("*.md")))
     files.extend(sorted((ROOT / "strategic-explainer").rglob("*.md")))
@@ -3771,6 +2768,14 @@ def validate_artifacts(errors: list[str]) -> None:
 
 def main() -> int:
     errors: list[str] = []
+    for retired in (
+        ROOT / "ship-tasks",
+        ROOT / "scripts" / "terminal_handoff_harness.py",
+        ROOT / "tests" / "test_shiptask_terminal_handoff.py",
+        ROOT / "tests" / "test_shiptask_explainer_routing.py",
+    ):
+        if retired.exists():
+            fail(errors, f"retired ShipTask runtime remains: {relative(retired)}")
     for path in (
         ROOT / "consultant" / "SKILL.md",
         ROOT / "consultant" / "references" / "consultant-role.md",
@@ -3787,16 +2792,13 @@ def main() -> int:
 
     if not errors:
         validate_issue_skill(errors)
-        validate_ship_skill(errors)
         validate_composer_skill(errors)
         validate_scope_reviewer_skill(errors)
         validate_strategic_skill(errors)
         validate_strategic_provider_encapsulation(errors)
-        validate_trigger_matrix(errors)
         validate_composer_trigger_matrix(errors)
         validate_review_matrix(errors)
         validate_source_layers(errors)
-        validate_current_contract(errors)
         validate_strategic_contract(errors)
         validate_supersession(errors)
         validate_adapter_and_distribution(errors)

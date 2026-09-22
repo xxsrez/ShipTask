@@ -2,7 +2,9 @@
 
 Начните с [философии проекта](philosophy.md): это ключевой документ о свободе
 агента, разделении ответственности и документации как исходном коде. Затем
-прочитайте [обзор](overview.md), чтобы понять назначение и границы skills.
+прочитайте [обзор Issue Grinder](skills/issue-grinder/overview.md), чтобы
+понять назначение действующего delivery-навыка.
+[Исторический обзор ShipTask](overview.md) сохранён отдельно.
 
 ## Skill source packages
 
@@ -26,20 +28,10 @@
   Баланс и Экономичный требуют основную Luna Max; Экономичный только явно. Внешние semantic providers не входят в
   mode topology, чистая справка о режимах не запускает delivery, а runtime
   publication подтверждается distribution проверкой.
-- `$ship-tasks`: [Requirements](skills/ship-tasks/requirements.md) и
-  [Architecture](skills/ship-tasks/architecture.md) — канонический Task
-  Manager-only workflow
-  для explicit invocation и natural-language delivery с однозначным Task
-  Manager anchor: single и release без Goal, Goal только для массовой
-  имплементации минимум двух Tasks, automatic delegation при отсутствии user
-  topology rule, natural-language exact/relative/role/conditional overrides,
-  отдельный worktree на каждого
-  concurrent implementation writer, resume existing task-owned worktree/branch
-  после interruption или смены сессии, Luna Max только для genuinely simple
-  packets с эскалацией на current profile, constitution-first требования, обязательные
-  comments, видимые acceptance incidents, свобода выбора инструментов и
-  фактическая классификация приёмки; лёгкие per-Task gates и периодические
-  thorough UAT batch releases одним exact integrated candidate без approval.
+- Архив `$ship-tasks`: защищённые
+  [Requirements](skills/ship-tasks/requirements.md) и историческая
+  [Architecture](skills/ship-tasks/architecture.md). Runtime и пакет
+  Marketplace удалены.
 - `$issue-grinder:scope-reviewer`:
   [Overview](skills/scope-reviewer/overview.md),
   [Requirements](skills/scope-reviewer/requirements.md) и
@@ -239,9 +231,6 @@ Architecture — за «как сейчас этого достигать». С�
 - [Проверка классификации `In Review`](reference/shiptask-review-disposition-evaluation.md)
   — decision-level cases для task-contract conflict, proven failure,
   verification blocker, critical codebase fallback, incident persistence и Goal behavior.
-- [Project memory contract](../ship-tasks/references/project-memory.md) —
-  runtime-схема current scope и project profile, precedence, bootstrap,
-  freshness, alarms и cross-surface ограничения.
 
 ## Guides
 

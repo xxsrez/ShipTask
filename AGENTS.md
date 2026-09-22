@@ -10,10 +10,10 @@
 - [`docs/README.md`](docs/README.md) — канонический индекс документации, а
   [`docs/skills/README.md`](docs/skills/README.md) — техническая схема source
   packages.
-- Репозиторий является source of truth для `$issue-grinder`, legacy
-  `$ship-tasks`, `$issue-grinder:task-composer`,
+- Репозиторий является source of truth для `$issue-grinder`,
+  `$issue-grinder:task-composer`,
   `$issue-grinder:scope-reviewer` и `$strategic-explainer`.
-  Runtime находится в `issue-grinder/`, `ship-tasks/`, `task-composer/`,
+  Runtime находится в `issue-grinder/`, `task-composer/`,
   `scope-reviewer/` и `strategic-explainer/`.
 - Основной язык документации — русский. Точные названия protocol, state и tool
   можно оставлять на английском.
@@ -57,7 +57,7 @@ evaluation` и возможность восстановить семантич�
 
 ## Границы компонентов
 
-- `$issue-grinder` и legacy `$ship-tasks` выполняют delivery только через Task
+- `$issue-grinder` выполняет delivery только через Task
   Manager connector. Не добавляйте fallback provider или generic tracker
   abstraction.
 - `$issue-grinder:task-composer` остаётся Task Manager-only planning workflow:
@@ -106,8 +106,8 @@ evaluation` и возможность восстановить семантич�
   `strategic-explainer@srez-marketplace` — только Strategic Explainer.
 - `task-manager@srez-marketplace` остаётся отдельным adapter-only package и не
   содержит skills этого репозитория.
-- `ship-tasks@srez-marketplace` — неустановленный legacy rollback artifact; его
-  нельзя устанавливать одновременно с Issue Grinder.
+- Legacy `ship-tasks` удалён из runtime и Marketplace; не восстанавливайте его
+  как второй delivery skill.
 - Не создавайте standalone user-level копии в
   `~/.codex/skills/{issue-grinder,ship-tasks,task-composer,scope-reviewer,strategic-explainer}`.
 
@@ -122,7 +122,8 @@ evaluation` и возможность восстановить семантич�
    `Srez Marketplace/plugins/issue-grinder/skills/` и Strategic Explainer в
    `Srez Marketplace/plugins/strategic-explainer/skills/`.
 3. Installed cache byte-identical Marketplace sources; оба plugins имеют
-   состояние installed/enabled; `ship-tasks@srez-marketplace` не установлен;
+   состояние installed/enabled; `ship-tasks@srez-marketplace` отсутствует в
+   каталоге и не установлен;
    Task Manager остаётся adapter-only; standalone user-level каталоги
    отсутствуют.
 4. Если runtime payload изменился, обновлены manifest version или cachebuster,
@@ -146,7 +147,6 @@ runtime изменения — применимые tests и quick_validate за
 ```bash
 python3 scripts/validate_repo.py
 python3 -B -m unittest discover -s tests -p 'test_*.py'
-python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ship-tasks
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py issue-grinder
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py task-composer
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py scope-reviewer

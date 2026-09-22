@@ -76,7 +76,7 @@ production release. Terminal acceptance теперь определяется AD
   reset или нарушение explicit read-only boundary.
 
 Подробный runtime flow находится в
-[`ship-tasks/references/autonomy-and-release.md`](../../ship-tasks/references/autonomy-and-release.md).
+Исторический runtime reference удалён вместе с legacy `$ship-tasks`.
 
 ## Последствия
 
