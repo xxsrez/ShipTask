@@ -100,6 +100,25 @@ ID**, а не формальная частота одного слова в JSO
 Task Manager, фактическое получение UAT receipts или расходы полного Release.
 Один дополнительный полный список в последнем закрытом наборе и два в
 предыдущем — основание для узкого изменения checkpoint, но не гарантия лучшей
-живой приёмки. Следующая проверка
-после установки — свежая сессия с установленным skill и затем наблюдение
-нового настоящего run по тем же исходам.
+живой приёмки. Наблюдение нового настоящего run по тем же исходам остаётся
+отдельной проверкой.
+
+## Публикация и smoke установленной версии
+
+Source commit `5b70a681e095cd3bb6e5121c81f5bcf1324c250f` запушен в ShipTask
+`origin/main`, Marketplace commit `d4ae7e324eafeb737a0039380e9148aafa8a2d96`
+— в свой `origin/main`. Runtime source побайтно совпадает с Marketplace и новым
+installed cache `issue-grinder@0.1.0+codex.20260925125535`. Issue Grinder и
+Strategic Explainer включены; legacy ShipTask не установлен, Task Manager
+сохранил отдельный adapter-only пакет.
+
+Перед commit прошли `validate_repo.py`, 165 unit tests, quick validation
+четырёх присутствующих skill directories, строгая проверка 391 локальной ссылки
+и `git diff --check`. Marketplace прошёл 23 теста. Legacy `ship-tasks`
+directory в текущем source отсутствует, поэтому его quick validator не
+запускался.
+
+Свежий read-only `codex exec --ephemeral` прочитал `SKILL.md` и `run-and-goal.md`
+именно из нового installed cache, подтвердил version и SHA-256 reference. На
+синтетическом продолжении он вернул оба открытых ID (`AC-READ`, `AC-REVOKE`),
+`release_complete=false`; вызовов Task Manager и изменений данных не было.
