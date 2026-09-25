@@ -15,6 +15,13 @@
 прочитал runtime из installed cache и сохранил `AC-READ`/`AC-REVOKE` при
 `release_complete=false`; подробности и границы — в отчёте выше.
 
+После явного разрешения пользователя измеренный инвариант закреплён в
+`IG-GOAL-08` и заново скомпилирован в Architecture §5 и `run-and-goal.md`.
+На этой редакции повторная синтетическая проверка двухшагового продолжения
+дала 6/6 у прежней установленной версии и 6/6 у новой, включая точные ID
+и критерий без ID; прямой набор новой версии — 11/11. Это проверка отсутствия
+наблюдаемой регрессии в этих случаях, а не дополнительный измеренный выигрыш.
+
 ## Слои проверки
 
 1. Static contract связывает каждый `IG-*` с runtime surface и required
@@ -143,7 +150,7 @@ prompt; подготовка обязана остановиться при ра
 | `IG-GOAL-05` | `SKILL.md` §3; `final-report.md` | final-reflection-continues; chat-only-final; whole-run-outgoing-report; post-edit-meaning-preserved |
 | `IG-GOAL-06` | `SKILL.md` §2; `task-.md` | nonmaterial-gap-transparent-by-issue-contract; material-acceptance-gap-blocks |
 | `IG-GOAL-07` | `SKILL.md` §3; `strategic-explainer.md`; `final-report.md`; blocker harness | all-causes-overview; one-separate-answer-per-cause; three-lens-completeness; reason-reflection-unlocks; accepted-blocker-auto-continuation-no-repeat; threshold-goal-effect-only |
-| `IG-GOAL-08` | `final-report.md`; `run-and-goal.md` | old-defect-survives-revert; workaround-is-not-product-fix; full-run-not-last-card |
+| `IG-GOAL-08` | `final-report.md`; `run-and-goal.md` | old-defect-survives-revert; workaround-is-not-product-fix; full-run-not-last-card; exact-criterion-ids-after-checkpoint; unindexed-criterion-without-invention |
 | `IG-GOAL-09` | `final-report.md`; final-report smoke | outgoing-report-review; restored-context; unchanged-continuations; model-profile-matrix |
 | `IG-SCOPE-01` | `run-and-goal.md`; `task-.md` | prompt-selector-precedence |
 | `IG-SCOPE-02` | `run-and-goal.md` | explicit-default-release; implicit-missing-selector |
