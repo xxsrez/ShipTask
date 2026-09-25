@@ -18,11 +18,65 @@
    case измеряет только mode topology и delivery по локальному плану. Generator
    не получает скрытый oracle или expected answer. Полный
    repository-executable harness этого слоя пока отсутствует; доступны узкие
-   mode-loading и Solo-topology smoke. Остальные coverage names ниже являются
+   mode-loading, Solo-topology и final-report smoke. Остальные coverage names ниже являются
    обязательным corpus, а не доказанными PASS.
 4. Distribution smoke проверяет source → Marketplace → installed cache,
    activation и отсутствие одновременно установленного ShipTask. Его evidence
    относится к конкретному snapshot и не переносится на следующую версию.
+
+## Проверка исходящего отчёта
+
+`scripts/issue_grinder_final_report_smoke.py` создаёт реальные тексты отчётов
+на выбранной модели по синтетической сохранённой истории. Он читает reference
+переданного runtime snapshot и проверяет механические effects, но не объявляет
+смысловое качество PASS автоматически. Артефакты `input.txt`, `events.jsonl`,
+`outgoing.json`, `report.md` и `summary.json` сохраняются вне репозитория для
+независимого сравнения исходящих текстов с фактами. Oracle не входит в prompt.
+
+Пример запуска: `python3 scripts/issue_grinder_final_report_smoke.py --runtime
+<installed-skill-path> --output-dir <temporary-directory> --model gpt-6-sol
+--effort xhigh`. Матрица включает Sol xhigh, Astra и Luna Max; каждый профиль
+отмечается исполненным только по собственным артефактам. Отдельный свежий runtime
+smoke проверяет разрешение установленного skill и загрузку нового reference.
+
+Ревью оценивает итог всего прогона, сохранение давнего дефекта после отката,
+границы workaround и проверок, отсутствие ложной полноты результата, действие
+пользователя и resume condition. В случаях completion и economical checkpoint
+дополнительно проверяется отсутствие ложного blocker либо terminal claim.
+Повторные turns 2 и 3 получают фактически опубликованный первый отчёт:
+publication и запрос не повторяются, на третьем разрешён только blocked effect.
+Затем независимый holdout с другой предметной историей проверяет переносимость.
+Прогон с восстановленным checkpoint моделирует сжатие контекста, но не доказывает
+реальный platform compaction, непрерывный многочасовой delivery или model switch.
+Сведения об исполненных проверках и ограничениях добавляются ниже по факту.
+
+### Наблюдения 2026-09-25
+
+Матрица Sol xhigh, Astra medium и Luna max исполнена: по пять cases на профиль,
+15/15 симулируемых lifecycle effects верны. Входы и реальные исходящие тексты
+сохранены в `/tmp/ig-final-{sol,astra,luna}-v3-20260925`; SHA-256 reference этого
+прогона — `94b39410e0b65ebe00c600bbcb26719bd105cae0d70a88f5658787b1417661ea`.
+Независимое смысловое ревью Sol и Astra не обнаружило существенных потерь в v3.
+На предыдущих итерациях Sol терял квалификатор экономичного режима, добавлял
+неустановленный следующий шаг и завышал вводный вывод о непринятом candidate;
+после уточнения проверки исходящего текста эти ошибки в v3 не воспроизвелись.
+
+У Luna v3 сохранились outcomes, дефект после отката, пределы workaround и
+правильные продолжения, но blocker-report потерял факт отсутствия изменений
+production. Проверка границ effects отделена от среды тестов. Адресный повтор
+`blocked` на Luna max после этой правки (`/tmp/ig-final-luna-v4-20260925`) сохранил
+границу production, все существенные результаты и корректный effect.
+Итоговый reference SHA-256:
+`596055cde35c7920b304f7c78b59966f5e6efec74a76603557cefd3838f9ab7d`.
+Полная матрица относится к предыдущему snapshot, адресный повтор — к итоговому;
+их нельзя выдавать за 15 прогонов последней версии.
+
+Дополнительный независимый holdout на истории миграции архива сохранил
+отменённое исправление отката, границу ручной очистки, достигнутые результаты
+и подпись хранителя как условие возобновления. Это узкая проверка финализации.
+Она не доказывает накопление continuity в реальном долгом run, настоящий platform
+compaction/model switch, вызовы semantic providers или реальные Goal/Task Manager
+mutations. Повторяемость качества на иных историях не установлена.
 
 ## Протокол синтетической настройки режимов
 
@@ -62,12 +116,14 @@ prompt; подготовка обязана остановиться при ра
 | `IG-FLOW-07` | `SKILL.md`; `consultant.md`; `modes/solo.md` | non-astra-hard-question-consults; astra-and-unknown-skip; routine-skip; intervention-consults; unavailable-continues; solo-advice-only; user-ban-wins |
 | `IG-FLOW-08` | `SKILL.md` §3; `execution-modes.md` | usage-full-model-rows; usage-optional-provider; usage-run-isolation; usage-cutoff; usage-unavailable-nonblocking |
 | `IG-GOAL-01` | `run-and-goal.md`; `execution-modes.md`; `modes/economical.md`; trace harness | explicit-multi-create; implicit-no-goal; grow-and-keep; economical-checkpoint-keeps-goal |
-| `IG-GOAL-02` | `SKILL.md`; `run-and-goal.md`; `multi-agent-execution.md` | strategic-release-objective; issue-list-rejected; strategic-context-restored; single-issue-parent-context; strategy-does-not-expand-scope |
+| `IG-GOAL-02` | `SKILL.md`; `run-and-goal.md`; `final-report.md`; `multi-agent-execution.md` | strategic-release-objective; issue-list-rejected; strategic-context-restored; single-issue-parent-context; strategy-does-not-expand-scope; durable-report-obligation-and-link |
 | `IG-GOAL-03` | `SKILL.md` §5; `run-and-goal.md`; `modes/economical.md`; trace harness | empty-scope-complete; active-scope-continue; checkpoint-goal-not-complete; completed-tasks-with-strategic-gap-still-complete |
 | `IG-GOAL-04` | `SKILL.md` §3; blocker harness | explanation-unlocks; true-external-blocker; advice-gap; premature-permission |
-| `IG-GOAL-05` | `SKILL.md` §3 | final-reflection-continues; chat-only-final |
+| `IG-GOAL-05` | `SKILL.md` §3; `final-report.md` | final-reflection-continues; chat-only-final; whole-run-outgoing-report; post-edit-meaning-preserved |
 | `IG-GOAL-06` | `SKILL.md` §2; `task-.md` | nonmaterial-gap-transparent-by-issue-contract; material-acceptance-gap-blocks |
-| `IG-GOAL-07` | `SKILL.md` §3; `strategic-explainer.md`; blocker harness | all-causes-overview; one-separate-answer-per-cause; three-lens-completeness; reason-reflection-unlocks; accepted-blocker-auto-continuation-no-repeat; threshold-goal-effect-only |
+| `IG-GOAL-07` | `SKILL.md` §3; `strategic-explainer.md`; `final-report.md`; blocker harness | all-causes-overview; one-separate-answer-per-cause; three-lens-completeness; reason-reflection-unlocks; accepted-blocker-auto-continuation-no-repeat; threshold-goal-effect-only |
+| `IG-GOAL-08` | `final-report.md`; `run-and-goal.md` | old-defect-survives-revert; workaround-is-not-product-fix; full-run-not-last-card |
+| `IG-GOAL-09` | `final-report.md`; final-report smoke | outgoing-report-review; restored-context; unchanged-continuations; model-profile-matrix |
 | `IG-SCOPE-01` | `run-and-goal.md`; `task-.md` | prompt-selector-precedence |
 | `IG-SCOPE-02` | `run-and-goal.md` | explicit-default-release; implicit-missing-selector |
 | `IG-SCOPE-03` | `run-and-goal.md`; `task-.md` | late-member; excluded-member; final-refresh |

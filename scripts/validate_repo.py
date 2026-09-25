@@ -609,7 +609,7 @@ def validate_issue_skill(errors: list[str]) -> None:
     )
     expected_ids = [
         *(f"IG-FLOW-{number:02d}" for number in range(1, 9)),
-        *(f"IG-GOAL-{number:02d}" for number in range(1, 8)),
+        *(f"IG-GOAL-{number:02d}" for number in range(1, 10)),
         *(f"IG-SCOPE-{number:02d}" for number in range(1, 4)),
         "IG-UI-01",
         *(f"IG-AUTO-{number:02d}" for number in range(1, 6)),

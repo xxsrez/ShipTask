@@ -84,7 +84,7 @@ class IssueGrinderContractTest(unittest.TestCase):
 
         self.assertEqual(len(rows), len(set(rows)), "duplicate coverage rows")
         self.assertEqual(set(rows), requirement_ids)
-        self.assertEqual(len(requirement_ids), 64)
+        self.assertEqual(len(requirement_ids), 66)
 
     def test_architecture_runtime_layout_exists(self) -> None:
         architecture = ARCHITECTURE.read_text(encoding="utf-8")
@@ -96,6 +96,7 @@ class IssueGrinderContractTest(unittest.TestCase):
             "references/autonomy-and-environments.md",
             "references/mode-help.md",
             "references/run-and-goal.md",
+            "references/final-report.md",
             "references/execution-modes.md",
             "references/modes/solo.md",
             "references/modes/classic.md",
