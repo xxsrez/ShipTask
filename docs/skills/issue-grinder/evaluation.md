@@ -4,6 +4,14 @@
 компиляцию локальных [Overview](overview.md), [Requirements](requirements.md) и
 [Architecture](architecture.md), но не создаёт новый policy contract.
 
+Эксперимент 2026-09-25 по `IG-GOAL-08`, `IG-VERIFY-04/05` и долгому Release:
+[отчёт с baseline, промежуточными вариантами и holdout](../../reports/2026-09-25-issue-grinder-acceptance-experiment.md).
+Трасса дополнения: Requirements → Architecture §5 (карта открытых критериев) →
+`issue-grinder/references/run-and-goal.md` → двухшаговый model-forward harness.
+Закрытый holdout: 9/10 → 10/10 по точному списку открытых ID или текстовой
+ссылке, когда ID нет; ранее отложенный повтор: 8/10 → 10/10. Прямые решения
+11/11 → 11/11. Это синтетика, не подтверждение изменения поведения живого run.
+
 ## Слои проверки
 
 1. Static contract связывает каждый `IG-*` с runtime surface и required
