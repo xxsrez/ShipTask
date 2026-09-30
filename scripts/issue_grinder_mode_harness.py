@@ -38,13 +38,6 @@ class ModeOrigin(str, Enum):
     AUTOMATIC = "automatic"
 
 
-class ScopeSize(str, Enum):
-    SMALL = "small"
-    MEDIUM = "medium"
-    LARGE = "large"
-    UNCERTAIN = "uncertain"
-
-
 @dataclass(frozen=True)
 class Profile:
     model: str
@@ -63,18 +56,10 @@ class Profile:
 
 LUNA_MAX = Profile(LUNA_MODEL, LUNA_MAX_EFFORT)
 SOL_XHIGH = Profile("gpt-6-sol", "xhigh")
-BALANCE_VERSION = "luna-coordinator-v1"
-
-def require_main_profile(mode: ExecutionMode, profile: Profile) -> None:
-    if mode in (ExecutionMode.BALANCE, ExecutionMode.ECONOMICAL) and profile != LUNA_MAX:
-        raise ValueError("main_profile_required: gpt-6-luna/max")
-
-
-
 @dataclass(frozen=True)
 class RoleProfiles:
-    controller: Profile
     worker: Profile
+    reviewer: Profile
     specialist: Profile | None = None
 
 
@@ -82,11 +67,7 @@ class RoleProfiles:
 class ModeRecord:
     canonical_mode: ExecutionMode
     mode_origin: ModeOrigin
-    initial_main_profile: Profile
-    role_profiles: RoleProfiles
-    initial_scope_task_count: int = 1
-    mode_contract_version: str | None = None
-    initial_scope_size: ScopeSize = ScopeSize.UNCERTAIN
+    role_profiles: RoleProfiles | None
     mode_selection_reason: str = ""
 
 
@@ -95,117 +76,70 @@ class ModeDispatchPolicy:
     issue_grinder_execution_subagents_allowed: bool
     max_active_execution_lanes: int | None
     max_active_execution_subagents: int | None
-    execution_profile: Profile | None
     service_provider_agents_allowed: bool
 
 
-def mode_dispatch_policy(
-    record: ModeRecord,
-    *,
-    current_main_profile: Profile,
-) -> ModeDispatchPolicy:
-    """Return the mechanical topology constraints of the selected mode."""
+def mode_dispatch_policy(record: ModeRecord) -> ModeDispatchPolicy:
+    """Constrain topology without inspecting the current session profile."""
 
-    ExecutionMode(record.canonical_mode)
-    require_main_profile(record.canonical_mode, current_main_profile)
-    if record.canonical_mode is ExecutionMode.SOLO:
-        return ModeDispatchPolicy(
-            issue_grinder_execution_subagents_allowed=False,
-            max_active_execution_lanes=1,
-            max_active_execution_subagents=0,
-            execution_profile=current_main_profile,
-            service_provider_agents_allowed=True,
-        )
+    mode = ExecutionMode(record.canonical_mode)
+    solo = mode is ExecutionMode.SOLO
     return ModeDispatchPolicy(
-        issue_grinder_execution_subagents_allowed=True,
-        max_active_execution_lanes=None,
-        max_active_execution_subagents=None,
-        execution_profile=None,
+        issue_grinder_execution_subagents_allowed=not solo,
+        max_active_execution_lanes=1 if solo else None,
+        max_active_execution_subagents=0 if solo else None,
         service_provider_agents_allowed=True,
     )
 
 
-def normalize_profiles(
-    main_profile: Profile,
+def child_profiles(
     *,
-    mode: ExecutionMode = ExecutionMode.CLASSIC,
-    controller_override: Profile | None = None,
+    mode: ExecutionMode,
     worker_override: Profile | None = None,
-) -> RoleProfiles:
-    """Apply the selected mode's worker baseline without guessing ordering."""
+    reviewer_override: Profile | None = None,
+    specialist_override: Profile | None = None,
+) -> RoleProfiles | None:
+    """Assign child profiles; the current coordinator is never normalized."""
 
-    require_main_profile(mode, main_profile)
-    if mode in (ExecutionMode.BALANCE, ExecutionMode.ECONOMICAL) and controller_override not in (None, LUNA_MAX):
-        raise ValueError("main_profile_required: controller override cannot replace root")
-    default_controller = LUNA_MAX if main_profile.is_luna else main_profile
-    default_worker = LUNA_MAX
+    mode = ExecutionMode(mode)
+    if mode is ExecutionMode.SOLO:
+        return None
     return RoleProfiles(
-        controller=controller_override or default_controller,
-        worker=worker_override or default_worker,
-        specialist=SOL_XHIGH if mode is ExecutionMode.BALANCE else None,
+        worker=worker_override or LUNA_MAX,
+        reviewer=reviewer_override or (SOL_XHIGH if mode is ExecutionMode.BALANCE else LUNA_MAX),
+        specialist=(specialist_override or SOL_XHIGH) if mode is ExecutionMode.BALANCE else None,
     )
 
 
 def resolve_mode(
-    main_profile: Profile,
     *,
-    scope_task_count: int = 1,
-    scope_size: ScopeSize = ScopeSize.UNCERTAIN,
-    scope_assessment_reason: str = "",
     explicit_mode: ExecutionMode | None = None,
     saved_record: ModeRecord | None = None,
     continuity_proven: bool = False,
-    controller_override: Profile | None = None,
     worker_override: Profile | None = None,
+    reviewer_override: Profile | None = None,
+    specialist_override: Profile | None = None,
 ) -> ModeRecord:
-    """Resolve a new run or restore a proven continuation without mode drift."""
+    """Use Solo by default or preserve the mode of a proven continuation."""
 
     if continuity_proven:
         if saved_record is None:
             raise ValueError("proven continuity requires a saved mode record")
         if explicit_mode is not None:
             raise ValueError("an explicit mode switch must pass the switch barrier")
-        ExecutionMode(saved_record.canonical_mode)  # retired records fail closed
-        require_main_profile(saved_record.canonical_mode, main_profile)
-        if saved_record.canonical_mode is ExecutionMode.BALANCE and saved_record.mode_contract_version != BALANCE_VERSION:
-            raise ValueError("legacy_balance_requires_explicit_switch")
+        ExecutionMode(saved_record.canonical_mode)
         return saved_record
 
-    if not isinstance(scope_task_count, int) or isinstance(scope_task_count, bool) or scope_task_count < 0:
-        raise ValueError("scope_task_count must be a nonnegative resolved task count")
-    # The agent supplies the semantic assessment; this oracle does not infer
-    # size from task count, profile or keywords in a justification.
-    assessed_size = ScopeSize(scope_size)
-    if explicit_mode is None and main_profile != LUNA_MAX and assessed_size is ScopeSize.LARGE and not scope_assessment_reason.strip():
-        raise ValueError("large scope requires a concrete assessment reason")
-    canonical_mode = (
-        ExecutionMode(explicit_mode) if explicit_mode is not None else
-        ExecutionMode.BALANCE if main_profile == LUNA_MAX else
-        ExecutionMode.CLASSIC if assessed_size is ScopeSize.LARGE else
-        ExecutionMode.SOLO
-    )
-    origin = (
-        ModeOrigin.EXPLICIT
-        if explicit_mode is not None
-        else ModeOrigin.AUTOMATIC
-    )
+    mode = ExecutionMode(explicit_mode) if explicit_mode is not None else ExecutionMode.SOLO
     return ModeRecord(
-        canonical_mode=canonical_mode,
-        mode_origin=origin,
-        mode_contract_version=BALANCE_VERSION if canonical_mode is ExecutionMode.BALANCE else None,
-        initial_scope_task_count=scope_task_count,
-        initial_scope_size=assessed_size,
-        mode_selection_reason=(
-            "explicit mode choice" if explicit_mode is not None else
-            "Luna Max default" if main_profile == LUNA_MAX else
-            scope_assessment_reason or "large scope is not established"
-        ),
-        initial_main_profile=main_profile,
-        role_profiles=normalize_profiles(
-            main_profile,
-            mode=canonical_mode,
-            controller_override=controller_override,
+        canonical_mode=mode,
+        mode_origin=ModeOrigin.EXPLICIT if explicit_mode is not None else ModeOrigin.AUTOMATIC,
+        mode_selection_reason="explicit mode choice" if explicit_mode is not None else "Solo by default",
+        role_profiles=child_profiles(
+            mode=mode,
             worker_override=worker_override,
+            reviewer_override=reviewer_override,
+            specialist_override=specialist_override,
         ),
     )
 
@@ -415,7 +349,6 @@ def decide_mode_switch(
     target_mode: ExecutionMode,
     *,
     explicit_request: bool,
-    current_main_profile: Profile | None = None,
     active_writer_count: int = 0,
     active_writers_checkpointed: bool = False,
     integration_unchanged: bool = True,
@@ -429,11 +362,7 @@ def decide_mode_switch(
     if not explicit_request:
         return ModeSwitchDecision("keep_mode", current_record, False)
     target_mode = ExecutionMode(target_mode)
-    if target_mode in (ExecutionMode.BALANCE, ExecutionMode.ECONOMICAL):
-        if current_main_profile is None:
-            raise ValueError("current_main_profile_required")
-        require_main_profile(target_mode, current_main_profile)
-    if target_mode is current_record.canonical_mode and not (target_mode is ExecutionMode.BALANCE and current_record.mode_contract_version != BALANCE_VERSION):
+    if target_mode is current_record.canonical_mode:
         return ModeSwitchDecision("already_selected", current_record, False)
 
     defects = []
@@ -454,7 +383,7 @@ def decide_mode_switch(
         current_record,
         canonical_mode=target_mode,
         mode_origin=ModeOrigin.EXPLICIT,
-        mode_contract_version=BALANCE_VERSION if target_mode is ExecutionMode.BALANCE else None,
-        role_profiles=normalize_profiles(current_main_profile or current_record.initial_main_profile, mode=target_mode),
+        mode_selection_reason="explicit mode choice",
+        role_profiles=child_profiles(mode=target_mode),
     )
     return ModeSwitchDecision("switch_next_wave", switched_record, True)

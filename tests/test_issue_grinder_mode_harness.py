@@ -14,13 +14,9 @@ from scripts.issue_grinder_mode_harness import (
     decide_mode_switch,
     decide_run_exit,
     mode_dispatch_policy,
-    normalize_profiles,
+    child_profiles,
     resolve_mode,
 )
-
-
-LUNA_EFFORTS = (None, "none", "minimal", "low", "medium", "high", "xhigh", "max")
-SOL = Profile("gpt-6-sol", "xhigh")
 
 
 def complete_checkpoint() -> EconomicalCheckpoint:
@@ -115,67 +111,31 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         self.assertFalse(classic.may_checkpoint)
 
     def test_every_explicit_mode_wins(self) -> None:
-        for main_profile in (LUNA_MAX,):
-            for mode in ExecutionMode:
-                with self.subTest(main=main_profile, mode=mode):
-                    record = resolve_mode(main_profile, explicit_mode=mode)
-                    self.assertEqual(record.canonical_mode, mode)
-                    self.assertEqual(record.mode_origin, ModeOrigin.EXPLICIT)
+        for mode in ExecutionMode:
+            record = resolve_mode(explicit_mode=mode)
+            self.assertEqual(record.canonical_mode, mode)
+            self.assertEqual(record.mode_origin, ModeOrigin.EXPLICIT)
 
-    def test_single_task_default_is_solo_except_luna_max(self) -> None:
-        for effort in LUNA_EFFORTS:
-            with self.subTest(effort=effort):
-                record = resolve_mode(Profile("gpt-6-luna", effort))
-                self.assertEqual(record.canonical_mode, ExecutionMode.BALANCE if effort == "max" else ExecutionMode.SOLO)
-                self.assertEqual(record.mode_origin, ModeOrigin.AUTOMATIC)
-        self.assertEqual(resolve_mode(SOL).canonical_mode, ExecutionMode.SOLO)
-
-    def test_other_modes_keep_luna_max_worker_baseline(self) -> None:
-        for mode in (
-            ExecutionMode.CLASSIC,
-            ExecutionMode.CLASSIC,
-            ExecutionMode.ECONOMICAL,
-        ):
-            with self.subTest(mode=mode):
-                self.assertEqual(normalize_profiles(LUNA_MAX, mode=mode).worker, LUNA_MAX)
-
-    def test_role_overrides_win(self) -> None:
-        controller = Profile("gpt-5.6-terra", "high")
+    def test_child_role_overrides_win(self) -> None:
+        reviewer = Profile("gpt-5.6-terra", "high")
         worker = Profile("gpt-6-luna", "medium")
-        profiles = normalize_profiles(
-            SOL,
-            mode=ExecutionMode.CLASSIC,
-            controller_override=controller,
+        specialist = Profile("gpt-6-astra", "medium")
+        profiles = child_profiles(
+            mode=ExecutionMode.BALANCE,
+            reviewer_override=reviewer,
             worker_override=worker,
+            specialist_override=specialist,
         )
-        self.assertEqual(profiles.controller, controller)
+        self.assertEqual(profiles.reviewer, reviewer)
         self.assertEqual(profiles.worker, worker)
-
-    def test_proven_continuation_preserves_mode_after_model_change(self) -> None:
-        original = resolve_mode(SOL, explicit_mode=ExecutionMode.CLASSIC)
-        resumed = resolve_mode(
-            Profile("gpt-6-luna", "none"),
-            saved_record=original,
-            continuity_proven=True,
-        )
-        self.assertIs(resumed, original)
-
-    def test_unproven_continuity_returns_to_solo_default(self) -> None:
-        old = resolve_mode(SOL, explicit_mode=ExecutionMode.CLASSIC)
-        new = resolve_mode(
-            Profile("gpt-6-luna", "high"),
-            saved_record=old,
-            continuity_proven=False,
-        )
-        self.assertEqual(new.canonical_mode, ExecutionMode.SOLO)
+        self.assertEqual(profiles.specialist, specialist)
 
     def test_proven_continuity_requires_record_and_switch_barrier(self) -> None:
         with self.assertRaisesRegex(ValueError, "saved mode record"):
-            resolve_mode(SOL, continuity_proven=True)
+            resolve_mode(continuity_proven=True)
         with self.assertRaisesRegex(ValueError, "switch barrier"):
             resolve_mode(
-                SOL,
-                saved_record=resolve_mode(SOL),
+                saved_record=resolve_mode(),
                 continuity_proven=True,
                 explicit_mode=ExecutionMode.CLASSIC,
             )
@@ -216,7 +176,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         self.assertTrue(accepted.may_complete)
 
     def test_mode_switch_requires_explicit_safe_barrier(self) -> None:
-        current = resolve_mode(SOL, explicit_mode=ExecutionMode.SOLO)
+        current = resolve_mode(explicit_mode=ExecutionMode.SOLO)
         automatic = decide_mode_switch(
             current,
             ExecutionMode.CLASSIC,
@@ -237,7 +197,7 @@ class IssueGrinderModeHarnessTest(unittest.TestCase):
         self.assertEqual(len(unsafe.defects), 4)
 
     def test_safe_mode_switch_changes_only_mode_and_origin(self) -> None:
-        current = resolve_mode(SOL, explicit_mode=ExecutionMode.SOLO)
+        current = resolve_mode(explicit_mode=ExecutionMode.SOLO)
         decision = decide_mode_switch(
             current,
             ExecutionMode.CLASSIC,

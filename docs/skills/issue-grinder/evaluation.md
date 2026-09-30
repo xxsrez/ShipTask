@@ -175,10 +175,10 @@ prompt; подготовка обязана остановиться при ра
 | `IG-VERIFY-06` | `SKILL.md`; `verification.md` | unchanged-uat-artifact-reused; environment-delta-check; no-production-access |
 | `IG-VERIFY-07` | `SKILL.md`; `verification.md` | existing-profile-adapted; missing-profile-no-blocker; no-per-command-report |
 | `IG-MODE-01` | `SKILL.md` §1, §5; `execution-modes.md` | four-canonical-modes; mode-does-not-expand-authority |
-| `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; luna-max-balance-before-scope; other-profiles-small-medium-uncertain-solo; other-profiles-justified-large-classic; count-independent; economical-explicit-only; retired-mode-rejected; mode-persists-after-model-and-scope-change |
-| `IG-MODE-03` | `modes/classic.md`; `multi-agent-execution.md`; mode harness | classic-sol-does-almost-all; classic-luna-trivial-only; classic-high-judgment-owner; classic-simple-independent-review; classic-final-review-terminal |
-| `IG-MODE-04` | `modes/balance.md`; mode/routing harness | luna-root-owns-process; bounded-sol-specialist; independent-sol-xhigh-review; no-cheap-quality-bypass |
-| `IG-MODE-06` | `SKILL.md` §5; `modes/economical.md`; mode/routing guards; mode harness | economical-all-substantive-luna; wrong-root-refused-before-effects; economical-independent-luna-review; economical-terminal-when-proven; economical-partial-review-checkpoint; economical-resumable-candidate; no-false-done; no-false-blocked |
+| `IG-MODE-02` | `SKILL.md` §1; `execution-modes.md`; mode harness | explicit-freeform-wins; solo-default-without-profile; all-other-modes-explicit-only; scope-and-count-independent; retired-mode-rejected; mode-persists-after-model-and-scope-change |
+| `IG-MODE-03` | `modes/classic.md`; `multi-agent-execution.md`; mode harness | classic-current-agent-does-almost-all; classic-luna-trivial-only; classic-high-judgment-owner; classic-simple-independent-review; classic-final-review-terminal |
+| `IG-MODE-04` | `modes/balance.md`; mode/routing harness | current-agent-owns-process-without-profile-probe; bounded-sol-specialist; independent-sol-xhigh-review; no-cheap-quality-bypass |
+| `IG-MODE-06` | `SKILL.md` §5; `modes/economical.md`; mode/routing guards; mode harness | economical-luna-children; unknown-root-allowed; economical-independent-luna-review; economical-terminal-when-proven; economical-partial-review-checkpoint; economical-resumable-candidate; no-false-done; no-false-blocked |
 | `IG-MODE-07` | `SKILL.md` §1; `execution-modes.md`; mode/routing guards | bounded-fork; observed-profile-match; agent-label-neutral; role-override-wins |
 | `IG-MODE-08` | `modes/{classic,balance,economical}.md`; `multi-agent-execution.md` | economical-handoff-preserves-evidence; same-retry-rejected |
 | `IG-MODE-09` | `modes/{solo,classic,balance,economical}.md` | one-review-candidate; dissent-preserved; finding-disposition-preserved; material-defect-beats-generic-approvals; raw-loop-transcript-not-required; rework-reviewed-again |
@@ -186,8 +186,8 @@ prompt; подготовка обязана остановиться при ра
 | `IG-MODE-11` | `SKILL.md` §1-3; `modes/solo.md`; `strategic-explainer.md`; mode/solo-topology harnesses | solo-one-issue; solo-many-issues-sequential; solo-current-profile-after-model-change; solo-no-execution-delegation; solo-provider-allowed; solo-terminal-only |
 | `IG-MODE-12` | `execution-modes.md`; `multi-agent-execution.md`; `strategic-explainer.md`; solo-topology harness | outer-controller-not-counted; provider-transport-not-counted; provider-doing-delivery-becomes-execution-agent; explicit-global-opt-out-wins; topology-boundary-all-modes |
 | `IG-MODE-19` | `execution-modes.md`; `modes/solo.md` | process-handle-survives-handoff; completed-result-reused; independent-tools-one-solo-packet; unknown-effect-reconciled |
-| `IG-MODE-20` | `SKILL.md`; `execution-modes.md`; `main_profile.py`; mode harness | own-latest-turn-profile; no-config-fallback; wrong-model-refused; wrong-effort-refused; unknown-refused; resume-profile-gate; switch-profile-gate; no-wrapper-or-effects; legacy-balance-refused |
-| `IG-HELP-01` | `SKILL.md` §0; `mode-help.md` | all-four-modes-brief; default-is-resolver; narrow-difference-answer; help-has-no-task-manager-effects; mixed-help-delivery-preserves-gates |
+| `IG-MODE-20` | `SKILL.md`; `execution-modes.md`; mode harness; `test_issue_grinder_three_modes.py` | Solo default; explicit modes without host profile; no session/config reads; resume and switch without profile admission; removed probe absent |
+| `IG-HELP-01` | `SKILL.md` §0; `mode-help.md` | all-four-modes-brief; default-is-solo; narrow-difference-answer; help-has-no-task-manager-effects; mixed-help-delivery-preserves-gates |
 | `IG-MA-01` | `SKILL.md` §2; `multi-agent-execution.md` | two-independent-packets; useful-critic; intentional-candidate; one-lane-no-filler; solo-delegation-forbidden |
 | `IG-MA-02` | `multi-agent-execution.md` | disjoint-surfaces; ordinary-conflicting-surfaces; isolated-intentional-overlap |
 | `IG-MA-03` | `multi-agent-execution.md` | dependency-ready-frontier |
@@ -219,15 +219,13 @@ python3 -B -m unittest discover -s tests -p 'test_issue_grinder_mode_harness.py'
 
 Corpus доказывает:
 
-- приоритет явного режима; Luna Max → Balance независимо от объёма;
-  остальные профили: небольшой/средний и неопределённый объём → Solo,
-  обоснованно крупный → Classic независимо от числа карточек;
-  root admission запрещает недопустимые профили для Balance/Economical;
-- `Соло` с current main profile, нулём execution-subagents и одной
-  последовательной lane;
+- приоритет явного режима; без него всегда Solo, независимо от объёма и среды;
+- запуск всех четырёх режимов без сведений о модели и effort основной сессии,
+  без чтения host state; удалённый profile helper отсутствует в runtime;
+- `Соло` с текущим агентом, нулём execution-subagents и одной последовательной lane;
 - сохранение mode record при доказанной continuity и отсутствие переноса
   старого record в новый run;
-- Luna Max baseline рабочих ролей и независимый приоритет role overrides;
+- Luna Max baseline субагентов, Sol xhigh specialist/reviewer в Балансе и приоритет role overrides;
 - independent-review lifecycle режимов, которые его требуют: один guard/spawn
   на owner-а, event waits, reuse после rework и только economical checkpoint с
   partial deadline ledger;
@@ -403,20 +401,18 @@ fresh model-forward smoke.
   режимах без Task Manager, Goal, title mutation, delivery loop и subagents;
 - правильно различать explicit delivery, implicit exact selector, implicit
   missing selector и read/status/planning negative prompts;
-- на новых synthetic runs проверить default: Luna Max → Balance; остальные
-  профили: обоснованно крупный объём → Classic, иначе Solo; Economical только явно;
-  любой явно выбранный канонический режим должен победить default rule, а продолжение
-  после смены модели — сохранить ранее выбранный mode;
+- на новых synthetic runs проверить Solo default для любого scope без получения
+  основной модели/effort, явный выбор каждого режима и сохранение режима при resume;
 - при активной модели Astra (`gpt-6-astra`) для каждой автоматической
   publication unit не вызывать Strategic Explainer и сформулировать native
   текст самой Astra, даже если provider установлен и предыдущий mode был
   `ordinary`;
-- наблюдаемо различить режимы: в `Классическом` Sol/controller делает почти
+- наблюдаемо различить режимы: в `Классическом` текущий coordinator делает почти
    всё, а Luna получает только тривиальные packets; `Соло` сохраняет current
   model, ноль Issue Grinder execution-subagents и в не-Astra ветке допускает
   отдельный Strategic Explainer provider для одного и нескольких issue;
-  `Экономичный` выполняет весь substantive packet и review на Luna Max, оставляя
-  non-Luna root только transport/authority shell, и сохраняет один resumable
+  `Экономичный` использует текущего координатора и Luna Max субагентов без
+  определения или замены основного профиля и сохраняет один resumable
   candidate без ложного `Done`/Goal completion;
 - для всех mode-specific Luna child в `Классическом` и `Экономичном` сохранить packet-bound
   pre-dispatch и observed `issue-grinder/model-routing/v2` receipts с
@@ -489,27 +485,16 @@ delivery source/tests/review, должен считаться execution-agent и
 
 Замеры удалённых режимов сохранены в датированных reports и не являются
 действующей политикой или подтверждением поведения четырёх текущих режимов.
-Новый автовыбор проверяется матрицей оценки объёма × profiles × число live задач,
-явным выбором, продолжением после изменения модели/объёма и отклонением удалённых
-modes. Механический harness получает оценку объёма от агента: его PASS не
-доказывает правильность смысловой классификации.
+С 2026-09-30 default всегда `solo`; прежние замеры профильного и
+scope-aware автовыбора ниже являются историей и не подтверждают текущий resolver.
+Текущая проверка охватывает запуск без host profile, четыре явных режима,
+продолжение сохранённого режима, безопасный switch и прежние профили субагентов.
 
-Для смысловой проверки установленного runtime на профилях, отличных от exact
-Luna Max, используются следующие ситуации:
-
-| Состав live scope без явного режима | Ожидаемое решение |
-|---|---|
-| Три связанных исправления одного механизма с общей проверкой | `solo` |
-| Двадцать однотипных небольших текстовых правок | `solo` |
-| Одна сложная тесно связанная алгоритмическая задача | `solo`: сложность сама по себе не доказывает крупный объём |
-| Несколько самостоятельных существенных функций в разных подсистемах с отдельными тестами и общей интеграцией; распределение и независимая проверка полезны | `classic`, с указанием направлений и пользы |
-| Известно только, что есть десять задач; содержательных оснований для крупного объёма нет | `solo`, оценка `uncertain` |
-
-Повторение этих ситуаций для exact Luna Max должно всегда выбирать `balance`;
-другой или неизвестный effort у Luna остаётся в ветке оценки объёма.
-Явное `Соло` для крупного объёма и явный `Классический` для малого сохраняют
-приоритет, в том числе на Luna Max. `Экономичный` остаётся только явным;
-`Баланс` и `Экономичный` требуют проверки основной сессии.
+Для проверки установленного runtime любой scope без явного режима должен
+выбирать `solo`: связанные исправления, множество однотипных правок, сложная
+алгоритмическая задача и несколько самостоятельных подсистем. Явный режим
+имеет приоритет во всех этих случаях. Неизвестная основная модель или effort
+не вызывают отказа либо попытки чтения локальных журналов и конфигурации.
 
 Историческая проверка 2026-09-21 до восстановления приоритета Luna Max:
 новая ephemeral read-only Codex-сессия прочитала только

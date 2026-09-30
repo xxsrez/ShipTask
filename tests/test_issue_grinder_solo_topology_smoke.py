@@ -130,14 +130,11 @@ class IssueGrinderSoloTopologySmokeTest(unittest.TestCase):
         sys.modules[spec.name] = harness
         spec.loader.exec_module(harness)
 
-        current = harness.Profile("gpt-6-sol", "xhigh")
         record = harness.resolve_mode(
-            current,
             explicit_mode=harness.ExecutionMode.SOLO,
         )
         policy = harness.mode_dispatch_policy(
             record,
-            current_main_profile=current,
         )
 
         self.assertFalse(policy.issue_grinder_execution_subagents_allowed)

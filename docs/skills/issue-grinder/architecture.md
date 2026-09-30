@@ -25,10 +25,10 @@ Runtime mechanics загружаются из `references/consultant.md` по с
 entrypoint при содержательном затруднении.
 
 `IG-FLOW-07` исполняется в delivery loop при возникновении содержательной
-неопределённости, а не при старте каждой задачи. Coordinator использует actual
-profile текущей сессии: `gpt-6-astra` исключает автоматический вызов; unknown
-не считается подтверждённым non-Astra и не разрешает вызов. После смены модели
-профиль проверяется заново обычным main-profile механизмом.
+неопределённости, а не при старте каждой задачи. Coordinator использует только
+явно заданные сведения текущего доверенного контекста: `gpt-6-astra` исключает
+автоматический вызов; unknown не считается подтверждённым non-Astra и не
+разрешает этот необязательный вызов. Поиск модели или effort не выполняется.
 
 При выполнении условий coordinator читает доступный `$issue-grinder:consultant`
 (или однозначно разрешённый `$consultant`) и вызывает его по собственному
@@ -183,7 +183,7 @@ plugin может содержать только skills, а MCP server, UI и l
   transaction, read-back и recovery;
 - `execution-modes.md` — после однократного выбора режима и перед
   декомпозицией: общий mode resolver, invariants и switch barrier;
-- `multi-agent-routing.md` — только вне Соло: profile normalization, dispatch
+- `multi-agent-routing.md` — только вне Соло: профили субагентов, dispatch
   receipts, event coordination и review packet, до первого профильного решения;
 - `local-evaluation.md` — только для явно изолированного model-forward запуска;
 - `modes/{solo,classic,economical}.md` — ровно один файл после
@@ -415,17 +415,15 @@ coordinator сначала кратко отвечает или называет
 - `explicit invocation` — пользователь назвал `$issue-grinder` в prompt,
   запустившем именно этот run;
 - `run mode` — является ли уже начатый run явно вызванным и поэтому автономным.
-- `execution mode` — один из `Соло`, `Классический` или
-  `Экономичный`, его origin `explicit|automatic` и применённая нормализация
-  профилей.
+- `execution mode` — один из `Соло`, `Классический`, `Баланс` или
+  `Экономичный`, его origin `explicit|automatic` и профили субагентов.
 
 Прошлый `$issue-grinder` не разрешает начинать новый явный run или новый Goal.
 Однако `run mode` не теряется посреди того же незавершённого прогона из-за
 следующего turn, compaction, автоматического продолжения или восстановления
 контекста. Непрерывность доказывается не одним совпадением selector-а: checkpoint
 связывает origin `explicit|implicit`, identity Project/selector, canonical
-execution mode, mode origin, исходный main profile, нормализованные role
-profiles, terminal flag, Goal ref при его наличии и task-owned
+execution mode, mode origin, профили субагентов, terminal flag, Goal ref при его наличии и task-owned
 implementation/effect receipts. Для
 single-issue run отсутствие Goal не уничтожает origin: тот же thread lineage и
 согласованные checkpoints сохраняют его отдельно. Совместимый активный Goal
@@ -557,42 +555,22 @@ canonical mode берётся из run checkpoint и не проектирует
 
 ### 4.1 Однократное разрешение режима
 
-Новый run: explicit mode имеет приоритет. Иначе exact `gpt-6-luna/max`
-выбирает `balance` независимо от объёма. Для остальных профилей оцени live scope:
-небольшой/средний объём → `solo`, обоснованно крупный → `classic`.
-`economical` включается только явно; model/effort, квота и capacity не участвуют
-в оценке объёма. Неизвестный профиль не подтверждает Luna Max.
+Новый run: явный поддерживаемый режим имеет приоритет. Без него всегда
+выбирается `solo`. Оценка объёма остаётся частью планирования работы, но не
+выбора режима. Не определяй model/effort основной сессии, не читай её журналы
+или конфигурацию и не требуй подтверждения профиля до effects или dispatch.
+Неизвестный профиль не является blocker ни в одном режиме.
 
-Оценка предшествует стратегической декомпозиции и опирается на уже доступные
-contracts, затронутые подсистемы и зависимости. Крупный объём требует нескольких
-содержательных направлений с отдельным контекстом реализации и проверки и
-существенной пользы распределения работы или независимой проверки относительно
-координации. Несколько связанных исправлений, множество однотипных правок или
-одна сложная тесно связанная задача сами по себе этого не доказывают. Несколько
-самостоятельных функций либо существенные изменения нескольких подсистем с
-общей интеграцией могут обосновать `classic`.
+В mode record сохраняются `canonical_mode`, `mode_origin` и
+`mode_selection_reason` (`Solo by default` либо явный выбор пользователя).
+Поля основного профиля, его нормализация и классификация объёма для resolver
+не нужны. Существующие records поддерживаемых режимов продолжаются с
+сохранением работы; старые профильные поля и admission receipts игнорируются.
+Механический mode harness принимает explicit choice и continuity без
+параметров модели, effort или размера scope.
 
-Не вводи численный порог, балльную модель или обязательное исследование ради
-классификатора. При недостаточных основаниях выбери `solo`; неизвестный contract,
-мешающий самой delivery, разрешается обычным workflow. В mode record сохрани
-`initial_scope_size` (`small`, `medium`, `large` или `uncertain`) и краткое
-`mode_selection_reason`, назвав конкретные работы и, для `large`, пользу
-многоагентного исполнения. Для автоматического `balance` запиши причиной Luna Max;
-оценка объёма для этой ветки не нужна, допустимо `uncertain`.
-Число карточек остаётся описательным полем.
-Механический mode harness принимает эту смысловую оценку как вход и проверяет
-выбор, explicit override и continuity; он не заменяет оценку содержания агентом.
-
-До эффектов и dispatch проверь `IG-MODE-20`: `balance`/`economical` требуют
-exact текущую основную Luna Max. Unknown или mismatch → `main_profile_required`,
-без Goal, записей, supervisor и автоматического другого режима. Проверка
-повторяется при resume/switch; нормализация не заменяет фактический root.
-Версия нового balance record — `luna-coordinator-v1`; старые balance records
-без неё требуют явного switch, а не скрытого продолжения исторической topology.
-
-Стартовый текст в `agents/openai.yaml` не называет конкретный режим:
-он поручает применить автовыбор при отсутствии явного выбора пользователя.
-Иначе сама кнопка запуска незаметно превращалась бы в explicit override.
+Стартовый текст в `agents/openai.yaml` поручает использовать Соло, только
+если пользователь не указал другой режим. Он не задаёт безусловный override.
 
 Для `Соло` сохраняются aliases `single`, `сингл`, «одним агентом» и
 «без субагентов». Случайное слово в описании продукта не является selector-ом.
@@ -606,31 +584,20 @@ exact текущую основную Luna Max. Unknown или mismatch → `mai
 пользователем нового режима через switch barrier, а не пересчёта default.
 Прочитай ровно один mode-файл выбранного поддерживаемого режима.
 
-До resolver один раз за текущий turn обязательно вызови bundled
-`scripts/main_profile.py`; для balance/economical нужен receipt с `--mode`
-и `allowed=true` до любого effect. Self-report не заменяет receipt. Он читает только журнал по
-`CODEX_THREAD_ID`, проверяет session_meta и берёт последний turn_context;
-config/default и чужая сессия не используются. Unknown остаётся отказом.
-Receipt сохраняется в текущем turn; после resume/model change читается заново.
+### 4.2 Профили субагентов
 
-### 4.2 Нормализация профилей
+Во всех режимах координация остаётся на текущем основном агенте без определения
+его профиля. В `Соло` он единственный исполнитель; supervisor или worker
+для delivery-работы не создаётся.
 
-Профильный resolver работает отдельно от выбора режима. В `Соло` единственный
-execution profile всегда равен exact effective current top-level model и effort;
-никакой supervisor или worker для delivery-работы не создаётся.
+Для явно выбранного многоагентного режима:
+- точный пользовательский override профиля субагента применяется первым;
+- `Классический`, `Баланс` и `Экономичный` сохраняют baseline
+  `gpt-6-luna` с `reasoning_effort=max` для предусмотренных ими Luna-ролей;
+- в `Балансе` specialist и final reviewer используют Sol xhigh;
+- основной профиль не определяется, не сравнивается с другими и не
+  нормализуется; его неизвестность не препятствует исполнению.
 
-Для выбранного многоагентного режима:
-
-- точный пользовательский override конкретной роли применяется первым;
-- `Классический`, `Баланс` и `Экономичный` сохраняют economical
-  baseline `gpt-6-luna` с `reasoning_effort=max` для предусмотренных ими Luna
-  ролей;
-- если main profile не сильнее требуемого economical profile, роли могут
-  схлопнуться в этот profile только по надёжно установленному правилу;
-- неизвестное cross-family отношение не угадывается по имени, цене или одному
-  benchmark run.
-
-Top-level model участвует в автовыборе и обязательном admission по `IG-MODE-20` и не является override всех ролей.
 Root всегда сохраняет одно владение Goal, Task Manager mutations, integration,
 внешними effects и publication unit.
 
@@ -646,8 +613,8 @@ telemetry туда добавляется observed profile; иначе сохр�
 Default child profiles зависят от выбранного mode:
 
 - `Классический`: только его узкие Luna Max packets и independent review;
-- `Баланс`: Luna Max root и обычная работа; Sol xhigh specialist/final_review;
-- `Экономичный`: Luna Max root, analysis, implementation и review.
+- `Баланс`: Luna Max ordinary children; Sol xhigh specialist/final_review;
+- `Экономичный`: Luna Max analysis, implementation и review children.
 
 Имя роли не обходит routing: обычная implementation, спрятанная под названием
 `review` или `material_judgment`, остаётся implementation.
@@ -1028,7 +995,7 @@ resume signals, отдельно — действительно недоступ
 ## 7. Комментарий и status transition как публикационная операция
 
 Для каждого перехода, кроме `To Do → In Progress`, coordinator сначала собирает
-проверенные факты и проверяет активную модель. При Astra (`gpt-6-astra`) он
+проверенные факты. Если текущий доверенный контекст явно указывает Astra (`gpt-6-astra`), он
 выбирает native writing и не вызывает Strategic Explainer. Иначе он формирует
 semantic request к доступному `$strategic-explainer:strategic-explainer`. В
 запрос входят назначение текста, исходная ситуация, exact scope, язык,
@@ -1460,8 +1427,8 @@ Architecture не вводит автоматическую замену мод�
 read; повторять mutation вслепую нельзя.
 
 Run checkpoint хранит только проверяемую continuity: origin, Project/selector
-identity, canonical execution mode и его origin, исходный main profile,
-нормализованные role profiles, terminal state, Goal ref при наличии, task-owned
+identity, canonical execution mode и его origin,
+профили субагентов, terminal state, Goal ref при наличии, task-owned
 Git identity, publication/status receipts и незавершённые effects. Формат и
 место хранения выбираются по доступной platform capability; Architecture не
 требует несуществующий durable store. Возобновление сначала восстанавливает mode
@@ -1542,7 +1509,7 @@ Task Manager cancellation statuses от имени Issue Grinder.
 | `IG-GOAL-*` | strategic synthesis, persistent execution context, Goal lifecycle, blocker/final reflection, `final-report.md` | Strategic Outcome направляет локальные решения без новой задолженности; Goal завершается после fresh empty active scope даже при известном strategic gap; исходящий итог сохраняет outcomes и остаток всего run, без повторной публикации на неизменном continuation |
 | `IG-SCOPE-*` | selector-as-predicate и контрольные refresh points | новые и исключённые issue учитываются до terminal result |
 | `IG-AUTO-*` | explicit-mode gate, полный UAT цикл и границы согласования | нет Production access; разрешённая UAT работа не ждёт рутинного approval |
-| `IG-MODE-*` | однократный resolver, profile normalization, mode-specific dispatch/review/checkpoint и semantic topology boundary | Luna Max выбирает `Баланс` независимо от объёма; остальные профили выбирают `Соло` для небольшого/среднего и неопределённого объёма, `Классический` для обоснованно крупного; число карточек не выбирает режим; недопустимый root отклоняется; `Соло` сохраняет current profile и ноль Issue Grinder execution-subagents; `Экономичный` только явно; режимы не дрейфуют |
+| `IG-MODE-*` | однократный resolver, профили субагентов, mode-specific dispatch/review/checkpoint и semantic topology boundary | по умолчанию всегда `Соло`; другие режимы только явно; профиль основной сессии не определяется и не ограничивает запуск; `Соло` сохраняет current profile и ноль Issue Grinder execution-subagents; `Экономичный` только явно; режимы не дрейфуют |
 | `IG-HELP-*` | ранний fast path и компактный `mode-help.md` | чистая справка объясняет четыре режима и default без Task Manager, Goal, title mutations или subagents |
 | `IG-MA-*` | dependency-ready packets, isolated writers, integration owner, profile routing и capability-aware stages | параллельные writers изолированы; independent review применяется только там, где его требует contract |
 
@@ -1563,7 +1530,7 @@ ID само по себе не доказывает поведение.
    состояние, scripted tool results и fault injection, затем проверяют
    required/forbidden decisions и их порядок. Blocker/writer trace остаётся в
    `scripts/issue_grinder_trace_harness.py`, а mode resolver, profile
-   normalization, economical exit и switch barrier — в
+   профили субагентов, economical exit и switch barrier — в
    `scripts/issue_grinder_mode_harness.py`. Тот же mode harness
    проверяет матрицу model × число live задач, явный выбор, continuity,
    отклонение удалённых режимов и обязательные review/checkpoint gates.
@@ -1594,14 +1561,14 @@ ID само по себе не доказывает поведение.
 - чистая и узкая справка о режимах/default/различиях без Task Manager, Goal,
   title mutations, delivery refs и subagents; смешанный help+delivery prompt
   сохраняет обычные scope и authority gates;
-- explicit natural-language mode override, scope-aware default и обязательный root admission, persistence через continuation/model
+- explicit natural-language mode override, Solo default без определения основного профиля, persistence через continuation/model
   change и safe explicit switch;
 - `Соло` для одного и нескольких issue с exact current profile, одной
   последовательной execution lane, отсутствием Issue Grinder worker delegation
   и допустимым отдельным Strategic Explainer provider; конкретный
   `Классический`, где Sol/controller делает почти всё, а
   Luna получает только тривиальные packets
-- Luna profile normalization, wrong-root refusal, explicit role override и
+- Solo default без проверки основного профиля, explicit role override и
   неизвестное cross-family ordering без догадки;
 - zero/one/multiple issue, рост и сокращение scope, late matching issue,
   pagination и concurrent status change;
@@ -1649,7 +1616,7 @@ review остаётся model-forward case, а не имитируется fake 
 Description содержит только delivery с выбранным Task Manager scope, справку о режимах и
 исключение Backlog/status/planning. Общий execution-modes сохраняет resolver, root
 admission, continuity, authority и evidence; multi-agent-routing хранит прежние
-normalization, receipts, owner coordination и review packet без изменения профилей. В
+профили субагентов, receipts, owner coordination и review packet без изменения профилей. В
 Соло этот reference не загружается: работает текущий root, ноль execution-subagents. При
 явном переходе из Соло multi-agent-routing читается до профильного решения. Local
 evaluation имеет отдельный условный entrypoint; ограничения среды, routing, review и
