@@ -27,6 +27,12 @@ trace и deterministic guards подтверждают формальные ин
 
 ## Критические gates
 
+[Release-selection smoke 2026-09-30](../issue-grinder/evaluation.md#проверка-активного-релиза-2026-09-30)
+на установленном `issue-grinder@0.1.0+codex.20260930132800` подтвердил решения
+для единственного live active вопреки старой памяти и запроса уточнения при
+двух active. Ответ сохранил read-only boundary. Это проверка выбора scope на
+синтетических snapshots, не запуск полного multi-perspective review.
+
 Любой провал ниже означает `FAIL`:
 
 - selector однозначен и весь inventory прочитан до terminal pagination;

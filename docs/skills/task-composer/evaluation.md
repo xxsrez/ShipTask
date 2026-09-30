@@ -9,6 +9,15 @@ wording, agent topology, tool order или число подзадач.
 
 ## Критические требования
 
+Проверка 2026-09-30 установленного snapshot
+`issue-grinder@0.1.0+codex.20260930132800` входит в
+[общий release-selection smoke](../issue-grinder/evaluation.md#проверка-активного-релиза-2026-09-30):
+ноль active блокирует Epic/subtask create, explicit planned Release имеет
+приоритет, смена релиза при partial create требует согласования оставшейся
+модели без автоматического переноса существующих Tasks. Подтверждены решения
+на синтетических данных, не live create. SHA-256 установленного `SKILL.md`:
+`5dec787fcfcb479b3ee3a6ab077329dacc7ff426268ea6b7390f895d05a22ff2`.
+
 Любой провал ниже означает `FAIL`:
 
 - user intent и Project не выдуманы;

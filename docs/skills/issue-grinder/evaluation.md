@@ -30,6 +30,33 @@ cache, подтвердила SHA-256 `run-and-goal.md`
 
 ## Слои проверки
 
+### Проверка активного релиза 2026-09-30
+
+Свежая read-only Codex-сессия прочитала установленный
+`issue-grinder@0.1.0+codex.20260930132800`, без Requirements, Architecture и
+evaluation oracle. Смысловая проверка ответов на 12 синтетических snapshots
+подтвердила ожидаемый выбор и границы действий: stale memory, ноль/несколько
+active с pagination, explicit planned Release, безопасный переход A → B,
+resume dynamic predicate, стабильность exact Release, исчезновение active перед
+completion, повторная смена B → C, read-only review, действительно пустой
+рабочий scope и partial planning create. Это 12/12 решений на описанных
+snapshots, не проверка реальных mutations, writers или многочасового run.
+
+Сессия использовала только shell reads и SHA-256; Task Manager, Goal и subagents
+не вызывались. Временные артефакты: `/tmp/shiptask-active-release-smoke.txt`,
+`/tmp/shiptask-active-release-smoke-events.jsonl` и
+`/tmp/shiptask-active-release-smoke-result.txt`. SHA-256 установленного
+`references/run-and-goal.md`:
+`b3c3a5e243e514865f2e5143d2877cc6f83f71081da8848a63e76c0d5d9a4b25`.
+
+Repository suite: 149 tests; Marketplace suite: 25 tests. Validators repository,
+четырёх skills и документации прошли. Проверено byte identity source →
+Marketplace → installed cache, installed/enabled обоих plugins, свежий
+App Server `skills/list` с четырьмя ожидаемыми skills, отсутствие legacy
+`ship-tasks` и standalone copies; Task Manager остаётся adapter-only.
+
+### Обязательные сценарии и методы
+
 Для `IG-SCOPE-01..03` трасса выбора релиза: Requirements → Architecture §4/§5
 → `references/run-and-goal.md` и `references/task-manager-flow.md` → следующие
 observable cases. Ожидания не являются записью об успешном model-forward run.
