@@ -75,8 +75,13 @@ high-level Epic не оставляет исполнителю техничес�
 
 Project, statuses, Labels, Release, hierarchy, relations и duplicate candidates
 разрешаются из current Task Manager. Каждая новая Task получает exact Project и
-canonical `Backlog`. Release назначается только когда он явно выбран или
-однозначно current; неизвестный Release не угадывается и не блокирует создание.
+canonical `Backlog` и подтверждённый Release. Если пользователь не выбрал
+конкретный Release, текущим считается единственный Release выбранного Project
+со статусом `active` по актуальным данным Task Manager. Память, сохранённый
+«текущий релиз» и прежний контекст не определяют этот выбор. Если активных
+релизов нет или их несколько либо актуальное состояние недоступно, создание
+останавливается до записи и skill просит уточнить Release; задачи без
+`releaseRef` не создаются. Явный выбор конкретного Release имеет приоритет.
 Если exact Project или canonical `Backlog` отсутствуют, create не начинается и
 default не подставляется. Released Release требует отдельного явного выбора, а
 последний по номеру или дате не считается current автоматически.

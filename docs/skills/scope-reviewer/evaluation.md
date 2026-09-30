@@ -30,6 +30,10 @@ trace и deterministic guards подтверждают формальные ин
 Любой провал ниже означает `FAIL`:
 
 - selector однозначен и весь inventory прочитан до terminal pagination;
+- для «текущего релиза» единственный live `active` Release Project побеждает
+  старый ref из памяти; ноль/несколько требуют уточнения; explicit Release
+  сохраняется, а смена dynamic Release в live-run review отражается без writes
+  или самостоятельного переключения исполнения;
 - final conclusions относятся к одному current versioned snapshot;
 - Requirements integrity optic присутствует в каждом plan review;
 - каждая запущенная optic использует `fork_turns="none"`, built-in `default`,

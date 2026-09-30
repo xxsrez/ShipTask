@@ -125,12 +125,17 @@ Task Manager connector остаётся единственным task adapter. �
 предоставляет такой status, preflight не пройден: skill не подменяет его
 default status и не начинает частичное создание.
 
-Release назначается только когда пользователь явно его выбрал либо current
-Project context однозначно определяет текущий unreleased Release. Последний по
-номеру, имени или дате Release сам по себе не является current. Если current
-Release неизвестен или неоднозначен, `releaseRef` опускается, создание
-продолжается и отсутствие Release сообщается. Добавление в уже released
-Release требует отдельного явного подтверждения.
+Release обязателен для каждой новой Task, Epic и подзадачи. Явный выбор
+конкретного Release проверяется через Task Manager и имеет приоритет. Иначе
+читай все страницы `list_releases(projectRef, statuses: ["active"])` и проверяй
+единственный результат через `get_release`. Память, сохранённый current Release,
+номер, имя и дата не выбирают релиз. Ноль или несколько активных релизов либо
+недоступное live-чтение останавливают create до записи и требуют уточнения.
+Не опускай `releaseRef`. Добавление в released Release требует отдельного
+явного подтверждения. Перед продолжением частичного create повтори разрешение
+selector; при смене релиза пересогласуй оставшуюся planning-модель с новым
+scope, сохрани уже созданные элементы и сообщи partial result без автоматического
+переноса или удаления прежних Tasks.
 
 Перед write выполняется bounded duplicate search по Project и materially
 relevant title/problem terms. Exact duplicate не создаётся. Material overlap
@@ -330,7 +335,7 @@ Tasks из разных Projects, если current adapter этого не по�
 ## 7. Write integrity и completion
 
 После полного preflight parent/standalone Task создаётся с canonical Project,
-`Backlog`, необязательным confirmed Release и resolved existing labels. Для
+`Backlog`, обязательным confirmed Release и resolved existing labels. Для
 Epic подзадачи создаются native subtask operation с current parent version;
 после каждой mutation authoritative state перечитывается. Relations создаются
 после существования обоих endpoints с caller-stable idempotency key.
@@ -352,7 +357,7 @@ cleanup без authority: skill перечисляет созданные, по�
 Работа завершена, когда read-back подтверждает для каждого созданного элемента:
 
 - canonical Task/Project identity и `Backlog`;
-- Release либо честно зафиксированное отсутствие current Release;
+- подтверждённый Release на каждом созданном элементе;
 - parent-child hierarchy;
 - фактически назначенные labels и известные label gaps;
 - отсутствие classification prefix/suffix в title, кроме explicit verbatim

@@ -372,8 +372,9 @@ artifact, но одновременно устанавливать его с Iss
   принимает решения о scope, статусе, полномочиях или продолжении работы;
 - Goal хранит стратегическую цель и состояние длинного явно вызванного прогона;
 - Git worktree и feature branches изолируют одновременно пишущих исполнителей;
-- project context и project memory помогают найти Release, UAT и устойчивые
-  разрешения, но не заменяют live Task Manager или фактическое состояние среды.
+- project context и project memory помогают найти Project, UAT и устойчивые
+  разрешения, но не выбирают default Release и не заменяют live Task Manager
+  или фактическое состояние среды.
 
 Ни одна зависимость не добавляет `$issue-grinder` полномочия сверх
 `requirements.md` и текущего запроса пользователя.
@@ -437,13 +438,17 @@ explicit marker не восстанавливается по догадке. Ter
 
 1. явные уточнения scope и среды из текущего prompt;
 2. canonical Project, Release и status refs через live Task Manager;
-3. repository/project context и project memory как указатели на текущий Release,
-   repository, команды и UAT;
+3. repository/project context и project memory как указатели на Project,
+   repository, команды и UAT, но не как источник default Release;
 4. фактическое подтверждение, что выбранная среда не является Production.
 
 Устаревающая память используется только как locator и перепроверяется в живом
-источнике. Неоднозначный default Release останавливает run до Task Manager
-mutations. В явно вызванном автономном run неизвестный UAT также останавливает
+источнике. Default Release — единственный `active` Release выбранного Project
+из live Task Manager. `list_releases(projectRef, statuses: ["active"])`
+дочитывается до конца; `get_release` подтверждает identity, Project и статус.
+Ноль или несколько кандидатов либо недоступное чтение останавливают run до
+mutations и требуют уточнения. Явно выбранный Release проверяется отдельно и
+не заменяется активным. В явно вызванном автономном run неизвестный UAT также останавливает
 работу до environment mutations; Production не используется как fallback.
 
 Default Release разрешается только явному запуску без selector-а. Неявно
@@ -790,6 +795,13 @@ refs текущего workspace/project, а не сравниваются как
 Отсутствующий или неоднозначный обязательный status ref останавливает lifecycle
 mutations до разрешения контекста.
 
+Различай predicate «активный Release данного Project» и exact Release ref.
+Для первого ref — последний результат live-разрешения, а не постоянная
+identity scope. На каждом refresh сначала повторно разрешай активный Release,
+затем читай его inventory. После resume/compaction восстанавливай predicate,
+а не только старый ref. Для exact Release смена активного релиза ничего не
+переключает.
+
 Coordinator перечитывает scope:
 
 - перед первой диспетчеризацией;
@@ -803,6 +815,17 @@ Coordinator перечитывает scope:
 восстановимый checkpoint и решает судьбу локальной реализации по её фактической
 полезности для оставшегося scope. Автоматический rollback или включение такой
 работы в интеграцию только по инерции не выполняется.
+
+Смена активного Release проходит тот же scope-change barrier: прекрати новую
+dispatch утративших актуальность пакетов, доведи in-flight работу до безопасного
+recoverable checkpoint, согласуй writers/ownership и незавершённые effects.
+Не требуй полного завершения старой Task и не обрывай операцию в небезопасном
+месте. Перечитай актуальный selector перед следующей dispatch, обнови Goal
+context, карту обязательной приёмки и frontier нового scope, сохранив evidence
+старого отдельно. Не объявляй старые критерии выполненными или весь run
+завершённым из-за смены релиза. Уважай прежние environment/authority boundaries.
+При нуле или нескольких активных релизах сохрани checkpoint и запроси выбор;
+это unresolved selector, а не empty active scope. Новую работу не начинай.
 
 Для каждого текущего scope coordinator различает:
 

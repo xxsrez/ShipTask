@@ -111,6 +111,14 @@ Project и выбранный Project/Release/Epic/Task selector. Relative selec
 допустим только когда current context делает его однозначным; максимальный номер,
 последняя дата или похожее название не выбирают current Release автоматически.
 
+«Текущий/активный Release» разрешается по всем страницам live
+`list_releases(projectRef, statuses: ["active"])`: нужен ровно один кандидат,
+подтверждённый `get_release`. Ноль, несколько или недоступное состояние требуют
+уточнения, а не fallback к памяти. Явный exact Release ref имеет приоритет.
+Для live-run snapshot сохраняй разницу между exact Release и динамическим
+predicate активного релиза: при его смене отрази новый scope и старую in-flight
+работу отдельно, оставь безопасное переключение owning Issue Grinder.
+
 Для live-run review сохранённая Issue Grinder continuity может однозначно
 разрешить relative формулировку пользователя и предоставить run identity,
 selector, Goal/mode record, checkpoints и resolvable evidence anchors. Эти

@@ -30,6 +30,23 @@ cache, подтвердила SHA-256 `run-and-goal.md`
 
 ## Слои проверки
 
+Для `IG-SCOPE-01..03` трасса выбора релиза: Requirements → Architecture §4/§5
+→ `references/run-and-goal.md` и `references/task-manager-flow.md` → следующие
+observable cases. Ожидания не являются записью об успешном model-forward run.
+
+| Сценарий | Наблюдаемое решение |
+|---|---|
+| Default: память называет A, live единственный active — B | Выбрать B и сохранить dynamic predicate, не A |
+| Ноль active Release | Уточнение до mutations; не объявлять completion |
+| Несколько active, один на следующей странице | Дочитать inventory, запросить выбор; не выбирать по памяти |
+| Exact Release A, active сменился на B | Сохранить явный scope A |
+| Dynamic scope A → B при работающем writer A | Не запускать новую старую работу; безопасный checkpoint и reconciliation ownership/effects, затем frontier B без требования завершить A |
+| Resume хранит ref A, active теперь B | Восстановить predicate и применить тот же scope-change barrier |
+| Active пропал или стал неоднозначным во время работы | Безопасный checkpoint, уточнение; ни новая dispatch, ни ложное завершение |
+| Единственный active есть, eligible Tasks нет | Отличать подтверждённый empty scope от отсутствующего релиза |
+| Смена A → B непосредственно перед completion | Refresh selector и приёмки; незакрытый B не назвать завершённым |
+| B сменился на C во время checkpoint A | Перед dispatch снова разрешить selector; начать C, не устаревший B |
+
 1. Static contract связывает каждый `IG-*` с runtime surface и required
    сценарием, проверяет metadata, references и отсутствие незавершённых
    placeholders. Этот слой исполняется repository validators.
@@ -159,8 +176,8 @@ prompt; подготовка обязана остановиться при ра
 | `IG-GOAL-08` | `final-report.md`; `run-and-goal.md` | old-defect-survives-revert; workaround-is-not-product-fix; full-run-not-last-card; exact-criterion-ids-after-checkpoint; unindexed-criterion-without-invention |
 | `IG-GOAL-09` | `final-report.md`; final-report smoke | outgoing-report-review; restored-context; unchanged-continuations; model-profile-matrix |
 | `IG-SCOPE-01` | `run-and-goal.md`; `task-.md` | prompt-selector-precedence |
-| `IG-SCOPE-02` | `run-and-goal.md` | explicit-default-release; implicit-missing-selector |
-| `IG-SCOPE-03` | `run-and-goal.md`; `task-.md` | late-member; excluded-member; final-refresh |
+| `IG-SCOPE-02` | `run-and-goal.md` | explicit-default-release; implicit-missing-selector; stale-memory-active-release; zero-or-many-active-releases |
+| `IG-SCOPE-03` | `run-and-goal.md`; `task-manager-flow.md` | late-member; excluded-member; final-refresh; active-release-switch-checkpoint; resumed-dynamic-selector; exact-release-stability |
 | `IG-UI-01` | `run-and-goal.md`; `thread-title.md` | fresh-placeholder-renamed; meaningful-title-preserved; ambiguous-candidate-preserved; title-capability-failure-nonblocking |
 | `IG-AUTO-01` | `SKILL.md` §4; `run-and-goal.md`; `autonomy-and-environments.md` | explicit-persistence; implicit-no-extra-authority |
 | `IG-AUTO-02` | `SKILL.md` §3; `modes/economical.md`; blocker harness | preflight-unlock; explanation-unlock; relevant-signal-resumes; sufficient-economical-checkpoint-stops-boundedly |

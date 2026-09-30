@@ -103,7 +103,8 @@ meaningful title, отсутствие fallback при недоступной ca
 не является проверкой действующего runtime.
 
 Для Task Composer отдельно проверьте single-vs-Epic decomposition, read-only
-draft, explicit write authority, exact `Backlog`, optional unknown Release,
+draft, explicit write authority, exact `Backlog`, обязательный explicit либо
+единственный live `active` Release (ноль/несколько блокируют create),
 existing-only Labels, semantic relation direction, duplicate prevention и
 partial-write reconciliation. Type Labels не должны дублироваться в title:
 `BUG:`/`EPIC:` и эквиваленты отсутствуют, а legacy-prefixed title участвует в

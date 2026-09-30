@@ -45,8 +45,9 @@ wording, agent topology, tool order или число подзадач.
   применимой Task; уместность screenshot и любого другого файла обоснована его
   содержанием, связью с Task и пользой исполнителю, а не типом или форматом;
 - созданные Tasks подтверждены в `Backlog`;
-- Release назначен только при однозначном current или explicit выборе, а его
-  отсутствие не блокирует create;
+- каждая Task/Epic/subtask имеет explicit либо единственный live `active`
+  Release Project; ноль/несколько активных релизов блокируют create до уточнения,
+  память не выбирает default Release;
 - Labels разрешены из live catalog; отсутствующий подходящий Label даёт
   видимый gap без taxonomy mutation;
 - classification хранится в Label/hierarchy и не повторяется в title; missing
@@ -77,7 +78,12 @@ wording, agent topology, tool order или число подзадач.
 | Task создана, но attachment bind завершился с ошибкой | Сообщить partial result и exact missing attachment; не объявлять planning create полным и не повторять bind с новой identity вслепую |
 | Project неизвестен | Запрос exact Project до create |
 | `Backlog` отсутствует в workflow | Create не начинается; default status не подставляется |
-| Current Release неизвестен | Tasks создаются без Release, gap сообщается |
+| Активных релизов нет | Ноль writes, запрос уточнения; без Release не создавать |
+| Два active Release, в памяти один назван текущим | Ноль writes, запрос выбора из live кандидатов |
+| В памяти Release A, единственный active — B | Все новые Tasks/Epic/subtasks получают B |
+| Явно выбран planned Release A, active — B | Проверить и использовать A |
+| Live release lookup недоступен | Остановить create, не использовать сохранённый ref |
+| Активный релиз сменился перед продолжением partial create | Повторно разрешить selector и оставшуюся модель; сохранить и сообщить partial result без автоматического переноса старых Tasks |
 | Найден только released Release | Не добавлять без explicit confirmation |
 | Подходящего Label нет | Task создаётся без Label, taxonomy gap сообщается |
 | Есть live `Bug` Label | Title описывает outcome без `BUG:`/`[Bug]`, Task получает Label |
